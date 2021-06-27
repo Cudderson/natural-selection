@@ -17,7 +17,7 @@ function setup () {
     setInterval(moveSquare, 10);
 
     function moveSquare () {
-        ctx.clearRect(25, 250, 25, 25);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.translate(1, 0);
         ctx.fillRect(25, 250, 25, 25);
     }
