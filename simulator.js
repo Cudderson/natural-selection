@@ -14,12 +14,11 @@ function setup () {
 
     console.log("Javascript working.");
 
-    var btn = document.getElementById("btn");
-    console.log(btn.innerHTML);
+    setInterval(moveSquare, 10);
 
-    btn.addEventListener('click', function () {
+    function moveSquare () {
         ctx.clearRect(25, 250, 25, 25);
-        ctx.translate(50, 50);
+        ctx.translate(1, 0);
         ctx.fillRect(25, 250, 25, 25);
-    });
+    }
 }
