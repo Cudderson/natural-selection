@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", setup);
 
-TOTAL_ORGANISMS = 10;
-GENE_COUNT = 10;
+const TOTAL_ORGANISMS = 10;
+const GENE_COUNT = 10;
 
 // container holding organisms
 organisms = [];
@@ -14,9 +14,26 @@ class Organism {
     }
 
     // class method for creating random genes
-    // setRandomGenes {
-        // this.genes = [];
-    // }
+    setRandomGenes () {
+
+        this.genes = [];
+
+        for (var i = 0; i < GENE_COUNT; i++) {
+            // Create random vectors (genes)
+            var x_pos = getRandomInt(-10, 10);
+            var y_pos = getRandomInt(-10, 10);
+
+            var random_vector = ([x_pos, y_pos]);
+            // console.log(random_vector)
+
+            this.genes.push([random_vector]);
+        }
+    }
+
+    // just for testing
+    showGenes () {
+        console.log(this.genes);
+    }
 }
 
 function setup () {
@@ -27,19 +44,24 @@ function setup () {
     // get drawing object
     var ctx = canvas.getContext("2d");
 
-    // create rect object
-    ctx.fillStyle = "lightblue";
-    ctx.fillRect(300, 300, 10, 10);
-    setInterval(moveOrganism, 100);
-
     // Create organisms
     for (var i = 0; i < TOTAL_ORGANISMS; i++) {
         var organism = new Organism(300, 300, 10, 10);
+        organism.setRandomGenes();
         organisms.push(organism);
     }
 
     console.log("SETUP COMPLETE");
     console.log("Amount of organisms created = " + organisms.length);
+
+    // log genes for each organism (convert to class method?)
+    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+        console.log(`GENES FOR ORGANISM ${i}: `);
+        // 'of' keyword allows us to loop through *values* of an iterable object
+        for (gene of organisms[i].genes) {
+            console.log(gene);
+        }
+    }
 }
 
 function getRandomInt(min, max) {
@@ -48,16 +70,16 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min); // min and max inclusive
 }
 
-function moveOrganism () {
-    // get canvas element
-    var canvas = document.getElementById("main-canvas");
+// function moveOrganism () {
+//     // get canvas element
+//     var canvas = document.getElementById("main-canvas");
     
-    // get drawing object
-    var ctx = canvas.getContext("2d");
+//     // get drawing object
+//     var ctx = canvas.getContext("2d");
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    var x = getRandomInt(-10, 10);
-    var y = getRandomInt(-10, 10);
-    ctx.translate(x, y);
-    ctx.fillRect(300, 300, 10, 10);
-}
+//     ctx.clearRect(0, 0, canvas.width, canvas.height);
+//     var x = getRandomInt(-10, 10);
+//     var y = getRandomInt(-10, 10);
+//     ctx.translate(x, y);
+//     ctx.fillRect(300, 300, 10, 10);
+// }
