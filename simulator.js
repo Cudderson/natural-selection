@@ -1,11 +1,22 @@
 document.addEventListener("DOMContentLoaded", setup);
 
+TOTAL_ORGANISMS = 10;
+GENE_COUNT = 10;
+
+// container holding organisms
+organisms = [];
+
 class Organism {
     constructor (x, y, ctx) {
         this.x = x;
         this.y = y;
         this.ctx = ctx;
     }
+
+    // class method for creating random genes
+    // setRandomGenes {
+        // this.genes = [];
+    // }
 }
 
 function setup () {
@@ -19,9 +30,16 @@ function setup () {
     // create rect object
     ctx.fillStyle = "lightblue";
     ctx.fillRect(300, 300, 10, 10);
-
     setInterval(moveOrganism, 100);
+
+    // Create organisms
+    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+        var organism = new Organism(300, 300, 10, 10);
+        organisms.push(organism);
+    }
+
     console.log("SETUP COMPLETE");
+    console.log("Amount of organisms created = " + organisms.length);
 }
 
 function getRandomInt(min, max) {
