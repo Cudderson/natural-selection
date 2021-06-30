@@ -81,7 +81,8 @@ function setup () {
     // organisms[0].showGenes();
 
      // calling test function for moving organsism
-     testMoveOrganism();
+    //  testMoveOrganism();
+    testMoveAllOrganisms();
 }
 
 function getRandomInt(min, max) {
@@ -92,39 +93,73 @@ function getRandomInt(min, max) {
 
 // next, we want to loop through an organism's genes and animate it
 // this works
-function testMoveOrganism() {
+// function testMoveOrganism() {
 
-    console.log("CALLED");
-    var test_organism = organisms[5];
-    // draw starting location
-    ctx.fillStyle = 'purple';
+//     console.log("CALLED");
+//     var test_organism = organisms[5];
+//     // draw starting location
+//     ctx.fillStyle = 'purple';
+//     ctx.fillRect(300, 300, 10, 10);
+
+//     requestAnimationFrame(function testLoop () {
+//         // var canvas = document.getElementById("main-canvas");
+//         // var ctx = canvas.getContext("2d");
+//         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+//         // get next movement
+//         var x_position = test_organism.genes[x][0];
+//         var y_position = test_organism.genes[x][1];
+
+//         console.log(x_position);
+//         console.log(y_position);
+
+//         ctx.translate(x_position, y_position);
+//         ctx.fillstyle = "purple";
+//         ctx.fillRect(300, 300, 10, 10);
+
+//         x = x + 1;
+
+//         if (x === GENE_COUNT) {
+//             return;
+//         }
+
+//         // (working) control animation execution speed
+//         setTimeout(function() {
+//             requestAnimationFrame(testLoop);
+//         }, 1000 / FPS);
+//     })
+// }
+
+// with animation working for the test organism, let's do it for all of our organisms
+// can make class method after
+function testMoveAllOrganisms() {
+
+    console.log(organisms.length);
+
+    // track gene count
+    var q = 0;
+    
+    console.log("CALLED.");
+    ctx.fillStyle = 'gold';
     ctx.fillRect(300, 300, 10, 10);
 
-    requestAnimationFrame(function testLoop () {
-        // var canvas = document.getElementById("main-canvas");
-        // var ctx = canvas.getContext("2d");
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+        for (var j = 0; j < GENE_COUNT; j++) {
+            console.log("HI");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // get next movement
-        var x_position = test_organism.genes[x][0];
-        var y_position = test_organism.genes[x][1];
+            var x_position = organisms[i].genes[j][0];
+            var y_position = organisms[i].genes[j][1];
 
-        console.log(x_position);
-        console.log(y_position);
+            console.log(x_position);
+            console.log(y_position);
 
-        ctx.translate(x_position, y_position);
-        ctx.fillstyle = "purple";
-        ctx.fillRect(300, 300, 10, 10);
+            ctx.translate(x_position, y_position);
+            ctx.fillStyle = 'gold';
+            ctx.fillRect(300, 300, 10, 10);
 
-        x = x + 1;
-
-        if (x === GENE_COUNT) {
-            return;
+            q = q + 1;
         }
-
-        // (working) control animation execution speed
-        setTimeout(function() {
-            requestAnimationFrame(testLoop);
-        }, 1000 / FPS);
-    })
+    }
+    console.log(q); // == 100, 10 organisms x 10 genes
 }
