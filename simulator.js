@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", setup);
 
 const TOTAL_ORGANISMS = 10;
 const GENE_COUNT = 10;
+const FPS = 30;
 
 // container holding organisms
 organisms = [];
@@ -117,10 +118,13 @@ function testMoveOrganism() {
 
         x = x + 1;
 
-        if (x === 11) {
+        if (x === GENE_COUNT) {
             return;
         }
 
-        requestAnimationFrame(testLoop);
+        // (working) control animation execution speed
+        setTimeout(function() {
+            requestAnimationFrame(testLoop);
+        }, 1000 / FPS);
     })
 }
