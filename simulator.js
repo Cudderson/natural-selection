@@ -59,7 +59,7 @@ class Organism {
 
     move () {
         console.log("called move");
-        this.ctx.fillStyle = 'gold';
+        this.ctx.fillStyle = 'purple';
         this.ctx.translate(this.x, this.y);
         this.ctx.fillRect(300, 300, 10, 10);
     }
@@ -117,10 +117,10 @@ function moveOrganisms() {
 
     for (var j = 0; j < GENE_COUNT; j++) {
         for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-            var org = organisms[i];
             console.log(`ORGANISM #${i}`);
-            org.update();
-            org.move();
+            organisms[i].update();
+            organisms[i].move();
+            console.log(organisms[i].x, organisms[i].y);
 
             tracker++;
         }
