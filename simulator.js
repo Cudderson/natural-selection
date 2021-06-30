@@ -53,16 +53,15 @@ class Organism {
             this.x = this.genes[this.index][0];
             this.y = this.genes[this.index][1];
             this.index++;
+            console.log(`X: ${this.x}, Y: ${this.y}`);
         }
     }
 
     move () {
         console.log("called move");
-        console.log(this.ctx);
-        console.log(ctx);
-        // this.ctx.fillStyle = 'gold';
-        // this.ctx.translate(this.x, this.y, 10, 10);
-        // this.ctx.fillRect(300, 300, 10, 10);
+        this.ctx.fillStyle = 'gold';
+        this.ctx.translate(this.x, this.y);
+        this.ctx.fillRect(300, 300, 10, 10);
     }
 }
 
@@ -112,14 +111,22 @@ function getRandomInt(min, max) {
 }
 
 function moveOrganisms() {
+    var tracker = 0;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-        console.log(i);
-        var org = organisms[i];
-        org.update();
-        org.move();
+    for (var j = 0; j < GENE_COUNT; j++) {
+        for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+            var org = organisms[i];
+            console.log(`ORGANISM #${i}`);
+            org.update();
+            org.move();
+
+            tracker++;
+        }
     }
+    console.log(tracker); // 100;
+    
 }
 
 // next, we want to loop through an organism's genes and animate it
