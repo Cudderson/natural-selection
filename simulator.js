@@ -20,6 +20,7 @@ class Organism {
         this.x = x;
         this.y = y;
         this.ctx = ctx;
+        this.index = 0;
     }
 
     // class method for creating random genes
@@ -45,6 +46,24 @@ class Organism {
             console.log(gene);
         }
     }
+
+    update () {
+        console.log("called update");
+        if (this.index < GENE_COUNT) {
+            this.x = this.genes[this.index][0];
+            this.y = this.genes[this.index][1];
+            this.index++;
+        }
+    }
+
+    move () {
+        console.log("called move");
+        console.log(this.ctx);
+        console.log(ctx);
+        // this.ctx.fillStyle = 'gold';
+        // this.ctx.translate(this.x, this.y, 10, 10);
+        // this.ctx.fillRect(300, 300, 10, 10);
+    }
 }
 
 function setup () {
@@ -57,7 +76,7 @@ function setup () {
 
     // Create organisms
     for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-        var organism = new Organism(300, 300, 10, 10);
+        var organism = new Organism(300, 300, ctx);
         organism.setRandomGenes();
         organisms.push(organism);
     }
@@ -82,13 +101,25 @@ function setup () {
 
      // calling test function for moving organsism
     //  testMoveOrganism();
-    testMoveAllOrganisms();
+    // testMoveAllOrganisms();
+    moveOrganisms();
 }
 
 function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1) + min); // min and max inclusive
+}
+
+function moveOrganisms() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+        console.log(i);
+        var org = organisms[i];
+        org.update();
+        org.move();
+    }
 }
 
 // next, we want to loop through an organism's genes and animate it
@@ -132,34 +163,52 @@ function getRandomInt(min, max) {
 
 // with animation working for the test organism, let's do it for all of our organisms
 // can make class method after
-function testMoveAllOrganisms() {
 
-    console.log(organisms.length);
+// currently, this code redraws each organisms final position
+// function testMoveAllOrganisms() {
 
-    // track gene count
-    var q = 0;
+//     console.log(organisms.length);
+
+//     // track gene count
+//     var q = 0;
     
-    console.log("CALLED.");
-    ctx.fillStyle = 'gold';
-    ctx.fillRect(300, 300, 10, 10);
+//     console.log("CALLED.");
+//     ctx.fillStyle = 'gold';
+//     ctx.fillRect(300, 300, 10, 10);
 
-    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-        for (var j = 0; j < GENE_COUNT; j++) {
-            console.log("HI");
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+//     for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+//         ctx.clearRect(0, 0, canvas.width, canvas.height);
+//         for (var j = 0; j < GENE_COUNT; j++) {
 
-            var x_position = organisms[i].genes[j][0];
-            var y_position = organisms[i].genes[j][1];
+//             requestAnimationFrame(function testLoopAll () {
 
-            console.log(x_position);
-            console.log(y_position);
+//                 console.log(i);
+//                 var x_position = organisms[i].genes[j][0];
+//                 var y_position = organisms[i].genes[j][1];
 
-            ctx.translate(x_position, y_position);
-            ctx.fillStyle = 'gold';
-            ctx.fillRect(300, 300, 10, 10);
+//                 console.log(x_position);
+//                 console.log(y_position);
 
-            q = q + 1;
-        }
-    }
-    console.log(q); // == 100, 10 organisms x 10 genes
-}
+//                 ctx.translate(x_position, y_position);
+//                 ctx.fillStyle = 'gold';
+//                 ctx.fillRect(300, 300, 10, 10);
+
+//                 q = q + 1;
+
+//                 if (q === GENE_COUNT) {
+//                     return;
+//                 }
+
+//                 setTimeout(function() {
+//                     requestAnimationFrame(testLoopAll);
+//                 }, 1000 / FPS);
+//             })
+            
+//         }
+//     }
+//     console.log(q); // == 100, 10 organisms x 10 genes
+// }
+
+// the problem is that we clearRect on every update, so only 1 organism shows at the end. 
+// I instead need to draw 10 organisms on the same loop
+// perhaps I could have a loop that first clears the canvas, and then redraws each organisms new position (yes)
