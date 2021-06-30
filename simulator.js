@@ -86,13 +86,13 @@ function setup () {
     // code blocks below work, they show genes for all organisms and a single organism
 
     // log genes for each organism (convert to class method?)
-    // for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-        // console.log(`GENES FOR ORGANISM ${i}: `);
+    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+        console.log(`GENES FOR ORGANISM ${i}: `);
         // 'of' keyword allows us to loop through *values* of an iterable object
-        // for (gene of organisms[i].genes) {
-            // console.log(gene);
-        // }
-    // }
+        for (gene of organisms[i].genes) {
+            console.log(gene);
+        }
+    }
 
     // works
     // console.log("SHOWING GENES FUNCTION FOR ORGANISM 0:")
