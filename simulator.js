@@ -113,9 +113,10 @@ function getRandomInt(min, max) {
 function moveOrganisms() {
     var tracker = 0;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
 
     for (var j = 0; j < GENE_COUNT; j++) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (var i = 0; i < TOTAL_ORGANISMS; i++) {
             console.log(`ORGANISM #${i}`);
             organisms[i].update();
