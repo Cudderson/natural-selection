@@ -104,10 +104,8 @@ function testMoveOneOrganism() {
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // draw goal (make function after working)
-        ctx.fillStyle = 'lightgreen';
-        ctx.fillRect(300, 20, 20, 20);
-
+        // goal redrawn on each repaint
+        drawGoal(ctx);
 
         for (var i = 0; i < TOTAL_ORGANISMS; i++) {
             organisms[i].update();
@@ -130,5 +128,10 @@ function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1) + min); // min and max inclusive
+}
+
+function drawGoal(ctx) {
+    ctx.fillStyle = 'lightgreen';
+    ctx.fillRect(300, 20, 20, 20);
 }
 
