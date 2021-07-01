@@ -85,7 +85,7 @@ function setup () {
     console.log("SETUP COMPLETE");
     console.log("Amount of organisms created = " + organisms.length);
 
-    // code blocks below work, they show genes for all organisms and a single organism
+    // code block below works, it shows genes for all organisms
 
     // log genes for each organism (convert to class method?)
     // for (var i = 0; i < TOTAL_ORGANISMS; i++) {
@@ -96,20 +96,31 @@ function setup () {
     //     }
     // }
 
-    // works
-    // console.log("SHOWING GENES FUNCTION FOR ORGANISM 0:")
-    // organisms[0].showGenes();
-
-     // calling test function for moving organsism
-    //  testMoveOrganism();
-    // testMoveAllOrganisms();
     testMoveOneOrganism();
 }
 
 function testMoveOneOrganism() {
+    var canvas = document.getElementById("main-canvas");
+    var ctx = canvas.getContext("2d");
     test_organism = organisms[3];
-    test_organism.update();
-    test_organism.move();
+
+    
+    requestAnimationFrame(function test () {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        console.log("HI");
+        test_organism.update();
+        test_organism.move();
+
+        if (test_organism.index == GENE_COUNT) {
+            console.log("DONE");
+            return;
+        }
+
+        setTimeout(function() {
+            requestAnimationFrame(test);
+        }, 1000 / FPS);
+    })
 }
 
 function getRandomInt(min, max) {
@@ -118,117 +129,3 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min); // min and max inclusive
 }
 
-
-// not working properly
-
-// function moveOrganisms() {
-//     var tracker = 0;
-
-//     for (var j = 0; j < GENE_COUNT; j++) {
-//         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-//         for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-//             console.log(`ORGANISM #${i}`);
-//             organisms[i].update();
-//             organisms[i].move();
-//             console.log(organisms[i].x, organisms[i].y);
-
-//             tracker++;
-//         }
-//     }
-//     console.log(tracker); // 100;
-    
-// }
-
-// next, we want to loop through an organism's genes and animate it
-// this works
-// function testMoveOrganism() {
-//     var canvas = document.getElementById("main-canvas");
-//     var ctx = canvas.getContext("2d");
-
-//     console.log("CALLED");
-//     var test_organism = organisms[5];
-//     // draw starting location
-//     ctx.fillStyle = 'purple';
-//     ctx.fillRect(300, 300, 10, 10);
-
-//     requestAnimationFrame(function testLoop () {
-//         // var canvas = document.getElementById("main-canvas");
-//         // var ctx = canvas.getContext("2d");
-//         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-//         // get next movement
-//         var x_position = test_organism.genes[x][0];
-//         var y_position = test_organism.genes[x][1];
-
-//         console.log(x_position);
-//         console.log(y_position);
-
-//         ctx.translate(x_position, y_position);
-//         ctx.fillstyle = "purple";
-//         ctx.fillRect(300, 300, 10, 10);
-
-//         x = x + 1;
-
-//         if (x === GENE_COUNT) {
-//             return;
-//         }
-
-//         // (working) control animation execution speed
-//         setTimeout(function() {
-//             requestAnimationFrame(testLoop);
-//         }, 1000 / FPS);
-//     })
-// }
-
-// with animation working for the test organism, let's do it for all of our organisms
-// can make class method after
-
-// currently, this code redraws each organisms final position
-// function testMoveAllOrganisms() {
-
-//     console.log(organisms.length);
-
-//     // track gene count
-//     var q = 0;
-    
-//     console.log("CALLED.");
-//     ctx.fillStyle = 'gold';
-//     ctx.fillRect(300, 300, 10, 10);
-
-//     for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-//         ctx.clearRect(0, 0, canvas.width, canvas.height);
-//         for (var j = 0; j < GENE_COUNT; j++) {
-
-//             requestAnimationFrame(function testLoopAll () {
-
-//                 console.log(i);
-//                 var x_position = organisms[i].genes[j][0];
-//                 var y_position = organisms[i].genes[j][1];
-
-//                 console.log(x_position);
-//                 console.log(y_position);
-
-//                 ctx.translate(x_position, y_position);
-//                 ctx.fillStyle = 'gold';
-//                 ctx.fillRect(300, 300, 10, 10);
-
-//                 q = q + 1;
-
-//                 if (q === GENE_COUNT) {
-//                     return;
-//                 }
-
-//                 setTimeout(function() {
-//                     requestAnimationFrame(testLoopAll);
-//                 }, 1000 / FPS);
-//             })
-            
-//         }
-//     }
-//     console.log(q); // == 100, 10 organisms x 10 genes
-// }
-
-// the problem is that we clearRect on every update, so only 1 organism shows at the end. 
-// I instead need to draw 10 organisms on the same loop
-// perhaps I could have a loop that first clears the canvas, and then redraws each organisms new position (yes)
