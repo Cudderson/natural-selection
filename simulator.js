@@ -12,14 +12,15 @@ var x = 0;
 var y = 1;
 
 // testing global canvas declaration
-var canvas = document.getElementById("main-canvas");
-var ctx = canvas.getContext("2d");
+// var canvas = document.getElementById("main-canvas");
+// var ctx = canvas.getContext("2d");
 
 class Organism {
     constructor (x, y, ctx) {
         this.x = x;
         this.y = y;
         this.ctx = ctx;
+        this.radius = 5;
         this.index = 0;
     }
 
@@ -50,8 +51,8 @@ class Organism {
     update () {
         console.log("called update");
         if (this.index < GENE_COUNT) {
-            this.x = this.genes[this.index][0];
-            this.y = this.genes[this.index][1];
+            this.x += this.genes[this.index][0];
+            this.y += this.genes[this.index][1];
             this.index++;
             console.log(`X: ${this.x}, Y: ${this.y}`);
         }
@@ -60,8 +61,9 @@ class Organism {
     move () {
         console.log("called move");
         this.ctx.fillStyle = 'purple';
-        this.ctx.translate(this.x, this.y);
-        this.ctx.fillRect(300, 300, 10, 10);
+        this.ctx.beginPath();
+        this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2, false);
+        this.ctx.fill();
     }
 }
 
@@ -86,13 +88,13 @@ function setup () {
     // code blocks below work, they show genes for all organisms and a single organism
 
     // log genes for each organism (convert to class method?)
-    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-        console.log(`GENES FOR ORGANISM ${i}: `);
-        // 'of' keyword allows us to loop through *values* of an iterable object
-        for (gene of organisms[i].genes) {
-            console.log(gene);
-        }
-    }
+    // for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+    //     console.log(`GENES FOR ORGANISM ${i}: `);
+    //     // 'of' keyword allows us to loop through *values* of an iterable object
+    //     for (gene of organisms[i].genes) {
+    //         console.log(gene);
+    //     }
+    // }
 
     // works
     // console.log("SHOWING GENES FUNCTION FOR ORGANISM 0:")
@@ -101,7 +103,13 @@ function setup () {
      // calling test function for moving organsism
     //  testMoveOrganism();
     // testMoveAllOrganisms();
-    moveOrganisms();
+    testMoveOneOrganism();
+}
+
+function testMoveOneOrganism() {
+    test_organism = organisms[3];
+    test_organism.update();
+    test_organism.move();
 }
 
 function getRandomInt(min, max) {
@@ -110,29 +118,33 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min); // min and max inclusive
 }
 
-function moveOrganisms() {
-    var tracker = 0;
 
+// not working properly
+
+// function moveOrganisms() {
+//     var tracker = 0;
+
+//     for (var j = 0; j < GENE_COUNT; j++) {
+//         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+//         for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+//             console.log(`ORGANISM #${i}`);
+//             organisms[i].update();
+//             organisms[i].move();
+//             console.log(organisms[i].x, organisms[i].y);
+
+//             tracker++;
+//         }
+//     }
+//     console.log(tracker); // 100;
     
-
-    for (var j = 0; j < GENE_COUNT; j++) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-            console.log(`ORGANISM #${i}`);
-            organisms[i].update();
-            organisms[i].move();
-            console.log(organisms[i].x, organisms[i].y);
-
-            tracker++;
-        }
-    }
-    console.log(tracker); // 100;
-    
-}
+// }
 
 // next, we want to loop through an organism's genes and animate it
 // this works
 // function testMoveOrganism() {
+//     var canvas = document.getElementById("main-canvas");
+//     var ctx = canvas.getContext("2d");
 
 //     console.log("CALLED");
 //     var test_organism = organisms[5];
