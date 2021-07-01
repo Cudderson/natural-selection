@@ -74,7 +74,7 @@ function setup () {
 
     // Create organisms
     for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-        var organism = new Organism(300, 300, ctx);
+        var organism = new Organism(300, 500, ctx);
         organism.setRandomGenes();
         organisms.push(organism);
     }
@@ -103,6 +103,11 @@ function testMoveOneOrganism() {
     requestAnimationFrame(function test () {
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // draw goal (make function after working)
+        ctx.fillStyle = 'lightgreen';
+        ctx.fillRect(300, 20, 20, 20);
+
 
         for (var i = 0; i < TOTAL_ORGANISMS; i++) {
             organisms[i].update();
