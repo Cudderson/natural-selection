@@ -34,8 +34,7 @@ class Organism {
             var x_pos = getRandomInt(-10, 10);
             var y_pos = getRandomInt(-10, 10);
 
-            var random_vector = ([x_pos, y_pos]);
-            // console.log(random_vector)
+            var random_vector = [x_pos, y_pos];
 
             this.genes.push(random_vector);
         }
@@ -49,7 +48,6 @@ class Organism {
     }
 
     update () {
-        console.log("called update");
         if (this.index < GENE_COUNT) {
             this.x += this.genes[this.index][0];
             this.y += this.genes[this.index][1];
@@ -59,7 +57,6 @@ class Organism {
     }
 
     move () {
-        console.log("called move");
         this.ctx.fillStyle = 'purple';
         this.ctx.beginPath();
         this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2, false);
@@ -102,23 +99,19 @@ function setup () {
 function testMoveOneOrganism() {
     var canvas = document.getElementById("main-canvas");
     var ctx = canvas.getContext("2d");
-    test_organism = organisms[3];
 
-    // i'm not sure how to loop through each organism with animation frames
     requestAnimationFrame(function test () {
-
-        for (var g = 0; g < 10; g++) {
-            console.log(g);
-        }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        console.log("HI");
-        test_organism.update();
-        test_organism.move();
+        for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+            organisms[i].update();
+            organisms[i].move();
+        }
+        
 
-        if (test_organism.index == GENE_COUNT) {
-            console.log("DONE");
+        if (organisms[0].index == GENE_COUNT) {
+            console.log("Generation Complete");
             return;
         }
 
