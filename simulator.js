@@ -11,9 +11,9 @@ organisms = [];
 var x = 0;
 var y = 1;
 
-// testing global canvas declaration
-// var canvas = document.getElementById("main-canvas");
-// var ctx = canvas.getContext("2d");
+// testing global canvas declaration (comment out if code breaks)
+var canvas = document.getElementById("main-canvas");
+var ctx = canvas.getContext("2d");
 
 class Organism {
     constructor (x, y, ctx) {
@@ -115,6 +115,9 @@ function testMoveOneOrganism() {
 
         if (organisms[0].index == GENE_COUNT) {
             console.log("Generation Complete");
+            console.log("Now calling new goal function");
+            getDistanceToGoal();
+            console.log("All complete.");
             return;
         }
 
@@ -132,6 +135,32 @@ function getRandomInt(min, max) {
 
 function drawGoal(ctx) {
     ctx.fillStyle = 'lightgreen';
-    ctx.fillRect(300, 20, 20, 20);
+    p = ctx.fillRect(300, 20, 20, 20);
+    console.log(p);
 }
 
+// the next step is the evaluation stage
+// we want to determine an organisms distance to the goal
+// distance_to_goal = sqrt(horizontal distance to center) + sqrt(vertical distance to horizonatal line @ target start)
+
+// the first step is to define where the goal is
+// goal_x = 300
+// goal_y = 20
+
+// I know that, but can I get an object's coordinates programatically?
+// looks to not be possible, at least not easily
+// we'll have to update the evaluation step if we ever move the goal
+
+// we'll use the center position of the goal to start
+function getDistanceToGoal() {
+    console.log(`${organisms[0]} <<<`);
+    // let's just print out an organism's x and y position
+    console.log("Position of organism[0]:");
+    console.log(organisms[0].x, organisms[0].y);
+    organisms[0].ctx.fillStyle = 'gold';
+    organisms[0].ctx.beginPath();
+    organisms[0].ctx.arc(organisms[0].x, organisms[0].y, organisms[0].radius, 0, Math.PI*2, false);
+    organisms[0].ctx.fill();
+
+    console.log(canvas.width);
+}
