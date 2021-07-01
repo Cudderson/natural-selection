@@ -104,8 +104,13 @@ function testMoveOneOrganism() {
     var ctx = canvas.getContext("2d");
     test_organism = organisms[3];
 
-    
+    // i'm not sure how to loop through each organism with animation frames
     requestAnimationFrame(function test () {
+
+        for (var g = 0; g < 10; g++) {
+            console.log(g);
+        }
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         console.log("HI");
