@@ -7,10 +7,6 @@ const FPS = 30;
 // container holding organisms
 organisms = [];
 
-// test variables for animation loop
-var x = 0;
-var y = 1;
-
 // testing global canvas declaration (comment out if code breaks)
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
@@ -64,6 +60,20 @@ class Organism {
     }
 }
 
+class Goal {
+    constructor(x, y, size, ctx) {
+        this.x = x;
+        this.y = y;
+        this.size = size;
+        this.ctx = ctx;
+    }
+
+    drawGoal () {
+        this.ctx.fillStyle = 'lightgreen';
+        this.ctx.fillRect(this.x, this.y, this.size, this.size);
+    }
+}
+
 function setup () {
 
     // get canvas element
@@ -100,19 +110,21 @@ function testMoveOneOrganism() {
     var canvas = document.getElementById("main-canvas");
     var ctx = canvas.getContext("2d");
 
+    // Create goal
+    var goal = new Goal(300, 20, 20, ctx); 
+
     requestAnimationFrame(function test () {
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // goal redrawn on each repaint
-        drawGoal(ctx);
+        goal.drawGoal();
 
         for (var i = 0; i < TOTAL_ORGANISMS; i++) {
             organisms[i].update();
             organisms[i].move();
         }
         
-
         if (organisms[0].index == GENE_COUNT) {
             console.log("Generation Complete");
             console.log("Now calling new goal function");
@@ -131,12 +143,6 @@ function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1) + min); // min and max inclusive
-}
-
-function drawGoal(ctx) {
-    ctx.fillStyle = 'lightgreen';
-    p = ctx.fillRect(300, 20, 20, 20);
-    console.log(p);
 }
 
 // the next step is the evaluation stage
