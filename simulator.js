@@ -18,28 +18,22 @@ class Organism {
         this.ctx = ctx;
         this.radius = 5;
         this.index = 0;
+        this.genes = [];
     }
 
-    // class method for creating random genes
     setRandomGenes () {
-
-        this.genes = [];
+        var min = Math.ceil(-10);
+        var max = Math.floor(10);
 
         for (var i = 0; i < GENE_COUNT; i++) {
-            // Create random vectors (genes)
-            var x_pos = getRandomInt(-10, 10);
-            var y_pos = getRandomInt(-10, 10);
-
-            var random_vector = [x_pos, y_pos];
-
-            this.genes.push(random_vector);
+            var random_gene = getRandomGene(min, max);
+            this.genes.push(random_gene);
         }
     }
 
-    // just for testing
     showGenes () {
-        for (gene of this.genes) {
-            console.log(gene);
+        for (var i = 0; i < GENE_COUNT; i++) {
+            console.log(this.genes[i]);
         }
     }
 
@@ -60,11 +54,9 @@ class Organism {
 
     calcDistanceToGoal (goal) {
         // can shorten after working
-        var horizontal_distance = Math.abs(this.x - goal.x);
-        var vertical_distance = Math.abs(this.y - goal.y);
-
-        var horizontal_distance_squared = horizontal_distance ** 2;
-        var vertical_distance_squared = vertical_distance ** 2;
+        // c**2 = a**2 + b**2
+        var horizontal_distance_squared = (Math.abs(this.x - goal.x)) ** 2;
+        var vertical_distance_squared = (Math.abs(this.y - goal.y)) ** 2;
 
         var distance_to_goal_squared = vertical_distance_squared + horizontal_distance_squared;
         var distance_to_goal = Math.sqrt(distance_to_goal_squared);
@@ -105,17 +97,6 @@ function setup () {
     console.log("SETUP COMPLETE");
     console.log("Amount of organisms created = " + organisms.length);
 
-    // code block below works, it shows genes for all organisms
-
-    // log genes for each organism (convert to class method?)
-    // for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-    //     console.log(`GENES FOR ORGANISM ${i}: `);
-    //     // 'of' keyword allows us to loop through *values* of an iterable object
-    //     for (gene of organisms[i].genes) {
-    //         console.log(gene);
-    //     }
-    // }
-
     runGeneration();
 }
 
@@ -153,10 +134,11 @@ function runGeneration() {
     })
 }
 
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1) + min); // min and max inclusive
+function getRandomGene(min, max) {
+    var random_x = Math.floor(Math.random() * (max - min + 1) + min);
+    var random_y = Math.floor(Math.random() * (max - min + 1) + min);
+    var random_gene = [random_x, random_y];
+    return random_gene;
 }
 
 function getDistanceToGoal(goal) {
