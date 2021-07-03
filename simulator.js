@@ -11,6 +11,10 @@ organisms = [];
 var initial_x = 300;
 var initial_y = 500;
 
+// target goal coordinates
+var goal_x_pos = 300;
+var goal_y_pos = 20;
+
 // testing global canvas declaration (comment out if code breaks)
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
@@ -58,10 +62,10 @@ class Organism {
         this.ctx.fill();
     }
 
-    calcDistanceToGoal (goal) {
+    calcDistanceToGoal () {
         // c**2 = a**2 + b**2
-        var horizontal_distance_squared = (Math.abs(this.x - goal.x)) ** 2;
-        var vertical_distance_squared = (Math.abs(this.y - goal.y)) ** 2;
+        var horizontal_distance_squared = (Math.abs(this.x - goal_x_pos)) ** 2;
+        var vertical_distance_squared = (Math.abs(this.y - goal_y_pos)) ** 2;
 
         var distance_to_goal_squared = vertical_distance_squared + horizontal_distance_squared;
         var distance_to_goal = Math.sqrt(distance_to_goal_squared);
@@ -71,9 +75,9 @@ class Organism {
         return distance_to_goal;
     }
 
-    calcFitness (goal) {
+    calcFitness () {
         // height = distance between starting location(y) and goal.y
-        var height = initial_y + goal.y;
+        var height = initial_y + goal_y_pos;
 
         var normalized_distance_to_goal = this.distance_to_goal / height;
         this.fitness = 1 - normalized_distance_to_goal;
@@ -108,7 +112,7 @@ function setup () {
 function runGeneration() {
 
     // Create goal
-    var goal = new Goal(300, 20, 20, ctx); 
+    var goal = new Goal(goal_x_pos, goal_y_pos, 20, ctx); 
 
     requestAnimationFrame(function animateFrame () {
 
@@ -127,8 +131,8 @@ function runGeneration() {
         if (organisms[0].index == GENE_COUNT) {
             console.log("Generation Complete");
 
-            getShortestDistanceToGoal(goal);
-            calcPopulationFitness(goal);
+            getShortestDistanceToGoal();
+            calcPopulationFitness();
 
             console.log("All complete.");
 
@@ -161,13 +165,13 @@ function getRandomGene(min, max) {
     return random_gene;
 }
 
-function getShortestDistanceToGoal(goal) {
+function getShortestDistanceToGoal() {
 
     var shortest_distance = 10000;
     var closest_organism;
 
     for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-        var distance_to_goal = organisms[i].calcDistanceToGoal(goal);
+        var distance_to_goal = organisms[i].calcDistanceToGoal();
         if (distance_to_goal < shortest_distance) {
             shortest_distance = distance_to_goal;
             closest_organism = i;
@@ -185,8 +189,8 @@ function highlightClosestOrganism (closest_organism) {
     console.log(`ORGANISM ${closest_organism} is closest!`);
 }
 
-function calcPopulationFitness (goal) {
+function calcPopulationFitness () {
     for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-        organisms[i].calcFitness(goal);
+        organisms[i].calcFitness();
     }
 }
