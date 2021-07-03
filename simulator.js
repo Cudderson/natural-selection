@@ -58,6 +58,18 @@ class Organism {
         this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2, false);
         this.ctx.fill();
     }
+
+    calcDistanceToGoal (goal) {
+        // can shorten after working
+        var horizontal_distance = Math.abs(this.x - goal.x);
+        var vertical_distance = Math.abs(this.y - goal.y);
+        var horizontal_distance_squared = horizontal_distance ** 2;
+        var vertical_distance_squared = vertical_distance ** 2;
+        var distance_to_goal_squared = vertical_distance_squared + horizontal_distance_squared;
+        var distance_to_goal = Math.sqrt(distance_to_goal_squared);
+
+        return distance_to_goal;
+    }
 }
 
 class Goal {
@@ -128,7 +140,7 @@ function testMoveOneOrganism() {
         if (organisms[0].index == GENE_COUNT) {
             console.log("Generation Complete");
             console.log("Now calling new goal function");
-            getDistanceToGoal();
+            getDistanceToGoal(goal);
             console.log("All complete.");
             return;
         }
@@ -158,15 +170,55 @@ function getRandomInt(min, max) {
 // we'll have to update the evaluation step if we ever move the goal
 
 // we'll use the center position of the goal to start
-function getDistanceToGoal() {
-    console.log(`${organisms[0]} <<<`);
-    // let's just print out an organism's x and y position
-    console.log("Position of organism[0]:");
-    console.log(organisms[0].x, organisms[0].y);
-    organisms[0].ctx.fillStyle = 'gold';
-    organisms[0].ctx.beginPath();
-    organisms[0].ctx.arc(organisms[0].x, organisms[0].y, organisms[0].radius, 0, Math.PI*2, false);
-    organisms[0].ctx.fill();
+function getDistanceToGoal(goal) {
+    // console.log(`${organisms[0]} <<<`);
+    // // let's just print out an organism's x and y position
+    // console.log("Position of organism[0]:");
+    // console.log(organisms[0].x, organisms[0].y);
+    // organisms[0].ctx.fillStyle = 'gold';
+    // organisms[0].ctx.beginPath();
+    // organisms[0].ctx.arc(organisms[0].x, organisms[0].y, organisms[0].radius, 0, Math.PI*2, false);
+    // organisms[0].ctx.fill();
 
-    console.log(canvas.width);
+    // console.log(canvas.width);
+
+
+    // Let's calculate the distance to goal for organism[0]
+    // a^2 + b^2 = c^2 
+    // distance_to_goal = sqrt(distance_to_vertical_center_line) + sqrt(distance to horizontal line at goal position)
+    // the distance to the vertical center line = abs(organism[0].x - goal.x)
+    // the distance to the horizontal line at goal position = abs(organism[0].y - goal.y)
+    
+
+    // need to pass goal to this function
+    // var a = Math.abs(organisms[0].x - goal.x);
+    // var b = Math.abs(organisms[0].y - goal.y);
+    // console.log("ABS DISTANCE TO GOAL (X, Y): ");
+    // console.log(a, b);
+    // a = a ** 2;
+    // b = b ** 2;
+    // console.log("SQUARED: ")
+    // console.log(a, b);
+    // console.log("SUM OF SQUARES AKA C^2: ");
+    // var c = a + b;
+    // console.log(c);
+
+    // console.log("DISTANCE TO GOAL == SQUARE ROOT OF C^2 == SQUARE ROOT OF A^2 + B^2: ");
+    // console.log(Math.sqrt(c));
+
+    // the best way to see if this works is to calculate each organisms distance to goal using my current method, and
+    // then highlight in gold the organism with the shortest distance to goal.
+
+    // this function is called at the end of each generation
+    // loop through organisms and calculate their distance to goal
+    // make class method after working
+
+    // for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+    //     organisms[i].calcDistanceToGoal(goal);
+    // }
+
+    for (organism of organisms) {
+        d = organism.calcDistanceToGoal(goal);
+        console.log(`D: ${d}`);
+    }
 }
