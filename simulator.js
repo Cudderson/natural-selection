@@ -53,7 +53,6 @@ class Organism {
     }
 
     calcDistanceToGoal (goal) {
-        // can shorten after working
         // c**2 = a**2 + b**2
         var horizontal_distance_squared = (Math.abs(this.x - goal.x)) ** 2;
         var vertical_distance_squared = (Math.abs(this.y - goal.y)) ** 2;
@@ -81,18 +80,8 @@ class Goal {
 
 function setup () {
 
-    // get canvas element
-    var canvas = document.getElementById("main-canvas");
-    
-    // get drawing object
-    var ctx = canvas.getContext("2d");
-
-    // Create organisms
-    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-        var organism = new Organism(300, 500, ctx);
-        organism.setRandomGenes();
-        organisms.push(organism);
-    }
+    // Create organisms with random genes
+    createOrganisms();
 
     console.log("SETUP COMPLETE");
     console.log("Amount of organisms created = " + organisms.length);
@@ -101,8 +90,6 @@ function setup () {
 }
 
 function runGeneration() {
-    var canvas = document.getElementById("main-canvas");
-    var ctx = canvas.getContext("2d");
 
     // Create goal
     var goal = new Goal(300, 20, 20, ctx); 
@@ -114,15 +101,17 @@ function runGeneration() {
         // goal redrawn on each repaint
         goal.drawGoal();
 
+        // update next coordinate and move
         for (var i = 0; i < TOTAL_ORGANISMS; i++) {
             organisms[i].update();
             organisms[i].move();
         }
         
+        // executes when all genes accounted for
         if (organisms[0].index == GENE_COUNT) {
             console.log("Generation Complete");
 
-            getDistanceToGoal(goal);
+            getShortestDistanceToGoal(goal);
 
             console.log("All complete.");
             return;
@@ -134,6 +123,14 @@ function runGeneration() {
     })
 }
 
+function createOrganisms () {
+    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+        var organism = new Organism(300, 500, ctx);
+        organism.setRandomGenes();
+        organisms.push(organism);
+    }
+}
+
 function getRandomGene(min, max) {
     var random_x = Math.floor(Math.random() * (max - min + 1) + min);
     var random_y = Math.floor(Math.random() * (max - min + 1) + min);
@@ -141,7 +138,7 @@ function getRandomGene(min, max) {
     return random_gene;
 }
 
-function getDistanceToGoal(goal) {
+function getShortestDistanceToGoal(goal) {
 
     var shortest_distance = 10000;
     var closest_organism;
