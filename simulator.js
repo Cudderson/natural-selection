@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", setup);
 
 const TOTAL_ORGANISMS = 10;
-const GENE_COUNT = 10;
+const GENE_COUNT = 10; // original was 10
 const FPS = 30;
 
 // container holding organisms
@@ -48,7 +48,6 @@ class Organism {
             this.x += this.genes[this.index][0];
             this.y += this.genes[this.index][1];
             this.index++;
-            console.log(`X: ${this.x}, Y: ${this.y}`);
         }
     }
 
@@ -63,8 +62,10 @@ class Organism {
         // can shorten after working
         var horizontal_distance = Math.abs(this.x - goal.x);
         var vertical_distance = Math.abs(this.y - goal.y);
+
         var horizontal_distance_squared = horizontal_distance ** 2;
         var vertical_distance_squared = vertical_distance ** 2;
+
         var distance_to_goal_squared = vertical_distance_squared + horizontal_distance_squared;
         var distance_to_goal = Math.sqrt(distance_to_goal_squared);
 
@@ -115,17 +116,17 @@ function setup () {
     //     }
     // }
 
-    testMoveOneOrganism();
+    runGeneration();
 }
 
-function testMoveOneOrganism() {
+function runGeneration() {
     var canvas = document.getElementById("main-canvas");
     var ctx = canvas.getContext("2d");
 
     // Create goal
     var goal = new Goal(300, 20, 20, ctx); 
 
-    requestAnimationFrame(function test () {
+    requestAnimationFrame(function animateFrame () {
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -139,14 +140,15 @@ function testMoveOneOrganism() {
         
         if (organisms[0].index == GENE_COUNT) {
             console.log("Generation Complete");
-            console.log("Now calling new goal function");
+
             getDistanceToGoal(goal);
+
             console.log("All complete.");
             return;
         }
 
         setTimeout(function() {
-            requestAnimationFrame(test);
+            requestAnimationFrame(animateFrame);
         }, 1000 / FPS);
     })
 }
@@ -157,68 +159,25 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min); // min and max inclusive
 }
 
-// the next step is the evaluation stage
-// we want to determine an organisms distance to the goal
-// distance_to_goal = sqrt(horizontal distance to center) + sqrt(vertical distance to horizonatal line @ target start)
-
-// the first step is to define where the goal is
-// goal_x = 300
-// goal_y = 20
-
-// I know that, but can I get an object's coordinates programatically?
-// looks to not be possible, at least not easily
-// we'll have to update the evaluation step if we ever move the goal
-
-// we'll use the center position of the goal to start
 function getDistanceToGoal(goal) {
-    // console.log(`${organisms[0]} <<<`);
-    // // let's just print out an organism's x and y position
-    // console.log("Position of organism[0]:");
-    // console.log(organisms[0].x, organisms[0].y);
-    // organisms[0].ctx.fillStyle = 'gold';
-    // organisms[0].ctx.beginPath();
-    // organisms[0].ctx.arc(organisms[0].x, organisms[0].y, organisms[0].radius, 0, Math.PI*2, false);
-    // organisms[0].ctx.fill();
 
-    // console.log(canvas.width);
+    var shortest_distance = 10000;
+    var closest_organism;
 
-
-    // Let's calculate the distance to goal for organism[0]
-    // a^2 + b^2 = c^2 
-    // distance_to_goal = sqrt(distance_to_vertical_center_line) + sqrt(distance to horizontal line at goal position)
-    // the distance to the vertical center line = abs(organism[0].x - goal.x)
-    // the distance to the horizontal line at goal position = abs(organism[0].y - goal.y)
-    
-
-    // need to pass goal to this function
-    // var a = Math.abs(organisms[0].x - goal.x);
-    // var b = Math.abs(organisms[0].y - goal.y);
-    // console.log("ABS DISTANCE TO GOAL (X, Y): ");
-    // console.log(a, b);
-    // a = a ** 2;
-    // b = b ** 2;
-    // console.log("SQUARED: ")
-    // console.log(a, b);
-    // console.log("SUM OF SQUARES AKA C^2: ");
-    // var c = a + b;
-    // console.log(c);
-
-    // console.log("DISTANCE TO GOAL == SQUARE ROOT OF C^2 == SQUARE ROOT OF A^2 + B^2: ");
-    // console.log(Math.sqrt(c));
-
-    // the best way to see if this works is to calculate each organisms distance to goal using my current method, and
-    // then highlight in gold the organism with the shortest distance to goal.
-
-    // this function is called at the end of each generation
-    // loop through organisms and calculate their distance to goal
-    // make class method after working
-
-    // for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-    //     organisms[i].calcDistanceToGoal(goal);
-    // }
-
-    for (organism of organisms) {
-        d = organism.calcDistanceToGoal(goal);
-        console.log(`D: ${d}`);
+    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+        var distance_to_goal = organisms[i].calcDistanceToGoal(goal);
+        if (distance_to_goal < shortest_distance) {
+            shortest_distance = distance_to_goal;
+            closest_organism = i;
+        }
     }
+
+    highlightClosestOrganism(closest_organism);
+}
+
+function highlightClosestOrganism (closest_organism) {
+    organisms[closest_organism].ctx.fillStyle = 'gold';
+    organisms[closest_organism].ctx.beginPath();
+    organisms[closest_organism].ctx.arc(organisms[closest_organism].x, organisms[closest_organism].y, organisms[closest_organism].radius, 0, Math.PI*2, false);
+    organisms[closest_organism].ctx.fill();
 }
