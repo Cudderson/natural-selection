@@ -7,6 +7,10 @@ const FPS = 30;
 // container holding organisms
 organisms = [];
 
+// organism starting coordinates
+var initial_x = 300;
+var initial_y = 500;
+
 // testing global canvas declaration (comment out if code breaks)
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
@@ -19,6 +23,8 @@ class Organism {
         this.radius = 5;
         this.index = 0;
         this.genes = [];
+        this.distance_to_goal;
+        this.fitness;
     }
 
     setRandomGenes () {
@@ -60,7 +66,17 @@ class Organism {
         var distance_to_goal_squared = vertical_distance_squared + horizontal_distance_squared;
         var distance_to_goal = Math.sqrt(distance_to_goal_squared);
 
+        this.distance_to_goal = distance_to_goal;
+
         return distance_to_goal;
+    }
+
+    calcFitness (goal) {
+        // height = distance between starting location(y) and goal.y
+        var height = initial_y + goal.y;
+
+        var normalized_distance_to_goal = this.distance_to_goal / height;
+        this.fitness = 1 - normalized_distance_to_goal;
     }
 }
 
@@ -112,8 +128,15 @@ function runGeneration() {
             console.log("Generation Complete");
 
             getShortestDistanceToGoal(goal);
+            calcPopulationFitness(goal);
 
             console.log("All complete.");
+
+            // test show fitness (try to find a way to not pass in the goal to every function)
+            for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+                console.log(`FITNESS FOR ORGANISM ${i}: ${organisms[i].fitness}`);
+            }
+
             return;
         }
 
@@ -125,7 +148,7 @@ function runGeneration() {
 
 function createOrganisms () {
     for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-        var organism = new Organism(300, 500, ctx);
+        var organism = new Organism(initial_x, initial_y, ctx);
         organism.setRandomGenes();
         organisms.push(organism);
     }
@@ -159,4 +182,11 @@ function highlightClosestOrganism (closest_organism) {
     organisms[closest_organism].ctx.beginPath();
     organisms[closest_organism].ctx.arc(organisms[closest_organism].x, organisms[closest_organism].y, organisms[closest_organism].radius, 0, Math.PI*2, false);
     organisms[closest_organism].ctx.fill();
+    console.log(`ORGANISM ${closest_organism} is closest!`);
+}
+
+function calcPopulationFitness (goal) {
+    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+        organisms[i].calcFitness(goal);
+    }
 }
