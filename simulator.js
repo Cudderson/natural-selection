@@ -1,19 +1,19 @@
 document.addEventListener("DOMContentLoaded", setup);
 
-const TOTAL_ORGANISMS = 10;
-const GENE_COUNT = 10; // original was 10
+const TOTAL_ORGANISMS = 20;
+const GENE_COUNT = 100; // original was 10
 const FPS = 30;
 
-// container holding organisms
-organisms = [];
-
 // organism starting coordinates
-var initial_x = 300;
-var initial_y = 500;
+const initial_x = 300; 
+const initial_y = 500;
 
 // target goal coordinates
-var goal_x_pos = 300;
-var goal_y_pos = 20;
+const goal_x_pos = 300;
+const goal_y_pos = 20;
+
+// container holding organisms
+var organisms = [];
 
 // testing global canvas declaration (comment out if code breaks)
 var canvas = document.getElementById("main-canvas");
@@ -32,8 +32,8 @@ class Organism {
     }
 
     setRandomGenes () {
-        var min = Math.ceil(-10);
-        var max = Math.floor(10);
+        var min = Math.ceil(-5);
+        var max = Math.floor(5);
 
         for (var i = 0; i < GENE_COUNT; i++) {
             var random_gene = getRandomGene(min, max);
@@ -170,6 +170,7 @@ function getShortestDistanceToGoal() {
     var shortest_distance = 10000;
     var closest_organism;
 
+    // though this loop identifies closest organism, it ALSO updates organism's distance_to_goal attribute
     for (var i = 0; i < TOTAL_ORGANISMS; i++) {
         var distance_to_goal = organisms[i].calcDistanceToGoal();
         if (distance_to_goal < shortest_distance) {
