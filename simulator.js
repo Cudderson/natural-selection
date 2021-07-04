@@ -128,6 +128,7 @@ function runGeneration() {
         }
         
         // executes when all genes accounted for
+        // this could be a function 'finishGeneration()'
         if (organisms[0].index == GENE_COUNT) {
             console.log("Generation Complete");
 
@@ -140,6 +141,9 @@ function runGeneration() {
             for (var i = 0; i < TOTAL_ORGANISMS; i++) {
                 console.log(`FITNESS FOR ORGANISM ${i}: ${organisms[i].fitness}`);
             }
+            console.log("Beginning Selection Phase");
+
+            selectParents();
 
             return;
         }
@@ -194,4 +198,25 @@ function calcPopulationFitness () {
     for (var i = 0; i < TOTAL_ORGANISMS; i++) {
         organisms[i].calcFitness();
     }
+}
+
+function selectParents() {
+    // fill array with candidates for reproduction
+    // multiply each Organism's fitness by 10, and add each organism to the array as many times
+    var parents = [];
+
+    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+        // Give organisms with negative fitness a chance to reproduce
+        if (organisms[i].fitness < 0) {
+            organisms[i].fitness = 0.01;
+            console.log(`Fitness changed from negative to .01 for organism ${i}`);
+        }
+        // fill parents array
+        for (var j = 0; j < Math.ceil(organisms[i].fitness * 100); j++) {
+            parents.push(organisms[i]);
+        }
+        console.log(`Organism ${i} was added to array ${Math.ceil(organisms[i].fitness * 100)} times.`);
+    }
+    console.log(parents);
+    console.log(parents.length);
 }
