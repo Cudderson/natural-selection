@@ -133,18 +133,29 @@ function runGeneration() {
             console.log("Generation Complete");
 
             getShortestDistanceToGoal();
-            calcPopulationFitness();
-
-            console.log("All complete.");
+            calcPopulationFitness(); 
 
             // test show fitness (try to find a way to not pass in the goal to every function)
             for (var i = 0; i < TOTAL_ORGANISMS; i++) {
                 console.log(`FITNESS FOR ORGANISM ${i}: ${organisms[i].fitness}`);
             }
+
             console.log("Beginning Selection Phase");
+            // fills a weighted array with organisms based on their fitness score
+            var potential_parents = beginSelectionProcess();
 
-            selectParents();
+            console.log("----------");
+            console.log(potential_parents);
+            console.log("----------");
 
+            var parents = selectParentsForReproduction(potential_parents);
+
+            console.log("Parents chosen to reproduce:")
+            for (parent_pair of parents) {
+                console.log(parent_pair);
+            }
+
+            console.log("Program complete.")
             return;
         }
 
@@ -200,10 +211,10 @@ function calcPopulationFitness () {
     }
 }
 
-function selectParents() {
+function beginSelectionProcess() {
     // fill array with candidates for reproduction
-    // multiply each Organism's fitness by 10, and add each organism to the array as many times
-    var parents = [];
+    // multiply each Organism's fitness by 100, and add each organism to the array as many times
+    var potential_parents = [];
 
     for (var i = 0; i < TOTAL_ORGANISMS; i++) {
         // Give organisms with negative fitness a chance to reproduce
@@ -213,10 +224,42 @@ function selectParents() {
         }
         // fill parents array
         for (var j = 0; j < Math.ceil(organisms[i].fitness * 100); j++) {
-            parents.push(organisms[i]);
+            potential_parents.push(organisms[i]);
         }
         console.log(`Organism ${i} was added to array ${Math.ceil(organisms[i].fitness * 100)} times.`);
     }
-    console.log(parents);
-    console.log(parents.length);
+
+    return potential_parents;
+}
+
+function selectParentsForReproduction(potential_parents) {
+    // parents will be an array containing a mother and father pair for each new organism
+    // (length = 10, each index is a length=2 array of organisms)
+
+    // example
+    // var parents = [
+    //     [mother0, father0],
+    //     [mather1, father1],
+    //     [mother2, father2],
+    //     ... 
+    //     [mother9, father9]
+    // ]
+
+    var parents = [];
+
+    // To create a new generation of Organisms, we'll need parents
+    // Create 2 parents for each new Organism
+    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+        mother_index = Math.floor(Math.random() * potential_parents.length);
+        father_index = Math.floor(Math.random() * potential_parents.length);
+
+        // select mother and father from parent pool
+        var mother = potential_parents[mother_index];
+        var father = potential_parents[father_index];
+
+        new_parents = [mother, father];
+
+        parents.push(new_parents);
+    }
+    return parents;
 }
