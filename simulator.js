@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", setup);
 
+var generation_count = 0;
+
 // organism globals
 const TOTAL_ORGANISMS = 20;
 const GENE_COUNT = 100;
@@ -164,8 +166,17 @@ function runGeneration() {
                 reproduce(crossover_genes);
             }
 
-            console.log("Program complete.")
-            return;
+            // offspring_organisms now represents our new population/generation
+            // we should run the next generation as seemlessly as possible
+            organisms = offspring_organisms;
+            offspring_organisms = [];
+
+            if (generation_count > 3) {
+                console.log("PROGRAM EXECUTION COMPLETE");
+                return;
+            }
+
+            generation_count++;
         }
 
         setTimeout(function() {
