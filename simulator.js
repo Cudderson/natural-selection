@@ -154,6 +154,33 @@ function runGeneration() {
                 console.log(parent_pair);
             }
 
+            // Next, we reproduce using the parents array
+            // new organism has 100 genes, we want 50% of mother and 50% of father
+            // let's brute force it, without helper function to start
+
+            var newOrganisms = [];
+
+            // loop enough times to create new generation of organisms
+            for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+                var a = new Organism(initial_x, initial_y, ctx);
+                var even = 0;
+                var odd = 0;
+
+                // loop enough times to fill genes array for new organism
+                for (var j = 0; j < GENE_COUNT; j++) {
+                    // select if mother or father gene will be used (start with 50/50)
+                    if (j % 2) {
+                        console.log('EVEN');
+                        even++;
+                    }
+                    else {
+                        console.log("ODD");
+                        odd++;
+                    }
+                }
+                console.log(even, odd);
+            }
+
             console.log("Program complete.")
             return;
         }
