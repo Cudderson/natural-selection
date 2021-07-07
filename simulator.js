@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", setup);
 
 const TOTAL_ORGANISMS = 20;
 const GENE_COUNT = 100; // original was 10
+const MUTATION_RATE = 0.05;
 const FPS = 30;
 
 // organism starting coordinates
@@ -156,6 +157,7 @@ function runGeneration() {
             }
 
             // crossover and reproduce for each parent couple
+            // mutation handled in crossover()
             for (var i = 0; i < TOTAL_ORGANISMS; i++) {
                 crossover_genes = crossover(parents[i]);
                 reproduce(crossover_genes);
@@ -278,14 +280,25 @@ function crossover(parents_to_crossover) {
     // create offspring's genes
     var mother_gene_counter = 0;
     var father_gene_counter = 0;
+    var mutated_gene_counter = 0;
     var crossover_genes = [];
 
     for (var j = 0; j < GENE_COUNT; j++) {
         // select if mother or father gene will be used (50% probability)
         var random_bool = Math.random();
 
+        // apply mutation for variance
+        // set upper and lower bound for gene mutation using MUTATION_RATE / 2
+        // this way, mother and father genes retain an equal chance of being chosen
+        if (random_bool < (MUTATION_RATE / 2) || random_bool > 1 - (MUTATION_RATE / 2)) {
+            console.log(random_bool);
+            mutated_gene = getRandomGene(-5, 5); // make global constants for MIN_GENE AND MAX_GENE
+            console.log(mutated_gene);
+            crossover_genes.push(mutated_gene);
+            mutated_gene_counter++;
+        }
         // mother gene chosen
-        if (random_bool < 0.5) {
+        else if (random_bool < 0.5) {
             mother_gene = mother.genes[j];
             crossover_genes.push(mother_gene);
             mother_gene_counter++;
@@ -297,7 +310,8 @@ function crossover(parents_to_crossover) {
             father_gene_counter++;
         }
     }
-    console.log(`FATHER GENES CHOSEN: ${father_gene_counter} -- MOTHER GENES CHOSEN: ${mother_gene_counter}`);
+    console.log(`FATHER GENES CHOSEN: ${father_gene_counter} -- MOTHER GENES CHOSEN: ${mother_gene_counter} -- MUTATED GENES: ${mutated_gene_counter}`);
+    console.log(`TOTAL GENES: ${mother_gene_counter + father_gene_counter + mutated_gene_counter}`);
     return crossover_genes;
 }
 
