@@ -15,7 +15,6 @@ const goal_y_pos = 20;
 // container holding organisms
 var organisms = [];
 
-// testing global canvas declaration (comment out if code breaks)
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
 
@@ -77,7 +76,7 @@ class Organism {
 
     calcFitness () {
         // height = distance between starting location(y) and goal.y
-        var height = initial_y + goal_y_pos;
+        var height = initial_y - goal_y_pos;
 
         var normalized_distance_to_goal = this.distance_to_goal / height;
         this.fitness = 1 - normalized_distance_to_goal;
@@ -135,7 +134,7 @@ function runGeneration() {
             getShortestDistanceToGoal();
             calcPopulationFitness(); 
 
-            // test show fitness (try to find a way to not pass in the goal to every function)
+            // show fitness
             for (var i = 0; i < TOTAL_ORGANISMS; i++) {
                 console.log(`FITNESS FOR ORGANISM ${i}: ${organisms[i].fitness}`);
             }
