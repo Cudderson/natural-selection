@@ -1,17 +1,21 @@
 document.addEventListener("DOMContentLoaded", setup);
 
+// organism globals
 const TOTAL_ORGANISMS = 20;
-const GENE_COUNT = 100; // original was 10
+const GENE_COUNT = 100;
 const MUTATION_RATE = 0.05;
-const FPS = 30;
-
-// organism starting coordinates
-const initial_x = 300; 
-const initial_y = 500;
+const MIN_GENE = -5;
+const MAX_GENE = 5;
+// starting coordinates
+const INITIAL_X = 300; 
+const INITIAL_Y = 500;
 
 // target goal coordinates
-const goal_x_pos = 300;
-const goal_y_pos = 20;
+const GOAL_X_POS = 300;
+const GOAL_Y_POS = 20;
+
+// frame rate
+const FPS = 30;
 
 // containers holding organisms and next-generation organisms
 var organisms = [];
@@ -33,11 +37,8 @@ class Organism {
     }
 
     setRandomGenes () {
-        var min = Math.ceil(-5);
-        var max = Math.floor(5);
-
         for (var i = 0; i < GENE_COUNT; i++) {
-            var random_gene = getRandomGene(min, max);
+            var random_gene = getRandomGene(MIN_GENE, MAX_GENE);
             this.genes.push(random_gene);
         }
     }
@@ -65,8 +66,8 @@ class Organism {
 
     calcDistanceToGoal () {
         // c**2 = a**2 + b**2
-        var horizontal_distance_squared = (Math.abs(this.x - goal_x_pos)) ** 2;
-        var vertical_distance_squared = (Math.abs(this.y - goal_y_pos)) ** 2;
+        var horizontal_distance_squared = (Math.abs(this.x - GOAL_X_POS)) ** 2;
+        var vertical_distance_squared = (Math.abs(this.y - GOAL_Y_POS)) ** 2;
 
         var distance_to_goal_squared = vertical_distance_squared + horizontal_distance_squared;
         var distance_to_goal = Math.sqrt(distance_to_goal_squared);
@@ -78,7 +79,7 @@ class Organism {
 
     calcFitness () {
         // height = distance between starting location(y) and goal.y
-        var height = initial_y - goal_y_pos;
+        var height = INITIAL_Y - GOAL_Y_POS;
 
         var normalized_distance_to_goal = this.distance_to_goal / height;
         this.fitness = 1 - normalized_distance_to_goal;
@@ -113,7 +114,7 @@ function setup () {
 function runGeneration() {
 
     // Create goal
-    var goal = new Goal(goal_x_pos, goal_y_pos, 20, ctx); 
+    var goal = new Goal(GOAL_X_POS, GOAL_Y_POS, 20, ctx); 
 
     requestAnimationFrame(function animateFrame () {
 
@@ -175,15 +176,15 @@ function runGeneration() {
 
 function createOrganisms () {
     for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-        var organism = new Organism(initial_x, initial_y, ctx);
+        var organism = new Organism(INITIAL_X, INITIAL_Y, ctx);
         organism.setRandomGenes();
         organisms.push(organism);
     }
 }
 
 function getRandomGene(min, max) {
-    var random_x = Math.floor(Math.random() * (max - min + 1) + min);
-    var random_y = Math.floor(Math.random() * (max - min + 1) + min);
+    var random_x = Math.floor(Math.random() * (MAX_GENE - MIN_GENE + 1) + MIN_GENE);
+    var random_y = Math.floor(Math.random() * (MAX_GENE - MIN_GENE + 1) + MIN_GENE);
     var random_gene = [random_x, random_y];
     return random_gene;
 }
@@ -247,8 +248,7 @@ function selectParentsForReproduction(potential_parents) {
     // example
     // var parents = [
     //     [mother0, father0],
-    //     [mather1, father1],
-    //     [mother2, father2],
+    //     [mother1, father1],
     //     ... 
     //     [mother9, father9]
     // ]
@@ -292,7 +292,7 @@ function crossover(parents_to_crossover) {
         // this way, mother and father genes retain an equal chance of being chosen
         if (random_bool < (MUTATION_RATE / 2) || random_bool > 1 - (MUTATION_RATE / 2)) {
             console.log(random_bool);
-            mutated_gene = getRandomGene(-5, 5); // make global constants for MIN_GENE AND MAX_GENE
+            mutated_gene = getRandomGene(MIN_GENE, MAX_GENE);
             console.log(mutated_gene);
             crossover_genes.push(mutated_gene);
             mutated_gene_counter++;
@@ -316,7 +316,7 @@ function crossover(parents_to_crossover) {
 }
 
 function reproduce(crossover_genes) {
-    offspring = new Organism(initial_x, initial_y, ctx);
+    offspring = new Organism(INITIAL_X, INITIAL_Y, ctx);
     offspring.genes = crossover_genes;
     // push offspring to new population
     offspring_organisms.push(offspring);
