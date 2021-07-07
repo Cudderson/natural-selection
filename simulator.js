@@ -23,6 +23,9 @@ const FPS = 30;
 var organisms = [];
 var offspring_organisms = [];
 
+// generation statistics
+var total_fitness = 0;
+
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
 
@@ -85,6 +88,7 @@ class Organism {
 
         var normalized_distance_to_goal = this.distance_to_goal / height;
         this.fitness = 1 - normalized_distance_to_goal;
+        total_fitness += this.fitness;
     }
 }
 
@@ -99,6 +103,13 @@ class Goal {
     drawGoal () {
         this.ctx.fillStyle = 'lightgreen';
         this.ctx.fillRect(this.x, this.y, this.size, this.size);
+    }
+
+    showStatistics (average_fitness) {
+        average_fitness = `Average Fitness: ${average_fitness.toFixed(2)}`;
+        this.ctx.font = "26px arial";
+        this.ctx.fillText(average_fitness.toString(), 10, 570);
+        this.ctx.fillText(`Generation: ${generation_count}`, 10, 545);
     }
 }
 
@@ -118,12 +129,17 @@ function runGeneration() {
     // Create goal
     var goal = new Goal(GOAL_X_POS, GOAL_Y_POS, 20, ctx); 
 
+    // initial average_fitness for Gen1
+    var average_fitness = 0;
+    // var total_fitness = 0;
+
     requestAnimationFrame(function animateFrame () {
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // goal redrawn on each repaint
         goal.drawGoal();
+        goal.showStatistics(average_fitness);
 
         // update next coordinate and move
         for (var i = 0; i < TOTAL_ORGANISMS; i++) {
@@ -143,6 +159,11 @@ function runGeneration() {
             for (var i = 0; i < TOTAL_ORGANISMS; i++) {
                 console.log(`FITNESS FOR ORGANISM ${i}: ${organisms[i].fitness}`);
             }
+
+            average_fitness = total_fitness / TOTAL_ORGANISMS;
+
+            console.log("TOTAL FITNESS: " + total_fitness);
+            console.log("AVERAGE FITNESS: " + average_fitness);
 
             console.log("Beginning Selection Phase");
             // fills a weighted array with organisms based on their fitness score
@@ -166,17 +187,18 @@ function runGeneration() {
                 reproduce(crossover_genes);
             }
 
-            // offspring_organisms now represents our new population/generation
-            // we should run the next generation as seemlessly as possible
-            organisms = offspring_organisms;
-            offspring_organisms = [];
-
-            if (generation_count > 3) {
+            if (generation_count == 5) {
                 console.log("PROGRAM EXECUTION COMPLETE");
                 return;
             }
 
+            // offspring_organisms now represents our new population/generation
+            organisms = offspring_organisms;
+            offspring_organisms = [];
+
+            // update/reset generation statistics
             generation_count++;
+            total_fitness = 0;
         }
 
         setTimeout(function() {
