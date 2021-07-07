@@ -12,8 +12,9 @@ const initial_y = 500;
 const goal_x_pos = 300;
 const goal_y_pos = 20;
 
-// container holding organisms
+// containers holding organisms and next-generation organisms
 var organisms = [];
+var offspring_organisms = [];
 
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
@@ -154,31 +155,10 @@ function runGeneration() {
                 console.log(parent_pair);
             }
 
-            // Next, we reproduce using the parents array
-            // new organism has 100 genes, we want 50% of mother and 50% of father
-            // let's brute force it, without helper function to start
-
-            var newOrganisms = [];
-
-            // loop enough times to create new generation of organisms
+            // crossover and reproduce for each parent couple
             for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-                var a = new Organism(initial_x, initial_y, ctx);
-                var even = 0;
-                var odd = 0;
-
-                // loop enough times to fill genes array for new organism
-                for (var j = 0; j < GENE_COUNT; j++) {
-                    // select if mother or father gene will be used (start with 50/50)
-                    if (j % 2) {
-                        console.log('EVEN');
-                        even++;
-                    }
-                    else {
-                        console.log("ODD");
-                        odd++;
-                    }
-                }
-                console.log(even, odd);
+                crossover_genes = crossover(parents[i]);
+                reproduce(crossover_genes);
             }
 
             console.log("Program complete.")
@@ -288,4 +268,42 @@ function selectParentsForReproduction(potential_parents) {
         parents.push(new_parents);
     }
     return parents;
+}
+
+function crossover(parents_to_crossover) {
+
+    var mother = parents_to_crossover[0];
+    var father = parents_to_crossover[1];
+
+    // create offspring's genes
+    var mother_gene_counter = 0;
+    var father_gene_counter = 0;
+    var crossover_genes = [];
+
+    for (var j = 0; j < GENE_COUNT; j++) {
+        // select if mother or father gene will be used (50% probability)
+        var random_bool = Math.random();
+
+        // mother gene chosen
+        if (random_bool < 0.5) {
+            mother_gene = mother.genes[j];
+            crossover_genes.push(mother_gene);
+            mother_gene_counter++;
+        }
+        // father gene chosen
+        else {
+            father_gene = father.genes[j];
+            crossover_genes.push(father_gene);
+            father_gene_counter++;
+        }
+    }
+    console.log(`FATHER GENES CHOSEN: ${father_gene_counter} -- MOTHER GENES CHOSEN: ${mother_gene_counter}`);
+    return crossover_genes;
+}
+
+function reproduce(crossover_genes) {
+    offspring = new Organism(initial_x, initial_y, ctx);
+    offspring.genes = crossover_genes;
+    // push offspring to new population
+    offspring_organisms.push(offspring);
 }
