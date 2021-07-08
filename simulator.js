@@ -196,6 +196,12 @@ function runGeneration() {
             }
             else {
                 cancelAnimationFrame(my_req);
+
+                // async here rather than sleep
+                // function would run its own animationLoop and await for the response here
+                // once response is received, resume animation here
+                
+                // end async test
                 sleep(2500);
                 pause = false;
 
@@ -261,13 +267,11 @@ function beginSelectionProcess() {
         // Give organisms with negative fitness a chance to reproduce
         if (organisms[i].fitness < 0) {
             organisms[i].fitness = 0.01;
-            console.log(`Fitness changed from negative to .01 for organism ${i}`);
         }
         // fill parents array
         for (var j = 0; j < Math.ceil(organisms[i].fitness * 100); j++) {
             potential_parents.push(organisms[i]);
         }
-        console.log(`Organism ${i} was added to array ${Math.ceil(organisms[i].fitness * 100)} times.`);
     }
 
     return potential_parents;
@@ -340,8 +344,6 @@ function crossover(parents_to_crossover) {
             father_gene_counter++;
         }
     }
-    console.log(`FATHER GENES CHOSEN: ${father_gene_counter} -- MOTHER GENES CHOSEN: ${mother_gene_counter} -- MUTATED GENES: ${mutated_gene_counter}`);
-    console.log(`TOTAL GENES: ${mother_gene_counter + father_gene_counter + mutated_gene_counter}`);
     return crossover_genes;
 }
 
