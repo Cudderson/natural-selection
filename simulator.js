@@ -5,7 +5,7 @@ var generation_count = 0;
 // organism globals
 const TOTAL_ORGANISMS = 20;
 const GENE_COUNT = 100;
-const MUTATION_RATE = 0.05;
+const MUTATION_RATE = 0.04;
 const MIN_GENE = -5;
 const MAX_GENE = 5;
 // starting coordinates
@@ -28,6 +28,8 @@ var total_fitness = 0;
 
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
+
+var pause = false;
 
 class Organism {
     constructor (x, y, ctx) {
@@ -122,8 +124,6 @@ function setup () {
     console.log("Amount of organisms created = " + organisms.length);
 
     runGeneration();
-
-    console.log('returned to setup.');
 }
 
 function runGeneration() {
@@ -135,7 +135,8 @@ function runGeneration() {
 
     requestAnimationFrame(function animateFrame () {
 
-        if (generation_count == 2) {
+        if (generation_count == 5) {
+            console.log("SIMULATION COMPLETE");
             return;
         }
 
@@ -154,6 +155,9 @@ function runGeneration() {
         // executes when all genes accounted for
         // this could be a function 'finishGeneration()'
         if (organisms[0].index == GENE_COUNT) {
+
+            pause = true; 
+
             console.log("Generation Complete");
 
             getShortestDistanceToGoal();
@@ -198,10 +202,23 @@ function runGeneration() {
             // update/reset generation statistics
             generation_count++;
             total_fitness = 0;
+
+            // test call func to highlight chosen parents
+            highlightChosenParents(parents);
         }
 
         setTimeout(function() {
-            my_req = requestAnimationFrame(animateFrame);
+            if (pause == false) {
+                my_req = requestAnimationFrame(animateFrame);
+            }
+            else {
+                cancelAnimationFrame(my_req);
+                console.log("PAUSING");
+                sleep(2500);
+                pause = false;
+
+                my_req = requestAnimationFrame(animateFrame);
+            }
         }, 1000 / FPS);
     })
 }
@@ -363,4 +380,32 @@ function sleep(milliseconds) {
         currentDate = Date.now();
     } 
     while (currentDate - date < milliseconds);
+}
+
+function highlightChosenParents (parents) {
+
+    ctx.font = "18px arial";
+
+    ctx.fillStyle = 'pink';
+    ctx.fillText("Females chosen to reproduce", 350, 520);
+
+    ctx.fillStyle = 'lightblue';
+    ctx.fillText("Males chosen to reproduce", 350, 545);
+
+    ctx.fillStyle = 'purple';
+    ctx.fillText("Not chosen to reproduce", 350, 570);
+
+    for (var i = 0; i < parents.length; i++) {
+        // mothers
+        parents[i][0].ctx.fillStyle = 'pink';
+        parents[i][0].ctx.beginPath();
+        parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
+        parents[i][0].ctx.fill();
+
+        // fathers
+        parents[i][1].ctx.fillStyle = 'lightblue';
+        parents[i][1].ctx.beginPath();
+        parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
+        parents[i][1].ctx.fill();
+    }
 }
