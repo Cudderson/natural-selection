@@ -122,18 +122,22 @@ function setup () {
     console.log("Amount of organisms created = " + organisms.length);
 
     runGeneration();
+
+    console.log('returned to setup.');
 }
 
 function runGeneration() {
 
     // Create goal
     var goal = new Goal(GOAL_X_POS, GOAL_Y_POS, 20, ctx); 
-
-    // initial average_fitness for Gen1
+    // initial average_fitness for Gen1 ||| not sure if this resets when i want it to..
     var average_fitness = 0;
-    // var total_fitness = 0;
 
     requestAnimationFrame(function animateFrame () {
+
+        if (generation_count == 2) {
+            return;
+        }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -187,11 +191,6 @@ function runGeneration() {
                 reproduce(crossover_genes);
             }
 
-            if (generation_count == 5) {
-                console.log("PROGRAM EXECUTION COMPLETE");
-                return;
-            }
-
             // offspring_organisms now represents our new population/generation
             organisms = offspring_organisms;
             offspring_organisms = [];
@@ -202,7 +201,7 @@ function runGeneration() {
         }
 
         setTimeout(function() {
-            requestAnimationFrame(animateFrame);
+            my_req = requestAnimationFrame(animateFrame);
         }, 1000 / FPS);
     })
 }
@@ -353,4 +352,15 @@ function reproduce(crossover_genes) {
     offspring.genes = crossover_genes;
     // push offspring to new population
     offspring_organisms.push(offspring);
+}
+
+function sleep(milliseconds) {
+    // everything in here will be executed until 2000ms is spent
+    const date = Date.now();
+    let currentDate = null;
+    console.log("SLEEP CALLED");
+    do {
+        currentDate = Date.now();
+    } 
+    while (currentDate - date < milliseconds);
 }
