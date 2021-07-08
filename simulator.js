@@ -4,10 +4,10 @@ var generation_count = 0;
 
 // organism globals
 const TOTAL_ORGANISMS = 30;
-const GENE_COUNT = 200;
+const GENE_COUNT = 100;
 const MUTATION_RATE = 0.02;
-const MIN_GENE = -10;
-const MAX_GENE = 10;
+const MIN_GENE = -7;
+const MAX_GENE = 7;
 // starting coordinates
 const INITIAL_X = 300; 
 const INITIAL_Y = 500;
@@ -200,12 +200,32 @@ function runGeneration() {
                 // async here rather than sleep
                 // function would run its own animationLoop and await for the response here
                 // once response is received, resume animation here
-                
-                // end async test
-                sleep(2500);
-                pause = false;
 
-                my_req = requestAnimationFrame(animateFrame);
+                //This function could be put down below
+                // this function should have its own animation loop for end-of-gen statstics
+                var first_function = function() {
+                    return new Promise(resolve => {
+
+                        // test animation, will eventually be real
+                        success = testAnimationLoop();
+
+                        if (success) {
+                            resolve("READY FOR NEXT GENERATION");
+                        }
+                    });
+                };
+
+                var async_function = async function() {
+                    console.log('async function called');
+                      
+                    await first_function();
+                    my_req = requestAnimationFrame(animateFrame);
+                }
+                      
+                async_function();
+
+                // end async test
+                pause = false;
             }
         }, 1000 / FPS);
     })
@@ -413,4 +433,41 @@ function updateGenerationStatistics () {
     generation_count++;
     average_fitness = 0;
     total_fitness = 0;
+}
+
+function testAnimationLoop() {
+    // let's run a decently long animation to prove its all working
+    var test_guy = new Organism(300, 300, ctx);
+    test_guy.setRandomGenes();
+    var done = false;
+
+    function test () {
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        test_guy.update();
+        test_guy.move();
+        console.log("HIT");
+
+        if (test_guy.index == GENE_COUNT) {
+            console.log("HI EARTH");
+            cancelAnimationFrame(req);
+            done = true;
+        }
+        setTimeout(function () {
+            if (test_guy.index == GENE_COUNT) {
+                console.log("!!!");
+                return;
+            }
+            req = requestAnimationFrame(test);
+        }, 1000 / FPS);
+    }
+    if (done == true) {
+        console.log("you did it!");
+        return;
+    }
+    else {
+        console.log("???");
+        req = requestAnimationFrame(test);
+    }
 }
