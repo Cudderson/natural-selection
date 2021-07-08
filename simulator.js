@@ -91,7 +91,6 @@ class Organism {
 
         var normalized_distance_to_goal = this.distance_to_goal / height;
         this.fitness = 1 - normalized_distance_to_goal;
-        total_fitness += this.fitness;
     }
 }
 
@@ -140,6 +139,7 @@ function runGeneration() {
             return;
         }
 
+        // clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // goal redrawn on each repaint
@@ -148,17 +148,13 @@ function runGeneration() {
 
         // update next coordinate and move
         for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-            // make sure organism hasn't reached goal
             if (organisms[i].reached_goal == false) {
                 organisms[i].update();
                 organisms[i].move();
                 hasReachedGoal(organisms[i], goal);
             }
             else {
-                organisms[i].ctx.fillStyle = 'red';
-                organisms[i].ctx.beginPath();
-                organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-                organisms[i].ctx.fill();
+                updateSuccessfulOrganism(organisms[i]);
             }
         }
         
@@ -169,24 +165,12 @@ function runGeneration() {
             pause = true; 
 
             getShortestDistanceToGoal();
-            calcPopulationFitness(); 
-
-            // show fitness
-            // for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-            //     console.log(`FITNESS FOR ORGANISM ${i}: ${organisms[i].fitness}`);
-            // }
-
-            average_fitness = total_fitness / TOTAL_ORGANISMS;
+            average_fitness = calcPopulationFitness(); 
 
             // fills a weighted array with organisms based on their fitness score
             var potential_parents = beginSelectionProcess();
 
             var parents = selectParentsForReproduction(potential_parents);
-
-            // console.log("Parents chosen to reproduce:")
-            // for (parent_pair of parents) {
-            //     console.log(parent_pair);
-            // }
 
             // crossover and reproduce for each parent couple
             // mutation handled in crossover()
@@ -200,8 +184,7 @@ function runGeneration() {
             offspring_organisms = [];
 
             // update/reset generation statistics
-            generation_count++;
-            total_fitness = 0;
+            updateGenerationStatistics();
 
             // test call func to highlight chosen parents
             highlightChosenParents(parents);
@@ -264,7 +247,9 @@ function highlightClosestOrganism (closest_organism) {
 function calcPopulationFitness () {
     for (var i = 0; i < TOTAL_ORGANISMS; i++) {
         organisms[i].calcFitness();
+        total_fitness += organisms[i].fitness;
     }
+    return total_fitness / TOTAL_ORGANISMS;
 }
 
 function beginSelectionProcess() {
@@ -413,4 +398,17 @@ function hasReachedGoal(organism, goal) {
             organism.reached_goal = true;
         }
     }
+}
+
+function updateSuccessfulOrganism(organism) {
+    organism.ctx.fillStyle = 'red';
+    organism.ctx.beginPath();
+    organism.ctx.arc(organism.x, organism.y, organism.radius, 0, Math.PI*2, false);
+    organism.ctx.fill();
+}
+
+function updateGenerationStatistics () {
+    generation_count++;
+    average_fitness = 0;
+    total_fitness = 0;
 }
