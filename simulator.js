@@ -207,10 +207,13 @@ function runGeneration() {
                     return new Promise(resolve => {
 
                         // test animation, will eventually be real
-                        success = testAnimationLoop();
+                        var success = testAnimationLoop();
 
                         if (success) {
                             resolve("READY FOR NEXT GENERATION");
+                        }
+                        else {
+                            console.log("JUPITER");
                         }
                     });
                 };
@@ -218,7 +221,8 @@ function runGeneration() {
                 var async_function = async function() {
                     console.log('async function called');
                       
-                    await first_function();
+                    var tester = await first_function();
+                    console.log(tester);
                     my_req = requestAnimationFrame(animateFrame);
                 }
                       
@@ -453,21 +457,21 @@ function testAnimationLoop() {
             console.log("HI EARTH");
             cancelAnimationFrame(req);
             done = true;
+            return;
         }
         setTimeout(function () {
-            if (test_guy.index == GENE_COUNT) {
-                console.log("!!!");
-                return;
-            }
+            // if (test_guy.index == GENE_COUNT) {
+            //     return true;
+            // }
             req = requestAnimationFrame(test);
         }, 1000 / FPS);
     }
-    if (done == true) {
-        console.log("you did it!");
-        return;
+    req = requestAnimationFrame(test);
+    if (done) {
+        console.log("DONE");
+        return done;
     }
     else {
-        console.log("???");
-        req = requestAnimationFrame(test);
+        console.log("NOT DONE");
     }
 }
