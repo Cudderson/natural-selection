@@ -3,18 +3,18 @@ document.addEventListener("DOMContentLoaded", setup);
 var generation_count = 0;
 
 // organism globals
-const TOTAL_ORGANISMS = 20;
-const GENE_COUNT = 100;
-const MUTATION_RATE = 0.04;
-const MIN_GENE = -5;
-const MAX_GENE = 5;
+const TOTAL_ORGANISMS = 30;
+const GENE_COUNT = 200;
+const MUTATION_RATE = 0.02;
+const MIN_GENE = -10;
+const MAX_GENE = 10;
 // starting coordinates
 const INITIAL_X = 300; 
 const INITIAL_Y = 500;
 
 // target goal coordinates
 const GOAL_X_POS = 300;
-const GOAL_Y_POS = 20;
+const GOAL_Y_POS = 300;
 
 // frame rate
 const FPS = 30;
@@ -41,6 +41,7 @@ class Organism {
         this.genes = [];
         this.distance_to_goal;
         this.fitness;
+        this.reached_goal = false;
     }
 
     setRandomGenes () {
@@ -135,7 +136,8 @@ function runGeneration() {
 
     requestAnimationFrame(function animateFrame () {
 
-        if (generation_count == 5) {
+        // base case to stop program
+        if (generation_count == 50) {
             console.log("SIMULATION COMPLETE");
             return;
         }
@@ -148,8 +150,22 @@ function runGeneration() {
 
         // update next coordinate and move
         for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-            organisms[i].update();
-            organisms[i].move();
+            // make sure organism hasn't reached goal
+            if (organisms[i].reached_goal == false) {
+                organisms[i].update();
+                organisms[i].move();
+                hasReachedGoal(organisms[i], goal);
+            }
+            else {
+                // this.ctx.fillStyle = 'purple';
+                // this.ctx.beginPath();
+                // this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2, false);
+                // this.ctx.fill();
+                organisms[i].ctx.fillStyle = 'red';
+                organisms[i].ctx.beginPath();
+                organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+                organisms[i].ctx.fill();
+            }
         }
         
         // executes when all genes accounted for
@@ -407,5 +423,26 @@ function highlightChosenParents (parents) {
         parents[i][1].ctx.beginPath();
         parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
         parents[i][1].ctx.fill();
+    }
+}
+
+// we'll need a function to check if an organism has reached the goal yet
+function hasReachedGoal(organism, goal) {
+    // we can say an organism reaches goal when its y value is less than or equal to goal.y, and 
+    // its x value is between (goal.x - (goal.size / 2) || (goal.x + (goal.size / 2)))
+
+    // check if within y-range 
+    if (organism.y >= goal.y && organism.y <= (goal.y + goal.size)) {
+        // check if within x-range
+        if (organism.x >= goal.x && organism.x <= (goal.x + goal.size)) {
+            // organism reached goal
+            organism.reached_goal = true;
+
+            // highlight
+            organism.ctx.fillStyle = "red";
+            organism.ctx.beginPath();
+            organism.ctx.arc(organism.x, organism.y, organism.radius, 0, Math.PI*2, false);
+            organism.ctx.fill();
+        }
     }
 }
