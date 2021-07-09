@@ -198,21 +198,35 @@ function runGeneration() {
                 cancelAnimationFrame(my_req);
                 
                 // this async demo works as desired
-                async function testAsyncFunc() {
-                    console.log("async function called");
-                    console.log("Awaiting sleepTest");
-                    const result = await sleepTest(3000);
-                    console.log("sleepTest complete. Calling again");
-                    const result2 = await sleepTest(4000);
-                    console.log("sleepTest complete again.");
-                    console.log("Resuming animation in 5 seconds.");
-                    const result3 = await sleepTest(5000);
+                // async function testAsyncFunc() {
+                //     console.log("async function called");
+                //     console.log("Awaiting sleepTest");
+                //     const result = await sleepTest(3000);
+                //     console.log("sleepTest complete.");
+                //     console.log("Starting sleep for 2 seconds.");
+                //     const result3 = await sleepTest(2000);
+                //     console.log("All sleeping complete");
 
-                    pause = false;
-                    my_req = requestAnimationFrame(animateFrame);
+                //     pause = false;
+                //     my_req = requestAnimationFrame(animateFrame);
+                // }
+                // testAsyncFunc();
+
+                async function runSideAnimation() {
+                    console.log("Side Animation Called");
+                    console.log("Calling sleep for 2 seconds");
+                    const sleep_result = await sleepTest(2000);
+                    console.log("Sleep Test Complete. Starting Side Animation.");
+
+                    var test_guy = new Organism(300, 300, ctx);
+                    test_guy.setRandomGenes();
+                    const test_result = await testAnimationLoop2(test_guy);
+
+                    console.log(test_result);
+                    console.log("Test Animation Complete.");
                 }
 
-                testAsyncFunc();
+                runSideAnimation();
             }
         }, 1000 / FPS);
     })
@@ -422,6 +436,7 @@ function updateGenerationStatistics () {
     total_fitness = 0;
 }
 
+// this function works, going to make another tet one so i don't ruin this one
 async function testAnimationLoop() {
     // let's run a decently long animation to prove its all working
     var test_guy = new Organism(300, 300, ctx);
@@ -437,26 +452,54 @@ async function testAnimationLoop() {
         console.log("HIT");
 
         if (test_guy.index == GENE_COUNT) {
-            console.log("HI EARTH");
+            console.log("All genes accounted for. Cancelling this animation");
             cancelAnimationFrame(req);
             done = true;
-            return;
+            return new Promise(resolve => {
+                resolve("Resolution for testAnimationLoop()");
+            });
         }
         setTimeout(function () {
-            // if (test_guy.index == GENE_COUNT) {
-            //     return true;
-            // }
             req = requestAnimationFrame(test);
         }, 1000 / FPS);
     }
     req = requestAnimationFrame(test);
     if (done) {
         console.log("DONE");
-        return done;
     }
     else {
         console.log("NOT DONE");
     }
+}
+
+// this working, just need to correctly wrap it with setTimeout to control the FPS
+async function testAnimationLoop2 (test_guy) {
+
+    var finished = false;
+
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                test_guy.update();
+                test_guy.move();
+                console.log("HIT");
+
+                if (test_guy.index == GENE_COUNT) {
+                    console.log("All genes accounted for. Cancelling this animation");
+                    finished = true;
+                    cancelAnimationFrame(req);
+                }
+
+                req = requestAnimationFrame(animate);
+            }
+            else {
+                resolve("ANIMATION COMPLETE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
 }
 
 function sleepTest(milliseconds) {
