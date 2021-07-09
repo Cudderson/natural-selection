@@ -196,21 +196,6 @@ function runGeneration() {
             }
             else {
                 cancelAnimationFrame(my_req);
-                
-                // this async demo works as desired
-                // async function testAsyncFunc() {
-                //     console.log("async function called");
-                //     console.log("Awaiting sleepTest");
-                //     const result = await sleepTest(3000);
-                //     console.log("sleepTest complete.");
-                //     console.log("Starting sleep for 2 seconds.");
-                //     const result3 = await sleepTest(2000);
-                //     console.log("All sleeping complete");
-
-                //     pause = false;
-                //     my_req = requestAnimationFrame(animateFrame);
-                // }
-                // testAsyncFunc();
 
                 async function runSideAnimation() {
                     console.log("Side Animation Called");
@@ -436,43 +421,6 @@ function updateGenerationStatistics () {
     total_fitness = 0;
 }
 
-// this function works, going to make another tet one so i don't ruin this one
-async function testAnimationLoop() {
-    // let's run a decently long animation to prove its all working
-    var test_guy = new Organism(300, 300, ctx);
-    test_guy.setRandomGenes();
-    var done = false;
-
-    function test () {
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        test_guy.update();
-        test_guy.move();
-        console.log("HIT");
-
-        if (test_guy.index == GENE_COUNT) {
-            console.log("All genes accounted for. Cancelling this animation");
-            cancelAnimationFrame(req);
-            done = true;
-            return new Promise(resolve => {
-                resolve("Resolution for testAnimationLoop()");
-            });
-        }
-        setTimeout(function () {
-            req = requestAnimationFrame(test);
-        }, 1000 / FPS);
-    }
-    req = requestAnimationFrame(test);
-    if (done) {
-        console.log("DONE");
-    }
-    else {
-        console.log("NOT DONE");
-    }
-}
-
-// this working, just need to correctly wrap it with setTimeout to control the FPS
 async function testAnimationLoop2 (test_guy) {
 
     var finished = false;
@@ -481,20 +429,21 @@ async function testAnimationLoop2 (test_guy) {
         function animate() {
             if (!finished) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-
                 test_guy.update();
                 test_guy.move();
-                console.log("HIT");
 
                 if (test_guy.index == GENE_COUNT) {
                     console.log("All genes accounted for. Cancelling this animation");
                     finished = true;
-                    cancelAnimationFrame(req);
                 }
 
-                req = requestAnimationFrame(animate);
+                setTimeout(function () {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+                
             }
             else {
+                cancelAnimationFrame(req);
                 resolve("ANIMATION COMPLETE");
             }
         }
