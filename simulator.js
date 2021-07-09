@@ -187,7 +187,7 @@ function runGeneration() {
             updateGenerationStatistics();
 
             // test call func to highlight chosen parents
-            highlightChosenParents(parents);
+            // highlightChosenParents(parents);
         }
 
         setTimeout(function() {
@@ -197,21 +197,30 @@ function runGeneration() {
             else {
                 cancelAnimationFrame(my_req);
 
-                async function runSideAnimation() {
+                async function runSideAnimations() {
                     console.log("Side Animation Called");
-                    console.log("Calling sleep for 2 seconds");
-                    const sleep_result = await sleepTest(2000);
-                    console.log("Sleep Test Complete. Starting Side Animation.");
+                    // console.log("Calling sleep for 2 seconds");
+                    // const sleep_result = await sleepTest(2000);
+                    // console.log("Sleep Test Complete. Starting Side Animation.");
 
-                    var test_guy = new Organism(300, 300, ctx);
-                    test_guy.setRandomGenes();
-                    const test_result = await testAnimationLoop2(test_guy);
+                    // var test_guy = new Organism(300, 300, ctx);
+                    // test_guy.setRandomGenes();
+                    // const test_result = await testAnimationLoop2(test_guy);
 
-                    console.log(test_result);
-                    console.log("Test Animation Complete.");
+                    // console.log(test_result);
+                    // console.log("Test Animation Complete.");
+
+                    console.log("SLEEPING FOR 2 SECONDS, THEN CALLING highlightChosenParents()");
+                    const result = await sleepTest(2000);
+
+                    const highlight_result = await highlightChosenParents(parents);
+                    console.log("ALL COMPLETE, sleeping for 3 seconds to show results");
+                    const time_blah = await sleepTest(3000);
+                    console.log("STARTING MAIN ANIMATION AGAIN");
+                    pause = false;
+                    my_req = requestAnimationFrame(animateFrame);
                 }
-
-                runSideAnimation();
+                runSideAnimations();
             }
         }, 1000 / FPS);
     })
@@ -369,33 +378,33 @@ function sleep(milliseconds) {
     while (currentDate - date < milliseconds);
 }
 
-function highlightChosenParents (parents) {
+// function highlightChosenParents (parents) {
 
-    ctx.font = "18px arial";
+//     ctx.font = "18px arial";
 
-    ctx.fillStyle = 'pink';
-    ctx.fillText("Females chosen to reproduce", 350, 520);
+//     ctx.fillStyle = 'pink';
+//     ctx.fillText("Females chosen to reproduce", 350, 520);
 
-    ctx.fillStyle = 'lightblue';
-    ctx.fillText("Males chosen to reproduce", 350, 545);
+//     ctx.fillStyle = 'lightblue';
+//     ctx.fillText("Males chosen to reproduce", 350, 545);
 
-    ctx.fillStyle = 'purple';
-    ctx.fillText("Not chosen to reproduce", 350, 570);
+//     ctx.fillStyle = 'purple';
+//     ctx.fillText("Not chosen to reproduce", 350, 570);
 
-    for (var i = 0; i < parents.length; i++) {
-        // mothers
-        parents[i][0].ctx.fillStyle = 'pink';
-        parents[i][0].ctx.beginPath();
-        parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
-        parents[i][0].ctx.fill();
+//     for (var i = 0; i < parents.length; i++) {
+//         // mothers
+//         parents[i][0].ctx.fillStyle = 'pink';
+//         parents[i][0].ctx.beginPath();
+//         parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
+//         parents[i][0].ctx.fill();
 
-        // fathers
-        parents[i][1].ctx.fillStyle = 'lightblue';
-        parents[i][1].ctx.beginPath();
-        parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
-        parents[i][1].ctx.fill();
-    }
-}
+//         // fathers
+//         parents[i][1].ctx.fillStyle = 'lightblue';
+//         parents[i][1].ctx.beginPath();
+//         parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
+//         parents[i][1].ctx.fill();
+//     }
+// }
 
 function hasReachedGoal(organism, goal) {
     // check if within y-range 
@@ -461,5 +470,52 @@ function sleepTest(milliseconds) {
     while (currentDate - date < milliseconds);
     return new Promise((resolve, reject) => {
         resolve("Response Processed.")
+    })
+}
+
+async function highlightChosenParents(parents) {
+    var finished = false;
+
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                // continue animation
+
+                ctx.font = "18px arial";
+
+                ctx.fillStyle = 'pink';
+                ctx.fillText("Females chosen to reproduce", 350, 520);
+
+                ctx.fillStyle = 'lightblue';
+                ctx.fillText("Males chosen to reproduce", 350, 545);
+
+                ctx.fillStyle = 'purple';
+                ctx.fillText("Not chosen to reproduce", 350, 570);
+
+                for (var i = 0; i < parents.length; i++) {
+                    // mothers
+                    parents[i][0].ctx.fillStyle = 'pink';
+                    parents[i][0].ctx.beginPath();
+                    parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
+                    parents[i][0].ctx.fill();
+
+                    // fathers
+                    parents[i][1].ctx.fillStyle = 'lightblue';
+                    parents[i][1].ctx.beginPath();
+                    parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
+                    parents[i][1].ctx.fill();
+                }
+                setTimeout(function() {
+                    // call animate
+                    finished = true
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                // terminate animation
+                resolve("HIGHLIGHT CHOSEN PARENTS ANIMATION COMPLETE");
+            }
+        }
+        req = requestAnimationFrame(animate);
     })
 }
