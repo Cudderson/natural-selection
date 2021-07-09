@@ -196,40 +196,23 @@ function runGeneration() {
             }
             else {
                 cancelAnimationFrame(my_req);
+                
+                // this async demo works as desired
+                async function testAsyncFunc() {
+                    console.log("async function called");
+                    console.log("Awaiting sleepTest");
+                    const result = await sleepTest(3000);
+                    console.log("sleepTest complete. Calling again");
+                    const result2 = await sleepTest(4000);
+                    console.log("sleepTest complete again.");
+                    console.log("Resuming animation in 5 seconds.");
+                    const result3 = await sleepTest(5000);
 
-                // async here rather than sleep
-                // function would run its own animationLoop and await for the response here
-                // once response is received, resume animation here
-
-                //This function could be put down below
-                // this function should have its own animation loop for end-of-gen statstics
-                var first_function = function() {
-                    return new Promise(resolve => {
-
-                        // test animation, will eventually be real
-                        var success = testAnimationLoop();
-
-                        if (success) {
-                            resolve("READY FOR NEXT GENERATION");
-                        }
-                        else {
-                            console.log("JUPITER");
-                        }
-                    });
-                };
-
-                var async_function = async function() {
-                    console.log('async function called');
-                      
-                    var tester = await first_function();
-                    console.log(tester);
+                    pause = false;
                     my_req = requestAnimationFrame(animateFrame);
                 }
-                      
-                async_function();
 
-                // end async test
-                pause = false;
+                testAsyncFunc();
             }
         }, 1000 / FPS);
     })
@@ -439,7 +422,7 @@ function updateGenerationStatistics () {
     total_fitness = 0;
 }
 
-function testAnimationLoop() {
+async function testAnimationLoop() {
     // let's run a decently long animation to prove its all working
     var test_guy = new Organism(300, 300, ctx);
     test_guy.setRandomGenes();
@@ -474,4 +457,17 @@ function testAnimationLoop() {
     else {
         console.log("NOT DONE");
     }
+}
+
+function sleepTest(milliseconds) {
+    console.log("Processing Response");
+    const date = Date.now();
+    let currentDate = null;
+    do {
+        currentDate = Date.now();
+    } 
+    while (currentDate - date < milliseconds);
+    return new Promise((resolve, reject) => {
+        resolve("Response Processed.")
+    })
 }
