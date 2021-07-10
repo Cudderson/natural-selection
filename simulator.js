@@ -184,7 +184,7 @@ function runGeneration() {
 
             // crossover and reproduce for each parent couple
             // mutation handled in crossover()
-            for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+            for (var i = 0; i < Math.floor(TOTAL_ORGANISMS / 2); i++) {
                 crossover_genes = crossover(parents[i]);
                 reproduce(crossover_genes);
             }
@@ -321,8 +321,6 @@ function beginSelectionProcess() {
 }
 
 function selectParentsForReproduction(potential_mothers, potential_fathers) {
-    // parents will be an array containing a mother and father pair for each new organism
-    // (length = 10, each index is a length=2 array of organisms)
 
     // example
     // var parents = [
@@ -348,21 +346,6 @@ function selectParentsForReproduction(potential_mothers, potential_fathers) {
         parents.push(new_parents);
     }
     return parents;
-
-    // To create a new generation of Organisms, we'll need parents
-    // Create 2 parents for each new Organism
-    // for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-    //     mother_index = Math.floor(Math.random() * potential_parents.length);
-    //     father_index = Math.floor(Math.random() * potential_parents.length);
-
-    //     // select mother and father from parent pool
-    //     var mother = potential_parents[mother_index];
-    //     var father = potential_parents[father_index];
-
-    //     new_parents = [mother, father];
-
-    //     parents.push(new_parents);
-    // }
 }
 
 function crossover(parents_to_crossover) {
@@ -378,6 +361,7 @@ function crossover(parents_to_crossover) {
 
     for (var j = 0; j < GENE_COUNT; j++) {
         // select if mother or father gene will be used (50% probability)
+        console.log("MADE");
         var random_bool = Math.random();
 
         // apply mutation for variance
@@ -405,7 +389,8 @@ function crossover(parents_to_crossover) {
 }
 
 function reproduce(crossover_genes) {
-    offspring = new Organism(INITIAL_X, INITIAL_Y, ctx);
+    offspring_gender = getGender();
+    offspring = new Organism(offspring_gender, INITIAL_X, INITIAL_Y, ctx);
     offspring.genes = crossover_genes;
     // push offspring to new population
     offspring_organisms.push(offspring);
@@ -715,3 +700,14 @@ function fadeInNotChosen() {
 }
 
 // begin gender implementation
+function getGender() {
+    var gender_indicator = Math.random();
+    var gender;
+    if (gender_indicator < 0.5) {
+        gender = 'female';
+    }
+    else {
+        gender = 'male';
+    }
+    return gender
+}
