@@ -32,7 +32,8 @@ var ctx = canvas.getContext("2d");
 var pause = false;
 
 class Organism {
-    constructor (x, y, ctx) {
+    constructor (gender, x, y, ctx) {
+        this.gender = gender;
         this.x = x;
         this.y = y;
         this.ctx = ctx;
@@ -147,7 +148,7 @@ function runGeneration() {
         goal.showStatistics(average_fitness);
 
         // update next coordinate and move
-        for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+        for (var i = 0; i < organisms.length; i++) {
             if (organisms[i].reached_goal == false) {
                 organisms[i].update();
                 organisms[i].move();
@@ -168,20 +169,48 @@ function runGeneration() {
             average_fitness = calcPopulationFitness(); 
 
             // fills a weighted array with organisms based on their fitness score
+            // var potential_parents = beginSelectionProcess();
             var potential_parents = beginSelectionProcess();
+            
+            var potential_mothers = potential_parents[0];
+            var potential_fathers = potential_parents[1];
+            console.log(potential_mothers);
+            console.log(potential_fathers);
 
-            var parents = selectParentsForReproduction(potential_parents);
+            // var parents = selectParentsForReproduction(potential_parents);
+            var parents = selectParentsForReproduction(potential_mothers, potential_fathers);
+            console.log("------------");
+            console.log(parents);
 
             // crossover and reproduce for each parent couple
             // mutation handled in crossover()
-            for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-                crossover_genes = crossover(parents[i]);
-                reproduce(crossover_genes);
+            all_indicies = [];
+            all_offspring_counts = [];
+
+            for (var i = 0; i < parents.length; i++) {
+                // 2 offspring on average
+                possible_offspring_counts = [0, 0, 1, 1, 2, 2, 2, 3, 4, 5]; // sum = 20, 20/10items = 2avg
+                var offspring_count_index = Math.floor(Math.random() * possible_offspring_counts.length);
+                all_indicies.push(offspring_count_index);
+                var offspring_count = possible_offspring_counts[offspring_count_index];
+                all_offspring_counts.push(offspring_count);
+
+                for (var j = 0; j < offspring_count; j++) {
+                    crossover_genes = crossover(parents[i]);
+                    reproduce(crossover_genes);
+                }
             }
+            console.log(all_indicies);
+            console.log(all_offspring_counts);
+            console.log("^^^^^^^^^^^^^^");
 
             // offspring_organisms now represents our new population/generation
             organisms = offspring_organisms;
             offspring_organisms = [];
+
+            console.log("!!!!!!!!!!!!!!!!!!!!");
+            console.log(organisms.length);
+            console.log("!!!!!!!!!!!!!!!!!!!!");
 
             // update/reset generation statistics
             updateGenerationStatistics();
@@ -196,16 +225,6 @@ function runGeneration() {
 
                 async function runSideAnimations() {
                     console.log("Side Animation Called");
-                    // console.log("Calling sleep for 2 seconds");
-                    // const sleep_result = await sleepTest(2000);
-                    // console.log("Sleep Test Complete. Starting Side Animation.");
-
-                    // var test_guy = new Organism(300, 300, ctx);
-                    // test_guy.setRandomGenes();
-                    // const test_result = await testAnimationLoop2(test_guy);
-
-                    // console.log(test_result);
-                    // console.log("Test Animation Complete.");
 
                     console.log("SLEEPING FOR 2 SECONDS, THEN CALLING highlightChosenParents()");
                     const result = await sleepTest(2000);
@@ -224,11 +243,24 @@ function runGeneration() {
 }
 
 function createOrganisms () {
+    var gender;
+    var male_count = 0;
+    var female_count = 0;
+    // create equal number of males and females
     for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-        var organism = new Organism(INITIAL_X, INITIAL_Y, ctx);
+        if (i % 2) {
+            gender = 'male';
+            male_count++;
+        }
+        else {
+            gender = 'female';
+            female_count++;
+        }
+        var organism = new Organism(gender, INITIAL_X, INITIAL_Y, ctx);
         organism.setRandomGenes();
         organisms.push(organism);
     }
+    console.log(`FEMALES CREATED: ${female_count}, MALES CREATED: ${male_count}`);
 }
 
 function getRandomGene(min, max) {
@@ -244,7 +276,7 @@ function getShortestDistanceToGoal() {
     var closest_organism;
 
     // though this loop identifies closest organism, it ALSO updates organism's distance_to_goal attribute
-    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+    for (var i = 0; i < organisms.length; i++) {
         var distance_to_goal = organisms[i].calcDistanceToGoal();
         if (distance_to_goal < shortest_distance) {
             shortest_distance = distance_to_goal;
@@ -263,35 +295,40 @@ function highlightClosestOrganism (closest_organism) {
 }
 
 function calcPopulationFitness () {
-    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+    for (var i = 0; i < organisms.length; i++) {
         organisms[i].calcFitness();
         total_fitness += organisms[i].fitness;
     }
-    return total_fitness / TOTAL_ORGANISMS;
+    return total_fitness / organisms.length;
 }
 
 function beginSelectionProcess() {
     // fill array with candidates for reproduction
     // multiply each Organism's fitness by 100, and add each organism to the array as many times
-    var potential_parents = [];
+    var potential_mothers = [];
+    var potential_fathers = [];
 
-    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+    for (var i = 0; i < organisms.length; i++) {
         // Give organisms with negative fitness a chance to reproduce
         if (organisms[i].fitness < 0) {
             organisms[i].fitness = 0.01;
         }
         // fill parents array
         for (var j = 0; j < Math.ceil(organisms[i].fitness * 100); j++) {
-            potential_parents.push(organisms[i]);
+            // potential_parents.push(organisms[i]);
+            if (organisms[i].gender === 'female') {
+                potential_mothers.push(organisms[i]);
+            }
+            else if (organisms[i].gender === 'male') {
+                potential_fathers.push(organisms[i]);
+            }
         }
     }
 
-    return potential_parents;
+    return [potential_mothers, potential_fathers];
 }
 
-function selectParentsForReproduction(potential_parents) {
-    // parents will be an array containing a mother and father pair for each new organism
-    // (length = 10, each index is a length=2 array of organisms)
+function selectParentsForReproduction(potential_mothers, potential_fathers) {
 
     // example
     // var parents = [
@@ -302,16 +339,15 @@ function selectParentsForReproduction(potential_parents) {
     // ]
 
     var parents = [];
+    // goal: pair together males and females 
+    // create parents == TOTAL_ORGANISMS / 2 (each couple reproduces roughly 2 offspring)
+    // change to TOTAL_ORGANISMS / 4 if makes sense
+    for (var i = 0; i < (organisms.length / 2); i++) {
+        mother_index = Math.floor(Math.random() * potential_mothers.length);
+        father_index = Math.floor(Math.random() * potential_fathers.length);
 
-    // To create a new generation of Organisms, we'll need parents
-    // Create 2 parents for each new Organism
-    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-        mother_index = Math.floor(Math.random() * potential_parents.length);
-        father_index = Math.floor(Math.random() * potential_parents.length);
-
-        // select mother and father from parent pool
-        var mother = potential_parents[mother_index];
-        var father = potential_parents[father_index];
+        var mother = potential_mothers[mother_index];
+        var father = potential_fathers[father_index];
 
         new_parents = [mother, father];
 
@@ -333,6 +369,7 @@ function crossover(parents_to_crossover) {
 
     for (var j = 0; j < GENE_COUNT; j++) {
         // select if mother or father gene will be used (50% probability)
+        console.log("MADE");
         var random_bool = Math.random();
 
         // apply mutation for variance
@@ -360,19 +397,11 @@ function crossover(parents_to_crossover) {
 }
 
 function reproduce(crossover_genes) {
-    offspring = new Organism(INITIAL_X, INITIAL_Y, ctx);
+    offspring_gender = getGender();
+    offspring = new Organism(offspring_gender, INITIAL_X, INITIAL_Y, ctx);
     offspring.genes = crossover_genes;
     // push offspring to new population
     offspring_organisms.push(offspring);
-}
-
-function sleep(milliseconds) {
-    const date = Date.now();
-    let currentDate = null;
-    do {
-        currentDate = Date.now();
-    } 
-    while (currentDate - date < milliseconds);
 }
 
 function hasReachedGoal(organism, goal) {
@@ -397,37 +426,6 @@ function updateGenerationStatistics () {
     generation_count++;
     average_fitness = 0;
     total_fitness = 0;
-}
-
-// just for testing, not used anymore (make sure)
-async function testAnimationLoop2 (test_guy) {
-
-    var finished = false;
-
-    return new Promise(resolve => {
-        function animate() {
-            if (!finished) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                test_guy.update();
-                test_guy.move();
-
-                if (test_guy.index == GENE_COUNT) {
-                    console.log("All genes accounted for. Cancelling this animation");
-                    finished = true;
-                }
-
-                setTimeout(function () {
-                    req = requestAnimationFrame(animate);
-                }, 1000 / FPS);
-                
-            }
-            else {
-                cancelAnimationFrame(req);
-                resolve("ANIMATION COMPLETE");
-            }
-        }
-        req = requestAnimationFrame(animate);
-    })
 }
 
 function sleepTest(milliseconds) {
@@ -667,4 +665,17 @@ function fadeInNotChosen() {
         }
         req = requestAnimationFrame(animate);
     })
+}
+
+// begin gender implementation
+function getGender() {
+    var gender_indicator = Math.random();
+    var gender;
+    if (gender_indicator < 0.5) {
+        gender = 'female';
+    }
+    else {
+        gender = 'male';
+    }
+    return gender
 }
