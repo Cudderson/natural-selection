@@ -464,19 +464,25 @@ async function highlightChosenParents(parents) {
     // 4. fade in male+female at same time, hold for 1-2s, fade out all to opacity=0
     // 5. animation ends
 
+    // I have completely discarded fadeOutMothers() and fadeOutFathers() because fadeToOriginal is exactly what I want and need
+    // delete fadeOutMothers() and fadeOutFathers() when confirmed useless
     console.log("STARTING MOTHER ANIMATION");
     await fadeInMothers(parents);
-    await fadeOutMothers(parents);
+    await fadeToOriginal(parents, 'female');
+    // await fadeOutMothers(parents);
     await fadeInMothers(parents);
-    await fadeOutMothers(parents);
+    await fadeToOriginal(parents, 'female');
+    // await fadeOutMothers(parents);
     await fadeInMothers(parents);
     // should return to purple here
     await fadeToOriginal(parents, 'female');
 
     await fadeInFathers(parents);
-    await fadeOutFathers(parents);
+    // await fadeOutFathers(parents);
+    await fadeToOriginal(parents, 'male');
     await fadeInFathers(parents);
-    await fadeOutFathers(parents);
+    // await fadeOutFathers(parents);
+    await fadeToOriginal(parents, 'male');
     await fadeInFathers(parents);
     // should return to purple here
     await fadeToOriginal(parents, 'male');
@@ -489,6 +495,9 @@ async function highlightChosenParents(parents) {
     await fadeInNotChosen();
     console.log("waiting 2s...");
     await sleepTest(2000); 
+    // should fade out text here too
+    /////////
+    await fadeToBlackText();
     await fadeToOriginal(parents, 'both');
     // fade out all to black here
     await fadeToBlack(organisms);
@@ -534,6 +543,7 @@ function fadeInMothers(parents) {
     })
 }
 
+// keep just in case (fadeToOriginal replaces this and fadeOutFathers)
 function fadeOutMothers(parents) {
     return new Promise(resolve => {
         console.log("FADE OUT MOTHERS CALLED");
@@ -612,6 +622,7 @@ function fadeInFathers(parents) {
     })
 }
 
+// keep just in case (fadeToOriginal replaces this and fadeOutMothers)
 function fadeOutFathers(parents) {
     return new Promise(resolve => {
         var opacity = 1.00;
@@ -779,6 +790,57 @@ function fadeToBlack(organisms) {
                 // resolve
                 cancelAnimationFrame(req);
                 resolve("FADE TO BLACK COMPLETE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeToBlackText() {
+    var finished = false;
+    var opacity = 1.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                // animate
+                // 'clear' text
+                // clearRect() method will work great when there's no organisms in the way of the cleared area
+                ctx.clearRect(350, 500, 250, 150);
+                ctx.font = "18px arial";
+                // ctx.fillStyle = 'black';
+                // ctx.fillText("Females chosen to reproduce", 350, 520);
+
+                // ctx.fillStyle = 'black';
+                // ctx.fillText("Males chosen to reproduce", 350, 545);
+
+                // ctx.fillStyle = 'black';
+                // ctx.fillText("Not chosen to reproduce", 350, 570);
+
+
+                ctx.font = "18px arial";
+                ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
+                ctx.fillText("Females chosen to reproduce", 350, 520);
+
+                ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
+                ctx.fillText("Males chosen to reproduce", 350, 545);
+
+                ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+                ctx.fillText("Not chosen to reproduce", 350, 570);
+
+                if (opacity <= 0.01) {
+                    finished = true;
+                }
+                else {
+                    opacity -= 0.05;
+                }
+                setTimeout(function() {
+                    req =  requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(req);
+                resolve("FADE TO BLACK TEXT COMPLETE");
             }
         }
         req = requestAnimationFrame(animate);
