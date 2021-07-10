@@ -148,7 +148,7 @@ function runGeneration() {
         goal.showStatistics(average_fitness);
 
         // update next coordinate and move
-        for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+        for (var i = 0; i < organisms.length; i++) {
             if (organisms[i].reached_goal == false) {
                 organisms[i].update();
                 organisms[i].move();
@@ -225,16 +225,6 @@ function runGeneration() {
 
                 async function runSideAnimations() {
                     console.log("Side Animation Called");
-                    // console.log("Calling sleep for 2 seconds");
-                    // const sleep_result = await sleepTest(2000);
-                    // console.log("Sleep Test Complete. Starting Side Animation.");
-
-                    // var test_guy = new Organism(300, 300, ctx);
-                    // test_guy.setRandomGenes();
-                    // const test_result = await testAnimationLoop2(test_guy);
-
-                    // console.log(test_result);
-                    // console.log("Test Animation Complete.");
 
                     console.log("SLEEPING FOR 2 SECONDS, THEN CALLING highlightChosenParents()");
                     const result = await sleepTest(2000);
@@ -286,7 +276,7 @@ function getShortestDistanceToGoal() {
     var closest_organism;
 
     // though this loop identifies closest organism, it ALSO updates organism's distance_to_goal attribute
-    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+    for (var i = 0; i < organisms.length; i++) {
         var distance_to_goal = organisms[i].calcDistanceToGoal();
         if (distance_to_goal < shortest_distance) {
             shortest_distance = distance_to_goal;
@@ -305,21 +295,20 @@ function highlightClosestOrganism (closest_organism) {
 }
 
 function calcPopulationFitness () {
-    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+    for (var i = 0; i < organisms.length; i++) {
         organisms[i].calcFitness();
         total_fitness += organisms[i].fitness;
     }
-    return total_fitness / TOTAL_ORGANISMS;
+    return total_fitness / organisms.length;
 }
 
 function beginSelectionProcess() {
     // fill array with candidates for reproduction
     // multiply each Organism's fitness by 100, and add each organism to the array as many times
-    // var potential_parents = [];
     var potential_mothers = [];
     var potential_fathers = [];
 
-    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+    for (var i = 0; i < organisms.length; i++) {
         // Give organisms with negative fitness a chance to reproduce
         if (organisms[i].fitness < 0) {
             organisms[i].fitness = 0.01;
@@ -353,7 +342,7 @@ function selectParentsForReproduction(potential_mothers, potential_fathers) {
     // goal: pair together males and females 
     // create parents == TOTAL_ORGANISMS / 2 (each couple reproduces roughly 2 offspring)
     // change to TOTAL_ORGANISMS / 4 if makes sense
-    for (var i = 0; i < Math.floor(TOTAL_ORGANISMS / 2); i++) {
+    for (var i = 0; i < (organisms.length / 2); i++) {
         mother_index = Math.floor(Math.random() * potential_mothers.length);
         father_index = Math.floor(Math.random() * potential_fathers.length);
 
@@ -415,15 +404,6 @@ function reproduce(crossover_genes) {
     offspring_organisms.push(offspring);
 }
 
-function sleep(milliseconds) {
-    const date = Date.now();
-    let currentDate = null;
-    do {
-        currentDate = Date.now();
-    } 
-    while (currentDate - date < milliseconds);
-}
-
 function hasReachedGoal(organism, goal) {
     // check if within y-range 
     if (organism.y >= goal.y && organism.y <= (goal.y + goal.size)) {
@@ -446,37 +426,6 @@ function updateGenerationStatistics () {
     generation_count++;
     average_fitness = 0;
     total_fitness = 0;
-}
-
-// just for testing, not used anymore (make sure)
-async function testAnimationLoop2 (test_guy) {
-
-    var finished = false;
-
-    return new Promise(resolve => {
-        function animate() {
-            if (!finished) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                test_guy.update();
-                test_guy.move();
-
-                if (test_guy.index == GENE_COUNT) {
-                    console.log("All genes accounted for. Cancelling this animation");
-                    finished = true;
-                }
-
-                setTimeout(function () {
-                    req = requestAnimationFrame(animate);
-                }, 1000 / FPS);
-                
-            }
-            else {
-                cancelAnimationFrame(req);
-                resolve("ANIMATION COMPLETE");
-            }
-        }
-        req = requestAnimationFrame(animate);
-    })
 }
 
 function sleepTest(milliseconds) {
