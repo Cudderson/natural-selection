@@ -184,14 +184,33 @@ function runGeneration() {
 
             // crossover and reproduce for each parent couple
             // mutation handled in crossover()
-            for (var i = 0; i < Math.floor(TOTAL_ORGANISMS / 2); i++) {
-                crossover_genes = crossover(parents[i]);
-                reproduce(crossover_genes);
+            all_indicies = [];
+            all_offspring_counts = [];
+
+            for (var i = 0; i < parents.length; i++) {
+                // 2 offspring on average
+                possible_offspring_counts = [0, 0, 1, 1, 2, 2, 2, 3, 4, 5]; // sum = 20, 20/10items = 2avg
+                var offspring_count_index = Math.floor(Math.random() * possible_offspring_counts.length);
+                all_indicies.push(offspring_count_index);
+                var offspring_count = possible_offspring_counts[offspring_count_index];
+                all_offspring_counts.push(offspring_count);
+
+                for (var j = 0; j < offspring_count; j++) {
+                    crossover_genes = crossover(parents[i]);
+                    reproduce(crossover_genes);
+                }
             }
+            console.log(all_indicies);
+            console.log(all_offspring_counts);
+            console.log("^^^^^^^^^^^^^^");
 
             // offspring_organisms now represents our new population/generation
             organisms = offspring_organisms;
             offspring_organisms = [];
+
+            console.log("!!!!!!!!!!!!!!!!!!!!");
+            console.log(organisms.length);
+            console.log("!!!!!!!!!!!!!!!!!!!!");
 
             // update/reset generation statistics
             updateGenerationStatistics();
