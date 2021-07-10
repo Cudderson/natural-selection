@@ -444,8 +444,6 @@ function sleepTest(milliseconds) {
 }
 
 async function highlightChosenParents(parents) {
-    // rgb(148,0,211) darkviolet
-    // rgb(0,191,255) deep sky blue
 
     // goal: make animation look good by fading in/out twice for each category
     // 1. animation starts
@@ -460,44 +458,6 @@ async function highlightChosenParents(parents) {
     // 4. fade in all at same time, hold for 1-2s, fade out to opacity=0
     // 5. animation ends
 
-    // use a variable to keep track of the current state of animation
-    // for each category: fade: in-out-in-out-in(hold)-out-end
-    // each time opacity>=1, we could update a variable that let's us know where we are in the animation
-    // will need different opacity vars, as we want to be able to only adjust certain organisms at a time (mother_opacity, father_opacity, etc)
-
-    var finished = false;
-
-    var mother_cycle_finished = false;
-
-    var mother_opacity = 0.00;
-    var father_opacity = 0.00;
-    var not_chosen_opacity = 0.00; // don't have a way to track these organisms yet
-
-    ctx.font = "18px arial";
-
-    // ctx.fillStyle = 'rgba(219, 10, 91, ' + opacity + ')';
-    ctx.fillStyle = 'rgba(219, 10, 91, 1)';
-    ctx.fillText("Females chosen to reproduce", 350, 520);
-
-    ctx.fillStyle = 'rgba(0, 191, 255, 1)';
-    ctx.fillText("Males chosen to reproduce", 350, 545);
-
-    ctx.fillStyle = 'purple';
-    ctx.fillText("Not chosen to reproduce", 350, 570);
-
-    // complete steps from above
-    // 1. animation starts
-    // 2. fade in/out mothers
-    //    - fade in to opacity=1
-    //    - fade out to opacity=0
-    //    - fade in to opacity=1
-    //    - fade out to opacity=0
-    //    - fade in and hold
-
-    // should probably make these animations return a promise, just to ensure everything works in order
-    // use await here
-
-    // finish mothers fade in/out animations
     console.log("STARTING MOTHER ANIMATION IN 2 SECONDS");
     await sleepTest(2000);
     await fadeInMothers(parents);
@@ -514,8 +474,11 @@ async function highlightChosenParents(parents) {
     await fadeInFathers(parents);
     await fadeOutFathers(parents);
     await fadeInFathers(parents);
-    console.log("waiting 10s...");
-    await sleepTest(10000); 
+    console.log("waiting 1s...");
+    await sleepTest(1000);
+    await fadeInNotChosen();
+    console.log("waiting 1s...");
+    await sleepTest(1000); 
 }
 
 function fadeInMothers(parents) {
@@ -523,9 +486,14 @@ function fadeInMothers(parents) {
         console.log("FADE IN MOTHERS CALLED");
         var opacity = 0.00;
         var finished = false;
+
         function animate() {
             if (!finished) {
                 // do stuff
+                ctx.font = "18px arial";
+                ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
+                ctx.fillText("Females chosen to reproduce", 350, 520);
+
                 for (var i = 0; i < parents.length; i++) {
                     parents[i][0].ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
                     parents[i][0].ctx.beginPath();
@@ -601,6 +569,9 @@ function fadeInFathers(parents) {
         function animate() {
             if (!finished) {
                 // animate frame
+                ctx.font = "18px arial";
+                ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
+                ctx.fillText("Males chosen to reproduce", 350, 545);
                 for (var i = 0; i < parents.length; i++) {
                     parents[i][1].ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
                     parents[i][1].ctx.beginPath();
@@ -661,6 +632,37 @@ function fadeOutFathers(parents) {
                 // resolve
                 cancelAnimationFrame(req);
                 resolve("FATHER FADE OUT COMPLETE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeInNotChosen() {
+    return new Promise(resolve => {
+        var opacity = 0.00;
+        var finished = false;
+        function animate() {
+            if (!finished) {
+                // animate
+                ctx.font = "18px arial";
+                ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+                ctx.fillText("Not chosen to reproduce", 350, 570);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.04;
+                }
+                setTimeout(function () {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(req);
+                resolve("NOT CHOSEN TEXT ANIMATION COMPLETE");
             }
         }
         req = requestAnimationFrame(animate);
