@@ -496,17 +496,26 @@ async function highlightChosenParents(parents) {
 
     // should probably make these animations return a promise, just to ensure everything works in order
     // use await here
-    console.log("CALLING FADE IN MOTHERS IN 2 SECONDS");
+
+    // finish mothers fade in/out animations
+    console.log("STARTING MOTHER ANIMATION IN 2 SECONDS");
     await sleepTest(2000);
     await fadeInMothers(parents);
-    console.log("FADE IN ANIMATION FINISHED, SLEEPING FOR 3 SECONDS, THEN FADING OUT MOTHERS");
-    await sleepTest(3000);
     await fadeOutMothers(parents);
-    console.log("FADE OUT COMPLETE, SLEEPING FOR 3 SECONDS THEN FADING IN AND OUT");
-    await sleepTest(3000);
     await fadeInMothers(parents);
-    const message = await fadeOutMothers(parents);
-    console.log(message);
+    await fadeOutMothers(parents);
+    await fadeInMothers(parents);
+    // should return to purple here
+    console.log("STARTING FATHER ANIMATION IN 2 SECONDS");
+    await sleepTest(2000);
+    // make father animations return promise
+    await fadeInFathers(parents);
+    await fadeOutFathers(parents);
+    await fadeInFathers(parents);
+    await fadeOutFathers(parents);
+    await fadeInFathers(parents);
+    console.log("waiting 10s...");
+    await sleepTest(10000); 
 }
 
 function fadeInMothers(parents) {
@@ -527,7 +536,7 @@ function fadeInMothers(parents) {
                     finished = true;
                 }
                 else {
-                    opacity += 0.04;
+                    opacity += 0.05;
                 }
                 setTimeout(function() {
                     req = requestAnimationFrame(animate);
@@ -535,7 +544,7 @@ function fadeInMothers(parents) {
             }
             else {
                 // resolve
-                cancelAnimationFrame(animate);
+                cancelAnimationFrame(req);
                 resolve("FADE IN MOTHERS COMPLETE");
             }
         }
@@ -550,10 +559,7 @@ function fadeOutMothers(parents) {
         var finished = false;
         function animate () {
             if (!finished) {
-                // since opacity already at 1.00, my redraws don't show.
-                // i need to clearRect() just for the organisms im highlighting
                 for (var i = 0; i < parents.length; i++) {
-                    // what if I just draw a circle == size_of_organism as the canvas color on each repaint?
                     // 'clear' organism
                     parents[i][0].ctx.fillStyle = 'black';
                     parents[i][0].ctx.beginPath();
@@ -572,7 +578,7 @@ function fadeOutMothers(parents) {
                 }
                 else {
                     console.log("not truuuu");
-                    opacity -= 0.04;
+                    opacity -= 0.10;
                 }
                 setTimeout(function () {
                     req = requestAnimationFrame(animate);
@@ -580,7 +586,7 @@ function fadeOutMothers(parents) {
             }
             else {
                 // resolve
-                cancelAnimationFrame(animate);
+                cancelAnimationFrame(req);
                 resolve("FADE OUT MOTHERS COMPLETE");
             }
         }
@@ -589,19 +595,74 @@ function fadeOutMothers(parents) {
 }
 
 function fadeInFathers(parents) {
-    var opacity = 0.00;
-    // opacity starts at 0.00
-    father.ctx.fillStyle = `rgba(0, 191, 255, ${father_opacity})`;
-    father.ctx.beginPath();
-    father.ctx.arc(father.x, father.y, father.radius, 0, Math.PI*2, false);
-    father.ctx.fill();
+    return new Promise(resolve => {
+        var opacity = 0.00;
+        var finished = false;
+        function animate() {
+            if (!finished) {
+                // animate frame
+                for (var i = 0; i < parents.length; i++) {
+                    parents[i][1].ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
+                    parents[i][1].ctx.beginPath();
+                    parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
+                    parents[i][1].ctx.fill();
+                }
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.05;
+                }
+                setTimeout(function () {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(req);
+                resolve("FATHERS FADE-IN COMPLETE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
 }
 
 function fadeOutFathers(parents) {
-    var opacity = 1.00;
-    // opacity starts at 1.00
-    father.ctx.fillStyle = `rgba(0, 191, 255, ${father_opacity})`;
-    father.ctx.beginPath();
-    father.ctx.arc(father.x, father.y, father.radius, 0, Math.PI*2, false);
-    father.ctx.fill();
+    return new Promise(resolve => {
+        var opacity = 1.00;
+        var finished = false;
+        function animate() {
+            if (!finished) {
+                // animate frame
+                for (var i = 0; i < parents.length; i++) {
+                    // redraw black so opacity changes will show
+                    parents[i][1].ctx.fillStyle = 'black';
+                    parents[i][1].ctx.beginPath();
+                    parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
+                    parents[i][1].ctx.fill();
+
+                    // redraw organism
+                    parents[i][1].ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
+                    parents[i][1].ctx.beginPath();
+                    parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
+                    parents[i][1].ctx.fill();
+                }
+                if (opacity <= 0.01) {
+                    finished = true;
+                }
+                else {
+                    opacity -= 0.10;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                })
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(req);
+                resolve("FATHER FADE OUT COMPLETE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
 }
