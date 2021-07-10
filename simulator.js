@@ -169,7 +169,13 @@ function runGeneration() {
             average_fitness = calcPopulationFitness(); 
 
             // fills a weighted array with organisms based on their fitness score
+            // var potential_parents = beginSelectionProcess();
             var potential_parents = beginSelectionProcess();
+            
+            var potential_mothers = potential_parents[0];
+            var potential_fathers = potential_parents[1];
+            console.log(potential_mothers);
+            console.log(potential_fathers);
 
             var parents = selectParentsForReproduction(potential_parents);
 
@@ -287,7 +293,9 @@ function calcPopulationFitness () {
 function beginSelectionProcess() {
     // fill array with candidates for reproduction
     // multiply each Organism's fitness by 100, and add each organism to the array as many times
-    var potential_parents = [];
+    // var potential_parents = [];
+    var potential_mothers = [];
+    var potential_fathers = [];
 
     for (var i = 0; i < TOTAL_ORGANISMS; i++) {
         // Give organisms with negative fitness a chance to reproduce
@@ -296,11 +304,17 @@ function beginSelectionProcess() {
         }
         // fill parents array
         for (var j = 0; j < Math.ceil(organisms[i].fitness * 100); j++) {
-            potential_parents.push(organisms[i]);
+            // potential_parents.push(organisms[i]);
+            if (organisms[i].gender === 'female') {
+                potential_mothers.push(organisms[i]);
+            }
+            else if (organisms[i].gender === 'male') {
+                potential_fathers.push(organisms[i]);
+            }
         }
     }
 
-    return potential_parents;
+    return [potential_mothers, potential_fathers];
 }
 
 function selectParentsForReproduction(potential_parents) {
