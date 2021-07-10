@@ -399,6 +399,7 @@ function updateGenerationStatistics () {
     total_fitness = 0;
 }
 
+// just for testing, not used anymore (make sure)
 async function testAnimationLoop2 (test_guy) {
 
     var finished = false;
@@ -444,10 +445,22 @@ function sleepTest(milliseconds) {
 
 async function highlightChosenParents(parents) {
     // rgb(148,0,211) darkviolet
+    // rgb(0,191,255) deep sky blue
 
-    //rgba(77, 19, 209, 1) persian blue
+    // goal: make animation look good by fading in/out twice for each category
+    // 1. animation starts
+    // 2. show females selected
+    //      - fade in to opacity=1
+    //      - fade out to opacity=0
+    //      - fade in to opacity=1
+    //      - fade out to opacity=0
+    //      - fade in to opacity=1
+    //      - hold frame for 1-2s, then fade-out
+    // 3. repeat same for males and not chosen
+    // 4. fade in all at same time, hold for 1-2s, fade out to opacity=0
+    // 5. animation ends
+
     var finished = false;
-
     var opacity = 0.00;
 
     return new Promise(resolve => {
@@ -461,7 +474,7 @@ async function highlightChosenParents(parents) {
                 ctx.fillStyle = 'rgba(219, 10, 91, 1)';
                 ctx.fillText("Females chosen to reproduce", 350, 520);
 
-                ctx.fillStyle = 'rgba(77, 19, 209, 1)';
+                ctx.fillStyle = 'rgba(0, 191, 255, 1)';
                 ctx.fillText("Males chosen to reproduce", 350, 545);
 
                 ctx.fillStyle = 'purple';
@@ -475,7 +488,7 @@ async function highlightChosenParents(parents) {
                     parents[i][0].ctx.fill();
 
                     // fathers
-                    parents[i][1].ctx.fillStyle = `rgba(77, 19, 209, ${opacity})`;
+                    parents[i][1].ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
                     parents[i][1].ctx.beginPath();
                     parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
                     parents[i][1].ctx.fill();
