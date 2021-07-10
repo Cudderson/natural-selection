@@ -177,7 +177,10 @@ function runGeneration() {
             console.log(potential_mothers);
             console.log(potential_fathers);
 
-            var parents = selectParentsForReproduction(potential_parents);
+            // var parents = selectParentsForReproduction(potential_parents);
+            var parents = selectParentsForReproduction(potential_mothers, potential_fathers);
+            console.log("------------");
+            console.log(parents);
 
             // crossover and reproduce for each parent couple
             // mutation handled in crossover()
@@ -317,7 +320,7 @@ function beginSelectionProcess() {
     return [potential_mothers, potential_fathers];
 }
 
-function selectParentsForReproduction(potential_parents) {
+function selectParentsForReproduction(potential_mothers, potential_fathers) {
     // parents will be an array containing a mother and father pair for each new organism
     // (length = 10, each index is a length=2 array of organisms)
 
@@ -330,22 +333,36 @@ function selectParentsForReproduction(potential_parents) {
     // ]
 
     var parents = [];
+    // goal: pair together males and females 
+    // create parents == TOTAL_ORGANISMS / 2 (each couple reproduces roughly 2 offspring)
+    // change to TOTAL_ORGANISMS / 4 if makes sense
+    for (var i = 0; i < Math.floor(TOTAL_ORGANISMS / 2); i++) {
+        mother_index = Math.floor(Math.random() * potential_mothers.length);
+        father_index = Math.floor(Math.random() * potential_fathers.length);
 
-    // To create a new generation of Organisms, we'll need parents
-    // Create 2 parents for each new Organism
-    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-        mother_index = Math.floor(Math.random() * potential_parents.length);
-        father_index = Math.floor(Math.random() * potential_parents.length);
-
-        // select mother and father from parent pool
-        var mother = potential_parents[mother_index];
-        var father = potential_parents[father_index];
+        var mother = potential_mothers[mother_index];
+        var father = potential_fathers[father_index];
 
         new_parents = [mother, father];
 
         parents.push(new_parents);
     }
     return parents;
+
+    // To create a new generation of Organisms, we'll need parents
+    // Create 2 parents for each new Organism
+    // for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+    //     mother_index = Math.floor(Math.random() * potential_parents.length);
+    //     father_index = Math.floor(Math.random() * potential_parents.length);
+
+    //     // select mother and father from parent pool
+    //     var mother = potential_parents[mother_index];
+    //     var father = potential_parents[father_index];
+
+    //     new_parents = [mother, father];
+
+    //     parents.push(new_parents);
+    // }
 }
 
 function crossover(parents_to_crossover) {
