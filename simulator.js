@@ -32,7 +32,8 @@ var ctx = canvas.getContext("2d");
 var pause = false;
 
 class Organism {
-    constructor (x, y, ctx) {
+    constructor (gender, x, y, ctx) {
+        this.gender = gender;
         this.x = x;
         this.y = y;
         this.ctx = ctx;
@@ -224,11 +225,24 @@ function runGeneration() {
 }
 
 function createOrganisms () {
+    var gender;
+    var male_count = 0;
+    var female_count = 0;
+    // create equal number of males and females
     for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-        var organism = new Organism(INITIAL_X, INITIAL_Y, ctx);
+        if (i % 2) {
+            gender = 'male';
+            male_count++;
+        }
+        else {
+            gender = 'female';
+            female_count++;
+        }
+        var organism = new Organism(gender, INITIAL_X, INITIAL_Y, ctx);
         organism.setRandomGenes();
         organisms.push(organism);
     }
+    console.log(`FEMALES CREATED: ${female_count}, MALES CREATED: ${male_count}`);
 }
 
 function getRandomGene(min, max) {
