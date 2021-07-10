@@ -233,6 +233,8 @@ function runGeneration() {
                     console.log("ALL COMPLETE, sleeping for 3 seconds to show results");
                     const time_blah = await sleepTest(3000);
                     console.log("STARTING MAIN ANIMATION AGAIN");
+
+                    // restart main animation
                     pause = false;
                     my_req = requestAnimationFrame(animateFrame);
                 }
@@ -464,16 +466,19 @@ async function highlightChosenParents(parents) {
     await fadeOutMothers(parents);
     await fadeInMothers(parents);
     // should return to purple here
-    console.log("STARTING FATHER ANIMATION IN 2 SECONDS");
-    await sleepTest(2000);
-    // make father animations return promise
+    await fadeToOriginal(parents, 'female');
+
     await fadeInFathers(parents);
     await fadeOutFathers(parents);
     await fadeInFathers(parents);
     await fadeOutFathers(parents);
     await fadeInFathers(parents);
+    // should return to purple here
+    await fadeToOriginal(parents, 'male');
+
     console.log("waiting 1s...");
     await sleepTest(1000);
+    // should color in everything here (highlight all)
     await fadeInNotChosen();
     console.log("waiting 1s...");
     await sleepTest(1000); 
@@ -667,7 +672,52 @@ function fadeInNotChosen() {
     })
 }
 
-// begin gender implementation
+function fadeToOriginal(parents, gender) {
+    // use opacity to redraw original color over highlighted color for mothers and fathers
+    var opacity = 0.00;
+    var finished = false;
+
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                // animate
+                if (gender === 'female') {
+                    for (var i = 0; i < parents.length; i++) {
+                        parents[i][0].ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+                        parents[i][0].ctx.beginPath();
+                        parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
+                        parents[i][0].ctx.fill();
+                    }
+                }
+                else if (gender === 'male') {
+                    for (var i = 0; i < parents.length; i++) {
+                        parents[i][1].ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+                        parents[i][1].ctx.beginPath();
+                        parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
+                        parents[i][1].ctx.fill();
+                    }
+                }
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.05;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(animate);
+                resolve("FADE TO ORIGINAL COMPLETE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+
 function getGender() {
     var gender_indicator = Math.random();
     var gender;
