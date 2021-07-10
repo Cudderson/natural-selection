@@ -204,9 +204,9 @@ function runGeneration() {
             console.log(all_offspring_counts);
             console.log("^^^^^^^^^^^^^^");
 
-            // offspring_organisms now represents our new population/generation
-            organisms = offspring_organisms;
-            offspring_organisms = [];
+            // this code was moved after highlightChosenParents to access fadeToBlack properly (keep here for now just in case)
+            // organisms = offspring_organisms;
+            // offspring_organisms = [];
 
             console.log("!!!!!!!!!!!!!!!!!!!!");
             console.log(organisms.length);
@@ -230,6 +230,12 @@ function runGeneration() {
                     const result = await sleepTest(2000);
 
                     const highlight_result = await highlightChosenParents(parents);
+
+                    // checking if this is okay here
+                    organisms = offspring_organisms;
+                    offspring_organisms = [];
+
+
                     console.log("ALL COMPLETE, sleeping for 3 seconds to show results");
                     const time_blah = await sleepTest(3000);
                     console.log("STARTING MAIN ANIMATION AGAIN");
@@ -453,13 +459,12 @@ async function highlightChosenParents(parents) {
     //      - fade in to opacity=1
     //      - fade out to opacity=0
     //      - fade in to opacity=1
-    //      - hold frame for 1-2s, then fade-out
-    // 3. repeat same for males and not chosen
-    // 4. fade in all at same time, hold for 1-2s, fade out to opacity=0
+    //      - hold frame for 1-2s, then fade to original color
+    // 3. repeat same for males
+    // 4. fade in male+female at same time, hold for 1-2s, fade out all to opacity=0
     // 5. animation ends
 
-    console.log("STARTING MOTHER ANIMATION IN 2 SECONDS");
-    await sleepTest(2000);
+    console.log("STARTING MOTHER ANIMATION");
     await fadeInMothers(parents);
     await fadeOutMothers(parents);
     await fadeInMothers(parents);
@@ -479,9 +484,15 @@ async function highlightChosenParents(parents) {
     console.log("waiting 1s...");
     await sleepTest(1000);
     // should color in everything here (highlight all)
+    await fadeInMothers(parents);
+    await fadeInFathers(parents);
     await fadeInNotChosen();
-    console.log("waiting 1s...");
-    await sleepTest(1000); 
+    console.log("waiting 2s...");
+    await sleepTest(2000); 
+    await fadeToOriginal(parents, 'both');
+    // fade out all to black here
+    await fadeToBlack(organisms);
+    await sleepTest(6000);
 }
 
 function fadeInMothers(parents) {
@@ -697,6 +708,19 @@ function fadeToOriginal(parents, gender) {
                         parents[i][1].ctx.fill();
                     }
                 }
+                else if (gender === 'both') {
+                    for (var i = 0; i < parents.length; i++) {
+                        parents[i][0].ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+                        parents[i][0].ctx.beginPath();
+                        parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
+                        parents[i][0].ctx.fill();
+
+                        parents[i][1].ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+                        parents[i][1].ctx.beginPath();
+                        parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
+                        parents[i][1].ctx.fill();
+                    }
+                }
                 if (opacity >= 1.00) {
                     finished = true;
                 }
@@ -711,6 +735,50 @@ function fadeToOriginal(parents, gender) {
                 // resolve
                 cancelAnimationFrame(animate);
                 resolve("FADE TO ORIGINAL COMPLETE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeToBlack(organisms) {
+    var finished = false;
+    var opacity = 1.00;
+    console.log("*&^*&^*&^*");
+    console.log(organisms);
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                // animate
+                for (var i = 0; i < organisms.length; i++) {
+                    // 'clear' organism from canvas
+                    organisms[i].ctx.fillStyle = 'black';
+                    organisms[i].ctx.beginPath();
+                    organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+                    organisms[i].ctx.fill();
+
+                    organisms[i].ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+                    organisms[i].ctx.beginPath();
+                    organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+                    organisms[i].ctx.fill();
+                    console.log("this should print roughly 30 times");
+                }
+
+                if (opacity <= 0.01) {
+                    finished = true;
+                }
+                else {
+                    opacity -= 0.10;
+                }
+
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(req);
+                resolve("FADE TO BLACK COMPLETE");
             }
         }
         req = requestAnimationFrame(animate);
