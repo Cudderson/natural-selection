@@ -465,7 +465,6 @@ async function highlightChosenParents(parents) {
     // each time opacity>=1, we could update a variable that let's us know where we are in the animation
     // will need different opacity vars, as we want to be able to only adjust certain organisms at a time (mother_opacity, father_opacity, etc)
 
-
     var finished = false;
 
     var mother_cycle_finished = false;
@@ -474,93 +473,122 @@ async function highlightChosenParents(parents) {
     var father_opacity = 0.00;
     var not_chosen_opacity = 0.00; // don't have a way to track these organisms yet
 
+    ctx.font = "18px arial";
+
+    // ctx.fillStyle = 'rgba(219, 10, 91, ' + opacity + ')';
+    ctx.fillStyle = 'rgba(219, 10, 91, 1)';
+    ctx.fillText("Females chosen to reproduce", 350, 520);
+
+    ctx.fillStyle = 'rgba(0, 191, 255, 1)';
+    ctx.fillText("Males chosen to reproduce", 350, 545);
+
+    ctx.fillStyle = 'purple';
+    ctx.fillText("Not chosen to reproduce", 350, 570);
+
+    // complete steps from above
+    // 1. animation starts
+    // 2. fade in/out mothers
+    //    - fade in to opacity=1
+    //    - fade out to opacity=0
+    //    - fade in to opacity=1
+    //    - fade out to opacity=0
+    //    - fade in and hold
+
+    // should probably make these animations return a promise, just to ensure everything works in order
+    // use await here
+    console.log("CALLING FADE IN MOTHERS IN 2 SECONDS");
+    await sleepTest(2000);
+    await fadeInMothers(parents);
+    console.log("FADE IN ANIMATION FINISHED, SLEEPING FOR 3 SECONDS, THEN FADING OUT MOTHERS");
+    await sleepTest(3000);
+    await fadeOutMothers(parents);
+    console.log("FADE OUT COMPLETE, SLEEPING FOR 3 SECONDS THEN FADING IN AND OUT");
+    await sleepTest(3000);
+    await fadeInMothers(parents);
+    const message = await fadeOutMothers(parents);
+    console.log(message);
+}
+
+function fadeInMothers(parents) {
     return new Promise(resolve => {
+        console.log("FADE IN MOTHERS CALLED");
+        var opacity = 0.00;
+        var finished = false;
         function animate() {
             if (!finished) {
-                // continue animation
-
-                ctx.font = "18px arial";
-
-                // ctx.fillStyle = 'rgba(219, 10, 91, ' + opacity + ')';
-                ctx.fillStyle = 'rgba(219, 10, 91, 1)';
-                ctx.fillText("Females chosen to reproduce", 350, 520);
-
-                ctx.fillStyle = 'rgba(0, 191, 255, 1)';
-                ctx.fillText("Males chosen to reproduce", 350, 545);
-
-                ctx.fillStyle = 'purple';
-                ctx.fillText("Not chosen to reproduce", 350, 570);
-
-                // complete steps from above
-                // 1. animation starts
-                // 2. fade in/out mothers
-                //    - fade in to opacity=1
-                //    - fade out to opacity=0
-                //    - fade in to opacity=1
-                //    - fade out to opacity=0
-                //    - fade in and hold
-
-                // should probably make these animations return a promise, just to ensure everything works in order
-
-                //----------------------------------------------------------------------------
-
-                // for (var i = 0; i < parents.length; i++) {
-                //     // mothers
-                //     // parents[i][0].ctx.fillStyle = `rgba(219, 10, 91, ${mother_opacity})`;
-                //     // parents[i][0].ctx.beginPath();
-                //     // parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
-                //     // parents[i][0].ctx.fill();
-                //     fadeInOutMother(parents[i][0], mother_opacity);
-
-                //     // fathers
-                //     // parents[i][1].ctx.fillStyle = `rgba(0, 191, 255, ${father_opacity})`;
-                //     // parents[i][1].ctx.beginPath();
-                //     // parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
-                //     // parents[i][1].ctx.fill();
-                //     fadeInOutFather(parents[i][1], father_opacity);
-                // }
-                // if (opacity >= 1.00) {
-                //     console.log("OPACITY == 1.00");
-                //     finished = true;
-                // }
-                // else {
-                //     console.log("Increased opacity!");
-                //     opacity += 0.01;
-                //     console.log(opacity);
-                // }
+                // do stuff
+                for (var i = 0; i < parents.length; i++) {
+                    parents[i][0].ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
+                    parents[i][0].ctx.beginPath();
+                    parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
+                    parents[i][0].ctx.fill();
+                }
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.04;
+                }
                 setTimeout(function() {
-                    // call animate
                     req = requestAnimationFrame(animate);
-                }, 1000 / FPS);
+                }, 1000 /FPS);
             }
             else {
-                // terminate animation
-                resolve("HIGHLIGHT CHOSEN PARENTS ANIMATION COMPLETE");
+                // resolve
+                cancelAnimationFrame(animate);
+                resolve("FADE IN MOTHERS COMPLETE");
             }
         }
         req = requestAnimationFrame(animate);
     })
 }
 
-function fadeInMother(mother) {
-    var opacity = 0.00;
-    // opacity starts at 0.00
-    mother.ctx.fillStyle = `rgba(219, 10, 91, ${mother_opacity})`;
-    mother.ctx.beginPath();
-    mother.ctx.arc(mother.x, mother.y, mother.radius, 0, Math.PI*2, false);
-    mother.ctx.fill();
+function fadeOutMothers(parents) {
+    return new Promise(resolve => {
+        console.log("FADE OUT MOTHERS CALLED");
+        var opacity = 1.00;
+        var finished = false;
+        function animate () {
+            if (!finished) {
+                // since opacity already at 1.00, my redraws don't show.
+                // i need to clearRect() just for the organisms im highlighting
+                for (var i = 0; i < parents.length; i++) {
+                    // what if I just draw a circle == size_of_organism as the canvas color on each repaint?
+                    // 'clear' organism
+                    parents[i][0].ctx.fillStyle = 'black';
+                    parents[i][0].ctx.beginPath();
+                    parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
+                    parents[i][0].ctx.fill();
+
+                    // redraw with less-opacity
+                    parents[i][0].ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
+                    parents[i][0].ctx.beginPath();
+                    parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
+                    parents[i][0].ctx.fill();
+                }
+                if (opacity <= 0.01) {
+                    console.log("truuuu");
+                    finished = true;
+                }
+                else {
+                    console.log("not truuuu");
+                    opacity -= 0.04;
+                }
+                setTimeout(function () {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(animate);
+                resolve("FADE OUT MOTHERS COMPLETE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
 }
 
-function fadeOutMother(mother) {
-    var opacity = 1.00;
-    // opacity starts at 1.00
-    mother.ctx.fillStyle = `rgba(219, 10, 91, ${mother_opacity})`;
-    mother.ctx.beginPath();
-    mother.ctx.arc(mother.x, mother.y, mother.radius, 0, Math.PI*2, false);
-    mother.ctx.fill();
-}
-
-function fadeInFather(father) {
+function fadeInFathers(parents) {
     var opacity = 0.00;
     // opacity starts at 0.00
     father.ctx.fillStyle = `rgba(0, 191, 255, ${father_opacity})`;
@@ -569,7 +597,7 @@ function fadeInFather(father) {
     father.ctx.fill();
 }
 
-function fadeOutFather(father, opacity) {
+function fadeOutFathers(parents) {
     var opacity = 1.00;
     // opacity starts at 1.00
     father.ctx.fillStyle = `rgba(0, 191, 255, ${father_opacity})`;
