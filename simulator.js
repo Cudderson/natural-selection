@@ -185,9 +185,6 @@ function runGeneration() {
 
             // update/reset generation statistics
             updateGenerationStatistics();
-
-            // test call func to highlight chosen parents
-            // highlightChosenParents(parents);
         }
 
         setTimeout(function() {
@@ -378,34 +375,6 @@ function sleep(milliseconds) {
     while (currentDate - date < milliseconds);
 }
 
-// function highlightChosenParents (parents) {
-
-//     ctx.font = "18px arial";
-
-//     ctx.fillStyle = 'pink';
-//     ctx.fillText("Females chosen to reproduce", 350, 520);
-
-//     ctx.fillStyle = 'lightblue';
-//     ctx.fillText("Males chosen to reproduce", 350, 545);
-
-//     ctx.fillStyle = 'purple';
-//     ctx.fillText("Not chosen to reproduce", 350, 570);
-
-//     for (var i = 0; i < parents.length; i++) {
-//         // mothers
-//         parents[i][0].ctx.fillStyle = 'pink';
-//         parents[i][0].ctx.beginPath();
-//         parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
-//         parents[i][0].ctx.fill();
-
-//         // fathers
-//         parents[i][1].ctx.fillStyle = 'lightblue';
-//         parents[i][1].ctx.beginPath();
-//         parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
-//         parents[i][1].ctx.fill();
-//     }
-// }
-
 function hasReachedGoal(organism, goal) {
     // check if within y-range 
     if (organism.y >= goal.y && organism.y <= (goal.y + goal.size)) {
@@ -474,7 +443,12 @@ function sleepTest(milliseconds) {
 }
 
 async function highlightChosenParents(parents) {
+    // rgb(148,0,211) darkviolet
+
+    //rgba(77, 19, 209, 1) persian blue
     var finished = false;
+
+    var opacity = 0.00;
 
     return new Promise(resolve => {
         function animate() {
@@ -483,10 +457,11 @@ async function highlightChosenParents(parents) {
 
                 ctx.font = "18px arial";
 
-                ctx.fillStyle = 'pink';
+                // ctx.fillStyle = 'rgba(219, 10, 91, ' + opacity + ')';
+                ctx.fillStyle = 'rgba(219, 10, 91, 1)';
                 ctx.fillText("Females chosen to reproduce", 350, 520);
 
-                ctx.fillStyle = 'lightblue';
+                ctx.fillStyle = 'rgba(77, 19, 209, 1)';
                 ctx.fillText("Males chosen to reproduce", 350, 545);
 
                 ctx.fillStyle = 'purple';
@@ -494,20 +469,28 @@ async function highlightChosenParents(parents) {
 
                 for (var i = 0; i < parents.length; i++) {
                     // mothers
-                    parents[i][0].ctx.fillStyle = 'pink';
+                    parents[i][0].ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
                     parents[i][0].ctx.beginPath();
                     parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
                     parents[i][0].ctx.fill();
 
                     // fathers
-                    parents[i][1].ctx.fillStyle = 'lightblue';
+                    parents[i][1].ctx.fillStyle = `rgba(77, 19, 209, ${opacity})`;
                     parents[i][1].ctx.beginPath();
                     parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
                     parents[i][1].ctx.fill();
                 }
+                if (opacity >= 1.00) {
+                    console.log("OPACITY == 1.00");
+                    finished = true;
+                }
+                else {
+                    console.log("Increased opacity!");
+                    opacity += 0.01;
+                    console.log(opacity);
+                }
                 setTimeout(function() {
                     // call animate
-                    finished = true
                     req = requestAnimationFrame(animate);
                 }, 1000 / FPS);
             }
