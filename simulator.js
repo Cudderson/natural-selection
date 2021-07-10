@@ -668,3 +668,5 @@ function fadeInNotChosen() {
         req = requestAnimationFrame(animate);
     })
 }
+
+// begin gender implementation
