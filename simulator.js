@@ -170,11 +170,10 @@ function runGeneration() {
 
             pause = true; 
 
-            getShortestDistanceToGoal();
+            closest_organism = getShortestDistanceToGoal(); // need this here so that beginSelectionProcess() can use Organisms' fitness score
             average_fitness = calcPopulationFitness(); 
 
             // fills a weighted array with organisms based on their fitness score
-            // var potential_parents = beginSelectionProcess();
             var potential_parents = beginSelectionProcess();
             
             var potential_mothers = potential_parents[0];
@@ -234,7 +233,16 @@ function runGeneration() {
                     console.log("SLEEPING FOR 2 SECONDS, THEN CALLING highlightChosenParents()");
                     const result = await sleepTest(2000);
 
-                    const highlight_result = await highlightChosenParents(parents);
+                    // should also include highlightClosestOrganism here
+                    // current: getShortestDistanceToGoal() is called first at the end of each gen.
+                    // current: that calls highlightClosestOrganism
+                    // goal: move that step to highlightChosenParents(), or similar
+                    // use promises/async
+                    // can't use here yet // need to assign fitness scores sooner than here
+                    // closest_organism = getShortestDistanceToGoal(); // now returns Organism object rather than index
+                    // now that we have the closest organism, we can use a promise to perform its animation
+                    const highlight_closest_result = await highlightClosestOrganism(closest_organism);
+                    const highlight_parents_result = await highlightChosenParents(parents);
 
                     // checking if this is okay here
                     organisms = offspring_organisms;
@@ -286,25 +294,21 @@ function getRandomGene(min, max) {
 function getShortestDistanceToGoal() {
 
     var shortest_distance = 10000;
-    var closest_organism;
+    var closest_organism_index;
 
     // though this loop identifies closest organism, it ALSO updates organism's distance_to_goal attribute
     for (var i = 0; i < organisms.length; i++) {
         var distance_to_goal = organisms[i].calcDistanceToGoal();
         if (distance_to_goal < shortest_distance) {
             shortest_distance = distance_to_goal;
-            closest_organism = i;
+            closest_organism_index = i;
         }
     }
 
-    highlightClosestOrganism(closest_organism);
-}
+    var closest_organism = organisms[closest_organism_index];
 
-function highlightClosestOrganism (closest_organism) {
-    organisms[closest_organism].ctx.fillStyle = 'gold';
-    organisms[closest_organism].ctx.beginPath();
-    organisms[closest_organism].ctx.arc(organisms[closest_organism].x, organisms[closest_organism].y, organisms[closest_organism].radius, 0, Math.PI*2, false);
-    organisms[closest_organism].ctx.fill();
+    // highlightClosestOrganism(closest_organism);
+    return closest_organism;
 }
 
 function calcPopulationFitness () {
@@ -337,6 +341,9 @@ function beginSelectionProcess() {
             }
         }
     }
+    console.log("HELLO");
+    console.log(organisms);
+    console.log(potential_mothers, potential_fathers);
 
     return [potential_mothers, potential_fathers];
 }
@@ -451,6 +458,48 @@ function sleepTest(milliseconds) {
     while (currentDate - date < milliseconds);
     return new Promise((resolve, reject) => {
         resolve("Response Processed.")
+    })
+}
+
+async function highlightClosestOrganism (closest_organism) {
+    await fadeInClosestOrganism(closest_organism);
+    await fadeClosestToOriginal(closest_organism);
+    await fadeInClosestOrganism(closest_organism);
+    await fadeClosestToOriginal(closest_organism);
+    await fadeInClosestOrganism(closest_organism);
+    await fadeClosestToOriginal(closest_organism);
+    await sleepTest(1000);
+}
+
+function fadeInClosestOrganism(closest_organism) {
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                //animate
+                closest_organism.ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
+                closest_organism.ctx.beginPath();
+                closest_organism.ctx.arc(closest_organism.x, closest_organism.y, closest_organism.radius, 0, Math.PI*2, false);
+                closest_organism.ctx.fill();
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.10;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(req);
+                resolve("FADE IN CLOSEST ORGANISM COMPLETE");
+            }
+        }
+        req = requestAnimationFrame(animate);
     })
 }
 
@@ -648,6 +697,39 @@ function fadeToOriginal(parents, gender) {
                 // resolve
                 cancelAnimationFrame(animate);
                 resolve("FADE TO ORIGINAL COMPLETE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeClosestToOriginal(closest_organism) {
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                //animate
+                // need to redraw black dot to make opacity decrease work
+                closest_organism.ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+                closest_organism.ctx.beginPath();
+                closest_organism.ctx.arc(closest_organism.x, closest_organism.y, closest_organism.radius, 0, Math.PI*2, false);
+                closest_organism.ctx.fill();
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.10;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(req);
+                resolve("FADE CLOSEST TO ORIGINAL COMPLETE");
             }
         }
         req = requestAnimationFrame(animate);
