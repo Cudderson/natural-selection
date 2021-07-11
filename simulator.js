@@ -469,19 +469,15 @@ async function highlightChosenParents(parents) {
     console.log("STARTING MOTHER ANIMATION");
     await fadeInMothers(parents);
     await fadeToOriginal(parents, 'female');
-    // await fadeOutMothers(parents);
     await fadeInMothers(parents);
     await fadeToOriginal(parents, 'female');
-    // await fadeOutMothers(parents);
     await fadeInMothers(parents);
     // should return to purple here
     await fadeToOriginal(parents, 'female');
 
     await fadeInFathers(parents);
-    // await fadeOutFathers(parents);
     await fadeToOriginal(parents, 'male');
     await fadeInFathers(parents);
-    // await fadeOutFathers(parents);
     await fadeToOriginal(parents, 'male');
     await fadeInFathers(parents);
     // should return to purple here
@@ -543,49 +539,6 @@ function fadeInMothers(parents) {
     })
 }
 
-// keep just in case (fadeToOriginal replaces this and fadeOutFathers)
-function fadeOutMothers(parents) {
-    return new Promise(resolve => {
-        console.log("FADE OUT MOTHERS CALLED");
-        var opacity = 1.00;
-        var finished = false;
-        function animate () {
-            if (!finished) {
-                for (var i = 0; i < parents.length; i++) {
-                    // 'clear' organism
-                    parents[i][0].ctx.fillStyle = 'black';
-                    parents[i][0].ctx.beginPath();
-                    parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
-                    parents[i][0].ctx.fill();
-
-                    // redraw with less-opacity
-                    parents[i][0].ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
-                    parents[i][0].ctx.beginPath();
-                    parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
-                    parents[i][0].ctx.fill();
-                }
-                if (opacity <= 0.01) {
-                    console.log("truuuu");
-                    finished = true;
-                }
-                else {
-                    console.log("not truuuu");
-                    opacity -= 0.10;
-                }
-                setTimeout(function () {
-                    req = requestAnimationFrame(animate);
-                }, 1000 / FPS);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(req);
-                resolve("FADE OUT MOTHERS COMPLETE");
-            }
-        }
-        req = requestAnimationFrame(animate);
-    })
-}
-
 function fadeInFathers(parents) {
     return new Promise(resolve => {
         var opacity = 0.00;
@@ -616,47 +569,6 @@ function fadeInFathers(parents) {
                 // resolve
                 cancelAnimationFrame(req);
                 resolve("FATHERS FADE-IN COMPLETE");
-            }
-        }
-        req = requestAnimationFrame(animate);
-    })
-}
-
-// keep just in case (fadeToOriginal replaces this and fadeOutMothers)
-function fadeOutFathers(parents) {
-    return new Promise(resolve => {
-        var opacity = 1.00;
-        var finished = false;
-        function animate() {
-            if (!finished) {
-                // animate frame
-                for (var i = 0; i < parents.length; i++) {
-                    // redraw black so opacity changes will show
-                    parents[i][1].ctx.fillStyle = 'black';
-                    parents[i][1].ctx.beginPath();
-                    parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
-                    parents[i][1].ctx.fill();
-
-                    // redraw organism
-                    parents[i][1].ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
-                    parents[i][1].ctx.beginPath();
-                    parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
-                    parents[i][1].ctx.fill();
-                }
-                if (opacity <= 0.01) {
-                    finished = true;
-                }
-                else {
-                    opacity -= 0.10;
-                }
-                setTimeout(function() {
-                    req = requestAnimationFrame(animate);
-                })
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(req);
-                resolve("FATHER FADE OUT COMPLETE");
             }
         }
         req = requestAnimationFrame(animate);
@@ -847,7 +759,6 @@ function fadeToBlackText() {
     })
 }
 
-
 function getGender() {
     var gender_indicator = Math.random();
     var gender;
@@ -859,3 +770,5 @@ function getGender() {
     }
     return gender
 }
+
+// finish fade animations
