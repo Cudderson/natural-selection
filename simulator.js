@@ -233,14 +233,25 @@ function runGeneration() {
                     console.log("SLEEPING FOR 2 SECONDS, THEN CALLING highlightChosenParents()");
                     const result = await sleepTest(2000);
 
-                    // should also include highlightClosestOrganism here
-                    // current: getShortestDistanceToGoal() is called first at the end of each gen.
-                    // current: that calls highlightClosestOrganism
-                    // goal: move that step to highlightChosenParents(), or similar
-                    // use promises/async
-                    // can't use here yet // need to assign fitness scores sooner than here
-                    // closest_organism = getShortestDistanceToGoal(); // now returns Organism object rather than index
-                    // now that we have the closest organism, we can use a promise to perform its animation
+
+                    // all side animations start here (show phase)
+                    // basic flow:
+                    // - draw on screen: goal, bottom-left stats, current phase (CREATE NEW GENERATION)
+                    // - animate organisms
+                    // --end of movement--
+                    // highlight/aniamte most-fit, females, males, not chosen with text (EVALUATE INDIVIDUALS)
+                    // (SELECT MOST-FIT ORGANISMS)
+                    // --highlighting ends--
+                    // (CROSSOVER / MUTATE)
+                    // (REPRODUCE)
+                    // --end of generation--
+
+                    // I'll start by simply drawing the phases on the top left of canvas at the beginning of each generation
+                    // to-do
+
+                    // this is not where this should be, but this async function allows me to run animation asynchronously
+                    const phase_message = await drawPhases();
+
                     const highlight_closest_result = await highlightClosestOrganism(closest_organism);
                     const highlight_parents_result = await highlightChosenParents(parents);
 
@@ -871,4 +882,58 @@ function getGender() {
         gender = 'male';
     }
     return gender
+}
+
+// phase animations
+function drawPhases() {
+    var finished = false;
+    var opacity = 0.01;
+
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                //animate
+                
+                // will outline where I want these phases to highlight
+                ctx.font = "18px arial";
+
+                // before animation run
+                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
+                ctx.fillText("Create New Generation", 10, 60);
+
+                // while main-animation running
+                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
+                ctx.fillText("Evaluate Individuals", 10, 90);
+
+                // while highlighting animation running
+                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
+                ctx.fillText("Select Most-Fit Individuals", 10, 120);
+
+                // after highlighting over / may need own animation / help text on top right?
+                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
+                ctx.fillText("Crossover / Mutate", 10, 150);
+
+                // may need own animation / when generation stats are updated
+                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
+                ctx.fillText("Reproduce", 10, 180);
+                
+                // draw at low-opacity
+                if (opacity >= 0.10) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.01;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(req);
+                resolve("DRAW PHASES COMPLETE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
 }
