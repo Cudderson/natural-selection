@@ -451,53 +451,38 @@ function sleepTest(milliseconds) {
 
 async function highlightChosenParents(parents) {
 
-    // goal: make animation look good by fading in/out twice for each category
-    // 1. animation starts
-    // 2. show females selected
-    //      - fade in to opacity=1
-    //      - fade out to opacity=0
-    //      - fade in to opacity=1
-    //      - fade out to opacity=0
-    //      - fade in to opacity=1
-    //      - hold frame for 1-2s, then fade to original color
-    // 3. repeat same for males
-    // 4. fade in male+female at same time, hold for 1-2s, fade out all to opacity=0
-    // 5. animation ends
-
-    // I have completely discarded fadeOutMothers() and fadeOutFathers() because fadeToOriginal is exactly what I want and need
-    // delete fadeOutMothers() and fadeOutFathers() when confirmed useless
-    console.log("STARTING MOTHER ANIMATION");
+    // highlight mothers
     await fadeInMothers(parents);
     await fadeToOriginal(parents, 'female');
     await fadeInMothers(parents);
     await fadeToOriginal(parents, 'female');
     await fadeInMothers(parents);
-    // should return to purple here
     await fadeToOriginal(parents, 'female');
 
+    // highlight fathers
     await fadeInFathers(parents);
     await fadeToOriginal(parents, 'male');
     await fadeInFathers(parents);
     await fadeToOriginal(parents, 'male');
     await fadeInFathers(parents);
-    // should return to purple here
     await fadeToOriginal(parents, 'male');
 
     console.log("waiting 1s...");
     await sleepTest(1000);
-    // should color in everything here (highlight all)
+
+    // highlight all
     await fadeInMothers(parents);
     await fadeInFathers(parents);
     await fadeInNotChosen();
-    console.log("waiting 2s...");
-    await sleepTest(2000); 
-    // should fade out text here too
-    /////////
+
+    console.log("waiting 1s...");
+    await sleepTest(1000); 
+
+    // fade out all
     await fadeToBlackText();
     await fadeToOriginal(parents, 'both');
-    // fade out all to black here
     await fadeToBlack(organisms);
-    await sleepTest(6000);
+    await sleepTest(1000);
 }
 
 function fadeInMothers(parents) {
@@ -523,7 +508,7 @@ function fadeInMothers(parents) {
                     finished = true;
                 }
                 else {
-                    opacity += 0.05;
+                    opacity += 0.10;
                 }
                 setTimeout(function() {
                     req = requestAnimationFrame(animate);
@@ -559,7 +544,7 @@ function fadeInFathers(parents) {
                     finished = true;
                 }
                 else {
-                    opacity += 0.05;
+                    opacity += 0.10;
                 }
                 setTimeout(function () {
                     req = requestAnimationFrame(animate);
@@ -648,7 +633,7 @@ function fadeToOriginal(parents, gender) {
                     finished = true;
                 }
                 else {
-                    opacity += 0.05;
+                    opacity += 0.10;
                 }
                 setTimeout(function() {
                     req = requestAnimationFrame(animate);
@@ -770,5 +755,3 @@ function getGender() {
     }
     return gender
 }
-
-// finish fade animations
