@@ -109,10 +109,15 @@ class Goal {
     }
 
     showStatistics (average_fitness) {
-        average_fitness = `Average Fitness: ${average_fitness.toFixed(2)}`;
+        var average_fitness = average_fitness.toFixed(2);
+        var population_size = organisms.length;
         this.ctx.font = "26px arial";
-        this.ctx.fillText(average_fitness.toString(), 10, 570);
-        this.ctx.fillText(`Generation: ${generation_count}`, 10, 545);
+        this.ctx.fillText('Generation:', 10, 520);
+        this.ctx.fillText(generation_count.toString(), 210, 520);
+        this.ctx.fillText('Population Size:', 10, 550);
+        this.ctx.fillText(population_size.toString(), 210, 550);
+        this.ctx.fillText('Average Fitness:', 10, 580);
+        this.ctx.fillText(average_fitness.toString(), 210, 580);
     }
 }
 
