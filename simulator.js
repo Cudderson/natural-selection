@@ -127,10 +127,10 @@ function setup () {
     createOrganisms();
     console.log("Amount of organisms created = " + organisms.length);
 
-    runGeneration();
+    runSimulation();
 }
 
-function runGeneration() {
+function runSimulation() {
 
     // Create goal
     var goal = new Goal(GOAL_X_POS, GOAL_Y_POS, 20, ctx); 
