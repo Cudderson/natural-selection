@@ -9,12 +9,12 @@ const MUTATION_RATE = 0.02;
 const MIN_GENE = -7;
 const MAX_GENE = 7;
 // starting coordinates
-const INITIAL_X = 300; 
+const INITIAL_X = 500; 
 const INITIAL_Y = 500;
 
 // target goal coordinates
-const GOAL_X_POS = 300;
-const GOAL_Y_POS = 300;
+const GOAL_X_POS = 500;
+const GOAL_Y_POS = 50;
 
 // frame rate
 const FPS = 30;
@@ -496,7 +496,7 @@ function fadeInMothers(parents) {
                 // do stuff
                 ctx.font = "18px arial";
                 ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
-                ctx.fillText("Females chosen to reproduce", 350, 520);
+                ctx.fillText("Females chosen to reproduce", 750, 520);
 
                 for (var i = 0; i < parents.length; i++) {
                     parents[i][0].ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
@@ -533,7 +533,7 @@ function fadeInFathers(parents) {
                 // animate frame
                 ctx.font = "18px arial";
                 ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
-                ctx.fillText("Males chosen to reproduce", 350, 545);
+                ctx.fillText("Males chosen to reproduce", 750, 545);
                 for (var i = 0; i < parents.length; i++) {
                     parents[i][1].ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
                     parents[i][1].ctx.beginPath();
@@ -569,7 +569,7 @@ function fadeInNotChosen() {
                 // animate
                 ctx.font = "18px arial";
                 ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
-                ctx.fillText("Not chosen to reproduce", 350, 570);
+                ctx.fillText("Not chosen to reproduce", 750, 570);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -702,7 +702,7 @@ function fadeToBlackText() {
                 // animate
                 // 'clear' text
                 // clearRect() method will work great when there's no organisms in the way of the cleared area
-                ctx.clearRect(350, 500, 250, 150);
+                ctx.clearRect(750, 500, 250, 150);
                 ctx.font = "18px arial";
                 // ctx.fillStyle = 'black';
                 // ctx.fillText("Females chosen to reproduce", 350, 520);
@@ -716,13 +716,13 @@ function fadeToBlackText() {
 
                 ctx.font = "18px arial";
                 ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
-                ctx.fillText("Females chosen to reproduce", 350, 520);
+                ctx.fillText("Females chosen to reproduce", 750, 520);
 
                 ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
-                ctx.fillText("Males chosen to reproduce", 350, 545);
+                ctx.fillText("Males chosen to reproduce", 750, 545);
 
                 ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
-                ctx.fillText("Not chosen to reproduce", 350, 570);
+                ctx.fillText("Not chosen to reproduce", 750, 570);
 
                 if (opacity <= 0.01) {
                     finished = true;
