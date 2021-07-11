@@ -467,8 +467,9 @@ async function highlightClosestOrganism (closest_organism) {
     await fadeInClosestOrganism(closest_organism);
     await fadeClosestToOriginal(closest_organism);
     await fadeInClosestOrganism(closest_organism);
-    await fadeClosestToOriginal(closest_organism);
     await sleepTest(1000);
+    await fadeToBlackTextClosestOrganism();
+    await fadeClosestToOriginal(closest_organism);
 }
 
 function fadeInClosestOrganism(closest_organism) {
@@ -478,6 +479,10 @@ function fadeInClosestOrganism(closest_organism) {
         function animate() {
             if (!finished) {
                 //animate
+                ctx.font = "18px arial";
+                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
+                ctx.fillText("Most-Fit Individual", 750, 500);
+
                 closest_organism.ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 closest_organism.ctx.beginPath();
                 closest_organism.ctx.arc(closest_organism.x, closest_organism.y, closest_organism.radius, 0, Math.PI*2, false);
@@ -497,6 +502,39 @@ function fadeInClosestOrganism(closest_organism) {
                 // resolve
                 cancelAnimationFrame(req);
                 resolve("FADE IN CLOSEST ORGANISM COMPLETE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeClosestToOriginal(closest_organism) {
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                //animate
+                // need to redraw black dot to make opacity decrease work
+                closest_organism.ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+                closest_organism.ctx.beginPath();
+                closest_organism.ctx.arc(closest_organism.x, closest_organism.y, closest_organism.radius, 0, Math.PI*2, false);
+                closest_organism.ctx.fill();
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.10;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(req);
+                resolve("FADE CLOSEST TO ORIGINAL COMPLETE");
             }
         }
         req = requestAnimationFrame(animate);
@@ -703,39 +741,6 @@ function fadeToOriginal(parents, gender) {
     })
 }
 
-function fadeClosestToOriginal(closest_organism) {
-    var finished = false;
-    var opacity = 0.00;
-    return new Promise(resolve => {
-        function animate() {
-            if (!finished) {
-                //animate
-                // need to redraw black dot to make opacity decrease work
-                closest_organism.ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
-                closest_organism.ctx.beginPath();
-                closest_organism.ctx.arc(closest_organism.x, closest_organism.y, closest_organism.radius, 0, Math.PI*2, false);
-                closest_organism.ctx.fill();
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.10;
-                }
-                setTimeout(function() {
-                    req = requestAnimationFrame(animate);
-                }, 1000 / FPS);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(req);
-                resolve("FADE CLOSEST TO ORIGINAL COMPLETE");
-            }
-        }
-        req = requestAnimationFrame(animate);
-    })
-}
-
 function fadeToBlack(organisms) {
     var finished = false;
     var opacity = 1.00;
@@ -789,17 +794,7 @@ function fadeToBlackText() {
                 // animate
                 // 'clear' text
                 // clearRect() method will work great when there's no organisms in the way of the cleared area
-                ctx.clearRect(750, 500, 250, 150);
-                ctx.font = "18px arial";
-                // ctx.fillStyle = 'black';
-                // ctx.fillText("Females chosen to reproduce", 350, 520);
-
-                // ctx.fillStyle = 'black';
-                // ctx.fillText("Males chosen to reproduce", 350, 545);
-
-                // ctx.fillStyle = 'black';
-                // ctx.fillText("Not chosen to reproduce", 350, 570);
-
+                ctx.clearRect(750, 400, 250, 250);
 
                 ctx.font = "18px arial";
                 ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
@@ -810,6 +805,41 @@ function fadeToBlackText() {
 
                 ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
                 ctx.fillText("Not chosen to reproduce", 750, 570);
+
+                if (opacity <= 0.01) {
+                    finished = true;
+                }
+                else {
+                    opacity -= 0.05;
+                }
+                setTimeout(function() {
+                    req =  requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(req);
+                resolve("FADE TO BLACK TEXT COMPLETE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeToBlackTextClosestOrganism() {
+    var finished = false;
+    var opacity = 1.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                // animate
+                // 'clear' text
+                // clearRect() method will work great when there's no organisms in the way of the cleared area
+                ctx.clearRect(750, 400, 250, 250);
+
+                ctx.font = "18px arial";
+                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
+                ctx.fillText("Most-Fit Individual", 750, 500);
 
                 if (opacity <= 0.01) {
                     finished = true;
