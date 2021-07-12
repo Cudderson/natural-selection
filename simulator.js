@@ -130,6 +130,11 @@ function setup () {
     runSimulation();
 }
 
+// change name later
+async function runSimulationRefactored() {
+    
+}
+
 function runSimulation() {
 
     // Create goal
