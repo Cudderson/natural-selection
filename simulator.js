@@ -121,18 +121,53 @@ class Goal {
     }
 }
 
-function setup () {
+async function setup () {
 
     // Create organisms with random genes
     createOrganisms();
     console.log("Amount of organisms created = " + organisms.length);
 
-    runSimulation();
+    // runSimulation();
+    await runSimulationRefactored();
+    console.log("resolved.");
 }
 
 // change name later
+// this will be called right after setup is complete
 async function runSimulationRefactored() {
-    
+    // pre-animation requirements
+    var generation_animation_finished = false; // maybe declare within animate function
+    // create goal ( maybe could be passed in from setup() )
+    var goal = new Goal(GOAL_X_POS, GOAL_Y_POS, 20, ctx);
+    // var average_fitness = 0; --try placing this in resetGenStats() 
+
+    // make promise, can change if needed
+    return new Promise((resolve, reject) => {
+        async function animateGeneration() {
+            if (!generation_animation_finished) {
+                //animate
+                // clearRect() every frame and draw goal
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                goal.drawGoal();
+                // OG had goal.showStatistics() here, but I disagree with that
+
+                // update and move organisms (make own function)
+                // hasReachedGoal and updateSuccessfulOrganisms may need to return promises as well
+                const result = await updateAndMoveOrganisms(goal); // ideally we don't pass goal to this function
+                console.log(result);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(req);
+                resolve("GENERATION MAIN ANIMATION COMPLETE");
+            }
+            setTimeout(function() {
+                console.log("called");
+                req = requestAnimationFrame(animateGeneration);
+            }, 1000 / FPS);
+        }
+        req = requestAnimationFrame(animateGeneration);
+    })
 }
 
 function runSimulation() {
@@ -305,6 +340,42 @@ function getRandomGene(min, max) {
     var random_y = Math.floor(Math.random() * (MAX_GENE - MIN_GENE + 1) + MIN_GENE);
     var random_gene = [random_x, random_y];
     return random_gene;
+}
+
+function updateAndMoveOrganisms(goal) {
+    return new Promise(resolve => {
+        var finished = false;
+        async function animate() {
+            if (!finished) {
+                // animate
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                goal.drawGoal();
+                // will need to redraw statistics here too if kept
+                for (var i = 0; i < organisms.length; i++) {
+                    if (organisms[i].reached_goal == false) {
+                        organisms[i].update();
+                        organisms[i].move();
+                        hasReachedGoal(organisms[i], goal); // maybe await
+                    }
+                    else {
+                        updateSuccessfulOrganism(organisms[i]); // maybe await
+                    }
+                }
+                if (organisms[0].index == GENE_COUNT) {
+                    finished = true;
+                }
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(req);
+                resolve("UPDATE AND MOVE COMPLETE");
+            }
+            setTimeout(function() {
+                req = requestAnimationFrame(animate);
+            }, 1000 / FPS);
+        }
+        req = requestAnimationFrame(animate);
+    })
 }
 
 function getShortestDistanceToGoal() {
