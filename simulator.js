@@ -124,6 +124,7 @@ class Goal {
 async function setup () {
 
     // Create organisms with random genes
+    /// PHASE: CREATE NEW GENERATION/POPULATION
     createOrganisms();
     console.log("Amount of organisms created = " + organisms.length);
 
@@ -134,40 +135,44 @@ async function setup () {
 
 // change name later
 // this will be called right after setup is complete
+// maybe this should call runGeneration() exteriorly (yes yes yes)
 async function runSimulationRefactored() {
     // pre-animation requirements
-    var generation_animation_finished = false; // maybe declare within animate function
-    // create goal ( maybe could be passed in from setup() )
-    var goal = new Goal(GOAL_X_POS, GOAL_Y_POS, 20, ctx);
+    var generation_finished = false;
+
     // var average_fitness = 0; --try placing this in resetGenStats() 
 
-    // make promise, can change if needed
-    return new Promise((resolve, reject) => {
-        async function animateGeneration() {
-            if (!generation_animation_finished) {
-                //animate
-                // clearRect() every frame and draw goal
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                goal.drawGoal();
-                // OG had goal.showStatistics() here, but I disagree with that
+    // PHASE: EVALUATE INDIVIDUALS
+    const generation_resolution = await runGeneration(); 
+    console.log(generation_resolution); 
+    
+    // at this point, all organisms have moved to their final location.
+    // could have function like evaluateIndividuals() or evaluatePopulation() that calls getShortestDistance() and calcPopulationFitness()
 
-                // update and move organisms (make own function)
-                // hasReachedGoal and updateSuccessfulOrganisms may need to return promises as well
-                const result = await updateAndMoveOrganisms(goal); // ideally we don't pass goal to this function
-                console.log(result);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(req);
-                resolve("GENERATION MAIN ANIMATION COMPLETE");
-            }
-            setTimeout(function() {
-                console.log("called");
-                req = requestAnimationFrame(animateGeneration);
-            }, 1000 / FPS);
+
+    // PHASE: SELECT MOST-FIT INDIVIDUALS
+
+
+}
+
+async function runGeneration() {
+    // do stuff
+    var goal = new Goal(GOAL_X_POS, GOAL_Y_POS, 20, ctx);
+
+    var generation_finished = false;
+    const update_and_move_result = await updateAndMoveOrganisms(goal); // ideally don't pass in goal here
+    return new Promise((resolve, reject) => {
+        if (update_and_move_result == 0) {
+            resolve(0);
         }
-        req = requestAnimationFrame(animateGeneration);
+        else {
+            reject(1);
+        }
     })
+}
+
+async function evaluatePopulation() {
+    // to do
 }
 
 function runSimulation() {
@@ -368,7 +373,7 @@ function updateAndMoveOrganisms(goal) {
             else {
                 // resolve
                 cancelAnimationFrame(req);
-                resolve("UPDATE AND MOVE COMPLETE");
+                resolve(0);
             }
             setTimeout(function() {
                 req = requestAnimationFrame(animate);
