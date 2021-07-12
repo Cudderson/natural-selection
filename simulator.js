@@ -129,8 +129,8 @@ async function setup () {
     console.log("Amount of organisms created = " + organisms.length);
 
     // runSimulation();
-    await runSimulationRefactored();
-    console.log("resolved.");
+    const result = await runSimulationRefactored();
+    console.log(result);
 }
 
 // change name later
@@ -143,16 +143,19 @@ async function runSimulationRefactored() {
     // var average_fitness = 0; --try placing this in resetGenStats() 
 
     // PHASE: EVALUATE INDIVIDUALS
-    const generation_resolution = await runGeneration(); 
-    console.log(generation_resolution); 
-    
-    // at this point, all organisms have moved to their final location.
-    // could have function like evaluateIndividuals() or evaluatePopulation() that calls getShortestDistance() and calcPopulationFitness()
+    await runGeneration(); 
 
+    const population_resolution = await evaluatePopulation();
+    var closest_organism = population_resolution['closest_organism'];
+    var average_fitness = population_resolution['average_fitness'];
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
+    // this phase includes: beginSelectionProcess(), selectParentsForReproduction()
 
 
+    return new Promise(resolve => {
+        resolve("runSimulationRefactored() complete.");
+    })
 }
 
 async function runGeneration() {
@@ -173,6 +176,17 @@ async function runGeneration() {
 
 async function evaluatePopulation() {
     // to do
+    const shortest_distance_resolution = await getShortestDistanceToGoal();
+    const average_fitness = await calcPopulationFitness(); // returns average_fitness
+
+    var population_resolution = {
+        'closest_organism': shortest_distance_resolution,
+        'average_fitness': average_fitness
+    }
+
+    return new Promise(resolve => {
+        resolve(population_resolution);
+    })
 }
 
 function runSimulation() {
@@ -404,11 +418,15 @@ function getShortestDistanceToGoal() {
 }
 
 function calcPopulationFitness () {
-    for (var i = 0; i < organisms.length; i++) {
-        organisms[i].calcFitness();
-        total_fitness += organisms[i].fitness;
-    }
-    return total_fitness / organisms.length;
+    return new Promise(resolve => {
+        for (var i = 0; i < organisms.length; i++) {
+            organisms[i].calcFitness();
+            total_fitness += organisms[i].fitness;
+        }
+
+        var average_fitness = total_fitness / organisms.length;
+        resolve(average_fitness);
+    })
 }
 
 function beginSelectionProcess() {
