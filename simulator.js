@@ -151,6 +151,28 @@ async function runSimulationRefactored() {
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     // this phase includes: beginSelectionProcess(), selectParentsForReproduction()
+    const potential_parents = await beginSelectionProcess();
+
+    var potential_mothers = potential_parents['potential_mothers'];
+    var potential_fathers = potential_parents['potential_fathers'];
+
+    var parents = selectParentsForReproduction(potential_mothers, potential_fathers);
+
+    // PHASE: CROSSOVER / REPRODUCE / MUTATE
+    // mutation handled in crossover()
+    // this could be a higher level function?
+    for (var i = 0; i < parents.length; i++) {
+        var offspring_count = determineOffspringCount();
+
+        for (var j = 0; j < offspring_count; j++) {
+            var crossover_genes = crossover(parents[i]);
+            reproduce(crossover_genes);
+        }
+    }
+
+    // updateGenerationStatistics()
+
+
 
 
     return new Promise(resolve => {
@@ -451,11 +473,15 @@ function beginSelectionProcess() {
             }
         }
     }
-    console.log("HELLO");
-    console.log(organisms);
-    console.log(potential_mothers, potential_fathers);
 
-    return [potential_mothers, potential_fathers];
+    var potential_parents = {
+        'potential_mothers': potential_mothers,
+        'potential_fathers': potential_fathers
+    }
+
+    return new Promise(resolve => {
+        resolve(potential_parents);
+    })
 }
 
 function selectParentsForReproduction(potential_mothers, potential_fathers) {
@@ -486,6 +512,15 @@ function selectParentsForReproduction(potential_mothers, potential_fathers) {
     return parents;
 }
 
+function determineOffspringCount() {
+    possible_offspring_counts = [0, 0, 1, 1, 2, 2, 2, 3, 4, 5]; // sum = 20, 20/10items = 2avg
+    var offspring_count_index = Math.floor(Math.random() * possible_offspring_counts.length);
+    // all_indicies.push(offspring_count_index);
+    var offspring_count = possible_offspring_counts[offspring_count_index];
+    // all_offspring_counts.push(offspring_count);
+    return offspring_count;
+}
+
 function crossover(parents_to_crossover) {
 
     var mother = parents_to_crossover[0];
@@ -499,7 +534,6 @@ function crossover(parents_to_crossover) {
 
     for (var j = 0; j < GENE_COUNT; j++) {
         // select if mother or father gene will be used (50% probability)
-        console.log("MADE");
         var random_bool = Math.random();
 
         // apply mutation for variance
