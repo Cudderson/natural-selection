@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", setup);
+document.addEventListener("DOMContentLoaded", runSimulation);
 
 var generation_count = 0;
 
@@ -121,7 +121,7 @@ class Goal {
     }
 }
 
-async function setup () {
+async function runSimulation () {
 
     // Create organisms with random genes
     /// PHASE: CREATE NEW GENERATION/POPULATION
@@ -129,21 +129,21 @@ async function setup () {
     console.log("Amount of organisms created = " + organisms.length);
 
     // runSimulation();
-    const result = await runSimulationRefactored();
+    const result = await runGeneration();
     console.log(result);
 }
 
 // change name later
 // this will be called right after setup is complete
 // maybe this should call runGeneration() exteriorly (yes yes yes)
-async function runSimulationRefactored() {
+async function runGeneration() {
     // pre-animation requirements
     var generation_finished = false;
 
     // var average_fitness = 0; --try placing this in resetGenStats() 
 
     // PHASE: EVALUATE INDIVIDUALS
-    await runGeneration(); 
+    await runEvaluationAnimation(); 
 
     const population_resolution = await evaluatePopulation();
     var closest_organism = population_resolution['closest_organism'];
@@ -158,9 +158,12 @@ async function runSimulationRefactored() {
 
     var parents = selectParentsForReproduction(potential_mothers, potential_fathers);
 
+    //runSelectionAnimations() here???
+
     // PHASE: CROSSOVER / REPRODUCE / MUTATE
     // mutation handled in crossover()
     // this could be a higher level function?
+    // createNewGeneration()?
     for (var i = 0; i < parents.length; i++) {
         var offspring_count = determineOffspringCount();
 
@@ -173,10 +176,6 @@ async function runSimulationRefactored() {
     // updateGenerationStatistics();
     // organisms = offspring_organisms;
     // offspring_organisms = [];
-
-    // place side animations where theyll be executed
-    // highlightClosestOrganism();
-    // highlightChosenParents();
 
     // where will phase animation changes trigger?
     // 0. updateCanvasStats() // should be called at beginning of generation
@@ -192,7 +191,8 @@ async function runSimulationRefactored() {
     // maybe instead of this, I call individual functions like runSelectionAnimation(), runCrossoverAnimation(), etc.
 
     // called after evaluateIndividuals() main animation
-
+        //...
+        //END EVALUATION
         //SELECTION
         // fade-to-original PhasesText (could be done in previous animation)
         // fade-in/highlight 'Select Most-Fit Individuals'
@@ -200,30 +200,32 @@ async function runSimulationRefactored() {
         // highlightChosenParents()
         // fade-to-original PhasesText
         //END SELECTION
+        //CROSSOVER
         // fade-in/highlight Crossover Text
         // fade-in canvas message/animation about crossover
         // fade-to-original PhasesText 
         // fade-out canvas message
+        //END CROSSOVER
+        //MUTATE
         // fade-in/highlight Mutate Text
         // fade-in message/animation about mutation
         // fade-out canvas message
         // fade-to-original PhasesText
+        //END MUTATE
+        //loop
 
         // At this point, the function should resolve and the main animation will start over by updating canvas stats and 
         // highlighting Create New Generation Text, maybe with a canvas message
-
-        // this function could split functionality, and await resolutions from runSelectMostFitAnimations(), runCrossoverAnimations(),
-        // runMutationAnimations(), etc. (good idea)
 
     await runSelectionAnimations(closest_organism, parents);
 
 
     return new Promise(resolve => {
-        resolve("runSimulationRefactored() complete.");
+        resolve("runGeneration() complete.");
     })
 }
 
-async function runGeneration() {
+async function runEvaluationAnimation() {
     // do stuff
     var goal = new Goal(GOAL_X_POS, GOAL_Y_POS, 20, ctx);
 
@@ -254,7 +256,8 @@ async function evaluatePopulation() {
     })
 }
 
-function runSimulation() {
+// moving away from this
+function runSimulationDeprecated() {
 
     // Create goal
     var goal = new Goal(GOAL_X_POS, GOAL_Y_POS, 20, ctx); 
