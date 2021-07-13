@@ -177,7 +177,6 @@ async function runSimulationRefactored() {
     // place side animations where theyll be executed
     // highlightClosestOrganism();
     // highlightChosenParents();
-    highlightChosenParents(parents);
 
     // where will phase animation changes trigger?
     // 0. updateCanvasStats() // should be called at beginning of generation
@@ -191,7 +190,33 @@ async function runSimulationRefactored() {
     // I could even have a dynamic function that can highlight any text based on a parameter (same for fades)
 
     // maybe instead of this, I call individual functions like runSelectionAnimation(), runCrossoverAnimation(), etc.
-    var something = await runSideAnimations();
+
+    // called after evaluateIndividuals() main animation
+
+        //SELECTION
+        // fade-to-original PhasesText (could be done in previous animation)
+        // fade-in/highlight 'Select Most-Fit Individuals'
+        // highlightClosestOrganism()
+        // highlightChosenParents()
+        // fade-to-original PhasesText
+        //END SELECTION
+        // fade-in/highlight Crossover Text
+        // fade-in canvas message/animation about crossover
+        // fade-to-original PhasesText 
+        // fade-out canvas message
+        // fade-in/highlight Mutate Text
+        // fade-in message/animation about mutation
+        // fade-out canvas message
+        // fade-to-original PhasesText
+
+        // At this point, the function should resolve and the main animation will start over by updating canvas stats and 
+        // highlighting Create New Generation Text, maybe with a canvas message
+
+        // this function could split functionality, and await resolutions from runSelectMostFitAnimations(), runCrossoverAnimations(),
+        // runMutationAnimations(), etc. (good idea)
+
+    await runSelectionAnimations(closest_organism, parents);
+
 
     return new Promise(resolve => {
         resolve("runSimulationRefactored() complete.");
@@ -1089,28 +1114,22 @@ function drawPhases() {
     })
 }
 
-async function runSideAnimations() {
-    return new Promise((resolve, reject) => {
-        // called after evaluateIndividuals() main animation
+async function runSelectionAnimations(closest_organism, parents) {
+    // 1. fade-to-original PhasesText (could be done in previous animation)
+    // 2. fade-in/highlight 'Select Most-Fit Individuals'
+    // 3. highlightClosestOrganism()
+    // 4. highlightChosenParents()
+    // 5. fade-to-original PhasesText
 
-        // fade-to-original PhasesText
-        // fade-in/highlight 'Select Most-Fit Individuals'
-        // highlightClosestOrganism()
-        // highlightChosenParents()
-        // fade-to-original PhasesText
-        // fade-in/highlight Crossover Text
-        // fade-in canvas message/animation about crossover
-        // fade-to-original PhasesText 
-        // fade-out canvas message
-        // fade-in/highlight Mutate Text
-        // fade-in message/animation about mutation
-        // fade-out canvas message
-        // fade-to-original PhasesText
+    // 1. (not ready)
+    // 2. (not ready)
+    // 3.
+    await highlightClosestOrganism(closest_organism);
+    // 4.
+    await highlightChosenParents(parents);
+    // 5. (not ready)
 
-        // At this point, the function should resolve and the main animation will start over by updating canvas stats and 
-        // highlighting Create New Generation Text, maybe with a canvas message
-
-        // this function could split functionality, and await resolutions from runSelectMostFitAnimations(), runCrossoverAnimations(),
-        // runMutationAnimations(), etc. (good idea)
+    return new Promise(resolve => {
+        resolve();
     })
 }
