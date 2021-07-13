@@ -177,6 +177,7 @@ async function runSimulationRefactored() {
     // place side animations where theyll be executed
     // highlightClosestOrganism();
     // highlightChosenParents();
+    highlightChosenParents(parents);
 
     // where will phase animation changes trigger?
     // 0. updateCanvasStats() // should be called at beginning of generation
@@ -188,6 +189,9 @@ async function runSimulationRefactored() {
     // 6. highlightMutateText() // fade-in after highlightCrossoverText() ends, <canvas message/stats> fade-out after a few seconds
 
     // I could even have a dynamic function that can highlight any text based on a parameter (same for fades)
+
+    // maybe instead of this, I call individual functions like runSelectionAnimation(), runCrossoverAnimation(), etc.
+    var something = await runSideAnimations();
 
     return new Promise(resolve => {
         resolve("runSimulationRefactored() complete.");
@@ -1082,5 +1086,31 @@ function drawPhases() {
             }
         }
         req = requestAnimationFrame(animate);
+    })
+}
+
+async function runSideAnimations() {
+    return new Promise((resolve, reject) => {
+        // called after evaluateIndividuals() main animation
+
+        // fade-to-original PhasesText
+        // fade-in/highlight 'Select Most-Fit Individuals'
+        // highlightClosestOrganism()
+        // highlightChosenParents()
+        // fade-to-original PhasesText
+        // fade-in/highlight Crossover Text
+        // fade-in canvas message/animation about crossover
+        // fade-to-original PhasesText 
+        // fade-out canvas message
+        // fade-in/highlight Mutate Text
+        // fade-in message/animation about mutation
+        // fade-out canvas message
+        // fade-to-original PhasesText
+
+        // At this point, the function should resolve and the main animation will start over by updating canvas stats and 
+        // highlighting Create New Generation Text, maybe with a canvas message
+
+        // this function could split functionality, and await resolutions from runSelectMostFitAnimations(), runCrossoverAnimations(),
+        // runMutationAnimations(), etc. (good idea)
     })
 }
