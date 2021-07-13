@@ -170,10 +170,24 @@ async function runSimulationRefactored() {
         }
     }
 
-    // updateGenerationStatistics()
+    // updateGenerationStatistics();
+    // organisms = offspring_organisms;
+    // offspring_organisms = [];
 
+    // place side animations where theyll be executed
+    // highlightClosestOrganism();
+    // highlightChosenParents();
 
+    // where will phase animation changes trigger?
+    // 0. updateCanvasStats() // should be called at beginning of generation
+    // 1. drawPhases() // should be called at beginning of generation
+    // 2. highlightCreateNewGenerationText() // fade-in before gen starts, fade-out before main animation
+    // 3. highlightEvaluateIndividualsText() // fade-in before main-animation starts, fade-out when main animation ends
+    // 4. highlightSelectMostFitIndividualsText() // fade-in before highlightClosestOrganism() starts, fade-out when highlightChosenParents() ends
+    // 5. highlightCrossoverText() // fade-in when highlightChosenParents() ends, <some canvas message/stats>, fade-out after a few seconds
+    // 6. highlightMutateText() // fade-in after highlightCrossoverText() ends, <canvas message/stats> fade-out after a few seconds
 
+    // I could even have a dynamic function that can highlight any text based on a parameter (same for fades)
 
     return new Promise(resolve => {
         resolve("runSimulationRefactored() complete.");
