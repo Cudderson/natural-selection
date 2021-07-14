@@ -135,19 +135,11 @@ async function runSimulation () {
 
 async function runGeneration() {
 
-    // await fadeInPhases();
-    // with phases on screen here, "Evaluate Individuals" should be highlighted
-
     // this will clear the phase text area
     // ctx.fillStyle = 'red';
     // ctx.fillRect(10, 10, 275, 200);
 
-    // sequence:
-    // 1. phase text on screen
-    // drawPhases();
-    // 2. Evaluate Individuals highlighted
     await fadeInEvaluationPhaseText();
-    // 3. redraw that same canvas during the evaluation animation [x]
 
     // PHASE: EVALUATE INDIVIDUALS (highlightClosestOrganism() freezes animation sometimes)
     await runEvaluationAnimation(); 
@@ -156,15 +148,12 @@ async function runGeneration() {
     var closest_organism = population_resolution['closest_organism'];
     average_fitness = population_resolution['average_fitness'];
 
-    // sequence:
-    // 1. fade out "Evaluate Individuals" text (fade to original phases)
-    //      - could improve by only clearing area where Evaluate Individuals text is
     await fadeOutEvaluationPhaseText();
+    // trying this to prevent text being redrawn to over-saturation
     ctx.clearRect(10, 10, 275, 200);
     drawPhases();
-    // 2. fade in "Select Most-Fit Individuals Text"
+
     await fadeInSelectionPhaseText();
-    // 3. redraw that static text for duration of runSelectionAnimations()
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     // this phase includes: beginSelectionProcess(), selectParentsForReproduction()
@@ -186,26 +175,15 @@ async function runGeneration() {
     reproduceNewGeneration(parents);
 
     // phase text (place in correct spot when needed)
-    // we need (for now):
-    // fadeInCrossoverPhaseText()
     await fadeInCrossoverPhaseText();
-    // fadeOutCrossoverPhaseText()
     await fadeOutCrossoverPhaseText();
-    // fadeInMutationPhaseText()
+
     await fadeInMutationPhaseText();
-    // fadeOutMutationPhaseText()
     await fadeOutMutationPhaseText();
 
-    /// everything below this is planning ------------------------------------------------------------------------------------------
-
-    // where will phase animation changes trigger?
-    // 0. updateCanvasStats() // should be called at beginning of generation
-    // 1. drawPhases() // should be called at beginning of generation
-    // 2. highlightCreateNewGenerationText() // fade-in before gen starts, fade-out before main animation
-    // 3. highlightEvaluateIndividualsText() // fade-in before main-animation starts, fade-out when main animation ends
-    // 4. highlightSelectMostFitIndividualsText() // fade-in before highlightClosestOrganism() starts, fade-out when highlightChosenParents() ends
-    // 5. highlightCrossoverText() // fade-in when highlightChosenParents() ends, <some canvas message/stats>, fade-out after a few seconds
-    // 6. highlightMutateText() // fade-in after highlightCrossoverText() ends, <canvas message/stats> fade-out after a few seconds
+    // we'll also need Create New Generation text, I'll write it here but it will be placed elsewhere later
+    await fadeInCreateNewGenPhaseText();
+    await fadeOutCreateNewGenPhaseText();
 
     return new Promise(resolve => {
         generation_count++;
@@ -1365,6 +1343,97 @@ function fadeOutMutationPhaseText() {
                 //resolve
                 cancelAnimationFrame(req);
                 resolve("FADE OUT MUTATION PHASE TEXT DONE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeInCreateNewGenPhaseText() {
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                // clearRect to avoid over-saturated text
+                ctx.clearRect(10, 10, 275, 200);
+
+                ctx.font = "20px arial";
+
+                ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
+                ctx.fillText("Create New Generation", 10, 60);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Evaluate Individuals", 10, 90);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Select Most-Fit Individuals", 10, 120);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Crossover", 10, 150);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Mutate", 10, 180);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.05;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(req);
+                resolve("Highlight New Gen Phase Text Complete.");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeOutCreateNewGenPhaseText() {
+    // could improve by only clearing area where Evaluate Individuals text is
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                //animate
+                ctx.font = "20px arial";
+
+                ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+                ctx.fillText("Create New Generation", 10, 60);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Evaluate Individuals", 10, 90);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Select Most-Fit Individuals", 10, 120);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Crossover", 10, 150);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Mutate", 10, 180);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.05;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(req);
+                resolve("FADE OUT CREATE NEW GEN PHASE TEXT DONE");
             }
         }
         req = requestAnimationFrame(animate);
