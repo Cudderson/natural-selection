@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", runSimulation);
-
+console.log(3);
 // organism globals
 const TOTAL_ORGANISMS = 30;
 const GENE_COUNT = 100;
@@ -134,6 +134,8 @@ async function runSimulation () {
 }
 
 async function runGeneration() {
+
+    // await fadeInPhases();
 
     // PHASE: EVALUATE INDIVIDUALS (highlightClosestOrganism() freezes animation sometimes)
     await runEvaluationAnimation(); 
@@ -904,7 +906,7 @@ function getGender() {
 }
 
 // phase animations
-function drawPhases() {
+function fadeInPhases() {
     var finished = false;
     var opacity = 0.01;
 
@@ -917,19 +919,19 @@ function drawPhases() {
                 ctx.font = "18px arial";
 
                 // before animation run
-                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
+                ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 ctx.fillText("Create New Generation", 10, 60);
 
                 // while main-animation running
-                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
+                ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 ctx.fillText("Evaluate Individuals", 10, 90);
 
                 // while highlighting animation running
-                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
+                ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 ctx.fillText("Select Most-Fit Individuals", 10, 120);
 
                 // after highlighting over / may need own animation / help text on top right?
-                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
+                ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 ctx.fillText("Crossover / Mutate", 10, 150);
 
                 // may need own animation / when generation stats are updated
