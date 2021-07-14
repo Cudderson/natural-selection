@@ -135,21 +135,14 @@ async function runSimulation () {
     } while (generation_count < 3);
 }
 
-// change name later
-// this will be called right after setup is complete
-// maybe this should call runGeneration() exteriorly (yes yes yes)
 async function runGeneration() {
-    // pre-animation requirements
-    var generation_finished = false;
 
-    // var average_fitness = 0; // --try placing this in resetGenStats() 
-
-    // PHASE: EVALUATE INDIVIDUALS
+    // PHASE: EVALUATE INDIVIDUALS (highlightClosestOrganism() freezes animation sometimes)
     await runEvaluationAnimation(); 
 
     const population_resolution = await evaluatePopulation();
     var closest_organism = population_resolution['closest_organism'];
-    var average_fitness = population_resolution['average_fitness'];
+    average_fitness = population_resolution['average_fitness'];
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     // this phase includes: beginSelectionProcess(), selectParentsForReproduction()
@@ -162,18 +155,11 @@ async function runGeneration() {
 
     //runSelectionAnimations() here???
     const resolution = await runSelectionAnimations(closest_organism, parents);
-    console.log(resolution);
 
     // PHASE: CROSSOVER / REPRODUCE / MUTATE
     // this function handles crossover, mutation and reproduction
     // this function pushes new gen organisms to offspring_organisms[]
     reproduceNewGeneration(parents);
-
-    // moving the below to updateGenerationStatistics();
-    // organisms = offspring_organisms;
-    // offspring_organisms = [];
-    updateGenerationStatistics();
-
 
     /// everything below this is planning ------------------------------------------------------------------------------------------
 
@@ -187,8 +173,6 @@ async function runGeneration() {
     // 6. highlightMutateText() // fade-in after highlightCrossoverText() ends, <canvas message/stats> fade-out after a few seconds
 
     // I could even have a dynamic function that can highlight any text based on a parameter (same for fades)
-
-    // maybe instead of this, I call individual functions like runSelectionAnimation(), runCrossoverAnimation(), etc.
 
     // called after evaluateIndividuals() main animation
         //...
@@ -243,7 +227,7 @@ async function runEvaluationAnimation() {
 async function evaluatePopulation() {
     // to do
     const shortest_distance_resolution = await getShortestDistanceToGoal();
-    const average_fitness = await calcPopulationFitness(); // returns average_fitness
+    const average_fitness = await calcPopulationFitness();
 
     var population_resolution = {
         'closest_organism': shortest_distance_resolution,
@@ -487,6 +471,8 @@ function getShortestDistanceToGoal() {
 
 function calcPopulationFitness () {
     return new Promise(resolve => {
+        // reset total_fitness before calculation
+        total_fitness = 0;
         for (var i = 0; i < organisms.length; i++) {
             organisms[i].calcFitness();
             total_fitness += organisms[i].fitness;
@@ -567,6 +553,9 @@ function reproduceNewGeneration(parents) {
             reproduce(crossover_genes);
         }
     }
+    // set offspring_organisms as next generation of organisms
+    organisms = offspring_organisms;
+    offspring_organisms = [];
 }
 
 function determineOffspringCount() {
@@ -643,16 +632,8 @@ function updateSuccessfulOrganism(organism) {
     organism.ctx.fill();
 }
 
-function updateGenerationStatistics () {
-    generation_count++;
-    average_fitness = 0;
-    total_fitness = 0;
-    organisms = offspring_organisms;
-    offspring_organisms = [];
-}
-
 function sleepTest(milliseconds) {
-    console.log("Processing Response");
+    console.log(`Sleeping for ${(milliseconds / 1000)} second(s).`);
     const date = Date.now();
     let currentDate = null;
     do {
@@ -761,16 +742,12 @@ async function highlightChosenParents(parents) {
     await fadeToOriginal(parents, 'male');
     await fadeInFathers(parents);
     await fadeToOriginal(parents, 'male');
-
-    console.log("waiting 1s...");
     await sleepTest(1000);
 
     // highlight all
     await fadeInMothers(parents);
     await fadeInFathers(parents);
     await fadeInNotChosen();
-
-    console.log("waiting 1s...");
     await sleepTest(1000); 
 
     // fade out all
@@ -782,7 +759,6 @@ async function highlightChosenParents(parents) {
 
 function fadeInMothers(parents) {
     return new Promise(resolve => {
-        console.log("FADE IN MOTHERS CALLED");
         var opacity = 0.00;
         var finished = false;
 
@@ -947,8 +923,6 @@ function fadeToOriginal(parents, gender) {
 function fadeToBlack(organisms) {
     var finished = false;
     var opacity = 1.00;
-    console.log("*&^*&^*&^*");
-    console.log(organisms);
     return new Promise(resolve => {
         function animate() {
             if (!finished) {
@@ -964,7 +938,7 @@ function fadeToBlack(organisms) {
                     organisms[i].ctx.beginPath();
                     organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
                     organisms[i].ctx.fill();
-                    console.log("this should print roughly 30 times");
+                    console.log("this should print roughly 30 times"); // but it actually prints 300+
                 }
 
                 if (opacity <= 0.01) {
