@@ -164,10 +164,13 @@ async function runGeneration() {
     // this function handles crossover, mutation and reproduction
     // this function pushes new gen organisms to offspring_organisms[]
     reproduceNewGeneration(parents);
+    console.log(offspring_organisms);
 
-    // updateGenerationStatistics();
+    // moving the below to updateGenerationStatistics();
     // organisms = offspring_organisms;
     // offspring_organisms = [];
+    updateGenerationStatistics();
+    console.log(offspring_organisms);
 
     // where will phase animation changes trigger?
     // 0. updateCanvasStats() // should be called at beginning of generation
@@ -639,6 +642,8 @@ function updateGenerationStatistics () {
     generation_count++;
     average_fitness = 0;
     total_fitness = 0;
+    organisms = offspring_organisms;
+    offspring_organisms = [];
 }
 
 function sleepTest(milliseconds) {
