@@ -1,23 +1,23 @@
 document.addEventListener("DOMContentLoaded", runSimulation);
 
-var generation_count = 0;
-
 // organism globals
 const TOTAL_ORGANISMS = 30;
 const GENE_COUNT = 100;
 const MUTATION_RATE = 0.02;
 const MIN_GENE = -7;
 const MAX_GENE = 7;
-// starting coordinates
 const INITIAL_X = 500; 
 const INITIAL_Y = 500;
 
-// target goal coordinates
+// starting coordinates for goal
 const GOAL_X_POS = 500;
 const GOAL_Y_POS = 50;
 
 // frame rate
 const FPS = 30;
+
+// track total generations
+var generation_count = 0;
 
 // containers holding organisms and next-generation organisms
 var organisms = [];
@@ -29,8 +29,6 @@ var total_fitness = 0.00;
 
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
-
-var pause = false;
 
 class Organism {
     constructor (gender, x, y, ctx) {
@@ -236,151 +234,6 @@ async function evaluatePopulation() {
 
     return new Promise(resolve => {
         resolve(population_resolution);
-    })
-}
-
-// moving away from this
-function runSimulationDeprecated() {
-
-    // Create goal
-    var goal = new Goal(GOAL_X_POS, GOAL_Y_POS, 20, ctx); 
-    // initial average_fitness for Gen1 ||| not sure if this resets when i want it to..
-    var average_fitness = 0;
-
-    requestAnimationFrame(function animateFrame () {
-
-        // base case to stop program
-        if (generation_count == 50) {
-            console.log("SIMULATION COMPLETE");
-            return;
-        }
-
-        // clear canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // goal redrawn on each repaint
-        goal.drawGoal();
-        goal.showStatistics(average_fitness);
-
-        // update next coordinate and move
-        for (var i = 0; i < organisms.length; i++) {
-            if (organisms[i].reached_goal == false) {
-                organisms[i].update();
-                organisms[i].move();
-                hasReachedGoal(organisms[i], goal);
-            }
-            else {
-                updateSuccessfulOrganism(organisms[i]);
-            }
-        }
-        
-        // executes when all genes accounted for
-        // this could be a function 'finishGeneration()'
-        if (organisms[0].index == GENE_COUNT) {
-
-            pause = true; 
-
-            closest_organism = getShortestDistanceToGoal(); // need this here so that beginSelectionProcess() can use Organisms' fitness score
-            average_fitness = calcPopulationFitness(); 
-
-            // fills a weighted array with organisms based on their fitness score
-            var potential_parents = beginSelectionProcess();
-            
-            var potential_mothers = potential_parents[0];
-            var potential_fathers = potential_parents[1];
-            console.log(potential_mothers);
-            console.log(potential_fathers);
-
-            // var parents = selectParentsForReproduction(potential_parents);
-            var parents = selectParentsForReproduction(potential_mothers, potential_fathers);
-            console.log("------------");
-            console.log(parents);
-
-            // crossover and reproduce for each parent couple
-            // mutation handled in crossover()
-            all_indicies = [];
-            all_offspring_counts = [];
-
-            for (var i = 0; i < parents.length; i++) {
-                // 2 offspring on average
-                possible_offspring_counts = [0, 0, 1, 1, 2, 2, 2, 3, 4, 5]; // sum = 20, 20/10items = 2avg
-                var offspring_count_index = Math.floor(Math.random() * possible_offspring_counts.length);
-                all_indicies.push(offspring_count_index);
-                var offspring_count = possible_offspring_counts[offspring_count_index];
-                all_offspring_counts.push(offspring_count);
-
-                for (var j = 0; j < offspring_count; j++) {
-                    crossover_genes = crossover(parents[i]);
-                    reproduce(crossover_genes);
-                }
-            }
-            console.log(all_indicies);
-            console.log(all_offspring_counts);
-            console.log("^^^^^^^^^^^^^^");
-
-            // this code was moved after highlightChosenParents to access fadeToBlack properly (keep here for now just in case)
-            // organisms = offspring_organisms;
-            // offspring_organisms = [];
-
-            console.log("!!!!!!!!!!!!!!!!!!!!");
-            console.log(organisms.length);
-            console.log("!!!!!!!!!!!!!!!!!!!!");
-
-            // update/reset generation statistics
-            updateGenerationStatistics();
-        }
-
-        setTimeout(function() {
-            if (pause == false) {
-                my_req = requestAnimationFrame(animateFrame);
-            }
-            else {
-                cancelAnimationFrame(my_req);
-
-                async function runSideAnimations() {
-                    console.log("Side Animation Called");
-
-                    console.log("SLEEPING FOR 2 SECONDS, THEN CALLING highlightChosenParents()");
-                    const result = await sleepTest(2000);
-
-
-                    // all side animations start here (show phase)
-                    // basic flow:
-                    // - draw on screen: goal, bottom-left stats, current phase (CREATE NEW GENERATION)
-                    // - animate organisms
-                    // --end of movement--
-                    // highlight/aniamte most-fit, females, males, not chosen with text (EVALUATE INDIVIDUALS)
-                    // (SELECT MOST-FIT ORGANISMS)
-                    // --highlighting ends--
-                    // (CROSSOVER / MUTATE)
-                    // (REPRODUCE)
-                    // --end of generation--
-
-                    // I'll start by simply drawing the phases on the top left of canvas at the beginning of each generation
-                    // to-do
-
-                    // this is not where this should be, but this async function allows me to run animation asynchronously
-                    const phase_message = await drawPhases();
-
-                    const highlight_closest_result = await highlightClosestOrganism(closest_organism);
-                    const highlight_parents_result = await highlightChosenParents(parents);
-
-                    // checking if this is okay here
-                    organisms = offspring_organisms;
-                    offspring_organisms = [];
-
-
-                    console.log("ALL COMPLETE, sleeping for 3 seconds to show results");
-                    const time_blah = await sleepTest(3000);
-                    console.log("STARTING MAIN ANIMATION AGAIN");
-
-                    // restart main animation
-                    pause = false;
-                    my_req = requestAnimationFrame(animateFrame);
-                }
-                runSideAnimations();
-            }
-        }, 1000 / FPS);
     })
 }
 
