@@ -161,17 +161,9 @@ async function runGeneration() {
     //runSelectionAnimations() here???
 
     // PHASE: CROSSOVER / REPRODUCE / MUTATE
-    // mutation handled in crossover()
-    // this could be a higher level function?
-    // createNewGeneration()?
-    for (var i = 0; i < parents.length; i++) {
-        var offspring_count = determineOffspringCount();
-
-        for (var j = 0; j < offspring_count; j++) {
-            var crossover_genes = crossover(parents[i]);
-            reproduce(crossover_genes);
-        }
-    }
+    // this function handles crossover, mutation and reproduction
+    // this function pushes new gen organisms to offspring_organisms[]
+    reproduceNewGeneration(parents);
 
     // updateGenerationStatistics();
     // organisms = offspring_organisms;
@@ -556,6 +548,17 @@ function selectParentsForReproduction(potential_mothers, potential_fathers) {
         parents.push(new_parents);
     }
     return parents;
+}
+
+function reproduceNewGeneration(parents) {
+    for (var i = 0; i < parents.length; i++) {
+        var offspring_count = determineOffspringCount();
+
+        for (var j = 0; j < offspring_count; j++) {
+            var crossover_genes = crossover(parents[i]);
+            reproduce(crossover_genes);
+        }
+    }
 }
 
 function determineOffspringCount() {
