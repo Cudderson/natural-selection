@@ -24,7 +24,8 @@ var organisms = [];
 var offspring_organisms = [];
 
 // generation statistics
-var total_fitness = 0;
+var average_fitness = 0.00;
+var total_fitness = 0.00;
 
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
@@ -108,8 +109,8 @@ class Goal {
         this.ctx.fillRect(this.x, this.y, this.size, this.size);
     }
 
-    showStatistics (average_fitness) {
-        var average_fitness = average_fitness.toFixed(2);
+    showStatistics () {
+        average_fitness = Number(average_fitness).toFixed(2);
         var population_size = organisms.length;
         this.ctx.font = "26px arial";
         this.ctx.fillText('Generation:', 10, 520);
@@ -128,9 +129,10 @@ async function runSimulation () {
     createOrganisms();
     console.log("Amount of organisms created = " + organisms.length);
 
-    // runSimulation();
-    const result = await runGeneration();
-    console.log(result);
+    do {
+        const result = await runGeneration();
+        console.log(result);
+    } while (generation_count < 3);
 }
 
 // change name later
@@ -140,7 +142,7 @@ async function runGeneration() {
     // pre-animation requirements
     var generation_finished = false;
 
-    // var average_fitness = 0; --try placing this in resetGenStats() 
+    // var average_fitness = 0; // --try placing this in resetGenStats() 
 
     // PHASE: EVALUATE INDIVIDUALS
     await runEvaluationAnimation(); 
@@ -159,18 +161,21 @@ async function runGeneration() {
     var parents = selectParentsForReproduction(potential_mothers, potential_fathers);
 
     //runSelectionAnimations() here???
+    const resolution = await runSelectionAnimations(closest_organism, parents);
+    console.log(resolution);
 
     // PHASE: CROSSOVER / REPRODUCE / MUTATE
     // this function handles crossover, mutation and reproduction
     // this function pushes new gen organisms to offspring_organisms[]
     reproduceNewGeneration(parents);
-    console.log(offspring_organisms);
 
     // moving the below to updateGenerationStatistics();
     // organisms = offspring_organisms;
     // offspring_organisms = [];
     updateGenerationStatistics();
-    console.log(offspring_organisms);
+
+
+    /// everything below this is planning ------------------------------------------------------------------------------------------
 
     // where will phase animation changes trigger?
     // 0. updateCanvasStats() // should be called at beginning of generation
@@ -212,11 +217,10 @@ async function runGeneration() {
         // At this point, the function should resolve and the main animation will start over by updating canvas stats and 
         // highlighting Create New Generation Text, maybe with a canvas message
 
-    await runSelectionAnimations(closest_organism, parents);
-
 
     return new Promise(resolve => {
-        resolve("runGeneration() complete.");
+        generation_count++;
+        resolve(generation_count);
     })
 }
 
@@ -432,6 +436,7 @@ function updateAndMoveOrganisms(goal) {
                 // animate
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 goal.drawGoal();
+                goal.showStatistics();
                 // will need to redraw statistics here too if kept
                 for (var i = 0; i < organisms.length; i++) {
                     if (organisms[i].reached_goal == false) {
