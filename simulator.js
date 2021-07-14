@@ -159,12 +159,12 @@ async function runGeneration() {
     // sequence:
     // 1. fade out "Evaluate Individuals" text (fade to original phases)
     //      - could improve by only clearing area where Evaluate Individuals text is
-    await fadeOutEvaluateIndividualsText();
+    await fadeOutEvaluationPhaseText();
     ctx.clearRect(10, 10, 275, 200);
     drawPhases();
-    
     // 2. fade in "Select Most-Fit Individuals Text"
-    // 3. redraw that static text for duration of runSelectionAnimations
+    await fadeInSelectionPhaseText();
+    // 3. redraw that static text for duration of runSelectionAnimations()
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     // this phase includes: beginSelectionProcess(), selectParentsForReproduction()
@@ -175,10 +175,12 @@ async function runGeneration() {
 
     var parents = selectParentsForReproduction(potential_mothers, potential_fathers);
 
-    //runSelectionAnimations() here???
-    const resolution = await runSelectionAnimations(closest_organism, parents);
+    await runSelectionAnimations(closest_organism, parents);
 
-    // PHASE: CROSSOVER / REPRODUCE / MUTATE
+    //possibly put this in runSelectionAnimations()
+    await fadeOutSelectionPhaseText();
+
+    // PHASE: CROSSOVER / MUTATE / REPRODUCE
     // this function handles crossover, mutation and reproduction
     // this function pushes new gen organisms to offspring_organisms[]
     reproduceNewGeneration(parents);
@@ -955,11 +957,11 @@ function fadeInPhases() {
 
                 // after highlighting over / may need own animation / help text on top right?
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
-                ctx.fillText("Crossover / Mutate", 10, 150);
+                ctx.fillText("Crossover", 10, 150);
 
                 // may need own animation / when generation stats are updated
                 ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
-                ctx.fillText("Reproduce", 10, 180);
+                ctx.fillText("Mutate", 10, 180);
                 
                 // draw at low-opacity
                 if (opacity >= 0.10) {
@@ -999,56 +1001,11 @@ function drawPhases() {
 
     // after highlighting over / may need own animation / help text on top right?
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Crossover / Mutate", 10, 150);
+    ctx.fillText("Crossover", 10, 150);
 
     // may need own animation / when generation stats are updated
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Reproduce", 10, 180);
-}
-
-function fadeOutEvaluateIndividualsText() {
-    // could improve by only clearing area where Evaluate Individuals text is
-    var finished = false;
-    var opacity = 0.00;
-    return new Promise(resolve => {
-        function animate() {
-            if (!finished) {
-                //animate
-                ctx.font = "20px arial";
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 60);
-
-                ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-                ctx.fillText("Evaluate Individuals", 10, 90);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 120);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover / Mutate", 10, 150);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Reproduce", 10, 180);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.05;
-                }
-                setTimeout(function() {
-                    req = requestAnimationFrame(animate);
-                }, 1000 / FPS);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(req);
-                resolve("FADE OUT EVALUATE INDIVIDUALS DONE");
-            }
-        }
-        req = requestAnimationFrame(animate);
-    })
+    ctx.fillText("Mutate", 10, 180);
 }
 
 function fadeInEvaluationPhaseText() {
@@ -1072,10 +1029,10 @@ function fadeInEvaluationPhaseText() {
                 ctx.fillText("Select Most-Fit Individuals", 10, 120);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover / Mutate", 10, 150);
+                ctx.fillText("Crossover", 10, 150);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Reproduce", 10, 180);
+                ctx.fillText("Mutate", 10, 180);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -1111,10 +1068,146 @@ function drawEvaluationPhaseText() {
     ctx.fillText("Select Most-Fit Individuals", 10, 120);
 
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Crossover / Mutate", 10, 150);
+    ctx.fillText("Crossover", 10, 150);
 
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Reproduce", 10, 180);
+    ctx.fillText("Mutate", 10, 180);
+}
+
+function fadeOutEvaluationPhaseText() {
+    // could improve by only clearing area where Evaluate Individuals text is
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                //animate
+                ctx.font = "20px arial";
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Create New Generation", 10, 60);
+
+                ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+                ctx.fillText("Evaluate Individuals", 10, 90);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Select Most-Fit Individuals", 10, 120);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Crossover", 10, 150);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Mutate", 10, 180);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.05;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(req);
+                resolve("FADE OUT EVALUATE INDIVIDUALS DONE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeInSelectionPhaseText() {
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                // clearRect to avoid over-saturated text
+                ctx.clearRect(10, 10, 275, 200);
+
+                ctx.font = "20px arial";
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Create New Generation", 10, 60);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Evaluate Individuals", 10, 90);
+
+                ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
+                ctx.fillText("Select Most-Fit Individuals", 10, 120);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Crossover", 10, 150);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Mutate", 10, 180);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.05;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(req);
+                resolve("Highlight Evaluation Text Complete.");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeOutSelectionPhaseText() {
+    // could improve by only clearing area where Evaluate Individuals text is
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                //animate
+                ctx.font = "20px arial";
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Create New Generation", 10, 60);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Evaluate Individuals", 10, 90);
+
+                ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+                ctx.fillText("Select Most-Fit Individuals", 10, 120);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Crossover", 10, 150);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Mutate", 10, 180);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.05;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(req);
+                resolve("FADE OUT SELECTION PHASE TEXT DONE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
 }
 
 async function runSelectionAnimations(closest_organism, parents) {
