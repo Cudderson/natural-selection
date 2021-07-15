@@ -127,6 +127,8 @@ async function runSimulation () {
     createOrganisms();
     console.log("Amount of organisms created = " + organisms.length);
 
+    // intro-animation here before sim-loop?
+
     do {
         const result = await runGeneration();
         console.log(result);
@@ -142,6 +144,7 @@ async function runGeneration() {
     await fadeInEvaluationPhaseText();
 
     // PHASE: EVALUATE INDIVIDUALS (highlightClosestOrganism() freezes animation sometimes)
+    // this is where statistics are redrawn (goal.showStatistics())
     await runEvaluationAnimation(); 
 
     const population_resolution = await evaluatePopulation();
@@ -193,6 +196,8 @@ async function runGeneration() {
     // maybe population_size canvas stat could be updated here
     // <canvas message> such as: "The offspring created from the selected parents will represent the new generation of organisms."
     await fadeOutCreateNewGenPhaseText();
+
+    // create generation-transition animations here ***********
 
     // maybe have a generation summary animation that shows:
     // Summary for Generation X: 
