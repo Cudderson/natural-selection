@@ -168,8 +168,6 @@ async function runGeneration() {
     var parents = selectParentsForReproduction(potential_mothers, potential_fathers);
 
     await runSelectionAnimations(closest_organism, parents);
-
-    //possibly put this in runSelectionAnimations()
     await fadeOutSelectionPhaseText();
 
     // PHASE: CROSSOVER / MUTATE / REPRODUCE
@@ -177,33 +175,23 @@ async function runGeneration() {
     // this function pushes new gen organisms to offspring_organisms[]
     reproduceNewGeneration(parents);
 
-    // phase text (place in correct spot when needed)
     await fadeInCrossoverPhaseText();
     await fadeInCrossoverDescriptionText();
     await sleepTest(2000);
     await fadeOutCrossoverDescriptionText();
     await fadeOutCrossoverPhaseText();
 
-    // working, speed/position can be adjusted later
     await fadeInMutationPhaseText();
     await fadeInMutationDescriptionText();
     await sleepTest(2000);
     await fadeOutMutationDescriptionText();
     await fadeOutMutationPhaseText();
 
-    // we'll also need Create New Generation text, I'll write it here but it will be placed elsewhere later
     await fadeInCreateNewGenPhaseText();
-    // maybe population_size canvas stat could be updated here
-    // <canvas message> such as: "The offspring created from the selected parents will represent the new generation of organisms."
+    await fadeInGenerationSummaryText();
+    await sleepTest(2000);
+    await fadeOutGenerationSummaryText();
     await fadeOutCreateNewGenPhaseText();
-
-    // create generation-transition animations here ***********
-
-    // maybe have a generation summary animation that shows:
-    // Summary for Generation X: 
-    // Average Fitness: x.xx
-    // Offspring Reproduced: <New Population Size>
-    // -update statistics-
 
     return new Promise(resolve => {
         generation_count++;
@@ -1581,6 +1569,109 @@ function fadeInCreateNewGenPhaseText() {
                 //resolve
                 cancelAnimationFrame(req);
                 resolve("Highlight New Gen Phase Text Complete.");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeInGenerationSummaryText() {
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                var generation_summary_text = `Generation ${generation_count} Summary:`;
+                var generation_average_fitness_preface = 'Average Fitness:';
+                var generation_offspring_reproduced_preface = 'Offspring Reproduced:';
+
+
+                // clearRect to avoid over-saturated text
+                ctx.fillStyle = 'black';
+                ctx.fillRect(100, 250, 800, 200);
+
+                ctx.font = "22px arial";
+                ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
+                ctx.fillText(generation_summary_text, 380, 280);
+
+                ctx.font = "20px arial";
+                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                ctx.fillText(generation_average_fitness_preface, 390, 330);
+
+                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                ctx.fillText(average_fitness.toFixed(2).toString(), 600, 330);
+
+                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                ctx.fillText(generation_offspring_reproduced_preface, 390, 355);
+
+                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                ctx.fillText(organisms.length.toString(), 600, 355);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.05;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(req);
+                resolve("Fade In Summary Complete.");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeOutGenerationSummaryText() {
+    var finished = false;
+    var opacity = 1.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                var generation_summary_text = `Generation ${generation_count} Summary:`;
+                var generation_average_fitness_preface = 'Average Fitness:';
+                var generation_offspring_reproduced_preface = 'Offspring Reproduced:';
+
+                // clearRect to avoid over-saturated text
+                ctx.fillStyle = 'black';
+                ctx.fillRect(100, 250, 800, 200);
+
+                ctx.font = "22px arial";
+                ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
+                ctx.fillText(generation_summary_text, 380, 280);
+
+                ctx.font = "20px arial";
+                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                ctx.fillText(generation_average_fitness_preface, 390, 330);
+
+                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                ctx.fillText(average_fitness.toFixed(2).toString(), 600, 330);
+
+                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                ctx.fillText(generation_offspring_reproduced_preface, 390, 355);
+
+                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                ctx.fillText(organisms.length.toString(), 600, 355);
+
+                if (opacity <= 0.01) {
+                    finished = true;
+                }
+                else {
+                    opacity -= 0.05;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(req);
+                resolve("Fade Out Summary Complete.");
             }
         }
         req = requestAnimationFrame(animate);
