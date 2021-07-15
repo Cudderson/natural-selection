@@ -176,13 +176,18 @@ async function runGeneration() {
 
     // phase text (place in correct spot when needed)
     await fadeInCrossoverPhaseText();
+    // <canvas message> such as: "In the crossover phase, genes of the selected parent couples are combined to create new offspring"
+    // <possible offspring created>?
     await fadeOutCrossoverPhaseText();
 
     await fadeInMutationPhaseText();
+    // <canvas message> such as: "To maintain genetic diversity, a small percentage of random genes are mutated. <MUTATION RATE>"
     await fadeOutMutationPhaseText();
 
     // we'll also need Create New Generation text, I'll write it here but it will be placed elsewhere later
     await fadeInCreateNewGenPhaseText();
+    // maybe population_size canvas stat could be updated here
+    // <canvas message> such as: "The offspring created from the selected parents will represent the new generation of organisms."
     await fadeOutCreateNewGenPhaseText();
 
     return new Promise(resolve => {
