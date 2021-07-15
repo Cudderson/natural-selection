@@ -180,8 +180,10 @@ async function runGeneration() {
     // <possible offspring created>?
     await fadeOutCrossoverPhaseText();
 
+    // working, speed/position can be adjusted later
     await fadeInMutationPhaseText();
-    // <canvas message> such as: "To maintain genetic diversity, a small percentage of random genes are mutated. <MUTATION RATE>"
+    await fadeInMutationDescriptionText();
+    await fadeOutMutationDescriptionText();
     await fadeOutMutationPhaseText();
 
     // we'll also need Create New Generation text, I'll write it here but it will be placed elsewhere later
@@ -1303,6 +1305,90 @@ function fadeInMutationPhaseText() {
                 //resolve
                 cancelAnimationFrame(req);
                 resolve("Highlight Mutation Phase Text Complete.");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeInMutationDescriptionText() {
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                // clearRect to avoid over-saturated text
+                ctx.fillStyle = 'black';
+                ctx.fillRect(100, 275, 800, 150);
+
+                var description = "To maintain genetic diversity, a small percentage of random genes are mutated";
+                var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100)}%`.toString();
+
+                ctx.font = "20px arial";
+                ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
+                ctx.fillText(description, 190, 300);
+
+                ctx.font = "22px arial";
+                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                ctx.fillText(mutation_rate_text, 420, 350);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.05;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(req);
+                resolve("Fade In Mutation Description Complete.");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeOutMutationDescriptionText() {
+    var finished = false;
+    var opacity = 1.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                //animate
+                // strategy: redraw the description with less opacity each frame, clearing rect before each redraw
+                ctx.fillStyle = 'black';
+                ctx.fillRect(100, 275, 800, 150);
+
+                var description = "To maintain genetic diversity, a small percentage of random genes are mutated";
+                var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100)}%`.toString();
+
+                ctx.font = "20px arial";
+                ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
+                ctx.fillText(description, 190, 300);
+
+                ctx.font = "22px arial";
+                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                ctx.fillText(mutation_rate_text, 420, 350);
+
+                if (opacity <= 0.01) {
+                    finished = true;
+                }
+                else {
+                    opacity -= 0.05;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                //resolve
+                // clearRect one last time if needed here
+                cancelAnimationFrame(req);
+                resolve();
             }
         }
         req = requestAnimationFrame(animate);
