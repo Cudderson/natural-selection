@@ -176,13 +176,15 @@ async function runGeneration() {
 
     // phase text (place in correct spot when needed)
     await fadeInCrossoverPhaseText();
-    // <canvas message> such as: "In the crossover phase, genes of the selected parent couples are combined to create new offspring"
-    // <possible offspring created>?
+    await fadeInCrossoverDescriptionText();
+    await sleepTest(2000);
+    await fadeOutCrossoverDescriptionText();
     await fadeOutCrossoverPhaseText();
 
     // working, speed/position can be adjusted later
     await fadeInMutationPhaseText();
     await fadeInMutationDescriptionText();
+    await sleepTest(2000);
     await fadeOutMutationDescriptionText();
     await fadeOutMutationPhaseText();
 
@@ -191,6 +193,12 @@ async function runGeneration() {
     // maybe population_size canvas stat could be updated here
     // <canvas message> such as: "The offspring created from the selected parents will represent the new generation of organisms."
     await fadeOutCreateNewGenPhaseText();
+
+    // maybe have a generation summary animation that shows:
+    // Summary for Generation X: 
+    // Average Fitness: x.xx
+    // Offspring Reproduced: <New Population Size>
+    // -update statistics-
 
     return new Promise(resolve => {
         generation_count++;
@@ -1214,6 +1222,94 @@ function fadeInCrossoverPhaseText() {
                 //resolve
                 cancelAnimationFrame(req);
                 resolve("Highlight Crossover Text Complete.");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeInCrossoverDescriptionText() {
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                // clearRect to avoid over-saturated text
+                ctx.fillStyle = 'black';
+                ctx.fillRect(75, 275, 950, 150);
+
+                var description = "In the crossover phase, genes of the selected parent couples are combined to create new offspring";
+                // saving in case I want ot include new pop size
+                // var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100)}%`.toString();
+
+                ctx.font = "20px arial";
+                ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
+                ctx.fillText(description, 80, 300);
+
+                // saving in case I want ot include new pop size
+                // ctx.font = "22px arial";
+                // ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                // ctx.fillText(mutation_rate_text, 420, 350);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.05;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(req);
+                resolve("Fade In Crossover Description Complete.");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeOutCrossoverDescriptionText() {
+    var finished = false;
+    var opacity = 1.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                //animate
+                // strategy: redraw the description with less opacity each frame, clearing rect before each redraw
+                ctx.fillStyle = 'black';
+                ctx.fillRect(75, 275, 950, 150);
+
+                var description = "In the crossover phase, genes of the selected parent couples are combined to create new offspring";
+                // saving in case I want to include pop size
+                // var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100)}%`.toString();
+
+                ctx.font = "20px arial";
+                ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
+                ctx.fillText(description, 80, 300);
+
+                // saving in case I want to include pop size
+                // ctx.font = "22px arial";
+                // ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                // ctx.fillText(mutation_rate_text, 420, 350);
+
+                if (opacity <= 0.01) {
+                    finished = true;
+                }
+                else {
+                    opacity -= 0.05;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                //resolve
+                // clearRect one last time if needed here
+                cancelAnimationFrame(req);
+                resolve();
             }
         }
         req = requestAnimationFrame(animate);
