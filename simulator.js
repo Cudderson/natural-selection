@@ -132,7 +132,7 @@ async function runSimulation () {
     do {
         const result = await runGeneration();
         console.log(result);
-    } while (generation_count < 3);
+    } while (generation_count < 50);
 }
 
 async function runGeneration() {
@@ -955,23 +955,23 @@ function drawPhases() {
 
     // before animation run
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Create New Generation", 10, 60);
+    ctx.fillText("Create New Generation", 10, 30);
 
     // while main-animation running
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Evaluate Individuals", 10, 90);
+    ctx.fillText("Evaluate Individuals", 10, 60);
 
     // while highlighting animation running
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Select Most-Fit Individuals", 10, 120);
+    ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
     // after highlighting over / may need own animation / help text on top right?
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Crossover", 10, 150);
+    ctx.fillText("Crossover", 10, 120);
 
     // may need own animation / when generation stats are updated
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Mutate", 10, 180);
+    ctx.fillText("Mutate", 10, 150);
 }
 
 function fadeInEvaluationPhaseText() {
@@ -986,19 +986,19 @@ function fadeInEvaluationPhaseText() {
                 ctx.font = "20px arial";
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 60);
+                ctx.fillText("Create New Generation", 10, 30);
 
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
-                ctx.fillText("Evaluate Individuals", 10, 90);
+                ctx.fillText("Evaluate Individuals", 10, 60);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 120);
+                ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover", 10, 150);
+                ctx.fillText("Crossover", 10, 120);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Mutate", 10, 180);
+                ctx.fillText("Mutate", 10, 150);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -1024,19 +1024,19 @@ function drawEvaluationPhaseText() {
     ctx.font = "20px arial";
 
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Create New Generation", 10, 60);
+    ctx.fillText("Create New Generation", 10, 30);
 
     ctx.fillStyle = 'rgba(255, 215, 0, 1)';
-    ctx.fillText("Evaluate Individuals", 10, 90);
+    ctx.fillText("Evaluate Individuals", 10, 60);
 
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Select Most-Fit Individuals", 10, 120);
+    ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Crossover", 10, 150);
+    ctx.fillText("Crossover", 10, 120);
 
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Mutate", 10, 180);
+    ctx.fillText("Mutate", 10, 150);
 }
 
 function fadeOutEvaluationPhaseText() {
@@ -1050,19 +1050,19 @@ function fadeOutEvaluationPhaseText() {
                 ctx.font = "20px arial";
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 60);
+                ctx.fillText("Create New Generation", 10, 30);
 
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-                ctx.fillText("Evaluate Individuals", 10, 90);
+                ctx.fillText("Evaluate Individuals", 10, 60);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 120);
+                ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover", 10, 150);
+                ctx.fillText("Crossover", 10, 120);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Mutate", 10, 180);
+                ctx.fillText("Mutate", 10, 150);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -1096,19 +1096,19 @@ function fadeInSelectionPhaseText() {
                 ctx.font = "20px arial";
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 60);
+                ctx.fillText("Create New Generation", 10, 30);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Evaluate Individuals", 10, 90);
+                ctx.fillText("Evaluate Individuals", 10, 60);
 
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
-                ctx.fillText("Select Most-Fit Individuals", 10, 120);
+                ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover", 10, 150);
+                ctx.fillText("Crossover", 10, 120);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Mutate", 10, 180);
+                ctx.fillText("Mutate", 10, 150);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -1141,19 +1141,19 @@ function fadeOutSelectionPhaseText() {
                 ctx.font = "20px arial";
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 60);
+                ctx.fillText("Create New Generation", 10, 30);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Evaluate Individuals", 10, 90);
+                ctx.fillText("Evaluate Individuals", 10, 60);
 
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-                ctx.fillText("Select Most-Fit Individuals", 10, 120);
+                ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover", 10, 150);
+                ctx.fillText("Crossover", 10, 120);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Mutate", 10, 180);
+                ctx.fillText("Mutate", 10, 150);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -1187,19 +1187,19 @@ function fadeInCrossoverPhaseText() {
                 ctx.font = "20px arial";
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 60);
+                ctx.fillText("Create New Generation", 10, 30);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Evaluate Individuals", 10, 90);
+                ctx.fillText("Evaluate Individuals", 10, 60);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 120);
+                ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
-                ctx.fillText("Crossover", 10, 150);
+                ctx.fillText("Crossover", 10, 120);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Mutate", 10, 180);
+                ctx.fillText("Mutate", 10, 150);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -1320,19 +1320,19 @@ function fadeOutCrossoverPhaseText() {
                 ctx.font = "20px arial";
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 60);
+                ctx.fillText("Create New Generation", 10, 30);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Evaluate Individuals", 10, 90);
+                ctx.fillText("Evaluate Individuals", 10, 60);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 120);
+                ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-                ctx.fillText("Crossover", 10, 150);
+                ctx.fillText("Crossover", 10, 120);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Mutate", 10, 180);
+                ctx.fillText("Mutate", 10, 150);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -1366,19 +1366,19 @@ function fadeInMutationPhaseText() {
                 ctx.font = "20px arial";
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 60);
+                ctx.fillText("Create New Generation", 10, 30);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Evaluate Individuals", 10, 90);
+                ctx.fillText("Evaluate Individuals", 10, 60);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 120);
+                ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover", 10, 150);
+                ctx.fillText("Crossover", 10, 120);
 
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
-                ctx.fillText("Mutate", 10, 180);
+                ctx.fillText("Mutate", 10, 150);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -1495,19 +1495,19 @@ function fadeOutMutationPhaseText() {
                 ctx.font = "20px arial";
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 60);
+                ctx.fillText("Create New Generation", 10, 30);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Evaluate Individuals", 10, 90);
+                ctx.fillText("Evaluate Individuals", 10, 60);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 120);
+                ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover", 10, 150);
+                ctx.fillText("Crossover", 10, 120);
 
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-                ctx.fillText("Mutate", 10, 180);
+                ctx.fillText("Mutate", 10, 150);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -1541,19 +1541,19 @@ function fadeInCreateNewGenPhaseText() {
                 ctx.font = "20px arial";
 
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
-                ctx.fillText("Create New Generation", 10, 60);
+                ctx.fillText("Create New Generation", 10, 30);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Evaluate Individuals", 10, 90);
+                ctx.fillText("Evaluate Individuals", 10, 60);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 120);
+                ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover", 10, 150);
+                ctx.fillText("Crossover", 10, 120);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Mutate", 10, 180);
+                ctx.fillText("Mutate", 10, 150);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -1689,19 +1689,19 @@ function fadeOutCreateNewGenPhaseText() {
                 ctx.font = "20px arial";
 
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-                ctx.fillText("Create New Generation", 10, 60);
+                ctx.fillText("Create New Generation", 10, 30);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Evaluate Individuals", 10, 90);
+                ctx.fillText("Evaluate Individuals", 10, 60);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 120);
+                ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover", 10, 150);
+                ctx.fillText("Crossover", 10, 120);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Mutate", 10, 180);
+                ctx.fillText("Mutate", 10, 150);
 
                 if (opacity >= 1.00) {
                     finished = true;
