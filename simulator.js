@@ -1,11 +1,11 @@
 document.addEventListener("DOMContentLoaded", runSimulation);
 console.log(3);
 // organism globals
-const TOTAL_ORGANISMS = 30;
+const TOTAL_ORGANISMS = 50;
 const GENE_COUNT = 100;
 const MUTATION_RATE = 0.02;
-const MIN_GENE = -7;
-const MAX_GENE = 7;
+const MIN_GENE = -5;
+const MAX_GENE = 5;
 const INITIAL_X = 500; 
 const INITIAL_Y = 500;
 
