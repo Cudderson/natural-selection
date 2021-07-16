@@ -153,8 +153,8 @@ async function runGeneration() {
 
     await fadeOutEvaluationPhaseText();
     // trying this to prevent text being redrawn to over-saturation
-    ctx.clearRect(10, 10, 275, 200);
-    drawPhases();
+    // ctx.clearRect(10, 10, 275, 200);
+    // drawPhases();
 
     await fadeInSelectionPhaseText();
 
@@ -493,6 +493,7 @@ function sleepTest(milliseconds) {
 }
 
 async function highlightClosestOrganism (closest_organism) {
+    await fadeInClosestOrganismText();
     await fadeInClosestOrganism(closest_organism);
     await fadeClosestToOriginal(closest_organism);
     await fadeInClosestOrganism(closest_organism);
@@ -509,10 +510,6 @@ function fadeInClosestOrganism(closest_organism) {
     return new Promise(resolve => {
         function animate() {
             if (!finished) {
-                //animate
-                ctx.font = "18px arial";
-                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
-                ctx.fillText("Most-Fit Individual", 750, 500);
 
                 closest_organism.ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 closest_organism.ctx.beginPath();
@@ -533,6 +530,40 @@ function fadeInClosestOrganism(closest_organism) {
                 // resolve
                 cancelAnimationFrame(req);
                 resolve("FADE IN CLOSEST ORGANISM COMPLETE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeInClosestOrganismText() {
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                // prevent over-saturation
+                ctx.fillStyle = 'black';
+                ctx.fillRect(750, 480, 250, 28);
+
+                ctx.font = "18px arial";
+                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
+                ctx.fillText("Most-Fit Individual", 750, 500);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.10;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(req);
+                resolve("FADE IN CLOSEST ORGANISM TEXT COMPLETE");
             }
         }
         req = requestAnimationFrame(animate);
@@ -575,6 +606,7 @@ function fadeClosestToOriginal(closest_organism) {
 async function highlightChosenParents(parents) {
 
     // highlight mothers
+    await fadeInMothersText();
     await fadeInMothers(parents);
     await fadeToOriginal(parents, 'female');
     await fadeInMothers(parents);
@@ -583,6 +615,7 @@ async function highlightChosenParents(parents) {
     await fadeToOriginal(parents, 'female');
 
     // highlight fathers
+    await fadeInFathersText();
     await fadeInFathers(parents);
     await fadeToOriginal(parents, 'male');
     await fadeInFathers(parents);
@@ -611,10 +644,10 @@ function fadeInMothers(parents) {
 
         function animate() {
             if (!finished) {
-                // do stuff
-                ctx.font = "18px arial";
-                ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
-                ctx.fillText("Females chosen to reproduce", 750, 520);
+
+                // ctx.font = "18px arial";
+                // ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
+                // ctx.fillText("Females chosen to reproduce", 750, 520);
 
                 for (var i = 0; i < parents.length; i++) {
                     parents[i][0].ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
@@ -642,16 +675,44 @@ function fadeInMothers(parents) {
     })
 }
 
+function fadeInMothersText() {
+    return new Promise(resolve => {
+        var opacity = 0.00;
+        var finished = false;
+
+        function animate() {
+            if (!finished) {
+                
+                ctx.font = "18px arial";
+                ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
+                ctx.fillText("Females chosen to reproduce", 750, 520);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.10;
+                }
+                setTimeout(function() {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(req);
+                resolve("FADE IN MOTHERS TEXT COMPLETE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
 function fadeInFathers(parents) {
     return new Promise(resolve => {
         var opacity = 0.00;
         var finished = false;
         function animate() {
             if (!finished) {
-                // animate frame
-                ctx.font = "18px arial";
-                ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
-                ctx.fillText("Males chosen to reproduce", 750, 545);
                 for (var i = 0; i < parents.length; i++) {
                     parents[i][1].ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
                     parents[i][1].ctx.beginPath();
@@ -672,6 +733,36 @@ function fadeInFathers(parents) {
                 // resolve
                 cancelAnimationFrame(req);
                 resolve("FATHERS FADE-IN COMPLETE");
+            }
+        }
+        req = requestAnimationFrame(animate);
+    })
+}
+
+function fadeInFathersText() {
+    return new Promise(resolve => {
+        var opacity = 0.00;
+        var finished = false;
+        function animate() {
+            if (!finished) {
+                ctx.font = "18px arial";
+                ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
+                ctx.fillText("Males chosen to reproduce", 750, 545);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.10;
+                }
+                setTimeout(function () {
+                    req = requestAnimationFrame(animate);
+                }, 1000 / FPS);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(req);
+                resolve("FATHERS TEXT FADE-IN COMPLETE");
             }
         }
         req = requestAnimationFrame(animate);
@@ -953,23 +1044,18 @@ function fadeInPhases() {
 function drawPhases() {
     ctx.font = "20px arial";
 
-    // before animation run
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
     ctx.fillText("Create New Generation", 10, 30);
 
-    // while main-animation running
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
     ctx.fillText("Evaluate Individuals", 10, 60);
 
-    // while highlighting animation running
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
     ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
-    // after highlighting over / may need own animation / help text on top right?
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
     ctx.fillText("Crossover", 10, 120);
 
-    // may need own animation / when generation stats are updated
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
     ctx.fillText("Mutate", 10, 150);
 }
@@ -1040,32 +1126,23 @@ function drawEvaluationPhaseText() {
 }
 
 function fadeOutEvaluationPhaseText() {
-    // could improve by only clearing area where Evaluate Individuals text is
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
         function animate() {
             if (!finished) {
-                //animate
+
+                // testing smooth transition
                 ctx.font = "20px arial";
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 30);
-
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
                 ctx.fillText("Evaluate Individuals", 10, 60);
 
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover", 10, 120);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Mutate", 10, 150);
-
                 if (opacity >= 1.00) {
                     finished = true;
+                    // testing smooth transitions
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(10, 10, 275, 200);
+                    drawPhases();
                 }
                 else {
                     opacity += 0.05;
@@ -1139,24 +1216,14 @@ function fadeOutSelectionPhaseText() {
             if (!finished) {
                 //animate
                 ctx.font = "20px arial";
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 30);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Evaluate Individuals", 10, 60);
-
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
                 ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover", 10, 120);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Mutate", 10, 150);
-
                 if (opacity >= 1.00) {
                     finished = true;
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(10, 10, 275, 200);
+                    drawPhases();
                 }
                 else {
                     opacity += 0.05;
@@ -1318,24 +1385,14 @@ function fadeOutCrossoverPhaseText() {
             if (!finished) {
                 //animate
                 ctx.font = "20px arial";
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 30);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Evaluate Individuals", 10, 60);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
                 ctx.fillText("Crossover", 10, 120);
 
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Mutate", 10, 150);
-
                 if (opacity >= 1.00) {
                     finished = true;
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(10, 10, 275, 200);
+                    drawPhases();
                 }
                 else {
                     opacity += 0.05;
@@ -1493,24 +1550,14 @@ function fadeOutMutationPhaseText() {
             if (!finished) {
                 //animate
                 ctx.font = "20px arial";
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 30);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Evaluate Individuals", 10, 60);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover", 10, 120);
-
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
                 ctx.fillText("Mutate", 10, 150);
 
                 if (opacity >= 1.00) {
                     finished = true;
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(10, 10, 275, 200);
+                    drawPhases();
                 }
                 else {
                     opacity += 0.05;
@@ -1687,24 +1734,14 @@ function fadeOutCreateNewGenPhaseText() {
             if (!finished) {
                 //animate
                 ctx.font = "20px arial";
-
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
                 ctx.fillText("Create New Generation", 10, 30);
 
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Evaluate Individuals", 10, 60);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover", 10, 120);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Mutate", 10, 150);
-
                 if (opacity >= 1.00) {
                     finished = true;
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(10, 10, 275, 200);
+                    drawPhases();
                 }
                 else {
                     opacity += 0.05;
@@ -1724,19 +1761,9 @@ function fadeOutCreateNewGenPhaseText() {
 }
 
 async function runSelectionAnimations(closest_organism, parents) {
-    // 1. fade-to-original PhasesText (could be done in previous animation)
-    // 2. fade-in/highlight 'Select Most-Fit Individuals'
-    // 3. highlightClosestOrganism()
-    // 4. highlightChosenParents()
-    // 5. fade-to-original PhasesText
-
-    // 1. (not ready)
-    // 2. (not ready)
-    // 3.
+    // maybe model other phases after this one
     await highlightClosestOrganism(closest_organism);
-    // 4.
     await highlightChosenParents(parents);
-    // 5. (not ready)
 
     return new Promise(resolve => {
         resolve();
