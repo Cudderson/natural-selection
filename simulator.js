@@ -544,11 +544,11 @@ function fadeInClosestOrganismText() {
             if (!finished) {
                 // prevent over-saturation
                 ctx.fillStyle = 'black';
-                ctx.fillRect(750, 480, 250, 28);
+                ctx.fillRect(750, 450, 275, 20);
 
-                ctx.font = "18px arial";
+                ctx.font = "20px arial";
                 ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
-                ctx.fillText("Most-Fit Individual", 750, 500);
+                ctx.fillText("Most-Fit Individual", 800, 470);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -682,10 +682,13 @@ function fadeInMothersText() {
 
         function animate() {
             if (!finished) {
+
+                ctx.fillStyle = 'black';
+                ctx.fillRect(750, 480, 275, 20);
                 
-                ctx.font = "18px arial";
+                ctx.font = "20px arial";
                 ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
-                ctx.fillText("Females chosen to reproduce", 750, 520);
+                ctx.fillText("Females Selected", 800, 500);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -745,9 +748,12 @@ function fadeInFathersText() {
         var finished = false;
         function animate() {
             if (!finished) {
-                ctx.font = "18px arial";
+                ctx.fillStyle = 'black';
+                ctx.fillRect(750, 510, 275, 20);
+
+                ctx.font = "20px arial";
                 ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
-                ctx.fillText("Males chosen to reproduce", 750, 545);
+                ctx.fillText("Males Selected", 800, 530);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -776,9 +782,12 @@ function fadeInNotChosen() {
         function animate() {
             if (!finished) {
                 // animate
-                ctx.font = "18px arial";
+                ctx.fillStyle = 'black';
+                ctx.fillRect(750, 540, 275, 20);
+
+                ctx.font = "20px arial";
                 ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
-                ctx.fillText("Not chosen to reproduce", 750, 570);
+                ctx.fillText("Not Selected", 800, 560);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -908,18 +917,18 @@ function fadeToBlackText() {
             if (!finished) {
                 // animate
                 // 'clear' text
-                // clearRect() method will work great when there's no organisms in the way of the cleared area
-                ctx.clearRect(750, 400, 250, 250);
+                ctx.fillStyle = 'black';
+                ctx.fillRect(750, 480, 275, 100);
 
-                ctx.font = "18px arial";
+                ctx.font = "20px arial";
                 ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
-                ctx.fillText("Females chosen to reproduce", 750, 520);
+                ctx.fillText("Females Selected", 800, 500);
 
                 ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
-                ctx.fillText("Males chosen to reproduce", 750, 545);
+                ctx.fillText("Males Selected", 800, 530);
 
                 ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
-                ctx.fillText("Not chosen to reproduce", 750, 570);
+                ctx.fillText("Not Selected", 800, 560);
 
                 if (opacity <= 0.01) {
                     finished = true;
@@ -949,12 +958,12 @@ function fadeToBlackTextClosestOrganism() {
             if (!finished) {
                 // animate
                 // 'clear' text
-                // clearRect() method will work great when there's no organisms in the way of the cleared area
-                ctx.clearRect(750, 400, 250, 250);
+                ctx.fillStyle = 'black';
+                ctx.fillRect(750, 450, 275, 20);
 
-                ctx.font = "18px arial";
+                ctx.font = "20px arial";
                 ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
-                ctx.fillText("Most-Fit Individual", 750, 500);
+                ctx.fillText("Most-Fit Individual", 800, 470);
 
                 if (opacity <= 0.01) {
                     finished = true;
