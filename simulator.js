@@ -141,41 +141,44 @@ async function runGeneration() {
     // ctx.fillStyle = 'red';
     // ctx.fillRect(10, 10, 275, 200);
 
-    await fadeInEvaluationPhaseText();
+    await fadeInEvaluationPhaseText();//
 
     // PHASE: EVALUATE INDIVIDUALS (highlightClosestOrganism() freezes animation sometimes)
     // this is where statistics are redrawn (goal.showStatistics())
-    await runEvaluationAnimation(); 
+    await runEvaluationAnimation(); //
 
-    const population_resolution = await evaluatePopulation();
+    const population_resolution = await evaluatePopulation(); // maybe don't await here
     var closest_organism = population_resolution['closest_organism'];
     average_fitness = population_resolution['average_fitness'];
 
-    await fadeOutEvaluationPhaseText();
+    await fadeOutEvaluationPhaseText(); //
     // trying this to prevent text being redrawn to over-saturation
     // ctx.clearRect(10, 10, 275, 200);
     // drawPhases();
 
-    await fadeInSelectionPhaseText();
+    await fadeInSelectionPhaseText(); // 
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     // this phase includes: beginSelectionProcess(), selectParentsForReproduction()
-    const potential_parents = await beginSelectionProcess();
+    const potential_parents = await beginSelectionProcess(); // maybe don't await here
 
     var potential_mothers = potential_parents['potential_mothers'];
     var potential_fathers = potential_parents['potential_fathers'];
 
     var parents = selectParentsForReproduction(potential_mothers, potential_fathers);
 
-    await runSelectionAnimations(closest_organism, parents);
+    console.log("made it to here, calling runSelectionAnimations()"); // this means that fadeInSelectionPhaseText() resolves when opacity >= 1.00
 
-    await fadeOutSelectionPhaseText();
+    await runSelectionAnimations(closest_organism, parents); //
+
+    await fadeOutSelectionPhaseText(); // 
 
     // PHASE: CROSSOVER / MUTATE / REPRODUCE
     // this function handles crossover, mutation and reproduction
     // this function pushes new gen organisms to offspring_organisms[]
     reproduceNewGeneration(parents);
 
+    // follow same naming convention for these animations!
     await fadeInCrossoverPhaseText();
     await fadeInCrossoverDescriptionText();
     await sleepTest(2000);
@@ -262,7 +265,7 @@ function getRandomGene(min, max) {
 function updateAndMoveOrganisms(goal) {
     return new Promise(resolve => {
         var finished = false;
-        async function animate() {
+        async function animateOrganisms() {
             if (!finished) {
                 // animate
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -286,14 +289,14 @@ function updateAndMoveOrganisms(goal) {
             }
             else {
                 // resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve(0);
             }
             setTimeout(function() {
-                req = requestAnimationFrame(animate);
+                frame_id = requestAnimationFrame(animateOrganisms);
             }, 1000 / FPS);
         }
-        req = requestAnimationFrame(animate);
+        start_animate_organisms = requestAnimationFrame(animateOrganisms);
     })
 }
 
@@ -494,8 +497,10 @@ function sleepTest(milliseconds) {
 }
 
 async function highlightClosestOrganism (closest_organism) {
+    console.log('highlightClosestOrganism() called');
     await fadeInClosestOrganismText();
-    await fadeInClosestOrganism(closest_organism);
+    const x = await fadeInClosestOrganism(closest_organism);
+    console.log(x);
     await fadeClosestToOriginal(closest_organism);
     await fadeInClosestOrganism(closest_organism);
     await fadeClosestToOriginal(closest_organism);
@@ -509,10 +514,11 @@ async function highlightClosestOrganism (closest_organism) {
 }
 
 function fadeInClosestOrganism(closest_organism) {
+    console.log('fadeInClosestOrganism() called');
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeInClosest() {
             if (!finished) {
 
                 closest_organism.ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
@@ -525,26 +531,30 @@ function fadeInClosestOrganism(closest_organism) {
                 }
                 else {
                     opacity += 0.10;
+                    console.log(opacity);
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeInClosest);
                 }, 1000 / FPS);
             }
             else {
                 // resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("FADE IN CLOSEST ORGANISM COMPLETE");
             }
         }
-        req = requestAnimationFrame(animate);
+        console.log('calling animate2()');
+        start_closest_fadein = requestAnimationFrame(fadeInClosest);
     })
 }
 
 function fadeInClosestOrganismText() {
+    console.log("fadeInClosestOrganismText() called");
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeInClosestText() {
+            console.log('animate called');
             if (!finished) {
                 // prevent over-saturation
                 ctx.fillStyle = 'black';
@@ -561,24 +571,26 @@ function fadeInClosestOrganismText() {
                     opacity += 0.10;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeInClosestText);
                 }, 1000 / FPS);
             }
             else {
                 // resolve
-                cancelAnimationFrame(req);
+                console.log('resolving');
+                cancelAnimationFrame(frame_id);
                 resolve("FADE IN CLOSEST ORGANISM TEXT COMPLETE");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_closest_text_fadein = requestAnimationFrame(fadeInClosestText);
     })
 }
 
 function fadeClosestToOriginal(closest_organism) {
+    console.log("fadeClosestToOriginal() called");
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeToOriginalClosest() {
             if (!finished) {
                 //animate
                 // need to redraw black dot to make opacity decrease work
@@ -594,16 +606,16 @@ function fadeClosestToOriginal(closest_organism) {
                     opacity += 0.10;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeToOriginalClosest);
                 }, 1000 / FPS);
             }
             else {
                 //resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("FADE CLOSEST TO ORIGINAL COMPLETE");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_closest_fade_to_original = requestAnimationFrame(fadeToOriginalClosest);
     })
 }
 
@@ -650,7 +662,7 @@ function fadeInMothers(parents) {
         var opacity = 0.00;
         var finished = false;
 
-        function animate() {
+        function motherFadeIn() {
             if (!finished) {
 
                 // ctx.font = "18px arial";
@@ -670,16 +682,16 @@ function fadeInMothers(parents) {
                     opacity += 0.10;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(motherFadeIn);
                 }, 1000 / FPS);
             }
             else {
                 // resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("FADE IN MOTHERS COMPLETE");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_mother_fade_in = requestAnimationFrame(motherFadeIn);
     })
 }
 
@@ -688,7 +700,7 @@ function fadeInMothersText() {
         var opacity = 0.00;
         var finished = false;
 
-        function animate() {
+        function fadeInTextMother() {
             if (!finished) {
 
                 ctx.fillStyle = 'black';
@@ -705,16 +717,16 @@ function fadeInMothersText() {
                     opacity += 0.10;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeInTextMother);
                 }, 1000 / FPS);
             }
             else {
                 // resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("FADE IN MOTHERS TEXT COMPLETE");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_mother_text_fadein = requestAnimationFrame(fadeInTextMother);
     })
 }
 
@@ -722,7 +734,7 @@ function fadeInFathers(parents) {
     return new Promise(resolve => {
         var opacity = 0.00;
         var finished = false;
-        function animate() {
+        function fatherFadeIn() {
             if (!finished) {
                 for (var i = 0; i < parents.length; i++) {
                     parents[i][1].ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
@@ -737,16 +749,16 @@ function fadeInFathers(parents) {
                     opacity += 0.10;
                 }
                 setTimeout(function () {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fatherFadeIn);
                 }, 1000 / FPS);
             }
             else {
                 // resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("FATHERS FADE-IN COMPLETE");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_father_fadein = requestAnimationFrame(fatherFadeIn);
     })
 }
 
@@ -754,7 +766,7 @@ function fadeInFathersText() {
     return new Promise(resolve => {
         var opacity = 0.00;
         var finished = false;
-        function animate() {
+        function fadeInTextFather() {
             if (!finished) {
                 ctx.fillStyle = 'black';
                 ctx.fillRect(750, 510, 275, 20);
@@ -770,16 +782,16 @@ function fadeInFathersText() {
                     opacity += 0.10;
                 }
                 setTimeout(function () {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeInTextFather);
                 }, 1000 / FPS);
             }
             else {
                 // resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("FATHERS TEXT FADE-IN COMPLETE");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_father_text_fadein = requestAnimationFrame(fadeInTextFather);
     })
 }
 
@@ -787,7 +799,7 @@ function fadeInNotChosen() {
     return new Promise(resolve => {
         var opacity = 0.00;
         var finished = false;
-        function animate() {
+        function notChosenFadeIn() {
             if (!finished) {
                 // animate
                 ctx.fillStyle = 'black';
@@ -804,16 +816,16 @@ function fadeInNotChosen() {
                     opacity += 0.04;
                 }
                 setTimeout(function () {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(notChosenFadeIn);
                 }, 1000 / FPS);
             }
             else {
                 // resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("NOT CHOSEN TEXT ANIMATION COMPLETE");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_not_chosen_fadein = requestAnimationFrame(notChosenFadeIn);
     })
 }
 
@@ -823,7 +835,7 @@ function fadeToOriginal(parents, gender) {
     var finished = false;
 
     return new Promise(resolve => {
-        function animate() {
+        function fadeParentsToOriginal() {
             if (!finished) {
                 // animate
                 if (gender === 'female') {
@@ -862,16 +874,16 @@ function fadeToOriginal(parents, gender) {
                     opacity += 0.10;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeParentsToOriginal);
                 }, 1000 / FPS);
             }
             else {
                 // resolve
-                cancelAnimationFrame(animate);
+                cancelAnimationFrame(frame_id);
                 resolve("FADE TO ORIGINAL COMPLETE");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_parents_fade_to_original = requestAnimationFrame(fadeParentsToOriginal);
     })
 }
 
@@ -879,7 +891,7 @@ function fadeToBlack(organisms) {
     var finished = false;
     var opacity = 1.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeToBlackOrganisms() {
             if (!finished) {
                 // animate
                 for (var i = 0; i < organisms.length; i++) {
@@ -904,16 +916,16 @@ function fadeToBlack(organisms) {
                 }
 
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeToBlackOrganisms);
                 }, 1000 / FPS);
             }
             else {
                 // resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("FADE TO BLACK COMPLETE");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_organism_fade_to_black = requestAnimationFrame(fadeToBlackOrganisms);
     })
 }
 
@@ -921,7 +933,7 @@ function fadeToBlackText() {
     var finished = false;
     var opacity = 1.00;
     return new Promise(resolve => {
-        function animate() {
+        function textFadeToBlack() {
             if (!finished) {
                 // animate
                 // 'clear' text
@@ -945,16 +957,16 @@ function fadeToBlackText() {
                     opacity -= 0.05;
                 }
                 setTimeout(function() {
-                    req =  requestAnimationFrame(animate);
+                    frame_id =  requestAnimationFrame(textFadeToBlack);
                 }, 1000 / FPS);
             }
             else {
                 // resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("FADE TO BLACK TEXT COMPLETE");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_text_fade_to_black = requestAnimationFrame(textFadeToBlack);
     })
 }
 
@@ -962,7 +974,7 @@ function fadeToBlackTextClosestOrganism() {
     var finished = false;
     var opacity = 1.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeBlackClosest() {
             if (!finished) {
                 // animate
                 // 'clear' text
@@ -980,16 +992,16 @@ function fadeToBlackTextClosestOrganism() {
                     opacity -= 0.05;
                 }
                 setTimeout(function() {
-                    req =  requestAnimationFrame(animate);
+                    frame_id =  requestAnimationFrame(fadeBlackClosest);
                 }, 1000 / FPS);
             }
             else {
                 // resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("FADE TO BLACK TEXT COMPLETE");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_fade_black_closest = requestAnimationFrame(fadeBlackClosest);
     })
 }
 
@@ -1081,7 +1093,7 @@ function fadeInEvaluationPhaseText() {
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeInEvalText() {
             if (!finished) {
                 // clearRect to avoid over-saturated text
                 ctx.clearRect(10, 10, 275, 200);
@@ -1110,16 +1122,16 @@ function fadeInEvaluationPhaseText() {
                     opacity += 0.05;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeInEvalText);
                 }, 1000 / FPS);
             }
             else {
                 //resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("Highlight Evaluation Text Complete.");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_eval_fade_in = requestAnimationFrame(fadeInEvalText);
     })
 }
 
@@ -1147,7 +1159,7 @@ function fadeOutEvaluationPhaseText() {
         var finished = false;
         var opacity = 0.00;
 
-        function animate() {
+        function fadeOutEvalText() {
             if (!finished) {
 
                 ctx.font = "20px arial";
@@ -1164,16 +1176,16 @@ function fadeOutEvaluationPhaseText() {
                     opacity += 0.05;
                 }
                 setTimeout(function() {
-                    var req = requestAnimationFrame(animate); // using var may have fixed problem?
+                    frame_id = requestAnimationFrame(fadeOutEvalText); // using var may have fixed problem?
                 }, 1000 / FPS);
             }
             else {
                 //resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("FADE OUT EVALUATE INDIVIDUALS DONE");
             }
         }
-        var req = requestAnimationFrame(animate);
+        start_eval_text_fadeout = requestAnimationFrame(fadeOutEvalText);
     })
 }
 
@@ -1181,7 +1193,7 @@ function fadeInSelectionPhaseText() {
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeInSelectionText() {
             if (!finished) {
                 // clearRect to avoid over-saturated text
                 ctx.clearRect(10, 10, 275, 200);
@@ -1211,16 +1223,16 @@ function fadeInSelectionPhaseText() {
                     console.log(opacity);
                 }
                 setTimeout(function() {
-                    var req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeInSelectionText);
                 }, 1000 / FPS);
             }
             else {
                 //resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("Highlight Evaluation Text Complete.");
             }
         }
-        var req = requestAnimationFrame(animate);
+        start_selection_text_fadein = requestAnimationFrame(fadeInSelectionText);
     })
 }
 
@@ -1229,7 +1241,7 @@ function fadeOutSelectionPhaseText() {
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
-        function animate() {
+        function selectionTextFadeOut() {
             if (!finished) {
                 //animate
                 ctx.font = "20px arial";
@@ -1246,16 +1258,16 @@ function fadeOutSelectionPhaseText() {
                     opacity += 0.05;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(selectionTextFadeOut);
                 }, 1000 / FPS);
             }
             else {
                 //resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("FADE OUT SELECTION PHASE TEXT DONE");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_selection_text_fadeout = requestAnimationFrame(selectionTextFadeOut);
     })
 }
 
@@ -1778,11 +1790,10 @@ function fadeOutCreateNewGenPhaseText() {
 }
 
 async function runSelectionAnimations(closest_organism, parents) {
+    console.log("Called runSelectionAnimations()");
     // maybe model other phases after this one
-    const h = await highlightClosestOrganism(closest_organism);
-    console.log(h);
-    const hc = await highlightChosenParents(parents);
-    console.log(hc);
+    await highlightClosestOrganism(closest_organism);
+    await highlightChosenParents(parents);
 
     return new Promise(resolve => {
         resolve("Run Selection Animations Complete");
