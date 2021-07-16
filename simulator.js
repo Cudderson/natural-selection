@@ -168,6 +168,7 @@ async function runGeneration() {
     var parents = selectParentsForReproduction(potential_mothers, potential_fathers);
 
     await runSelectionAnimations(closest_organism, parents);
+
     await fadeOutSelectionPhaseText();
 
     // PHASE: CROSSOVER / MUTATE / REPRODUCE
@@ -207,10 +208,10 @@ async function runEvaluationAnimation() {
     const update_and_move_result = await updateAndMoveOrganisms(goal); // ideally don't pass in goal here
     return new Promise((resolve, reject) => {
         if (update_and_move_result == 0) {
-            resolve(0);
+            resolve("EVALUATION ANIMATION COMPLETE");
         }
         else {
-            reject(1);
+            reject("Evaluation animation failed");
         }
     })
 }
@@ -502,6 +503,9 @@ async function highlightClosestOrganism (closest_organism) {
     await sleepTest(1000);
     await fadeToBlackTextClosestOrganism();
     await fadeClosestToOriginal(closest_organism);
+    return new Promise(resolve => {
+        resolve("Highlight Closest Organism Complete");
+    })
 }
 
 function fadeInClosestOrganism(closest_organism) {
@@ -635,6 +639,10 @@ async function highlightChosenParents(parents) {
     await fadeToOriginal(parents, 'both');
     await fadeToBlack(organisms);
     await sleepTest(1000);
+
+    return new Promise(resolve => {
+        resolve("Highlight Chosen Parents Animation Complete");
+    })
 }
 
 function fadeInMothers(parents) {
@@ -1135,20 +1143,19 @@ function drawEvaluationPhaseText() {
 }
 
 function fadeOutEvaluationPhaseText() {
-    var finished = false;
-    var opacity = 0.00;
     return new Promise(resolve => {
+        var finished = false;
+        var opacity = 0.00;
+
         function animate() {
             if (!finished) {
 
-                // testing smooth transition
                 ctx.font = "20px arial";
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
                 ctx.fillText("Evaluate Individuals", 10, 60);
 
-                if (opacity >= 1.00) {
+                if (opacity >= 0.99) {
                     finished = true;
-                    // testing smooth transitions
                     ctx.fillStyle = 'black';
                     ctx.fillRect(10, 10, 275, 200);
                     drawPhases();
@@ -1157,7 +1164,7 @@ function fadeOutEvaluationPhaseText() {
                     opacity += 0.05;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    var req = requestAnimationFrame(animate); // using var may have fixed problem?
                 }, 1000 / FPS);
             }
             else {
@@ -1166,7 +1173,7 @@ function fadeOutEvaluationPhaseText() {
                 resolve("FADE OUT EVALUATE INDIVIDUALS DONE");
             }
         }
-        req = requestAnimationFrame(animate);
+        var req = requestAnimationFrame(animate);
     })
 }
 
@@ -1196,14 +1203,15 @@ function fadeInSelectionPhaseText() {
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
                 ctx.fillText("Mutate", 10, 150);
 
-                if (opacity >= 1.00) {
+                if (opacity >= 0.99) {
                     finished = true;
                 }
                 else {
                     opacity += 0.05;
+                    console.log(opacity);
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    var req = requestAnimationFrame(animate);
                 }, 1000 / FPS);
             }
             else {
@@ -1212,7 +1220,7 @@ function fadeInSelectionPhaseText() {
                 resolve("Highlight Evaluation Text Complete.");
             }
         }
-        req = requestAnimationFrame(animate);
+        var req = requestAnimationFrame(animate);
     })
 }
 
@@ -1771,10 +1779,12 @@ function fadeOutCreateNewGenPhaseText() {
 
 async function runSelectionAnimations(closest_organism, parents) {
     // maybe model other phases after this one
-    await highlightClosestOrganism(closest_organism);
-    await highlightChosenParents(parents);
+    const h = await highlightClosestOrganism(closest_organism);
+    console.log(h);
+    const hc = await highlightChosenParents(parents);
+    console.log(hc);
 
     return new Promise(resolve => {
-        resolve();
+        resolve("Run Selection Animations Complete");
     })
 }
