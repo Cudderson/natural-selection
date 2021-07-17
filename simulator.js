@@ -533,7 +533,7 @@ function fadeInClosestOrganism(closest_organism) {
                     finished = true;
                 }
                 else {
-                    opacity += 0.10;
+                    opacity += 0.04;
                     console.log(opacity);
                 }
                 frame_id = requestAnimationFrame(fadeInClosest);
@@ -568,7 +568,7 @@ function fadeInClosestOrganismText() {
                     finished = true;
                 }
                 else {
-                    opacity += 0.10;
+                    opacity += 0.02;
                 }
                 frame_id = requestAnimationFrame(fadeInClosestText);
             }
@@ -601,7 +601,7 @@ function fadeClosestToOriginal(closest_organism) {
                     finished = true;
                 }
                 else {
-                    opacity += 0.10;
+                    opacity += 0.04;
                 }
                 frame_id = requestAnimationFrame(fadeToOriginalClosest);
             }
@@ -675,7 +675,7 @@ function fadeInMothers(parents) {
                     finished = true;
                 }
                 else {
-                    opacity += 0.10;
+                    opacity += 0.04;
                 }
                 frame_id = requestAnimationFrame(motherFadeIn);
             }
@@ -708,7 +708,7 @@ function fadeInMothersText() {
                     finished = true;
                 }
                 else {
-                    opacity += 0.10;
+                    opacity += 0.02;
                 }
                 frame_id = requestAnimationFrame(fadeInTextMother);
             }
@@ -738,7 +738,7 @@ function fadeInFathers(parents) {
                     finished = true;
                 }
                 else {
-                    opacity += 0.10;
+                    opacity += 0.04;
                 }
                 frame_id = requestAnimationFrame(fatherFadeIn);
             }
@@ -769,7 +769,7 @@ function fadeInFathersText() {
                     finished = true;
                 }
                 else {
-                    opacity += 0.10;
+                    opacity += 0.02;
                 }
                 frame_id = requestAnimationFrame(fadeInTextFather);
             }
@@ -801,7 +801,7 @@ function fadeInNotChosen() {
                     finished = true;
                 }
                 else {
-                    opacity += 0.04;
+                    opacity += 0.02;
                 }
                 frame_id = requestAnimationFrame(notChosenFadeIn);
             }
@@ -857,7 +857,7 @@ function fadeToOriginal(parents, gender) {
                     finished = true;
                 }
                 else {
-                    opacity += 0.10;
+                    opacity += 0.04;
                 }
                 frame_id = requestAnimationFrame(fadeParentsToOriginal);
             }
@@ -896,7 +896,7 @@ function fadeToBlack(organisms) {
                     finished = true;
                 }
                 else {
-                    opacity -= 0.10;
+                    opacity -= 0.05;
                 }
                 frame_id = requestAnimationFrame(fadeToBlackOrganisms);
             }
@@ -935,7 +935,7 @@ function fadeToBlackText() {
                     finished = true;
                 }
                 else {
-                    opacity -= 0.05;
+                    opacity -= 0.02;
                 }
                 frame_id =  requestAnimationFrame(textFadeToBlack);
             }
@@ -968,7 +968,7 @@ function fadeToBlackTextClosestOrganism() {
                     finished = true;
                 }
                 else {
-                    opacity -= 0.05;
+                    opacity -= 0.02;
                 }
                 frame_id =  requestAnimationFrame(fadeBlackClosest);
             }
@@ -994,6 +994,7 @@ function getGender() {
     return gender
 }
 
+// this function needs work
 function fadeInPhases() {
     var finished = false;
     var opacity = 0.01;
