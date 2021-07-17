@@ -1276,17 +1276,17 @@ function fadeInCrossoverDescriptionText() {
                 ctx.fillStyle = 'black';
                 ctx.fillRect(75, 275, 950, 150);
 
-                var description = "In the crossover phase, genes of the selected parent couples are combined to create new offspring";
+                var description = "Genes of the selected parent couples are combined to create new offspring.";
 
                 ctx.font = "20px arial";
                 ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
-                ctx.fillText(description, 80, 300);
+                ctx.fillText(description, 200, 300);
 
                 if (opacity >= 1.00) {
                     finished = true;
                 }
                 else {
-                    opacity += 0.05;
+                    opacity += 0.025;
                 }
                 frame_id = requestAnimationFrame(fadeInCrossoverDescription);
             }
@@ -1309,17 +1309,17 @@ function fadeOutCrossoverDescriptionText() {
                 ctx.fillStyle = 'black';
                 ctx.fillRect(75, 275, 950, 150);
 
-                var description = "In the crossover phase, genes of the selected parent couples are combined to create new offspring";
+                var description = "Genes of the selected parent couples are combined to create new offspring.";
 
                 ctx.font = "20px arial";
                 ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
-                ctx.fillText(description, 80, 300);
+                ctx.fillText(description, 200, 300);
 
                 if (opacity <= 0.01) {
                     finished = true;
                 }
                 else {
-                    opacity -= 0.05;
+                    opacity -= 0.025;
                 }
                 frame_id = requestAnimationFrame(fadeOutCrossoverDescription);
             }
@@ -1420,7 +1420,7 @@ function fadeInMutationDescriptionText() {
                     finished = true;
                 }
                 else {
-                    opacity += 0.05;
+                    opacity += 0.025;
                 }
                 frame_id = requestAnimationFrame(fadeInMutationDescription);
             }
@@ -1458,7 +1458,7 @@ function fadeOutMutationDescriptionText() {
                     finished = true;
                 }
                 else {
-                    opacity -= 0.05;
+                    opacity -= 0.025;
                 }
                 frame_id = requestAnimationFrame(fadeOutMutationDescription);
             }
@@ -1569,7 +1569,7 @@ function fadeInGenerationSummaryText() {
                     finished = true;
                 }
                 else {
-                    opacity += 0.05;
+                    opacity += 0.025;
                 }
                 frame_id = requestAnimationFrame(fadeInGenSummary);
             }
@@ -1617,7 +1617,7 @@ function fadeOutGenerationSummaryText() {
                     finished = true;
                 }
                 else {
-                    opacity -= 0.05;
+                    opacity -= 0.025;
                 }
                 frame_id = requestAnimationFrame(fadeOutGenSummary);
             }
