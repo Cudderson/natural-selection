@@ -1141,11 +1141,19 @@ function fadeOutEvaluationPhaseText() {
     return new Promise(resolve => {
         var finished = false;
         var opacity = 0.00;
+        var old_opacity = 1.00;
 
         function fadeOutEvalText() {
             if (!finished) {
+                // solution to over-saturation:
+                // each frame, draw the same text with less gold and then more gray
+                ctx.fillStyle = 'black';
+                ctx.fillRect(10, 40, 180, 20);
 
                 ctx.font = "20px arial";
+                ctx.fillStyle = `rgba(255, 215, 0, ${old_opacity})`;
+                ctx.fillText("Evaluate Individuals", 10, 60);
+
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
                 ctx.fillText("Evaluate Individuals", 10, 60);
 
@@ -1156,7 +1164,8 @@ function fadeOutEvaluationPhaseText() {
                     drawPhases();
                 }
                 else {
-                    opacity += 0.01;
+                    opacity += 0.02;
+                    old_opacity -= 0.02;
                 }
                 console.log("requesting another frame ok");
                 // for some reason changing the var name makes animation work
