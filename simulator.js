@@ -731,7 +731,7 @@ function fadeInFathers(parents) {
         function fatherFadeIn() {
             if (!finished) {
                 for (var i = 0; i < parents.length; i++) {
-                    parents[i][1].ctx.fillStyle = `rgba(79, 11, 255, ${opacity})`;
+                    parents[i][1].ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
                     parents[i][1].ctx.beginPath();
                     parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
                     parents[i][1].ctx.fill();
@@ -764,7 +764,7 @@ function fadeInFathersText() {
                 ctx.fillRect(750, 510, 275, 20);
 
                 ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(79, 11, 255, ${opacity})`;
+                ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
                 ctx.fillText("Males Selected", 800, 530);
 
                 if (opacity >= 1.00) {
@@ -923,13 +923,13 @@ function fadeToBlackText() {
                 ctx.fillRect(750, 480, 275, 100);
 
                 ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
+                ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
                 ctx.fillText("Females Selected", 800, 500);
 
-                ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
+                ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
                 ctx.fillText("Males Selected", 800, 530);
 
-                ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
                 ctx.fillText("Not Selected", 800, 560);
 
                 if (opacity <= 0.01) {
