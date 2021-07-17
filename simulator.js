@@ -675,7 +675,7 @@ function fadeInMothers(parents) {
                     finished = true;
                 }
                 else {
-                    opacity += 0.04;
+                    opacity += 0.03;
                 }
                 frame_id = requestAnimationFrame(motherFadeIn);
             }
@@ -738,7 +738,7 @@ function fadeInFathers(parents) {
                     finished = true;
                 }
                 else {
-                    opacity += 0.04;
+                    opacity += 0.03;
                 }
                 frame_id = requestAnimationFrame(fatherFadeIn);
             }
@@ -857,7 +857,7 @@ function fadeToOriginal(parents, gender) {
                     finished = true;
                 }
                 else {
-                    opacity += 0.04;
+                    opacity += 0.03;
                 }
                 frame_id = requestAnimationFrame(fadeParentsToOriginal);
             }
