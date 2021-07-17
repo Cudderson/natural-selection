@@ -1083,7 +1083,7 @@ function fadeInEvaluationPhaseText() {
                 ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
                 ctx.fillText("Evaluate Individuals", 10, 60);
 
-                ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
                 ctx.fillText("Evaluate Individuals", 10, 60);
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
@@ -1121,7 +1121,7 @@ function drawEvaluationPhaseText() {
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
     ctx.fillText("Create New Generation", 10, 30);
 
-    ctx.fillStyle = 'rgba(255, 215, 0, 1)';
+    ctx.fillStyle = 'rgba(155, 245, 0, 1)';
     ctx.fillText("Evaluate Individuals", 10, 60);
 
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
@@ -1149,7 +1149,7 @@ function fadeOutEvaluationPhaseText() {
                 ctx.fillRect(10, 40, 180, 20);
 
                 ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(255, 215, 0, ${old_opacity})`;
+                ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
                 ctx.fillText("Evaluate Individuals", 10, 60);
 
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
@@ -1195,7 +1195,7 @@ function fadeInSelectionPhaseText() {
                 ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
                 ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
-                ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
                 ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
                 if (opacity >= 0.99) {
@@ -1232,7 +1232,7 @@ function fadeOutSelectionPhaseText() {
 
                 ctx.font = "20px arial";
 
-                ctx.fillStyle = `rgba(255, 215, 0, ${old_opacity})`;
+                ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
                 ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
@@ -1275,7 +1275,7 @@ function fadeInCrossoverPhaseText() {
                 ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
                 ctx.fillText("Crossover", 10, 120);
 
-                ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
                 ctx.fillText("Crossover", 10, 120);
 
                 if (opacity >= 1.00) {
@@ -1376,7 +1376,7 @@ function fadeOutCrossoverPhaseText() {
 
                 ctx.font = "20px arial";
 
-                ctx.fillStyle = `rgba(255, 215, 0, ${old_opacity})`;
+                ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
                 ctx.fillText("Crossover", 10, 120);
 
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
@@ -1419,7 +1419,7 @@ function fadeInMutationPhaseText() {
                 ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
                 ctx.fillText("Mutate", 10, 150);
 
-                ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
                 ctx.fillText("Mutate", 10, 150);
 
                 if (opacity >= 1.00) {
@@ -1527,7 +1527,7 @@ function fadeOutMutationPhaseText() {
                 ctx.fillRect(10, 130, 100, 20);
                 ctx.font = "20px arial";
 
-                ctx.fillStyle = `rgba(255, 215, 0, ${old_opacity})`;
+                ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
                 ctx.fillText("Mutate", 10, 150);
 
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
@@ -1570,7 +1570,7 @@ function fadeInCreateNewGenPhaseText() {
                 ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
                 ctx.fillText("Create New Generation", 10, 30);
 
-                ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
                 ctx.fillText("Create New Generation", 10, 30);
 
                 if (opacity >= 1.00) {
@@ -1700,7 +1700,7 @@ function fadeOutCreateNewGenPhaseText() {
 
                 ctx.font = "20px arial";
 
-                ctx.fillStyle = `rgba(255, 215, 0, ${old_opacity})`;
+                ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
                 ctx.fillText("Create New Generation", 10, 30);
 
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
