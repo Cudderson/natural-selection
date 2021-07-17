@@ -12,3 +12,11 @@ body {
     margin: 0 auto;
     width: 1000px;
 }
+
+.my-colors {
+    --darkviolet: rgba(148, 0, 211, 1);
+    --mother-pink: rgba(232, 0, 118, 1);
+    --father-blue: rgba(79, 11, 255, 1);
+    --closest_organism_gold: rgba(255, 215, 0, 1);
+    --custom-green: rgba(155, 245, 0, 1);
+}
