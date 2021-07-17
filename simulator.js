@@ -1075,16 +1075,19 @@ function drawPhases() {
 function fadeInEvaluationPhaseText() {
     var finished = false;
     var opacity = 0.00;
+    var old_opacity = 1.00
     return new Promise(resolve => {
         function fadeInEvalText() {
             if (!finished) {
-                // clearRect to avoid over-saturated text
                 ctx.clearRect(10, 10, 275, 200);
 
                 ctx.font = "20px arial";
 
                 ctx.fillStyle = 'rgba(100, 100, 100, 1)';
                 ctx.fillText("Create New Generation", 10, 30);
+
+                ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+                ctx.fillText("Evaluate Individuals", 10, 60);
 
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 ctx.fillText("Evaluate Individuals", 10, 60);
@@ -1104,6 +1107,7 @@ function fadeInEvaluationPhaseText() {
                 else {
                     // testing decreasing opacity difference to increase animation duration
                     opacity += 0.02;
+                    old_opacity -= 0.02;
                 }
                 var frame_id = requestAnimationFrame(fadeInEvalText);
             }
@@ -1183,9 +1187,9 @@ function fadeOutEvaluationPhaseText() {
 }
 
 function fadeInSelectionPhaseText() {
-    console.log("am calllled");
     var finished = false;
     var opacity = 0.00;
+    var old_opacity = 1.00;
     return new Promise(resolve => {
         function fadeInSelectionText() {
             if (!finished) {
@@ -1193,6 +1197,9 @@ function fadeInSelectionPhaseText() {
                 ctx.fillRect(10, 70, 250, 20);
 
                 ctx.font = "20px arial";
+
+                ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+                ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 ctx.fillText("Select Most-Fit Individuals", 10, 90);
@@ -1202,9 +1209,8 @@ function fadeInSelectionPhaseText() {
                 }
                 else {
                     opacity += 0.02;
-                    console.log(opacity);
+                    old_opacity -= 0.02;
                 }
-                console.log('requesting another framey');
                 frame_id = requestAnimationFrame(fadeInSelectionText);
             }
             else {
@@ -1263,6 +1269,7 @@ function fadeOutSelectionPhaseText() {
 function fadeInCrossoverPhaseText() {
     var finished = false;
     var opacity = 0.00;
+    var old_opacity = 1.00;
     return new Promise(resolve => {
         function fadeInCrossoverText() {
             if (!finished) {
@@ -1270,6 +1277,9 @@ function fadeInCrossoverPhaseText() {
                 ctx.fillRect(10, 100, 200, 20);
 
                 ctx.font = "20px arial";
+
+                ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+                ctx.fillText("Crossover", 10, 120);
 
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 ctx.fillText("Crossover", 10, 120);
@@ -1279,6 +1289,7 @@ function fadeInCrossoverPhaseText() {
                 }
                 else {
                     opacity += 0.02;
+                    old_opacity -= 0.02;
                 }
                 frame_id = requestAnimationFrame(fadeInCrossoverText);
             }
@@ -1402,6 +1413,7 @@ function fadeOutCrossoverPhaseText() {
 function fadeInMutationPhaseText() {
     var finished = false;
     var opacity = 0.00;
+    var old_opacity = 1.00;
     return new Promise(resolve => {
         function fadeInMutationText() {
             if (!finished) {
@@ -1409,6 +1421,9 @@ function fadeInMutationPhaseText() {
                 ctx.fillRect(10, 130, 200, 20);
 
                 ctx.font = "20px arial";
+
+                ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+                ctx.fillText("Mutate", 10, 150);
 
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 ctx.fillText("Mutate", 10, 150);
@@ -1418,6 +1433,7 @@ function fadeInMutationPhaseText() {
                 }
                 else {
                     opacity += 0.02;
+                    old_opacity -= 0.02;
                 }
                 frame_id = requestAnimationFrame(fadeInMutationText);
             }
@@ -1548,6 +1564,7 @@ function fadeOutMutationPhaseText() {
 function fadeInCreateNewGenPhaseText() {
     var finished = false;
     var opacity = 0.00;
+    var old_opacity = 1.00;
     return new Promise(resolve => {
         function fadeInNewGenText() {
             if (!finished) {
@@ -1555,6 +1572,9 @@ function fadeInCreateNewGenPhaseText() {
                 ctx.fillRect(10, 10, 250, 20);
 
                 ctx.font = "20px arial";
+
+                ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+                ctx.fillText("Create New Generation", 10, 30);
 
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 ctx.fillText("Create New Generation", 10, 30);
@@ -1564,6 +1584,7 @@ function fadeInCreateNewGenPhaseText() {
                 }
                 else {
                     opacity += 0.02;
+                    old_opacity -= 0.02;
                 }
                 frame_id = requestAnimationFrame(fadeInNewGenText);
             }
