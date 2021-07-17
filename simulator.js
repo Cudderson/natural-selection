@@ -1275,7 +1275,7 @@ function fadeInCrossoverPhaseText() {
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeInCrossoverText() {
             if (!finished) {
                 // clearRect to avoid over-saturated text
                 ctx.clearRect(10, 10, 275, 200);
@@ -1304,16 +1304,16 @@ function fadeInCrossoverPhaseText() {
                     opacity += 0.05;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeInCrossoverText);
                 }, 1000 / FPS);
             }
             else {
                 //resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("Highlight Crossover Text Complete.");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_crossover_text_fadein = requestAnimationFrame(fadeInCrossoverText);
     })
 }
 
@@ -1321,7 +1321,7 @@ function fadeInCrossoverDescriptionText() {
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeInCrossoverDescription() {
             if (!finished) {
                 // clearRect to avoid over-saturated text
                 ctx.fillStyle = 'black';
@@ -1347,16 +1347,16 @@ function fadeInCrossoverDescriptionText() {
                     opacity += 0.05;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeInCrossoverDescription);
                 }, 1000 / FPS);
             }
             else {
                 //resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("Fade In Crossover Description Complete.");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_crossover_description_fadein = requestAnimationFrame(fadeInCrossoverDescription);
     })
 }
 
@@ -1364,7 +1364,7 @@ function fadeOutCrossoverDescriptionText() {
     var finished = false;
     var opacity = 1.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeOutCrossoverDescription() {
             if (!finished) {
                 //animate
                 // strategy: redraw the description with less opacity each frame, clearing rect before each redraw
@@ -1391,17 +1391,17 @@ function fadeOutCrossoverDescriptionText() {
                     opacity -= 0.05;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeOutCrossoverDescription);
                 }, 1000 / FPS);
             }
             else {
                 //resolve
                 // clearRect one last time if needed here
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve();
             }
         }
-        req = requestAnimationFrame(animate);
+        start_crossover_description_fadeout = requestAnimationFrame(fadeOutCrossoverDescription);
     })
 }
 
@@ -1410,7 +1410,7 @@ function fadeOutCrossoverPhaseText() {
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeOutCrossoverText() {
             if (!finished) {
                 //animate
                 ctx.font = "20px arial";
@@ -1427,16 +1427,16 @@ function fadeOutCrossoverPhaseText() {
                     opacity += 0.05;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeOutCrossoverText);
                 }, 1000 / FPS);
             }
             else {
                 //resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("FADE OUT CROSSOVER PHASE TEXT DONE");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_crossover_text_fadeout = requestAnimationFrame(fadeOutCrossoverText);
     })
 }
 
@@ -1444,7 +1444,7 @@ function fadeInMutationPhaseText() {
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeInMutationText() {
             if (!finished) {
                 // clearRect to avoid over-saturated text
                 ctx.clearRect(10, 10, 275, 200);
@@ -1473,16 +1473,16 @@ function fadeInMutationPhaseText() {
                     opacity += 0.05;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeInMutationText);
                 }, 1000 / FPS);
             }
             else {
                 //resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("Highlight Mutation Phase Text Complete.");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_mutation_text_fadein = requestAnimationFrame(fadeInMutationText);
     })
 }
 
@@ -1490,7 +1490,7 @@ function fadeInMutationDescriptionText() {
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeInMutationDescription() {
             if (!finished) {
                 // clearRect to avoid over-saturated text
                 ctx.fillStyle = 'black';
@@ -1514,16 +1514,16 @@ function fadeInMutationDescriptionText() {
                     opacity += 0.05;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeInMutationDescription);
                 }, 1000 / FPS);
             }
             else {
                 //resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("Fade In Mutation Description Complete.");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_mutation_description_fadein = requestAnimationFrame(fadeInMutationDescription);
     })
 }
 
@@ -1531,7 +1531,7 @@ function fadeOutMutationDescriptionText() {
     var finished = false;
     var opacity = 1.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeOutMutationDescription() {
             if (!finished) {
                 //animate
                 // strategy: redraw the description with less opacity each frame, clearing rect before each redraw
@@ -1556,17 +1556,17 @@ function fadeOutMutationDescriptionText() {
                     opacity -= 0.05;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeOutMutationDescription);
                 }, 1000 / FPS);
             }
             else {
                 //resolve
                 // clearRect one last time if needed here
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve();
             }
         }
-        req = requestAnimationFrame(animate);
+        start_mutation_description_fadeout = requestAnimationFrame(fadeOutMutationDescription);
     })
 }
 
@@ -1575,7 +1575,7 @@ function fadeOutMutationPhaseText() {
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeOutMutationText() {
             if (!finished) {
                 //animate
                 ctx.font = "20px arial";
@@ -1592,16 +1592,16 @@ function fadeOutMutationPhaseText() {
                     opacity += 0.05;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeOutMutationText);
                 }, 1000 / FPS);
             }
             else {
                 //resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("FADE OUT MUTATION PHASE TEXT DONE");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_mutation_text_fadeout = requestAnimationFrame(fadeOutMutationText);
     })
 }
 
@@ -1609,7 +1609,7 @@ function fadeInCreateNewGenPhaseText() {
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeInNewGenText() {
             if (!finished) {
                 // clearRect to avoid over-saturated text
                 ctx.clearRect(10, 10, 275, 200);
@@ -1638,16 +1638,16 @@ function fadeInCreateNewGenPhaseText() {
                     opacity += 0.05;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeInNewGenText);
                 }, 1000 / FPS);
             }
             else {
                 //resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("Highlight New Gen Phase Text Complete.");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_new_gen_text_fadein = requestAnimationFrame(fadeInNewGenText);
     })
 }
 
@@ -1655,7 +1655,7 @@ function fadeInGenerationSummaryText() {
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeInGenSummary() {
             if (!finished) {
                 var generation_summary_text = `Generation ${generation_count} Summary:`;
                 var generation_average_fitness_preface = 'Average Fitness:';
@@ -1690,16 +1690,16 @@ function fadeInGenerationSummaryText() {
                     opacity += 0.05;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeInGenSummary);
                 }, 1000 / FPS);
             }
             else {
                 //resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("Fade In Summary Complete.");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_gen_summary_fadein = requestAnimationFrame(fadeInGenSummary);
     })
 }
 
@@ -1707,7 +1707,7 @@ function fadeOutGenerationSummaryText() {
     var finished = false;
     var opacity = 1.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeOutGenSummary() {
             if (!finished) {
                 var generation_summary_text = `Generation ${generation_count} Summary:`;
                 var generation_average_fitness_preface = 'Average Fitness:';
@@ -1741,16 +1741,16 @@ function fadeOutGenerationSummaryText() {
                     opacity -= 0.05;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeOutGenSummary);
                 }, 1000 / FPS);
             }
             else {
                 //resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("Fade Out Summary Complete.");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_gen_summary_fadeout = requestAnimationFrame(fadeOutGenSummary);
     })
 }
 
@@ -1759,7 +1759,7 @@ function fadeOutCreateNewGenPhaseText() {
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
-        function animate() {
+        function fadeOutNewGenText() {
             if (!finished) {
                 //animate
                 ctx.font = "20px arial";
@@ -1776,16 +1776,16 @@ function fadeOutCreateNewGenPhaseText() {
                     opacity += 0.05;
                 }
                 setTimeout(function() {
-                    req = requestAnimationFrame(animate);
+                    frame_id = requestAnimationFrame(fadeOutNewGenText);
                 }, 1000 / FPS);
             }
             else {
                 //resolve
-                cancelAnimationFrame(req);
+                cancelAnimationFrame(frame_id);
                 resolve("FADE OUT CREATE NEW GEN PHASE TEXT DONE");
             }
         }
-        req = requestAnimationFrame(animate);
+        start_new_gen_text_fadeout = requestAnimationFrame(fadeOutNewGenText);
     })
 }
 
