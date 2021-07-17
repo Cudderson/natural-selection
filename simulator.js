@@ -112,13 +112,14 @@ class Goal {
     }
 
     drawGoal () {
-        this.ctx.fillStyle = 'lightgreen';
+        this.ctx.fillStyle = 'rgba(155, 245, 0, 1)';
         this.ctx.fillRect(this.x, this.y, this.size, this.size);
     }
 
     showStatistics () {
         average_fitness = Number(average_fitness).toFixed(2);
         var population_size = organisms.length;
+        this.ctx.fillStyle = 'rgba(155, 245, 0, 1)';
         this.ctx.font = "26px arial";
         this.ctx.fillText('Generation:', 10, 520);
         this.ctx.fillText(generation_count.toString(), 210, 520);
