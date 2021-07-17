@@ -1195,25 +1195,13 @@ function fadeInSelectionPhaseText() {
     return new Promise(resolve => {
         function fadeInSelectionText() {
             if (!finished) {
-                // clearRect to avoid over-saturated text
-                ctx.clearRect(10, 10, 275, 200);
+                ctx.fillStyle = 'black';
+                ctx.fillRect(10, 70, 250, 20);
 
                 ctx.font = "20px arial";
 
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 30);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Evaluate Individuals", 10, 60);
-
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover", 10, 120);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Mutate", 10, 150);
 
                 if (opacity >= 0.99) {
                     finished = true;
@@ -1277,25 +1265,13 @@ function fadeInCrossoverPhaseText() {
     return new Promise(resolve => {
         function fadeInCrossoverText() {
             if (!finished) {
-                // clearRect to avoid over-saturated text
-                ctx.clearRect(10, 10, 275, 200);
+                ctx.fillStyle = 'black';
+                ctx.fillRect(10, 100, 200, 20);
 
                 ctx.font = "20px arial";
 
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 30);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Evaluate Individuals", 10, 60);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 ctx.fillText("Crossover", 10, 120);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Mutate", 10, 150);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -1323,22 +1299,14 @@ function fadeInCrossoverDescriptionText() {
     return new Promise(resolve => {
         function fadeInCrossoverDescription() {
             if (!finished) {
-                // clearRect to avoid over-saturated text
                 ctx.fillStyle = 'black';
                 ctx.fillRect(75, 275, 950, 150);
 
                 var description = "In the crossover phase, genes of the selected parent couples are combined to create new offspring";
-                // saving in case I want ot include new pop size
-                // var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100)}%`.toString();
 
                 ctx.font = "20px arial";
                 ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
                 ctx.fillText(description, 80, 300);
-
-                // saving in case I want ot include new pop size
-                // ctx.font = "22px arial";
-                // ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
-                // ctx.fillText(mutation_rate_text, 420, 350);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -1366,23 +1334,14 @@ function fadeOutCrossoverDescriptionText() {
     return new Promise(resolve => {
         function fadeOutCrossoverDescription() {
             if (!finished) {
-                //animate
-                // strategy: redraw the description with less opacity each frame, clearing rect before each redraw
                 ctx.fillStyle = 'black';
                 ctx.fillRect(75, 275, 950, 150);
 
                 var description = "In the crossover phase, genes of the selected parent couples are combined to create new offspring";
-                // saving in case I want to include pop size
-                // var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100)}%`.toString();
 
                 ctx.font = "20px arial";
                 ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
                 ctx.fillText(description, 80, 300);
-
-                // saving in case I want to include pop size
-                // ctx.font = "22px arial";
-                // ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
-                // ctx.fillText(mutation_rate_text, 420, 350);
 
                 if (opacity <= 0.01) {
                     finished = true;
@@ -1396,7 +1355,6 @@ function fadeOutCrossoverDescriptionText() {
             }
             else {
                 //resolve
-                // clearRect one last time if needed here
                 cancelAnimationFrame(frame_id);
                 resolve();
             }
@@ -1406,7 +1364,6 @@ function fadeOutCrossoverDescriptionText() {
 }
 
 function fadeOutCrossoverPhaseText() {
-    // could improve by only clearing area where Evaluate Individuals text is
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
@@ -1446,22 +1403,10 @@ function fadeInMutationPhaseText() {
     return new Promise(resolve => {
         function fadeInMutationText() {
             if (!finished) {
-                // clearRect to avoid over-saturated text
-                ctx.clearRect(10, 10, 275, 200);
+                ctx.fillStyle = 'black';
+                ctx.fillRect(10, 130, 200, 20);
 
                 ctx.font = "20px arial";
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 30);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Evaluate Individuals", 10, 60);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover", 10, 120);
 
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 ctx.fillText("Mutate", 10, 150);
@@ -1477,7 +1422,6 @@ function fadeInMutationPhaseText() {
                 }, 1000 / FPS);
             }
             else {
-                //resolve
                 cancelAnimationFrame(frame_id);
                 resolve("Highlight Mutation Phase Text Complete.");
             }
@@ -1492,7 +1436,6 @@ function fadeInMutationDescriptionText() {
     return new Promise(resolve => {
         function fadeInMutationDescription() {
             if (!finished) {
-                // clearRect to avoid over-saturated text
                 ctx.fillStyle = 'black';
                 ctx.fillRect(100, 275, 800, 150);
 
@@ -1533,8 +1476,6 @@ function fadeOutMutationDescriptionText() {
     return new Promise(resolve => {
         function fadeOutMutationDescription() {
             if (!finished) {
-                //animate
-                // strategy: redraw the description with less opacity each frame, clearing rect before each redraw
                 ctx.fillStyle = 'black';
                 ctx.fillRect(100, 275, 800, 150);
 
@@ -1560,8 +1501,6 @@ function fadeOutMutationDescriptionText() {
                 }, 1000 / FPS);
             }
             else {
-                //resolve
-                // clearRect one last time if needed here
                 cancelAnimationFrame(frame_id);
                 resolve();
             }
@@ -1571,7 +1510,6 @@ function fadeOutMutationDescriptionText() {
 }
 
 function fadeOutMutationPhaseText() {
-    // could improve by only clearing area where Evaluate Individuals text is
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
@@ -1611,25 +1549,13 @@ function fadeInCreateNewGenPhaseText() {
     return new Promise(resolve => {
         function fadeInNewGenText() {
             if (!finished) {
-                // clearRect to avoid over-saturated text
-                ctx.clearRect(10, 10, 275, 200);
+                ctx.fillStyle = 'black';
+                ctx.fillRect(10, 10, 250, 20);
 
                 ctx.font = "20px arial";
 
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 ctx.fillText("Create New Generation", 10, 30);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Evaluate Individuals", 10, 60);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover", 10, 120);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Mutate", 10, 150);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -1661,8 +1587,6 @@ function fadeInGenerationSummaryText() {
                 var generation_average_fitness_preface = 'Average Fitness:';
                 var generation_offspring_reproduced_preface = 'Offspring Reproduced:';
 
-
-                // clearRect to avoid over-saturated text
                 ctx.fillStyle = 'black';
                 ctx.fillRect(100, 250, 800, 200);
 
@@ -1713,7 +1637,6 @@ function fadeOutGenerationSummaryText() {
                 var generation_average_fitness_preface = 'Average Fitness:';
                 var generation_offspring_reproduced_preface = 'Offspring Reproduced:';
 
-                // clearRect to avoid over-saturated text
                 ctx.fillStyle = 'black';
                 ctx.fillRect(100, 250, 800, 200);
 
@@ -1755,13 +1678,11 @@ function fadeOutGenerationSummaryText() {
 }
 
 function fadeOutCreateNewGenPhaseText() {
-    // could improve by only clearing area where Evaluate Individuals text is
     var finished = false;
     var opacity = 0.00;
     return new Promise(resolve => {
         function fadeOutNewGenText() {
             if (!finished) {
-                //animate
                 ctx.font = "20px arial";
                 ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
                 ctx.fillText("Create New Generation", 10, 30);
