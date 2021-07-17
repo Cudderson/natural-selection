@@ -1094,7 +1094,8 @@ function fadeInEvaluationPhaseText() {
                     finished = true;
                 }
                 else {
-                    opacity += 0.05;
+                    // testing decreasing opacity difference to increase animation duration
+                    opacity += 0.02;
                 }
                 var frame_id = requestAnimationFrame(fadeInEvalText);
             }
@@ -1147,7 +1148,7 @@ function fadeOutEvaluationPhaseText() {
                     drawPhases();
                 }
                 else {
-                    opacity += 0.05;
+                    opacity += 0.01;
                 }
                 console.log("requesting another frame ok");
                 // for some reason changing the var name makes animation work
@@ -1183,7 +1184,7 @@ function fadeInSelectionPhaseText() {
                     finished = true;
                 }
                 else {
-                    opacity += 0.05;
+                    opacity += 0.02;
                     console.log(opacity);
                 }
                 console.log('requesting another framey');
@@ -1219,7 +1220,7 @@ function fadeOutSelectionPhaseText() {
                     drawPhases();
                 }
                 else {
-                    opacity += 0.05;
+                    opacity += 0.01;
                 }
                 frame_id = requestAnimationFrame(selectionTextFadeOut);
             }
@@ -1251,7 +1252,7 @@ function fadeInCrossoverPhaseText() {
                     finished = true;
                 }
                 else {
-                    opacity += 0.05;
+                    opacity += 0.02;
                 }
                 frame_id = requestAnimationFrame(fadeInCrossoverText);
             }
@@ -1349,7 +1350,7 @@ function fadeOutCrossoverPhaseText() {
                     drawPhases();
                 }
                 else {
-                    opacity += 0.05;
+                    opacity += 0.01;
                 }
                 frame_id = requestAnimationFrame(fadeOutCrossoverText);
             }
@@ -1381,7 +1382,7 @@ function fadeInMutationPhaseText() {
                     finished = true;
                 }
                 else {
-                    opacity += 0.05;
+                    opacity += 0.02;
                 }
                 frame_id = requestAnimationFrame(fadeInMutationText);
             }
@@ -1487,7 +1488,7 @@ function fadeOutMutationPhaseText() {
                     drawPhases();
                 }
                 else {
-                    opacity += 0.05;
+                    opacity += 0.01;
                 }
                 frame_id = requestAnimationFrame(fadeOutMutationText);
             }
@@ -1519,7 +1520,7 @@ function fadeInCreateNewGenPhaseText() {
                     finished = true;
                 }
                 else {
-                    opacity += 0.05;
+                    opacity += 0.02;
                 }
                 frame_id = requestAnimationFrame(fadeInNewGenText);
             }
@@ -1646,7 +1647,7 @@ function fadeOutCreateNewGenPhaseText() {
                     drawPhases();
                 }
                 else {
-                    opacity += 0.05;
+                    opacity += 0.01;
                 }
                 frame_id = requestAnimationFrame(fadeOutNewGenText);
             }
