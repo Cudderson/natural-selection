@@ -290,13 +290,14 @@ function updateAndMoveOrganisms(goal) {
                 if (organisms[0].index == GENE_COUNT) {
                     finished = true;
                 }
+                sleepTest(1000 / FPS); // control drawing FPS for organisms
+                frame_id = requestAnimationFrame(animateOrganisms);
             }
             else {
                 // resolve
                 cancelAnimationFrame(frame_id);
                 resolve(0);
             }
-            frame_id = requestAnimationFrame(animateOrganisms);
         }
         start_animate_organisms = requestAnimationFrame(animateOrganisms);
     })
@@ -1148,7 +1149,7 @@ function fadeOutEvaluationPhaseText() {
                 else {
                     opacity += 0.05;
                 }
-                console.log("requesting another frame");
+                console.log("requesting another frame ok");
                 // for some reason changing the var name makes animation work
                 frame_id_eval_fadeout = requestAnimationFrame(fadeOutEvalText);
             }
