@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", runSimulation);
 
-console.log("On branch 'master'");
+console.log("On branch 'colors'");
 
 // organism globals
 const TOTAL_ORGANISMS = 50;
