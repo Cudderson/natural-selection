@@ -1309,7 +1309,7 @@ function fadeInCrossoverDescriptionText() {
                 var description = "Genes of the selected parent couples are combined to create new offspring.";
 
                 ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
                 ctx.fillText(description, 200, 300);
 
                 if (opacity >= 1.00) {
@@ -1342,7 +1342,7 @@ function fadeOutCrossoverDescriptionText() {
                 var description = "Genes of the selected parent couples are combined to create new offspring.";
 
                 ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
                 ctx.fillText(description, 200, 300);
 
                 if (opacity <= 0.01) {
@@ -1453,11 +1453,11 @@ function fadeInMutationDescriptionText() {
                 var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100)}%`.toString();
 
                 ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
                 ctx.fillText(description, 190, 300);
 
                 ctx.font = "22px arial";
-                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
                 ctx.fillText(mutation_rate_text, 420, 350);
 
                 if (opacity >= 1.00) {
@@ -1491,11 +1491,11 @@ function fadeOutMutationDescriptionText() {
                 var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100)}%`.toString();
 
                 ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
                 ctx.fillText(description, 190, 300);
 
                 ctx.font = "22px arial";
-                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
                 ctx.fillText(mutation_rate_text, 420, 350);
 
                 if (opacity <= 0.01) {
@@ -1606,20 +1606,20 @@ function fadeInGenerationSummaryText() {
                 ctx.fillRect(100, 250, 800, 200);
 
                 ctx.font = "22px arial";
-                ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
                 ctx.fillText(generation_summary_text, 380, 280);
 
                 ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
-                ctx.fillText(generation_average_fitness_preface, 390, 330);
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.fillText(generation_average_fitness_preface, 380, 330);
 
-                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
                 ctx.fillText(average_fitness.toFixed(2).toString(), 600, 330);
 
-                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
-                ctx.fillText(generation_offspring_reproduced_preface, 390, 355);
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.fillText(generation_offspring_reproduced_preface, 380, 355);
 
-                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
                 ctx.fillText(organisms.length.toString(), 600, 355);
 
                 if (opacity >= 1.00) {
@@ -1654,20 +1654,20 @@ function fadeOutGenerationSummaryText() {
                 ctx.fillRect(100, 250, 800, 200);
 
                 ctx.font = "22px arial";
-                ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
                 ctx.fillText(generation_summary_text, 380, 280);
 
                 ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
-                ctx.fillText(generation_average_fitness_preface, 390, 330);
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.fillText(generation_average_fitness_preface, 380, 330);
 
-                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
                 ctx.fillText(average_fitness.toFixed(2).toString(), 600, 330);
 
-                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
-                ctx.fillText(generation_offspring_reproduced_preface, 390, 355);
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.fillText(generation_offspring_reproduced_preface, 380, 355);
 
-                ctx.fillStyle = `rgba(50, 250, 17, ${opacity})`;
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
                 ctx.fillText(organisms.length.toString(), 600, 355);
 
                 if (opacity <= 0.01) {
