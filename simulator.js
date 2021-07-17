@@ -667,12 +667,8 @@ function fadeInMothers(parents) {
         function motherFadeIn() {
             if (!finished) {
 
-                // ctx.font = "18px arial";
-                // ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
-                // ctx.fillText("Females chosen to reproduce", 750, 520);
-
                 for (var i = 0; i < parents.length; i++) {
-                    parents[i][0].ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
+                    parents[i][0].ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
                     parents[i][0].ctx.beginPath();
                     parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
                     parents[i][0].ctx.fill();
@@ -707,7 +703,7 @@ function fadeInMothersText() {
                 ctx.fillRect(750, 480, 275, 20);
                 
                 ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(219, 10, 91, ${opacity})`;
+                ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
                 ctx.fillText("Females Selected", 800, 500);
 
                 if (opacity >= 1.00) {
@@ -735,7 +731,7 @@ function fadeInFathers(parents) {
         function fatherFadeIn() {
             if (!finished) {
                 for (var i = 0; i < parents.length; i++) {
-                    parents[i][1].ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
+                    parents[i][1].ctx.fillStyle = `rgba(79, 11, 255, ${opacity})`;
                     parents[i][1].ctx.beginPath();
                     parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
                     parents[i][1].ctx.fill();
@@ -768,7 +764,7 @@ function fadeInFathersText() {
                 ctx.fillRect(750, 510, 275, 20);
 
                 ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
+                ctx.fillStyle = `rgba(79, 11, 255, ${opacity})`;
                 ctx.fillText("Males Selected", 800, 530);
 
                 if (opacity >= 1.00) {
