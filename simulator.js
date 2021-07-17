@@ -75,7 +75,7 @@ class Organism {
     }
 
     move () {
-        this.ctx.fillStyle = 'purple';
+        this.ctx.fillStyle = 'rgba(148, 0, 211, 1)'; // darkviolet
         this.ctx.beginPath();
         this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2, false);
         this.ctx.fill();
@@ -597,9 +597,7 @@ function fadeClosestToOriginal(closest_organism) {
     return new Promise(resolve => {
         function fadeToOriginalClosest() {
             if (!finished) {
-                //animate
-                // need to redraw black dot to make opacity decrease work
-                closest_organism.ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+                closest_organism.ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
                 closest_organism.ctx.beginPath();
                 closest_organism.ctx.arc(closest_organism.x, closest_organism.y, closest_organism.radius, 0, Math.PI*2, false);
                 closest_organism.ctx.fill();
@@ -799,9 +797,8 @@ function fadeInNotChosen() {
                 // animate
                 ctx.fillStyle = 'black';
                 ctx.fillRect(750, 540, 275, 20);
-
                 ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
                 ctx.fillText("Not Selected", 800, 560);
 
                 if (opacity >= 1.00) {
@@ -833,7 +830,7 @@ function fadeToOriginal(parents, gender) {
                 // animate
                 if (gender === 'female') {
                     for (var i = 0; i < parents.length; i++) {
-                        parents[i][0].ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+                        parents[i][0].ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
                         parents[i][0].ctx.beginPath();
                         parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
                         parents[i][0].ctx.fill();
@@ -841,7 +838,7 @@ function fadeToOriginal(parents, gender) {
                 }
                 else if (gender === 'male') {
                     for (var i = 0; i < parents.length; i++) {
-                        parents[i][1].ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+                        parents[i][1].ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
                         parents[i][1].ctx.beginPath();
                         parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
                         parents[i][1].ctx.fill();
@@ -849,12 +846,12 @@ function fadeToOriginal(parents, gender) {
                 }
                 else if (gender === 'both') {
                     for (var i = 0; i < parents.length; i++) {
-                        parents[i][0].ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+                        parents[i][0].ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
                         parents[i][0].ctx.beginPath();
                         parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
                         parents[i][0].ctx.fill();
 
-                        parents[i][1].ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+                        parents[i][1].ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
                         parents[i][1].ctx.beginPath();
                         parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
                         parents[i][1].ctx.fill();
