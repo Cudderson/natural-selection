@@ -347,7 +347,6 @@ function calcPopulationFitness () {
 
 function beginSelectionProcess() {
     // fill array with candidates for reproduction
-    // multiply each Organism's fitness by 100, and add each organism to the array as many times
     var potential_mothers = [];
     var potential_fathers = [];
 
@@ -356,23 +355,8 @@ function beginSelectionProcess() {
         if (organisms[i].fitness < 0) {
             organisms[i].fitness = 0.01;
         }
-        // fill parents array
-        // I want to increase the selection bias slightly for higher-fitness organisms
-        // currently, we take fitness*100 and add that organism to array that many times
-        // This works, but it doesn't increase the more-fit organisms' chance of being chosen enough
-
-        // idea: organisms with fitness > average_fitness can be added more times
-        // ex. 
-
-        // if (j % 2 && (organisms[i].fitness > average_fitness)) {
-        //     potential_mothers.push(organisms[i]);
-        // }
-
-        // that's not bad, but it doesn't seem right or easy to track
 
         // I'm going to try this implementation >> (organism.fitness * 100) ** 1.25
-        // it's basically the same thing, but the (** 1.25) will give higher-fitness organisms a slightly greater chance than before.
-        // let's try it
         console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
         console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * 100) ** 2)} times.`);
 
