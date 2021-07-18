@@ -1,4 +1,12 @@
-document.addEventListener("DOMContentLoaded", runSimulation);
+// document.addEventListener("DOMContentLoaded", runSimulation);
+// strategy:
+// on DOM load, add event listener that waits for button to be clicked.
+// when clicked, call runSimulation()
+document.addEventListener("DOMContentLoaded", haha);
+
+function haha() {
+    console.log("haha");
+}
 
 console.log("On branch 'colors'");
 
@@ -134,6 +142,9 @@ class Goal {
 }
 
 async function runSimulation () {
+    // make start button disappear
+    var start_btn = document.getElementsByClassName("start-btn")[0];
+    start_btn.style.display = 'none';
 
     // Create organisms with random genes
     /// PHASE: CREATE NEW GENERATION/POPULATION
