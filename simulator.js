@@ -32,6 +32,9 @@ var total_fitness = 0.00;
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
 
+// testing optional dialogue
+var dialogue = false;
+
 // color theme
 //rgba(148, 0, 211, 1) darkviolet
 //rgba(155, 245, 0, 1) custom green
@@ -151,9 +154,11 @@ async function runGeneration() {
     // ctx.fillStyle = 'red';
     // ctx.fillRect(10, 10, 275, 200);
 
-    await fadeInEvaluationPhaseText();//
-
-    // PHASE: EVALUATE INDIVIDUALS (highlightClosestOrganism() freezes animation sometimes)
+    if (dialogue) {
+        await fadeInEvaluationPhaseText();
+    }
+    
+    // PHASE: EVALUATE INDIVIDUALS
     // this is where statistics are redrawn (goal.showStatistics())
     const r = await runEvaluationAnimation(); //
     console.log(r);
@@ -162,12 +167,17 @@ async function runGeneration() {
     var closest_organism = population_resolution['closest_organism'];
     average_fitness = population_resolution['average_fitness'];
 
-    await fadeOutEvaluationPhaseText(); //
+    if (dialogue) {
+        await fadeOutEvaluationPhaseText();
+    }
+
     // trying this to prevent text being redrawn to over-saturation
     // ctx.clearRect(10, 10, 275, 200);
     // drawPhases();
 
-    await fadeInSelectionPhaseText(); // 
+    if (dialogue) {
+        await fadeInSelectionPhaseText();
+    }
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     // this phase includes: beginSelectionProcess(), selectParentsForReproduction()
@@ -180,33 +190,44 @@ async function runGeneration() {
 
     console.log("made it to here, calling runSelectionAnimations()"); // this means that fadeInSelectionPhaseText() resolves when opacity >= 1.00
 
-    await runSelectionAnimations(closest_organism, parents); //
-
-    await fadeOutSelectionPhaseText(); // 
+    if (dialogue) {
+        await runSelectionAnimations(closest_organism, parents);
+        await fadeOutSelectionPhaseText(); 
+    }
 
     // PHASE: CROSSOVER / MUTATE / REPRODUCE
-    // this function handles crossover, mutation and reproduction
-    // this function pushes new gen organisms to offspring_organisms[]
-    reproduceNewGeneration(parents);
 
     // follow same naming convention for these animations!
-    await fadeInCrossoverPhaseText();
-    await fadeInCrossoverDescriptionText();
-    await sleepTest(2000);
-    await fadeOutCrossoverDescriptionText();
-    await fadeOutCrossoverPhaseText();
+    if (dialogue) {
+        // this function handles crossover, mutation and reproduction
+        // this function pushes new gen organisms to offspring_organisms[]
+        reproduceNewGeneration(parents);
 
-    await fadeInMutationPhaseText();
-    await fadeInMutationDescriptionText();
-    await sleepTest(2000);
-    await fadeOutMutationDescriptionText();
-    await fadeOutMutationPhaseText();
-
-    await fadeInCreateNewGenPhaseText();
-    await fadeInGenerationSummaryText();
-    await sleepTest(2000);
-    await fadeOutGenerationSummaryText();
-    await fadeOutCreateNewGenPhaseText();
+        await fadeInCrossoverPhaseText();
+        await fadeInCrossoverDescriptionText();
+        await sleepTest(2000);
+        await fadeOutCrossoverDescriptionText();
+        await fadeOutCrossoverPhaseText();
+    
+        await fadeInMutationPhaseText();
+        await fadeInMutationDescriptionText();
+        await sleepTest(2000);
+        await fadeOutMutationDescriptionText();
+        await fadeOutMutationPhaseText();
+    
+        await fadeInCreateNewGenPhaseText();
+        await fadeInGenerationSummaryText();
+        await sleepTest(2000);
+        await fadeOutGenerationSummaryText();
+        await fadeOutCreateNewGenPhaseText();
+    }
+    else {
+        // without dialogue, we need to fade the organisms to black before reproduceNewGeneration() forgets old population
+        await sleepTest(1000);
+        await fadeToBlack(organisms);
+        await sleepTest(1000);
+        reproduceNewGeneration(parents);
+    }
 
     return new Promise(resolve => {
         generation_count++;
@@ -283,7 +304,10 @@ function updateAndMoveOrganisms(goal) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 goal.drawGoal();
                 goal.showStatistics();
-                drawEvaluationPhaseText();
+
+                if (dialogue) {
+                    drawEvaluationPhaseText();
+                }
 
                 for (var i = 0; i < organisms.length; i++) {
                     if (organisms[i].reached_goal == false) {
