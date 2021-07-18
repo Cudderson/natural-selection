@@ -144,7 +144,8 @@ class Goal {
 var stop = false;
 
 function stopSimulation() {
-    stop = true;
+    // reloads the page
+    document.location.reload();
 }
 
 async function runSimulation () {
@@ -153,10 +154,6 @@ async function runSimulation () {
     var stop_btn = document.getElementsByClassName("stop-btn")[0];
     start_btn.style.display = 'none';
     stop_btn.style.display = 'block';
-    
-    // next, we should create a way to stop the simulation.
-    // they will start as separate buttons, but they will eventually be one dynamic button.
-
 
     // Create organisms with random genes
     /// PHASE: CREATE NEW GENERATION/POPULATION
@@ -166,14 +163,8 @@ async function runSimulation () {
     // intro-animation here before sim-loop?
 
     do {
-        if (!stop) {
-            const result = await runGeneration();
-            console.log(result);
-        }
-        else {
-            console.log("Stopping Simulation");
-            return;
-        }
+        const result = await runGeneration();
+        console.log(result);
     } while (generation_count < 1000);
 }
 
@@ -329,7 +320,6 @@ function updateAndMoveOrganisms(goal) {
         // why is this async?
         async function animateOrganisms() {
             if (!finished) {
-                // animate
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 goal.drawGoal();
                 goal.showStatistics();
