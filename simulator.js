@@ -141,10 +141,22 @@ class Goal {
     }
 }
 
+var stop = false;
+
+function stopSimulation() {
+    stop = true;
+}
+
 async function runSimulation () {
     // make start button disappear
     var start_btn = document.getElementsByClassName("start-btn")[0];
+    var stop_btn = document.getElementsByClassName("stop-btn")[0];
     start_btn.style.display = 'none';
+    stop_btn.style.display = 'block';
+    
+    // next, we should create a way to stop the simulation.
+    // they will start as separate buttons, but they will eventually be one dynamic button.
+
 
     // Create organisms with random genes
     /// PHASE: CREATE NEW GENERATION/POPULATION
@@ -154,8 +166,14 @@ async function runSimulation () {
     // intro-animation here before sim-loop?
 
     do {
-        const result = await runGeneration();
-        console.log(result);
+        if (!stop) {
+            const result = await runGeneration();
+            console.log(result);
+        }
+        else {
+            console.log("Stopping Simulation");
+            return;
+        }
     } while (generation_count < 1000);
 }
 
@@ -910,8 +928,10 @@ function fadeToOriginal(parents, gender) {
 }
 
 function fadeToBlack(organisms) {
+    console.log("fadeToBlack(organisms) called!");
     var finished = false;
     var opacity = 1.00;
+    var executions = 0;
     return new Promise(resolve => {
         function fadeToBlackOrganisms() {
             if (!finished) {
@@ -927,19 +947,23 @@ function fadeToBlack(organisms) {
                     organisms[i].ctx.beginPath();
                     organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
                     organisms[i].ctx.fill();
-                    console.log("this should print roughly 30 times"); // but it actually prints 300+
+                    executions++;
                 }
 
                 if (opacity <= 0.01) {
                     finished = true;
+                    console.log("finished is true.");
                 }
                 else {
+                    console.log(opacity);
                     opacity -= 0.05;
                 }
                 frame_id = requestAnimationFrame(fadeToBlackOrganisms);
             }
             else {
                 // resolve
+                console.log(`Expected Executions: ${organisms.length * 21}`);
+                console.log(`Executions: ${executions}`);
                 cancelAnimationFrame(frame_id);
                 resolve("FADE TO BLACK COMPLETE");
             }
