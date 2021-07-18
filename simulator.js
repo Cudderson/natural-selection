@@ -2,10 +2,10 @@
 // strategy:
 // on DOM load, add event listener that waits for button to be clicked.
 // when clicked, call runSimulation()
-document.addEventListener("DOMContentLoaded", haha);
+document.addEventListener("DOMContentLoaded", readyForSim);
 
-function haha() {
-    console.log("haha");
+function readyForSim() {
+    console.log("Simulation Ready!");
 }
 
 console.log("On branch 'colors'");
