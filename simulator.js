@@ -3,9 +3,9 @@ document.addEventListener("DOMContentLoaded", runSimulation);
 console.log("On branch 'colors'");
 
 // organism globals
-const TOTAL_ORGANISMS = 50;
-const GENE_COUNT = 100;
-const MUTATION_RATE = 0.02;
+const TOTAL_ORGANISMS = 100;
+const GENE_COUNT = 200;
+const MUTATION_RATE = 0.03;
 const MIN_GENE = -5;
 const MAX_GENE = 5;
 const INITIAL_X = 500; 
@@ -142,7 +142,7 @@ async function runSimulation () {
     do {
         const result = await runGeneration();
         console.log(result);
-    } while (generation_count < 50);
+    } while (generation_count < 1000);
 }
 
 async function runGeneration() {
@@ -357,8 +357,11 @@ function beginSelectionProcess() {
             organisms[i].fitness = 0.01;
         }
         // fill parents array
+        // I want to increase the selection bias slightly for higher-fitness organisms
+        // currently, we take fitness*100 and add that organism to array that many times
+        // This works, but it doesn't increase the more-fit organisms' chance of being chosen enough
+        
         for (var j = 0; j < Math.ceil(organisms[i].fitness * 100); j++) {
-            // potential_parents.push(organisms[i]);
             if (organisms[i].gender === 'female') {
                 potential_mothers.push(organisms[i]);
             }
