@@ -1,10 +1,18 @@
+:root {
+    --darkviolet: rgba(148, 0, 211, 1);
+    --mother-pink: rgba(232, 0, 118, 1);
+    --father-blue: rgba(36, 0, 129, 1);
+    --closest_organism_gold: rgba(255, 215, 0, 1);
+    --custom-green: rgba(155, 245, 0, 1);
+}
+
 body {
     background: black;
 }
 
 #main-canvas {
     background-color: black;
-    border: 4px solid purple;
+    border: 4px solid var(--darkviolet);
 }
 
 .canvas-container {
@@ -13,10 +21,6 @@ body {
     width: 1000px;
 }
 
-.my-colors {
-    --darkviolet: rgba(148, 0, 211, 1);
-    --mother-pink: rgba(232, 0, 118, 1);
-    --father-blue: rgba(79, 11, 255, 1);
-    --closest_organism_gold: rgba(255, 215, 0, 1);
-    --custom-green: rgba(155, 245, 0, 1);
+.stop-btn {
+    display: none;
 }
