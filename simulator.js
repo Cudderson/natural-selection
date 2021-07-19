@@ -12,7 +12,7 @@ const INITIAL_Y = 500;
 
 // starting coordinates for goal
 const GOAL_X_POS = 500;
-const GOAL_Y_POS = 400;
+const GOAL_Y_POS = 300;
 
 // frame rate
 const FPS = 30;
@@ -171,6 +171,11 @@ async function runGeneration() {
 
     // here, if success flag is true, we can await for the success animation here
     /// **************
+    if (success_flag) {
+        const dd = await fadeInSuccessMessage();
+        await sleepTest(1500);
+        const cc = await fadeOutSuccessMessage();
+    }
 
     const population_resolution = await evaluatePopulation(); // maybe don't await here
     var closest_organism = population_resolution['closest_organism'];
@@ -935,7 +940,6 @@ function fadeToBlack(organisms) {
 
                 if (opacity <= 0.01) {
                     finished = true;
-                    console.log("finished is true.");
                 }
                 else {
                     console.log(opacity);
@@ -1780,5 +1784,75 @@ async function runSelectionAnimations(closest_organism, parents) {
 
     return new Promise(resolve => {
         resolve("Run Selection Animations Complete");
+    })
+}
+
+function fadeInSuccessMessage() {
+    var opacity = 0.00;
+    var finished = false;
+    return new Promise(resolve => {
+        function successFadeIn() {
+            if (!finished) {
+                // animate
+                ctx.font = '28px arial';
+
+                ctx.fillStyle = 'black';
+                ctx.fillText("You Win!", 450, 275);
+
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.fillText("You Win!", 450, 275);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.05;
+                }
+                frame_id_success_in = requestAnimationFrame(successFadeIn);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(frame_id_success_in);
+                resolve();
+            }
+        }
+        start_success_fadein = requestAnimationFrame(successFadeIn);
+    })
+}
+
+function fadeOutSuccessMessage() {
+    var finished = false;
+    var opacity = 1.00;
+    return new Promise(resolve => {
+        function successFadeOut() {
+            if (!finished) {
+
+                ctx.font = '28px arial';
+
+                ctx.fillStyle = 'black';
+                ctx.fillText("You Win!", 450, 275);
+
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.fillText("You Win!", 450, 275);
+
+                if (opacity <= 0.00) {
+                    finished = true;
+                    // draw black box over text
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(450, 255, 125, 28);
+                }
+                else {
+                    opacity -= 0.05;
+                    console.log(opacity);
+                }
+                frame_id_success_out = requestAnimationFrame(successFadeOut);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(frame_id_success_out);
+                resolve();
+            }
+        }
+        start_success_fadeout = requestAnimationFrame(successFadeOut);
     })
 }
