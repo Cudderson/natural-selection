@@ -12,7 +12,7 @@ const INITIAL_Y = 500;
 
 // starting coordinates for goal
 const GOAL_X_POS = 500;
-const GOAL_Y_POS = 50;
+const GOAL_Y_POS = 400;
 
 // frame rate
 const FPS = 30;
@@ -302,6 +302,7 @@ function getRandomGene(min, max) {
 
 function updateAndMoveOrganisms(goal) {
     return new Promise(resolve => {
+        var total_moves = 0;
         var finished = false;
         // why is this async?
         async function animateOrganisms() {
@@ -318,15 +319,17 @@ function updateAndMoveOrganisms(goal) {
                     if (organisms[i].reached_goal == false) {
                         organisms[i].update();
                         organisms[i].move();
-                        hasReachedGoal(organisms[i], goal); // maybe await
+                        hasReachedGoal(organisms[i], goal);
                     }
                     else {
-                        updateSuccessfulOrganism(organisms[i]); // maybe await
+                        updateSuccessfulOrganism(organisms[i]);
                     }
+                    total_moves++;
                 }
-                if (organisms[0].index == GENE_COUNT) {
+                if (total_moves == (organisms.length * GENE_COUNT)) {
                     finished = true;
                 }
+
                 sleepTest(1000 / FPS); // control drawing FPS for organisms
                 frame_id = requestAnimationFrame(animateOrganisms);
             }
@@ -509,9 +512,9 @@ function reproduce(crossover_genes) {
 
 function hasReachedGoal(organism, goal) {
     // check if within y-range 
-    if (organism.y >= goal.y && organism.y <= (goal.y + goal.size)) {
+    if ((organism.y - (organism.radius / 2)) >= goal.y && (organism.y - (organism.radius / 2)) <= (goal.y + goal.size)) {
         // check if within x-range
-        if (organism.x >= goal.x && organism.x <= (goal.x + goal.size)) {
+        if ((organism.x - (organism.radius / 2)) >= goal.x && (organism.x - (organism.radius / 2)) <= (goal.x + goal.size)) {
             // organism reached goal
             organism.reached_goal = true;
         }
