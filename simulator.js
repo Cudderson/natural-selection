@@ -1,15 +1,6 @@
-// document.addEventListener("DOMContentLoaded", runSimulation);
-// strategy:
-// on DOM load, add event listener that waits for button to be clicked.
-// when clicked, call runSimulation()
 document.addEventListener("DOMContentLoaded", readyForSim);
 
-function readyForSim() {
-    console.log("Simulation Ready!");
-}
-
-console.log("On branch 'colors'");
-
+// maybe these should be vars, that way they can be edited by user
 // organism globals
 const TOTAL_ORGANISMS = 100;
 const GENE_COUNT = 250;
@@ -42,13 +33,6 @@ var ctx = canvas.getContext("2d");
 
 // testing optional dialogue
 var dialogue = false;
-
-// color theme
-//rgba(148, 0, 211, 1) darkviolet
-//rgba(155, 245, 0, 1) custom green
-//rgba(232, 0, 118, 1) mother pink
-//rgba(79, 11, 255, 1) father blue
-//rgba(255, 215, 0, 1) closest organism gold
 
 class Organism {
     constructor (gender, x, y, ctx) {
@@ -141,7 +125,9 @@ class Goal {
     }
 }
 
-var stop = false;
+function readyForSim() {
+    console.log("Simulation Ready!");
+}
 
 function stopSimulation() {
     // reloads the page
