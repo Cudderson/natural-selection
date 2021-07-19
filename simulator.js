@@ -166,8 +166,11 @@ async function runGeneration() {
     
     // PHASE: EVALUATE INDIVIDUALS
     // this is where statistics are redrawn (goal.showStatistics())
-    const r = await runEvaluationAnimation(); //
-    console.log(r);
+    var success_flag = await runEvaluationAnimation();
+    console.log(`Success Flag: ${success_flag}`);
+
+    // here, if success flag is true, we can await for the success animation here
+    /// **************
 
     const population_resolution = await evaluatePopulation(); // maybe don't await here
     var closest_organism = population_resolution['closest_organism'];
@@ -245,14 +248,13 @@ async function runEvaluationAnimation() {
     // do stuff
     var goal = new Goal(GOAL_X_POS, GOAL_Y_POS, 20, ctx);
 
-    var generation_finished = false;
-    const update_and_move_result = await updateAndMoveOrganisms(goal); // ideally don't pass in goal here
+    var success_flag = await updateAndMoveOrganisms(goal); // ideally don't pass in goal here
     return new Promise((resolve, reject) => {
-        if (update_and_move_result == 0) {
-            resolve("EVALUATION ANIMATION COMPLETE");
+        if (success_flag) {
+            resolve(true);
         }
         else {
-            reject("Evaluation animation failed");
+            resolve(false);
         }
     })
 }
@@ -304,6 +306,7 @@ function updateAndMoveOrganisms(goal) {
     return new Promise(resolve => {
         var total_moves = 0;
         var finished = false;
+        var success_flag = false;
         // why is this async?
         async function animateOrganisms() {
             if (!finished) {
@@ -323,6 +326,7 @@ function updateAndMoveOrganisms(goal) {
                     }
                     else {
                         updateSuccessfulOrganism(organisms[i]);
+                        success_flag = true;
                     }
                     total_moves++;
                 }
@@ -336,7 +340,7 @@ function updateAndMoveOrganisms(goal) {
             else {
                 // resolve
                 cancelAnimationFrame(frame_id);
-                resolve(0);
+                resolve(success_flag);
             }
         }
         start_animate_organisms = requestAnimationFrame(animateOrganisms);
