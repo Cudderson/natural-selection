@@ -172,9 +172,13 @@ async function runGeneration() {
     // here, if success flag is true, we can await for the success animation here
     /// **************
     if (success_flag) {
-        const dd = await fadeInSuccessMessage();
-        await sleepTest(1500);
-        const cc = await fadeOutSuccessMessage();
+        await fadeInSuccessMessage();
+
+        var key_pressed = await getUserDecision();
+        console.log(key_pressed);
+        
+        // await sleepTest(1500);
+        await fadeOutSuccessMessage();
     }
 
     const population_resolution = await evaluatePopulation(); // maybe don't await here
@@ -1854,5 +1858,15 @@ function fadeOutSuccessMessage() {
             }
         }
         start_success_fadeout = requestAnimationFrame(successFadeOut);
+    })
+}
+
+function getUserDecision() {
+    console.log("Waiting for key press...");
+    return new Promise(resolve => {
+        document.addEventListener('keydown', function(event) {
+            const key = event.key;
+            resolve(`Key Pressed: ${key}`);
+        });
     })
 }
