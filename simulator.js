@@ -31,8 +31,11 @@ var total_fitness = 0.00;
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
 
-// testing optional dialogue
+// optional dialogue
 var dialogue = false;
+
+// flag for post-success animations
+var simulation_succeeded = false;
 
 class Organism {
     constructor (gender, x, y, ctx) {
@@ -166,37 +169,48 @@ async function runGeneration() {
     
     // PHASE: EVALUATE INDIVIDUALS
     // this is where statistics are redrawn (goal.showStatistics())
-    var success_flag = await runEvaluationAnimation();
-    console.log(`Success Flag: ${success_flag}`);
+    if (simulation_succeeded) {
+        await runEvaluationAnimation()
+        // possible post-success animations
+    }
+    else {
+        // check if simulation succeeded 
+        var success_flag = await runEvaluationAnimation();
+        console.log(`Success Flag: ${success_flag}`);
 
-    // here, if success flag is true, we can await for the success animation here
-    /// **************
-    if (success_flag) {
-        // give user time to see their win
-        await sleepTest(1500);
-        await fadeInSuccessMessage();
+        // here, if success flag is true, we can await for the success animation here
+        /// **************
+        if (success_flag) {
+            // update flag
+            simulation_succeeded = true;
 
-        do {
-            var key_pressed = await getUserDecision();
-            console.log(key_pressed);
-        }
-        while (key_pressed != "Enter" && key_pressed != "q");
+            // give user time to see their win
+            await sleepTest(1500);
+            await fadeInSuccessMessage();
 
-        console.log("Key Accepted: " + key_pressed);
+            do {
+                var key_pressed = await getUserDecision();
+                console.log(key_pressed);
+            }
+            while (key_pressed != "Enter" && key_pressed != "q");
 
-        await fadeOutSuccessMessage();
+            console.log("Key Accepted: " + key_pressed);
 
-        if (key_pressed === 'Enter') {
-            console.log("Continuing Simulation.");
-            await sleepTest(500);
-        }
-        else if (key_pressed === 'q') {
-            console.log("Quitting Simulation.");
-            await fadeToBlack(organisms);
-            // possibly fade stats to black here too?
-            stopSimulation();
+            await fadeOutSuccessMessage();
+
+            if (key_pressed === 'Enter') {
+                console.log("Continuing Simulation.");
+                await sleepTest(500);
+            }
+            else if (key_pressed === 'q') {
+                console.log("Quitting Simulation.");
+                await fadeToBlack(organisms);
+                // possibly fade stats to black here too?
+                stopSimulation();
+            }
         }
     }
+    
 
     const population_resolution = await evaluatePopulation(); // maybe don't await here
     var closest_organism = population_resolution['closest_organism'];
