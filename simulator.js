@@ -12,7 +12,7 @@ const INITIAL_Y = 500;
 
 // starting coordinates for goal
 const GOAL_X_POS = 500;
-const GOAL_Y_POS = 300;
+const GOAL_Y_POS = 400;
 
 // frame rate
 const FPS = 30;
@@ -172,6 +172,8 @@ async function runGeneration() {
     // here, if success flag is true, we can await for the success animation here
     /// **************
     if (success_flag) {
+        // give user time to see their win
+        await sleepTest(1500);
         await fadeInSuccessMessage();
 
         var key_pressed = await getUserDecision();
@@ -1797,14 +1799,29 @@ function fadeInSuccessMessage() {
     return new Promise(resolve => {
         function successFadeIn() {
             if (!finished) {
-                // animate
-                ctx.font = '28px arial';
-
+                ctx.font = '44px arial';
                 ctx.fillStyle = 'black';
-                ctx.fillText("You Win!", 450, 275);
+                ctx.fillText("Your Simulation Succeeded!", 235, 275);
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                ctx.fillText("Your Simulation Succeeded!", 235, 275);
 
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.fillText("You Win!", 450, 275);
+                ctx.font = '30px arial';
+                ctx.fillStyle = 'black';
+                ctx.fillText(`Generations: ${generation_count}`, 420, 340);
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                ctx.fillText(`Generations: ${generation_count}`, 420, 340);
+
+                ctx.font = '26px arial';
+                ctx.fillStyle = 'black';
+                ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
+                ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+                ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
+
+                ctx.font = '26px arial';
+                ctx.fillStyle = 'black';
+                ctx.fillText("Press 'Q' to Quit", 420, 450);
+                ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+                ctx.fillText("Press 'Q' to Quit", 420, 450);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -1830,20 +1847,40 @@ function fadeOutSuccessMessage() {
     return new Promise(resolve => {
         function successFadeOut() {
             if (!finished) {
-
-                ctx.font = '28px arial';
-
+                ctx.font = '44px arial';
                 ctx.fillStyle = 'black';
-                ctx.fillText("You Win!", 450, 275);
+                ctx.fillText("Your Simulation Succeeded!", 235, 275);
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                ctx.fillText("Your Simulation Succeeded!", 235, 275);
 
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.fillText("You Win!", 450, 275);
+                ctx.font = '30px arial';
+                ctx.fillStyle = 'black';
+                ctx.fillText(`Generations: ${generation_count}`, 420, 340);
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                ctx.fillText(`Generations: ${generation_count}`, 420, 340);
+
+                ctx.font = '26px arial';
+                ctx.fillStyle = 'black';
+                ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
+                ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+                ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
+
+                ctx.font = '26px arial';
+                ctx.fillStyle = 'black';
+                ctx.fillText("Press 'Q' to Quit", 420, 450);
+                ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+                ctx.fillText("Press 'Q' to Quit", 420, 450);
 
                 if (opacity <= 0.00) {
                     finished = true;
                     // draw black box over text
                     ctx.fillStyle = 'black';
-                    ctx.fillRect(450, 255, 125, 28);
+                    ctx.fillRect(235, 231, 550, 235);
+
+                    // redraw organisms
+                    for (var i = 0; i < organisms.length; i++) {
+                        organisms[i].move();
+                    }
                 }
                 else {
                     opacity -= 0.05;
