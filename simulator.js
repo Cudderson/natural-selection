@@ -176,11 +176,26 @@ async function runGeneration() {
         await sleepTest(1500);
         await fadeInSuccessMessage();
 
-        var key_pressed = await getUserDecision();
-        console.log(key_pressed);
-        
-        // await sleepTest(1500);
+        do {
+            var key_pressed = await getUserDecision();
+            console.log(key_pressed);
+        }
+        while (key_pressed != "Enter" && key_pressed != "q");
+
+        console.log("Key Accepted: " + key_pressed);
+
         await fadeOutSuccessMessage();
+
+        if (key_pressed === 'Enter') {
+            console.log("Continuing Simulation.");
+            await sleepTest(500);
+        }
+        else if (key_pressed === 'q') {
+            console.log("Quitting Simulation.");
+            await fadeToBlack(organisms);
+            // possibly fade stats to black here too?
+            stopSimulation();
+        }
     }
 
     const population_resolution = await evaluatePopulation(); // maybe don't await here
@@ -1902,8 +1917,8 @@ function getUserDecision() {
     console.log("Waiting for key press...");
     return new Promise(resolve => {
         document.addEventListener('keydown', function(event) {
-            const key = event.key;
-            resolve(`Key Pressed: ${key}`);
+            var key = event.key;
+            resolve(key);
         });
     })
 }
