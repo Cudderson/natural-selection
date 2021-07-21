@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", readyForSim);
 
 // maybe these should be vars, that way they can be edited by user
 // organism globals
-const TOTAL_ORGANISMS = 100;
+var TOTAL_ORGANISMS = 100;
 const GENE_COUNT = 250;
 const MUTATION_RATE = 0.03;
 const MIN_GENE = -5;
@@ -134,6 +134,10 @@ function readyForSim() {
 
 function settings() {
     console.log("Settings Called");
+    // Run Simulation button should be hidden as well
+    var start_btn = document.getElementsByClassName("start-btn")[0];
+    start_btn.style.display = 'none';
+
     // let's first define what parameters are customizable:
     // - TOTAL_ORGANISMS
     // - MUTATION_RATE
@@ -150,6 +154,28 @@ function settings() {
 
     canvas_container.style.display = 'none';
     settings_container.style.display = 'block';
+}
+
+function testSettingsForm() {
+    // this function is called when settings are submitted
+    // the final thing this function should do is return user to title screen
+
+    console.log("Settings form says hello!");
+    var total_organisms_setting = document.getElementById("total_organisms");
+    console.log(`Your input was: ${total_organisms_setting.value}`);
+
+    TOTAL_ORGANISMS = total_organisms_setting.value;
+
+    //return to original view
+    var canvas_container = document.getElementsByClassName("canvas-container")[0];
+    var settings_container = document.getElementsByClassName("settings-container")[0];
+
+    canvas_container.style.display = 'block';
+    settings_container.style.display = 'none';
+
+    // make Run Simulation button reappear
+    var start_btn = document.getElementsByClassName("start-btn")[0];
+    start_btn.style.display = 'block';
 }
 
 function stopSimulation() {

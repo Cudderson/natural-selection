@@ -14,7 +14,20 @@
     <canvas id="main-canvas" width="1000" height="600"></canvas>
   </div>
   <div class="settings-container">
-    <div class="settings-form"></div>
+    <div class="settings-form">
+      <form onsubmit="testSettingsForm(); return false;">
+        <!--
+          TOTAL_ORGANISMS
+          MUTATION_RATE
+          MOVE_SPEED
+          *GENE_COUNT
+          *DIALOGUE
+        -->
+        <label for="total_organisms">Total Organisms:</label>
+        <input id="total_organisms" type="text">
+        <input type="submit" value="Submit">
+      </form>
+    </div>
   </div>
   <div class="btn-container">
     <button class="start-btn" onclick="runSimulation()">Run Simulation</button>
