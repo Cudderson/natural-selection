@@ -132,6 +132,10 @@ function readyForSim() {
     console.log("Simulation Ready!");
 }
 
+function settings() {
+    console.log("Settings Called");
+}
+
 function stopSimulation() {
     // reloads the page
     document.location.reload();
@@ -141,10 +145,19 @@ async function runSimulation () {
     // there should be a button next to 'Run Simulation' that allows users to input custom simulation parameters
     // begin custom parameters
 
+    // let's first define what parameters are customizable:
+    // - TOTAL_ORGANISMS
+    // - MUTATION_RATE
+    // - MOVEMENT SPEED
+    // - DIALOGUE
+    // - GENE_COUNT** (maybe)
+
     // make start button disappear
     var start_btn = document.getElementsByClassName("start-btn")[0];
     var stop_btn = document.getElementsByClassName("stop-btn")[0];
+    var settings_btn = document.getElementsByClassName("settings-btn")[0];
     start_btn.style.display = 'none';
+    settings_btn.style.display = 'none';
     stop_btn.style.display = 'block';
 
     // Create organisms with random genes
