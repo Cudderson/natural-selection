@@ -12,7 +12,7 @@ const INITIAL_Y = 500;
 
 // starting coordinates for goal
 const GOAL_X_POS = 500;
-const GOAL_Y_POS = 400;
+const GOAL_Y_POS = 200;
 
 // frame rate
 const FPS = 30;
@@ -138,6 +138,9 @@ function stopSimulation() {
 }
 
 async function runSimulation () {
+    // there should be a button next to 'Run Simulation' that allows users to input custom simulation parameters
+    // begin custom parameters
+
     // make start button disappear
     var start_btn = document.getElementsByClassName("start-btn")[0];
     var stop_btn = document.getElementsByClassName("stop-btn")[0];
@@ -160,6 +163,7 @@ async function runSimulation () {
 async function runGeneration() {
 
     // this will clear the phase text area
+    // can use this for fading stats to black
     // ctx.fillStyle = 'red';
     // ctx.fillRect(10, 10, 275, 200);
 
