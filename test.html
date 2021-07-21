@@ -16,15 +16,23 @@
   <div class="settings-container">
     <div class="settings-form">
       <form onsubmit="testSettingsForm(); return false;">
-        <!--
-          TOTAL_ORGANISMS
-          MUTATION_RATE
-          MOVE_SPEED
-          *GENE_COUNT
-          *DIALOGUE
-        -->
-        <label for="total_organisms">Total Organisms:</label>
-        <input id="total_organisms" type="text">
+        
+        <label for="total-organisms">Total Organisms:</label>
+        <input id="total-organisms" type="text">
+
+        <label for="move-speed">Movement Speed:</label>
+        <input id="move-speed" type="text">
+
+        <label for="gene-count">Gene Count:</label>
+        <input id="gene-count" type="text">
+
+        <label for="mutation-rate">Mutation Rate:</label>
+        <input id="mutation-rate" type="text">
+
+        <label for="dialogue">
+          <input type="checkbox" id="dialogue" >Dialogue
+        </label>
+
         <input type="submit" value="Submit">
       </form>
     </div>

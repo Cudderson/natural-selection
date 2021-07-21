@@ -1,16 +1,17 @@
 document.addEventListener("DOMContentLoaded", readyForSim);
 
-// maybe these should be vars, that way they can be edited by user
-// organism globals
+// organism global defaults
 var TOTAL_ORGANISMS = 100;
-const GENE_COUNT = 250;
-const MUTATION_RATE = 0.03;
-const MIN_GENE = -5;
-const MAX_GENE = 5;
+var GENE_COUNT = 250;
+var MUTATION_RATE = 0.03;
+var MIN_GENE = -5;
+var MAX_GENE = 5;
+// optional dialogue
+var dialogue = false;
+
+// starting coordinates for organisms and goal
 const INITIAL_X = 500; 
 const INITIAL_Y = 500;
-
-// starting coordinates for goal
 const GOAL_X_POS = 500;
 const GOAL_Y_POS = 200;
 
@@ -30,9 +31,6 @@ var total_fitness = 0.00;
 
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
-
-// optional dialogue
-var dialogue = false;
 
 // flag for post-success animations
 var simulation_succeeded = false;
@@ -161,9 +159,22 @@ function testSettingsForm() {
     // the final thing this function should do is return user to title screen
 
     console.log("Settings form says hello!");
-    var total_organisms_setting = document.getElementById("total_organisms");
-    console.log(`Your input was: ${total_organisms_setting.value}`);
 
+    // get form input
+    var total_organisms_setting = document.getElementById("total-organisms");
+    var movement_speed_setting = document.getElementById("move-speed");
+    var gene_count_setting = document.getElementById("gene-count");
+    var mutation_rate_setting = document.getElementById("mutation-rate");
+    var dialogue_setting = document.getElementById("dialogue");
+
+    console.log("Here are your custom settings:");
+    console.log(`Total Organisms: ${total_organisms_setting.value}`);
+    console.log(`Movement Speed: ${movement_speed_setting.value}`);
+    console.log(`Gene Count: ${gene_count_setting.value}`);
+    console.log(`Mutation Rate: ${mutation_rate_setting.value}`);
+    console.log(`Dialogue: ${dialogue_setting.checked}`);
+
+    // set varaibles
     TOTAL_ORGANISMS = total_organisms_setting.value;
 
     //return to original view
