@@ -15,22 +15,22 @@
   </div>
   <div class="settings-container">
     <div class="settings-form">
-      <form onsubmit="testSettingsForm(); return false;">
-        
+      <form onsubmit="applySettings(); return false;">
+
         <label for="total-organisms">Total Organisms:</label>
-        <input id="total-organisms" type="text">
+        <input id="total-organisms" type="text" value="100">
 
         <label for="move-speed">Movement Speed:</label>
-        <input id="move-speed" type="text">
+        <input id="move-speed" type="text" value="5">
 
         <label for="gene-count">Gene Count:</label>
-        <input id="gene-count" type="text">
+        <input id="gene-count" type="text" value="250">
 
         <label for="mutation-rate">Mutation Rate:</label>
-        <input id="mutation-rate" type="text">
+        <input id="mutation-rate" type="text" value="3">%
 
         <label for="dialogue">
-          <input type="checkbox" id="dialogue" >Dialogue
+          <input type="checkbox" id="dialogue" checked>Dialogue
         </label>
 
         <input type="submit" value="Submit">
@@ -39,7 +39,7 @@
   </div>
   <div class="btn-container">
     <button class="start-btn" onclick="runSimulation()">Run Simulation</button>
-    <button class="settings-btn" onclick="settings()">Settings</button>
+    <button class="settings-btn" onclick="displaySettingsForm()">Settings</button>
     <button class="stop-btn" onclick="stopSimulation()">Stop Simulation</button>
   </div>
     <script type="text/javascript" src="simulator.js"></script>

@@ -130,23 +130,10 @@ function readyForSim() {
     console.log("Simulation Ready!");
 }
 
-function settings() {
-    console.log("Settings Called");
-    // Run Simulation button should be hidden as well
+function displaySettingsForm() {
     var start_btn = document.getElementsByClassName("start-btn")[0];
     start_btn.style.display = 'none';
 
-    // let's first define what parameters are customizable:
-    // - TOTAL_ORGANISMS
-    // - MUTATION_RATE
-    // - MOVEMENT SPEED
-    // - DIALOGUE
-    // - GENE_COUNT** (maybe)
-
-    // when this function is called, we should present a form where user can change parameters
-    // After submitting the form, the global variables should be updated and user returns to initial screen
-
-    // let's first try making a form appear where the canvas normally is
     var canvas_container = document.getElementsByClassName("canvas-container")[0];
     var settings_container = document.getElementsByClassName("settings-container")[0];
 
@@ -154,12 +141,7 @@ function settings() {
     settings_container.style.display = 'block';
 }
 
-function testSettingsForm() {
-    // this function is called when settings are submitted
-    // the final thing this function should do is return user to title screen
-
-    console.log("Settings form says hello!");
-
+function applySettings() {
     // get form input
     var total_organisms_setting = document.getElementById("total-organisms");
     var movement_speed_setting = document.getElementById("move-speed");
@@ -167,17 +149,24 @@ function testSettingsForm() {
     var mutation_rate_setting = document.getElementById("mutation-rate");
     var dialogue_setting = document.getElementById("dialogue");
 
-    console.log("Here are your custom settings:");
-    console.log(`Total Organisms: ${total_organisms_setting.value}`);
-    console.log(`Movement Speed: ${movement_speed_setting.value}`);
-    console.log(`Gene Count: ${gene_count_setting.value}`);
-    console.log(`Mutation Rate: ${mutation_rate_setting.value}`);
-    console.log(`Dialogue: ${dialogue_setting.checked}`);
-
     // set varaibles
     TOTAL_ORGANISMS = total_organisms_setting.value;
+    GENE_COUNT = gene_count_setting.value;
+    MUTATION_RATE = mutation_rate_setting.value / 100;
 
-    //return to original view
+    // create max and min genes from movement speed
+    MIN_GENE = movement_speed_setting.value * -1;
+    MAX_GENE = movement_speed_setting.value;
+
+    // check dialogue checkbox
+    if (dialogue_setting.checked) {
+        dialogue = true;
+    }
+    else {
+        dialogue = false;
+    }
+
+    //return to original view (could be returnToTitleScreen() function?)
     var canvas_container = document.getElementsByClassName("canvas-container")[0];
     var settings_container = document.getElementsByClassName("settings-container")[0];
 
@@ -195,9 +184,14 @@ function stopSimulation() {
 }
 
 async function runSimulation () {
-    // there should be a button next to 'Run Simulation' that allows users to input custom simulation parameters
+    console.log("Running Simulation with these settings:");
+    console.log(`Total Organisms: ${TOTAL_ORGANISMS}`);
+    console.log(`Gene Count: ${GENE_COUNT}`);
+    console.log(`Mutation Rate: ${MUTATION_RATE}`);
+    console.log(`Min/Max Gene: [${MIN_GENE}, ${MAX_GENE}]`);
+    console.log(`Dialogue: ${dialogue}`);
 
-    // make start button disappear
+    // make start/settings buttons disappear, display stop simulation button
     var start_btn = document.getElementsByClassName("start-btn")[0];
     var stop_btn = document.getElementsByClassName("stop-btn")[0];
     var settings_btn = document.getElementsByClassName("settings-btn")[0];
