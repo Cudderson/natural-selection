@@ -15,9 +15,18 @@ body {
     border: 4px solid var(--darkviolet);
 }
 
-.canvas-container, .btn-container {
+.canvas-container, .btn-container, .settings-container {
     margin: 0 auto;
     width: 1000px;
+}
+
+.settings-container {
+    display: none;
+    margin-bottom: .25rem;
+    width: 1000px;
+    height: 600px;
+    border: 4px solid var(--darkviolet);
+    background-color: red;
 }
 
 .btn-container {

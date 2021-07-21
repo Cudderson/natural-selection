@@ -134,6 +134,22 @@ function readyForSim() {
 
 function settings() {
     console.log("Settings Called");
+    // let's first define what parameters are customizable:
+    // - TOTAL_ORGANISMS
+    // - MUTATION_RATE
+    // - MOVEMENT SPEED
+    // - DIALOGUE
+    // - GENE_COUNT** (maybe)
+
+    // when this function is called, we should present a form where user can change parameters
+    // After submitting the form, the global variables should be updated and user returns to initial screen
+
+    // let's first try making a form appear where the canvas normally is
+    var canvas_container = document.getElementsByClassName("canvas-container")[0];
+    var settings_container = document.getElementsByClassName("settings-container")[0];
+
+    canvas_container.style.display = 'none';
+    settings_container.style.display = 'block';
 }
 
 function stopSimulation() {
@@ -143,14 +159,6 @@ function stopSimulation() {
 
 async function runSimulation () {
     // there should be a button next to 'Run Simulation' that allows users to input custom simulation parameters
-    // begin custom parameters
-
-    // let's first define what parameters are customizable:
-    // - TOTAL_ORGANISMS
-    // - MUTATION_RATE
-    // - MOVEMENT SPEED
-    // - DIALOGUE
-    // - GENE_COUNT** (maybe)
 
     // make start button disappear
     var start_btn = document.getElementsByClassName("start-btn")[0];
