@@ -17,24 +17,25 @@
     <div class="settings-form"> 
       <form id="apply-form" onsubmit="return validateSettingsForm()">
 
-        <label for="total-organisms">Total Organisms:</label>
-        <input id="total-organisms" type="text" value="100">
-
-        <label for="move-speed">Movement Speed:</label>
-        <input id="move-speed" type="text" value="5">
-
-        <label for="gene-count">Gene Count:</label>
-        <input id="gene-count" type="text" value="250">
-
-        <label for="mutation-rate">Mutation Rate:</label>
-        <input id="mutation-rate" type="text" value="3">%
-
-        <label for="dialogue">
-          <input type="checkbox" id="dialogue" checked>Dialogue
+        <div class="settings-grid">
+          <label class="organisms-setting-label" for="total-organisms">Total Organisms:</label>
+          <input class="organisms-setting-input" id="total-organisms" type="text" value="100">
+  
+          <label class="movement-setting-label" for="move-speed">Movement Speed:</label>
+          <input class="movement-setting-input" id="move-speed" type="text" value="5">
+  
+          <label class="gene-setting-label" for="gene-count">Gene Count:</label>
+          <input class="gene-setting-input" id="gene-count" type="text" value="250">
+  
+          <label class="mutation-setting-label" for="mutation-rate">Mutation Rate (%):</label>
+          <input class="mutation-setting-input" id="mutation-rate" type="text" value="3">
+        </div>
+        <!-- these are beneath the grid -->
+        <label class="dialogue-setting-label" for="dialogue">
+          <input class="dialogue-setting-input" type="checkbox" id="dialogue" checked>Dialogue
         </label>
 
         <input type="submit" value="Submit">
-
       </form>
     </div>
   </div>
