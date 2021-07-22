@@ -143,6 +143,7 @@ function displaySettingsForm() {
 
 function applySettings() {
     // get form input
+    console.log('called');
     var total_organisms_setting = document.getElementById("total-organisms");
     var movement_speed_setting = document.getElementById("move-speed");
     var gene_count_setting = document.getElementById("gene-count");
@@ -150,7 +151,23 @@ function applySettings() {
     var dialogue_setting = document.getElementById("dialogue");
 
     // set varaibles
-    TOTAL_ORGANISMS = total_organisms_setting.value;
+    // TOTAL_ORGANISMS = total_organisms_setting.value;
+
+    // testing rejected form
+    if (Number.isInteger(parseInt(total_organisms_setting.value))) {
+        if (parseInt(total_organisms_setting.value > 9999)) {
+            TOTAL_ORGANISMS = 9999;
+        }
+        else {
+            TOTAL_ORGANISMS = Math.abs(total_organisms_setting.value);
+        }
+    }
+    else {
+        // reject
+        console.log(`value: ${typeof total_organisms_setting.value}`);
+        return false;
+    }
+
     GENE_COUNT = gene_count_setting.value;
     MUTATION_RATE = mutation_rate_setting.value / 100;
 
@@ -170,12 +187,16 @@ function applySettings() {
     var canvas_container = document.getElementsByClassName("canvas-container")[0];
     var settings_container = document.getElementsByClassName("settings-container")[0];
 
+    // this should only trigger after form validated
     canvas_container.style.display = 'block';
     settings_container.style.display = 'none';
 
     // make Run Simulation button reappear
     var start_btn = document.getElementsByClassName("start-btn")[0];
     start_btn.style.display = 'block';
+
+    return false;
+    // return true;
 }
 
 function stopSimulation() {

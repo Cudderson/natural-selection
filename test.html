@@ -14,8 +14,8 @@
     <canvas id="main-canvas" width="1000" height="600"></canvas>
   </div>
   <div class="settings-container">
-    <div class="settings-form">
-      <form onsubmit="applySettings(); return false;">
+    <div class="settings-form"> 
+      <form id="apply-form" onsubmit="return applySettings();">
 
         <label for="total-organisms">Total Organisms:</label>
         <input id="total-organisms" type="text" value="100">
