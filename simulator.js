@@ -152,8 +152,6 @@ function applySettings() {
 
     // turn into functionslater : validateTotalOrganismsSetting(), or validateSettings()
     // set varaibles
-
-    // testing rejected form
     if (typeof parseInt(total_organisms_setting.value) === 'number' && parseInt(total_organisms_setting.value) > 0) {
         if (parseInt(total_organisms_setting.value > 9999)) {
             TOTAL_ORGANISMS = 9999;
@@ -163,13 +161,7 @@ function applySettings() {
         }
     }
     else {
-        // reject
-        // (test) alter form when reject (working)
         total_organisms_setting.style.backgroundColor = 'red';
-
-        // instead, I should have a general area where error messages can appear if the form is rejected
-        // should style the form first
-        // ** style form after validation logic complete
         return false;
     }
 
@@ -182,7 +174,6 @@ function applySettings() {
         }
     }
     else {
-        //reject
         gene_count_setting.style.backgroundColor = 'red';
         return false;
     }
@@ -197,16 +188,26 @@ function applySettings() {
         }
     }
     else {
-        //reject
         mutation_rate_setting.style.backgroundColor = 'red';
         return false;
     }
 
     // create max and min genes from movement speed
-    MIN_GENE = movement_speed_setting.value * -1;
-    MAX_GENE = movement_speed_setting.value;
+    if (typeof parseInt(movement_speed_setting.value) === 'number') {
+        if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 7) {
+            MIN_GENE = parseInt(movement_speed_setting.value) * -1;
+            MAX_GENE = parseInt(movement_speed_setting.value);
+        } 
+        else {
+            movement_speed_setting.style.backgroundColor = 'red';
+            return false;
+        }   
+    }
+    else {
+        movement_speed_setting.style.backgroundColor = 'red';
+        return false;
+    }
 
-    // check dialogue checkbox
     if (dialogue_setting.checked) {
         dialogue = true;
     }
@@ -215,6 +216,7 @@ function applySettings() {
     }
 
     //return to original view (could be returnToTitleScreen() function?)
+
     var canvas_container = document.getElementsByClassName("canvas-container")[0];
     var settings_container = document.getElementsByClassName("settings-container")[0];
 
@@ -226,8 +228,8 @@ function applySettings() {
     var start_btn = document.getElementsByClassName("start-btn")[0];
     start_btn.style.display = 'block';
 
+    // don't submit form
     return false;
-    // return true;
 }
 
 function stopSimulation() {
