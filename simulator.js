@@ -150,26 +150,57 @@ function applySettings() {
     var mutation_rate_setting = document.getElementById("mutation-rate");
     var dialogue_setting = document.getElementById("dialogue");
 
+    // turn into functionslater : validateTotalOrganismsSetting(), or validateSettings()
     // set varaibles
-    // TOTAL_ORGANISMS = total_organisms_setting.value;
 
     // testing rejected form
-    if (Number.isInteger(parseInt(total_organisms_setting.value))) {
+    if (typeof parseInt(total_organisms_setting.value) === 'number' && parseInt(total_organisms_setting.value) > 0) {
         if (parseInt(total_organisms_setting.value > 9999)) {
             TOTAL_ORGANISMS = 9999;
         }
         else {
-            TOTAL_ORGANISMS = Math.abs(total_organisms_setting.value);
+            TOTAL_ORGANISMS = Math.abs(parseInt(total_organisms_setting.value));
         }
     }
     else {
         // reject
-        console.log(`value: ${typeof total_organisms_setting.value}`);
+        // (test) alter form when reject (working)
+        total_organisms_setting.style.backgroundColor = 'red';
+
+        // instead, I should have a general area where error messages can appear if the form is rejected
+        // should style the form first
+        // ** style form after validation logic complete
         return false;
     }
 
-    GENE_COUNT = gene_count_setting.value;
-    MUTATION_RATE = mutation_rate_setting.value / 100;
+    if (typeof parseInt(gene_count_setting.value) === 'number' && parseInt(gene_count_setting.value) > 0) {
+        if (parseInt(gene_count_setting.value) > 1000) {
+            GENE_COUNT = 1000;
+        }
+        else {
+            GENE_COUNT = Math.abs(parseInt(gene_count_setting.value));
+        }
+    }
+    else {
+        //reject
+        gene_count_setting.style.backgroundColor = 'red';
+        return false;
+    }
+
+    // consider allowing float here
+    if (typeof parseInt(mutation_rate_setting.value) === 'number' && parseInt(mutation_rate_setting.value) > 0) {
+        if (parseInt(mutation_rate_setting.value) > 100) {
+            MUTATION_RATE = 1;
+        }
+        else {
+            MUTATION_RATE = parseInt(mutation_rate_setting.value) / 100;
+        }
+    }
+    else {
+        //reject
+        mutation_rate_setting.style.backgroundColor = 'red';
+        return false;
+    }
 
     // create max and min genes from movement speed
     MIN_GENE = movement_speed_setting.value * -1;
