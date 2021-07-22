@@ -49,20 +49,20 @@ class Organism {
         this.reached_goal = false;
     }
 
-    setRandomGenes () {
+    setRandomGenes() {
         for (var i = 0; i < GENE_COUNT; i++) {
             var random_gene = getRandomGene(MIN_GENE, MAX_GENE);
             this.genes.push(random_gene);
         }
     }
 
-    showGenes () {
+    showGenes() {
         for (var i = 0; i < GENE_COUNT; i++) {
             console.log(this.genes[i]);
         }
     }
 
-    update () {
+    update() {
         if (this.index < GENE_COUNT) {
             this.x += this.genes[this.index][0];
             this.y += this.genes[this.index][1];
@@ -70,14 +70,14 @@ class Organism {
         }
     }
 
-    move () {
+    move() {
         this.ctx.fillStyle = 'rgba(148, 0, 211, 1)'; // darkviolet
         this.ctx.beginPath();
         this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2, false);
         this.ctx.fill();
     }
 
-    calcDistanceToGoal () {
+    calcDistanceToGoal() {
         // c**2 = a**2 + b**2
         var horizontal_distance_squared = (Math.abs(this.x - GOAL_X_POS)) ** 2;
         var vertical_distance_squared = (Math.abs(this.y - GOAL_Y_POS)) ** 2;
@@ -90,7 +90,7 @@ class Organism {
         return distance_to_goal;
     }
 
-    calcFitness () {
+    calcFitness() {
         // height = distance between starting location(y) and goal.y
         var height = INITIAL_Y - GOAL_Y_POS;
 
@@ -107,12 +107,13 @@ class Goal {
         this.ctx = ctx;
     }
 
-    drawGoal () {
+    // could convert final 2 class methods to new class Paintbrush ex. **
+    drawGoal() {
         this.ctx.fillStyle = 'rgba(155, 245, 0, 1)';
         this.ctx.fillRect(this.x, this.y, this.size, this.size);
     }
 
-    showStatistics () {
+    showStatistics() {
         average_fitness = Number(average_fitness).toFixed(2);
         var population_size = organisms.length;
         this.ctx.fillStyle = 'rgba(155, 245, 0, 1)';
@@ -141,9 +142,8 @@ function displaySettingsForm() {
     settings_container.style.display = 'block';
 }
 
-function applySettings() {
+function validateSettingsForm() {
     // get form input
-    console.log('called');
     var total_organisms_setting = document.getElementById("total-organisms");
     var movement_speed_setting = document.getElementById("move-speed");
     var gene_count_setting = document.getElementById("gene-count");
@@ -217,19 +217,25 @@ function applySettings() {
 
     //return to original view (could be returnToTitleScreen() function?)
 
+    finishApplyingSettings();
+
+    // html/css changes made && vars updated
+    // don't submit the form
+    return false;
+}
+
+function finishApplyingSettings() {
+    // make html changes before function returns
     var canvas_container = document.getElementsByClassName("canvas-container")[0];
     var settings_container = document.getElementsByClassName("settings-container")[0];
 
-    // this should only trigger after form validated
     canvas_container.style.display = 'block';
     settings_container.style.display = 'none';
 
-    // make Run Simulation button reappear
     var start_btn = document.getElementsByClassName("start-btn")[0];
     start_btn.style.display = 'block';
 
-    // don't submit form
-    return false;
+    return 0;
 }
 
 function stopSimulation() {
@@ -277,19 +283,17 @@ async function runGeneration() {
         await fadeInEvaluationPhaseText();
     }
     
-    // PHASE: EVALUATE INDIVIDUALS
+    // Phase: Evaluate Individuals
     // this is where statistics are redrawn (goal.showStatistics())
     if (simulation_succeeded) {
-        await runEvaluationAnimation()
-        // possible post-success animations
+        await runEvaluationAnimation();
     }
     else {
         // check if simulation succeeded 
         var success_flag = await runEvaluationAnimation();
         console.log(`Success Flag: ${success_flag}`);
 
-        // here, if success flag is true, we can await for the success animation here
-        /// **************
+        // here, if success flag is true, we can await the success animation
         if (success_flag) {
             // update flag
             simulation_succeeded = true;
@@ -1189,6 +1193,7 @@ function getGender() {
 }
 
 // this function needs work
+// I don't think this function is called anywhere (keep just in case, be remember rAF rules)
 function fadeInPhases() {
     var finished = false;
     var opacity = 0.01;
@@ -1196,32 +1201,26 @@ function fadeInPhases() {
     return new Promise(resolve => {
         function animate() {
             if (!finished) {
-                //animate
-                
-                // will outline where I want these phases to highlight
+
+                // needs black box to prevent over-saturation
+            
                 ctx.font = "20px arial";
 
-                // before animation run
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 ctx.fillText("Create New Generation", 10, 60);
 
-                // while main-animation running
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 ctx.fillText("Evaluate Individuals", 10, 90);
 
-                // while highlighting animation running
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 ctx.fillText("Select Most-Fit Individuals", 10, 120);
 
-                // after highlighting over / may need own animation / help text on top right?
                 ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
                 ctx.fillText("Crossover", 10, 150);
 
-                // may need own animation / when generation stats are updated
                 ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
                 ctx.fillText("Mutate", 10, 180);
                 
-                // draw at low-opacity
                 if (opacity >= 0.10) {
                     finished = true;
                 }
