@@ -148,7 +148,7 @@ function validateSettingsForm() {
     var movement_speed_setting = document.getElementById("move-speed");
     var gene_count_setting = document.getElementById("gene-count");
     var mutation_rate_setting = document.getElementById("mutation-rate");
-    var dialogue_setting = document.getElementById("dialogue");
+    var dialogue_setting = document.getElementById("dialogue-checkbox");
 
     // turn into functionslater : validateTotalOrganismsSetting(), or validateSettings()
     // set varaibles
