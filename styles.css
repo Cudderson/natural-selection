@@ -64,6 +64,8 @@ body {
 
 .setting-input {
     width: 50%;
+    border: none;
+    border-bottom: 2px solid var(--custom-green);
     text-align: right;
     font-size: 30px;
     background-color: black;
