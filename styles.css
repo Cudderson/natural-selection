@@ -39,7 +39,6 @@ body {
     grid-template-columns: 3fr 1fr;
     grid-template-rows: 1fr repeat(4, 1fr);
     row-gap: 10px;
-    /* border: 4px solid black; */
 }
 
 .settings-header {
@@ -49,12 +48,6 @@ body {
     color: var(--darkviolet);
 }
 
-/* may not need */
-.settings-grid > label {
-    display: block;
-}
-
-/* not doing dialogue yet */
 .organisms-setting-label,
 .movement-setting-label,
 .gene-setting-label,
@@ -79,7 +72,98 @@ body {
 
 .setting-submit {
     display: block;
+    margin: 0 auto;
+    margin-top: 4rem;
+    border: 2px solid var(--custom-green);
+    border-radius: 3px;
+    padding: .75rem 2rem;
+    background-color: black;
+    color: var(--custom-green);
+    font-size: 30px;
+    transition: .25s;
 }
+
+.setting-submit:hover {
+    background-color: var(--custom-green);
+    color: black;
+    transition: .25s;
+}
+
+.dialogue-container {
+    grid-column: 2 / 3;
+    margin-left: 40px;
+}
+
+/* custom checkbox */
+.dialogue-setting-label {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 22px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Hide the browser default checkbox */
+  .dialogue-setting-label input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  
+  /* Create a custom checkbox */
+  .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 40px;
+    width: 40px;
+    border: 1px solid var(--custom-green);
+    border-radius: 4px;
+    background-color: black;
+  }
+  
+  /* On mouse-over, add darkgray background color */
+  .dialogue-setting-label:hover input ~ .checkmark {
+    background-color: #222;
+  }
+  
+  /* When the checkbox is checked, add black background */
+  .dialogue-setting-label input:checked ~ .checkmark {
+    background-color: black;
+  }
+  
+  /* checkmark/indicator (hidden when not checked) */
+  .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+  
+  /* Show the checkmark when checked */
+  .dialogue-setting-label input:checked ~ .checkmark:after {
+    display: block;
+  }
+  
+  /* checkmark/indicator */
+  .dialogue-setting-label .checkmark:after {
+    left: 12px;
+    top: 5px;
+    width: 10px;
+    height: 20px;
+    border: solid var(--custom-green);
+    border-width: 0 6px 6px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+  }
+/* end custom checkbox */
 
 .btn-container {
     display: grid;
