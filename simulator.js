@@ -161,7 +161,7 @@ function validateSettingsForm() {
         }
     }
     else {
-        total_organisms_setting.style.backgroundColor = 'red';
+        total_organisms_setting.style.borderBottom = '2px solid red';
         return false;
     }
 
@@ -174,7 +174,7 @@ function validateSettingsForm() {
         }
     }
     else {
-        gene_count_setting.style.backgroundColor = 'red';
+        gene_count_setting.style.borderBottom = '2px solid red';
         return false;
     }
 
@@ -188,7 +188,7 @@ function validateSettingsForm() {
         }
     }
     else {
-        mutation_rate_setting.style.backgroundColor = 'red';
+        mutation_rate_setting.style.borderBottom = '2px solid red';
         return false;
     }
 
@@ -199,12 +199,12 @@ function validateSettingsForm() {
             MAX_GENE = parseInt(movement_speed_setting.value);
         } 
         else {
-            movement_speed_setting.style.backgroundColor = 'red';
+            movement_speed_setting.style.borderBottom = '2px solid red';
             return false;
         }   
     }
     else {
-        movement_speed_setting.style.backgroundColor = 'red';
+        movement_speed_setting.style.borderBottom = '2px solid red';
         return false;
     }
 

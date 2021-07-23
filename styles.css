@@ -75,7 +75,7 @@ body {
 .setting-submit {
     display: block;
     margin: 0 auto;
-    margin-top: 4rem;
+    margin-top: 2rem;
     border: 2px solid var(--custom-green);
     border-radius: 3px;
     padding: .75rem 2rem;
@@ -94,6 +94,17 @@ body {
 .dialogue-container {
     grid-column: 2 / 3;
     margin-left: 40px;
+}
+
+.error-container {
+    margin-top: 1rem;
+    border: 1px solid red;
+}
+
+.error-message {
+    color: red;
+    text-align: center;
+    font-size: 30px;
 }
 
 /* custom checkbox */
