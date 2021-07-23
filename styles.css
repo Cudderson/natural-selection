@@ -26,7 +26,6 @@ body {
     width: 1000px;
     height: 600px;
     border: 4px solid var(--darkviolet);
-    background-color: red;
 }
 
 #apply-form {
@@ -39,14 +38,15 @@ body {
     display: grid;
     grid-template-columns: 3fr 1fr;
     grid-template-rows: 1fr repeat(4, 1fr);
-    border: 4px solid black;
+    row-gap: 10px;
+    /* border: 4px solid black; */
 }
 
 .settings-header {
     grid-column: 1 / 3;
     display: block;
-    text-align: center;
-    font-size: 50px;
+    font-size: 30px;
+    color: var(--darkviolet);
 }
 
 /* may not need */
@@ -61,6 +61,24 @@ body {
 .mutation-setting-label {
     grid-column: 1 / 2;
     font-size: 40px;
+    color: var(--custom-green);
+}
+
+.dialogue-setting-span {
+    font-size: 40px;
+    color: var(--custom-green);
+}
+
+.setting-input {
+    width: 50%;
+    text-align: right;
+    font-size: 30px;
+    background-color: black;
+    color: var(--custom-green);
+}
+
+.setting-submit {
+    display: block;
 }
 
 .btn-container {

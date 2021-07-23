@@ -21,23 +21,22 @@
           <span class="settings-header">Simulation Settings</span>
 
           <label class="organisms-setting-label" for="total-organisms">Total Organisms:</label>
-          <input class="organisms-setting-input" id="total-organisms" type="text" value="100">
+          <input class="setting-input" id="total-organisms" type="text" value="100">
   
           <label class="movement-setting-label" for="move-speed">Movement Speed:</label>
-          <input class="movement-setting-input" id="move-speed" type="text" value="5">
+          <input class="setting-input" id="move-speed" type="text" value="5">
   
           <label class="gene-setting-label" for="gene-count">Gene Count:</label>
-          <input class="gene-setting-input" id="gene-count" type="text" value="250">
+          <input class="setting-input" id="gene-count" type="text" value="250">
   
           <label class="mutation-setting-label" for="mutation-rate">Mutation Rate (%):</label>
-          <input class="mutation-setting-input" id="mutation-rate" type="text" value="3">
+          <input class="setting-input" id="mutation-rate" type="text" value="3">
         </div>
         <!-- these are beneath the grid -->
-        <label class="dialogue-setting-label" for="dialogue">
-          <input class="dialogue-setting-input" type="checkbox" id="dialogue" checked>Dialogue
-        </label>
+        <label class="dialogue-setting-label" for="dialogue"></label>
+        <input class="dialogue-setting-input" type="checkbox" id="dialogue" checked><span class="dialogue-setting-span">Dialogue</span>
 
-        <input type="submit" value="Submit">
+        <input class="setting-submit" type="submit" value="Submit">
       </form>
     </div>
   </div>
