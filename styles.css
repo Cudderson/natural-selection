@@ -70,6 +70,7 @@ body {
     font-size: 30px;
     background-color: black;
     color: var(--custom-green);
+    outline: none;
 }
 
 .setting-submit {
@@ -98,13 +99,14 @@ body {
 
 .error-container {
     margin-top: 1rem;
-    border: 1px solid red;
 }
 
+/* consider using a better red color */
 .error-message {
+    display: block;
     color: red;
     text-align: center;
-    font-size: 30px;
+    font-size: 24px;
 }
 
 /* custom checkbox */

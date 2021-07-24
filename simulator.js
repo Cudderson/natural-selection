@@ -149,6 +149,8 @@ function validateSettingsForm() {
     var gene_count_setting = document.getElementById("gene-count");
     var mutation_rate_setting = document.getElementById("mutation-rate");
     var dialogue_setting = document.getElementById("dialogue-checkbox");
+    // get error message
+    var error_message = document.getElementsByClassName("error-message")[0];
 
     // turn into functionslater : validateTotalOrganismsSetting(), or validateSettings()
     // set varaibles
@@ -162,6 +164,7 @@ function validateSettingsForm() {
     }
     else {
         total_organisms_setting.style.borderBottom = '2px solid red';
+        error_message.innerHTML = "* Invalid number of organisms. Please input a positive number.";
         return false;
     }
 
@@ -175,6 +178,7 @@ function validateSettingsForm() {
     }
     else {
         gene_count_setting.style.borderBottom = '2px solid red';
+        error_message.innerHTML = "* Invalid gene count. Please input a positive number.";
         return false;
     }
 
@@ -189,10 +193,12 @@ function validateSettingsForm() {
     }
     else {
         mutation_rate_setting.style.borderBottom = '2px solid red';
+        error_message.innerHTML = "Invalid mutation rate. Please input a positive percentage value. (3 = 3%)";
         return false;
     }
 
     // create max and min genes from movement speed
+    // no error message yet. Might convert to select-box
     if (typeof parseInt(movement_speed_setting.value) === 'number') {
         if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 7) {
             MIN_GENE = parseInt(movement_speed_setting.value) * -1;
