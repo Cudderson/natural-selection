@@ -141,7 +141,7 @@ function displaySettingsForm() {
     canvas_container.style.display = 'none';
     settings_container.style.display = 'block';
 
-    // movement setting helper
+    // movement setting helper (move/abstract)
     var movement_speed_setting = document.getElementById("move-speed");
     var error_message = document.getElementsByClassName("error-message")[0];
 
@@ -180,6 +180,8 @@ function preValidateMovementSetting(event) {
 }
 
 function validateSettingsForm() {
+    // abstract this functions logic into helpers for readability
+
     // get form input
     var total_organisms_setting = document.getElementById("total-organisms");
     var movement_speed_setting = document.getElementById("move-speed");
@@ -304,6 +306,9 @@ async function runSimulation () {
     start_btn.style.display = 'none';
     settings_btn.style.display = 'none';
     stop_btn.style.display = 'block';
+
+    // pre-sim animations *****
+    await runPreSimAnimations();
 
     // Create organisms with random genes
     /// PHASE: CREATE NEW GENERATION/POPULATION
@@ -443,6 +448,46 @@ async function runGeneration() {
         resolve(generation_count);
     })
 }
+
+// pre-sim animation (can make async function that awaits each part of the animation) (runPreSimAnimations())
+async function runPreSimAnimations() {
+
+    await fadeInSimulationSettings();
+
+    return new Promise(resolve => {
+        resolve("pre sim complete!");
+    })
+}
+
+function fadeInSimulationSettings() {
+    // this will be called by runPreSimAnimations(), and run before the first generation
+    var opacity = 0.00;
+    var finished = false;
+    return new Promise(resolve => {
+        function simSettingsFadeIn() {
+            if (!finished) {
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.font = "20px arial";
+
+                ctx.fillText(`Running simulation with the following parameters:`, 100, 300);
+                
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.01;
+                }
+                frame_id = requestAnimationFrame(simSettingsFadeIn);
+            }
+            else {
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_settings_fadein = requestAnimationFrame(simSettingsFadeIn);
+    })
+}
+
 
 async function runEvaluationAnimation() {
     // do stuff
