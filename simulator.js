@@ -453,6 +453,7 @@ async function runGeneration() {
 async function runPreSimAnimations() {
 
     await fadeInSimulationSettings();
+    // no fadeout until fadeIn positions finalized
 
     return new Promise(resolve => {
         resolve("pre sim complete!");
@@ -466,10 +467,25 @@ function fadeInSimulationSettings() {
     return new Promise(resolve => {
         function simSettingsFadeIn() {
             if (!finished) {
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.font = "20px arial";
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.fillText(`Running simulation with the following parameters:`, 100, 300);
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.font = "30px arial";
+                ctx.fillText("Simulation Settings", 300, 190);
+                ctx.fillRect(300, 195, 350, 1);
+
+                ctx.font = "24px arial";
+                ctx.fillText(`Initial Population:`, 300, 250);
+                ctx.fillText(`Gene Count:`, 300, 290);
+                ctx.fillText(`Movement Speed:`, 300, 330);
+                ctx.fillText(`Mutation Rate:`, 300, 370);
+                
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                ctx.fillText(`${TOTAL_ORGANISMS}`, 600, 250);
+                ctx.fillText(`${GENE_COUNT}`, 600, 290);
+                ctx.fillText(`${MAX_GENE}`, 600, 330);
+                ctx.fillText(`${MUTATION_RATE}`, 600, 370);
                 
                 if (opacity >= 1.00) {
                     finished = true;
