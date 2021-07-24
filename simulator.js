@@ -140,6 +140,31 @@ function displaySettingsForm() {
 
     canvas_container.style.display = 'none';
     settings_container.style.display = 'block';
+
+    var movement_speed_setting = document.getElementById("move-speed");
+    movement_speed_setting.addEventListener('keydown', function(event) {
+        // function blocks keystrokes not within the acceptable range for movement speed
+        var keystroke = preValidateMovementSetting(event);
+        if (keystroke === 1) {
+            event.preventDefault();
+        }
+    });
+
+}
+
+function preValidateMovementSetting(event) {
+
+    // prevent keystrokes that aren't === 1-7 || Backspace, <, > 
+    var movement_key = event.key;
+    if (movement_key > "0" && movement_key <= "7") {
+        return 0;
+    }
+    else if (movement_key === "Backspace" || movement_key === "ArrowLeft" || movement_key === "ArrowRight") {
+        return 0;
+    }
+    else {
+        return 1;
+    }
 }
 
 function validateSettingsForm() {
@@ -205,6 +230,7 @@ function validateSettingsForm() {
 
     // create max and min genes from movement speed
     // no error message yet. Might convert to select-box
+    // check for duplicate logic in displaySettingsForm() / preValidateMovementSetting()
     if (typeof parseInt(movement_speed_setting.value) === 'number') {
         if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 7) {
             MIN_GENE = parseInt(movement_speed_setting.value) * -1;
