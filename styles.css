@@ -104,7 +104,7 @@ body {
 /* consider using a better red color */
 .error-message {
     display: block;
-    color: red;
+    color: var(--mother-pink);
     text-align: center;
     font-size: 24px;
 }

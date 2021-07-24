@@ -192,7 +192,7 @@ function validateSettingsForm() {
         total_organisms_setting.style.borderBottom = '2px solid var(--custom-green)';
     }
     else {
-        total_organisms_setting.style.borderBottom = '2px solid red';
+        total_organisms_setting.style.borderBottom = '2px solid var(--mother-pink)';
         error_message.innerHTML = "* Invalid number of organisms. Please input a positive number.";
         return false;
     }
@@ -207,7 +207,7 @@ function validateSettingsForm() {
         gene_count_setting.style.borderBottom = '2px solid var(--custom-green)';
     }
     else {
-        gene_count_setting.style.borderBottom = '2px solid red';
+        gene_count_setting.style.borderBottom = '2px solid var(--mother-pink)';
         error_message.innerHTML = "* Invalid gene count. Please input a positive number.";
         return false;
     }
@@ -223,7 +223,7 @@ function validateSettingsForm() {
         mutation_rate_setting.style.borderBottom = '2px solid var(--custom-green)';
     }
     else {
-        mutation_rate_setting.style.borderBottom = '2px solid red';
+        mutation_rate_setting.style.borderBottom = '2px solid var(--mother-pink)';
         error_message.innerHTML = "Invalid mutation rate. Please input a positive percentage value. (3 = 3%)";
         return false;
     }
@@ -233,9 +233,10 @@ function validateSettingsForm() {
     if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 7) {
         MIN_GENE = parseInt(movement_speed_setting.value) * -1;
         MAX_GENE = parseInt(movement_speed_setting.value);
+        movement_speed_setting.style.borderBottom = "2px solid var(--custom-green)";
     } 
     else {
-        movement_speed_setting.style.borderBottom = '2px solid red';
+        movement_speed_setting.style.borderBottom = '2px solid var(--mother-pink)';
         error_message.innerHTML = "Invalid movement speed. Please input a positive number between 1 - 7.";
         return false;
     }   
