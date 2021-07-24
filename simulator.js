@@ -152,6 +152,9 @@ function validateSettingsForm() {
     // get error message
     var error_message = document.getElementsByClassName("error-message")[0];
 
+    // clear error message
+    error_message.innerHTML = "";
+
     // turn into functionslater : validateTotalOrganismsSetting(), or validateSettings()
     // set varaibles
     if (typeof parseInt(total_organisms_setting.value) === 'number' && parseInt(total_organisms_setting.value) > 0) {
@@ -161,6 +164,7 @@ function validateSettingsForm() {
         else {
             TOTAL_ORGANISMS = Math.abs(parseInt(total_organisms_setting.value));
         }
+        total_organisms_setting.style.borderBottom = '2px solid var(--custom-green)';
     }
     else {
         total_organisms_setting.style.borderBottom = '2px solid red';
@@ -175,6 +179,7 @@ function validateSettingsForm() {
         else {
             GENE_COUNT = Math.abs(parseInt(gene_count_setting.value));
         }
+        gene_count_setting.style.borderBottom = '2px solid var(--custom-green)';
     }
     else {
         gene_count_setting.style.borderBottom = '2px solid red';
@@ -190,6 +195,7 @@ function validateSettingsForm() {
         else {
             MUTATION_RATE = parseInt(mutation_rate_setting.value) / 100;
         }
+        mutation_rate_setting.style.borderBottom = '2px solid var(--custom-green)';
     }
     else {
         mutation_rate_setting.style.borderBottom = '2px solid red';
