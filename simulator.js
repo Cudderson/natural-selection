@@ -141,7 +141,19 @@ function displaySettingsForm() {
     canvas_container.style.display = 'none';
     settings_container.style.display = 'block';
 
+    // movement setting helper
     var movement_speed_setting = document.getElementById("move-speed");
+    var error_message = document.getElementsByClassName("error-message")[0];
+
+    movement_speed_setting.addEventListener('focusin', function() {
+        error_message.style.color = "var(--closest_organism_gold)";
+        error_message.innerHTML = "Movement Speed Range: 1 - 7";
+        movement_speed_setting.addEventListener('focusout', function() {
+            error_message.style.color = 'var(--mother-pink)';
+            error_message.innerHTML = "";
+        })
+    })
+
     movement_speed_setting.addEventListener('keydown', function(event) {
         // function blocks keystrokes not within the acceptable range for movement speed
         var keystroke = preValidateMovementSetting(event);
@@ -178,6 +190,7 @@ function validateSettingsForm() {
     var error_message = document.getElementsByClassName("error-message")[0];
 
     // clear error message
+    error_message.style.color = "var(--mother-pink)";
     error_message.innerHTML = "";
 
     // turn into functionslater : validateTotalOrganismsSetting(), or validateSettings()
