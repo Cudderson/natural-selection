@@ -229,22 +229,16 @@ function validateSettingsForm() {
     }
 
     // create max and min genes from movement speed
-    // no error message yet. Might convert to select-box
-    // check for duplicate logic in displaySettingsForm() / preValidateMovementSetting()
-    if (typeof parseInt(movement_speed_setting.value) === 'number') {
-        if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 7) {
-            MIN_GENE = parseInt(movement_speed_setting.value) * -1;
-            MAX_GENE = parseInt(movement_speed_setting.value);
-        } 
-        else {
-            movement_speed_setting.style.borderBottom = '2px solid red';
-            return false;
-        }   
-    }
+    // pre-validated in preValidateMovementSetting();
+    if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 7) {
+        MIN_GENE = parseInt(movement_speed_setting.value) * -1;
+        MAX_GENE = parseInt(movement_speed_setting.value);
+    } 
     else {
         movement_speed_setting.style.borderBottom = '2px solid red';
+        error_message.innerHTML = "Invalid movement speed. Please input a positive number between 1 - 7.";
         return false;
-    }
+    }   
 
     if (dialogue_setting.checked) {
         dialogue = true;
