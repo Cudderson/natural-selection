@@ -480,12 +480,19 @@ function fadeInSimulationSettings() {
                 ctx.fillText(`Gene Count:`, 300, 290);
                 ctx.fillText(`Movement Speed:`, 300, 330);
                 ctx.fillText(`Mutation Rate:`, 300, 370);
+                ctx.fillText(`Dialogue:`, 300, 410);
                 
                 ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
                 ctx.fillText(`${TOTAL_ORGANISMS}`, 600, 250);
                 ctx.fillText(`${GENE_COUNT}`, 600, 290);
                 ctx.fillText(`${MAX_GENE}`, 600, 330);
                 ctx.fillText(`${MUTATION_RATE}`, 600, 370);
+                if (dialogue === false) {
+                    ctx.fillText(`Disabled`, 600, 410);
+                }
+                else {
+                    ctx.fillText(`Enabled`, 600, 410);
+                }
                 
                 if (opacity >= 1.00) {
                     finished = true;
