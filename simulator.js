@@ -322,11 +322,6 @@ async function runSimulation () {
 
 async function runGeneration() {
 
-    // this will clear the phase text area
-    // can use this for fading stats to black
-    // ctx.fillStyle = 'red';
-    // ctx.fillRect(10, 10, 275, 200);
-
     if (dialogue) {
         await fadeInEvaluationPhaseText();
     }
@@ -394,8 +389,16 @@ async function runGeneration() {
 
     // we shouldn't enter the selection phase if there aren't enough organisms to reproduce
     // this could happen if a population produced all males, then potential_mothers would never get filled, and program fails
+    // check extinction
     if (potential_mothers.length === 0 || potential_fathers.length === 0) {
-        // either males or females have gone extinct, species extinct, sim failed
+        await fadeInExtinctionMessage();
+        await sleepTest(2000);
+        do {
+            var exit_key = await getUserDecision();
+            console.log(exit_key);
+        }
+        while (exit_key != "q");
+
         stopSimulation();
     }
 
@@ -761,8 +764,6 @@ function fadeInStats() {
     return new Promise(resolve => {
         function animate() {
             if (!finished) {
-
-                // needs black box to prevent over-saturation
                 ctx.fillStyle = 'black';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             
@@ -784,12 +785,58 @@ function fadeInStats() {
                 frame_id = requestAnimationFrame(animate);
             }
             else {
-                // resolve
                 cancelAnimationFrame(frame_id);
                 resolve();
             }
         }
         start_stats_fadein = requestAnimationFrame(animate);
+    })
+}
+
+function fadeInExtinctionMessage() {
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function extinctMessageFadeIn() {
+            if (!finished) {
+                // clears
+                ctx.fillStyle = 'black';
+
+                ctx.font = '50px arial';
+                ctx.fillText("FAILURE", 400, 250);
+
+                ctx.font = "30px arial";
+                ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
+
+                ctx.font = '22px arial';
+                ctx.fillText("Press 'Q' to exit the simulation.", 345, 425);
+
+                // animations
+                ctx.font = '50px arial';
+                ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+                ctx.fillText("FAILURE", 400, 250);
+
+                ctx.font = "22px arial";
+                ctx.fillText("Press 'Q' to exit the simulation.", 345, 425);
+
+                ctx.font = "30px arial";
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.05;
+                }
+                frame_id = requestAnimationFrame(extinctMessageFadeIn);
+            }
+            else {
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_extinction_fadein = requestAnimationFrame(extinctMessageFadeIn);
     })
 }
 
