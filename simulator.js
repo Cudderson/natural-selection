@@ -468,7 +468,10 @@ async function runPreSimAnimations() {
     await fadeInSimulationSettings();
     // fade out sim settings
     await fadeInSimulationIntro();
+    // fade in goal?
     // fade out intro
+    await fadeInSimulationExplanation();
+    // fade out sim explanation
 
     return new Promise(resolve => {
         resolve("pre sim complete!");
@@ -483,9 +486,6 @@ function fadeInSimulationIntro() {
             if (!finished) {
                 // "100" organisms were created with completely random genes.
                 // This society of organisms needs to reach the goal if it wants to survive. (draw goal?)
-                // Using a genetic algorithm based on natural selection, these organisms will undergo generations of
-                // reproduction, evaluation, selection, gene crossover and mutation, until they either succeed or fail to survive.
-                // ^ not bad. Maybe just go with this and tweak it if it needs it. Don't worry too much about looks right away
 
                 // animation
                 // clear rect []
@@ -504,7 +504,7 @@ function fadeInSimulationIntro() {
                     finished = true;
                 }
                 else {
-                    opacity += 0.001;
+                    opacity += 0.01;
                 }
                 frame_id = requestAnimationFrame(simIntroFadeIn);
             }
@@ -515,6 +515,44 @@ function fadeInSimulationIntro() {
             }
         }
         start_sim_intro_fadein = requestAnimationFrame(simIntroFadeIn);
+    })
+}
+
+function fadeInSimulationExplanation() {
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function simExplanationFadeIn() {
+            if (!finished) {
+                // Using a genetic algorithm based on natural selection, these organisms will undergo generations of
+                // reproduction, evaluation, selection, gene crossover and mutation, until they either succeed or fail to survive.
+                // ^ not bad. Maybe just go with this and tweak it if it needs it. Don't worry too much about looks right away
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.font = '22px arial';
+                ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
+                ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
+                ctx.fillText("until they succeed or fail to survive.", 350, 350);
+                // ctx.fillText("", 150, 330);
+
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.01;
+                }
+                frame_id = requestAnimationFrame(simExplanationFadeIn);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_sim_explanation_fadein = requestAnimationFrame(simExplanationFadeIn);
     })
 }
 
