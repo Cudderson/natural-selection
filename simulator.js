@@ -452,11 +452,69 @@ async function runGeneration() {
 // pre-sim animation (can make async function that awaits each part of the animation) (runPreSimAnimations())
 async function runPreSimAnimations() {
 
+    // explanation:
+    // genetic algorithm based on natural selection
+    // roulette wheel
+    // this explanation shouldn't be as deep as the README will be. Make it fun and give enough for the user to be engaged.
+
+    // "100" organisms were created with completely random genes.
+    // This society of organisms needs to reach the goal if it wants to survive. (draw goal?)
+    // Using a genetic algorithm based on natural selection, these organisms will undergo generations of
+    // reproduction, evaluation, selection, gene crossover and mutation, until they either succeed or fail to survive.
+    // ^ not bad. Maybe just go with this and tweak it if it needs it. Don't worry too much about looks right away
+
+    // flow:
+    // (only with dialogue on!)
     await fadeInSimulationSettings();
-    // no fadeout until fadeIn positions finalized
+    // fade out sim settings
+    await fadeInSimulationIntro();
+    // fade out intro
 
     return new Promise(resolve => {
         resolve("pre sim complete!");
+    })
+}
+
+function fadeInSimulationIntro() {
+    var opacity = 0.00;
+    var finished = false;
+    return new Promise(resolve => {
+        function simIntroFadeIn() {
+            if (!finished) {
+                // "100" organisms were created with completely random genes.
+                // This society of organisms needs to reach the goal if it wants to survive. (draw goal?)
+                // Using a genetic algorithm based on natural selection, these organisms will undergo generations of
+                // reproduction, evaluation, selection, gene crossover and mutation, until they either succeed or fail to survive.
+                // ^ not bad. Maybe just go with this and tweak it if it needs it. Don't worry too much about looks right away
+
+                // animation
+                // clear rect []
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.font = '28px arial';
+                ctx.fillText(`${TOTAL_ORGANISMS} organisms were created with completely random genes.`, 125, 290);
+
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.font = '22px arial';
+                ctx.fillText("This society of organisms needs to reach the goal if it wants to survive.", 150, 330);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.001;
+                }
+                frame_id = requestAnimationFrame(simIntroFadeIn);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_sim_intro_fadein = requestAnimationFrame(simIntroFadeIn);
     })
 }
 
