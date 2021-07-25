@@ -310,12 +310,9 @@ async function runSimulation () {
     // pre-sim animations *****
     await runPreSimAnimations();
 
-    // Create organisms with random genes
     /// PHASE: CREATE NEW GENERATION/POPULATION
     createOrganisms();
     console.log("Amount of organisms created = " + organisms.length);
-
-    // intro-animation here before sim-loop?
 
     do {
         const result = await runGeneration();
@@ -376,7 +373,6 @@ async function runGeneration() {
         }
     }
     
-
     const population_resolution = await evaluatePopulation(); // maybe don't await here
     var closest_organism = population_resolution['closest_organism'];
     average_fitness = population_resolution['average_fitness'];
@@ -385,20 +381,23 @@ async function runGeneration() {
         await fadeOutEvaluationPhaseText();
     }
 
-    // trying this to prevent text being redrawn to over-saturation
-    // ctx.clearRect(10, 10, 275, 200);
-    // drawPhases();
-
+    // PHASE: SELECT MOST-FIT INDIVIDUALS
     if (dialogue) {
         await fadeInSelectionPhaseText();
     }
 
-    // PHASE: SELECT MOST-FIT INDIVIDUALS
     // this phase includes: beginSelectionProcess(), selectParentsForReproduction()
     const potential_parents = await beginSelectionProcess(); // maybe don't await here
 
     var potential_mothers = potential_parents['potential_mothers'];
     var potential_fathers = potential_parents['potential_fathers'];
+
+    // we shouldn't enter the selection phase if there aren't enough organisms to reproduce
+    // this could happen if a population produced all males, then potential_mothers would never get filled, and program fails
+    if (potential_mothers.length === 0 || potential_fathers.length === 0) {
+        // either males or females have gone extinct, species extinct, sim failed
+        stopSimulation();
+    }
 
     var parents = selectParentsForReproduction(potential_mothers, potential_fathers);
 
@@ -452,16 +451,22 @@ async function runGeneration() {
 // pre-sim animation (can make async function that awaits each part of the animation) (runPreSimAnimations())
 async function runPreSimAnimations() {
 
-    // flow:
     // (only with dialogue on!)
     await fadeInSimulationSettings();
+    await sleepTest(2000);
     await fadeOutSimulationSettings();
     await fadeInSimulationIntro();
-    // fade out intro
+    await sleepTest(2000);
     await fadeInFakeGoal();
+    await fadeOutSimulationIntro();
     await fadeInSimulationExplanation();
-    // fade out sim explanation & fake goal
+    await sleepTest(4000);
+    await fadeOutExplanationAndGoal();
+    await sleepTest(1000);
     // anything else needed before core animation runs
+    // testing if this is appropriate
+    await fadeInStats(); 
+    await sleepTest(1000);
 
     return new Promise(resolve => {
         resolve("pre sim complete!");
@@ -505,6 +510,40 @@ function fadeInSimulationIntro() {
             }
         }
         start_sim_intro_fadein = requestAnimationFrame(simIntroFadeIn);
+    })
+}
+
+function fadeOutSimulationIntro() {
+    var finished = false;
+    var opacity = 1.00;
+    return new Promise(resolve => {
+        function simIntroFadeOut() {
+            if (!finished) {
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 200, canvas.width, canvas.height);
+
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.font = '28px arial';
+                ctx.fillText(`${TOTAL_ORGANISMS} organisms were created with completely random genes.`, 125, 290);
+
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.font = '22px arial';
+                ctx.fillText("This society of organisms needs to reach the goal if it wants to survive.", 150, 330);
+
+                if (opacity <= 0.00) {
+                    finished = true;
+                }
+                else {
+                    opacity -= 0.02;
+                }
+                frame_id = requestAnimationFrame(simIntroFadeOut);
+            }
+            else {
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_sim_intro_fadeout = requestAnimationFrame(simIntroFadeOut);
     })
 }
 
@@ -571,6 +610,44 @@ function fadeInFakeGoal() {
             }
         }
         start_fake_goal_fadein = requestAnimationFrame(fakeGoalFadeIn);
+    })
+}
+
+function fadeOutExplanationAndGoal() {
+    var finished = false;
+    var opacity = 1.00;
+    return new Promise(resolve => {
+        function explanationAndGoalFadeOut() {
+            if (!finished) {
+                //animate
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.font = '22px arial';
+                ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
+                ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
+                ctx.fillText("until they succeed or fail to survive.", 350, 350);
+
+                // fake goal
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                ctx.fillRect(500, 50, 20, 20);
+
+                if (opacity <= 0.00) {
+                    finished = true;
+                }
+                else {
+                    opacity -= 0.02;
+                }
+                frame_id = requestAnimationFrame(explanationAndGoalFadeOut);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_explanation_fadeout = requestAnimationFrame(explanationAndGoalFadeOut);
     })
 }
 
@@ -675,6 +752,44 @@ function fadeOutSimulationSettings() {
             }
         }
         start_sim_settings_fadeout = requestAnimationFrame(simSettingsFadeOut);
+    })
+}
+
+function fadeInStats() {
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+
+                // needs black box to prevent over-saturation
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+                this.ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                this.ctx.font = "26px arial";
+                this.ctx.fillText('Generation:', 10, 520);
+                this.ctx.fillText(generation_count.toString(), 210, 520);
+                this.ctx.fillText('Population Size:', 10, 550);
+                this.ctx.fillText(TOTAL_ORGANISMS.toString(), 210, 550);
+                this.ctx.fillText('Average Fitness:', 10, 580);
+                this.ctx.fillText("0.00", 210, 580);
+                
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.02;
+                }
+                frame_id = requestAnimationFrame(animate);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_stats_fadein = requestAnimationFrame(animate);
     })
 }
 
@@ -863,7 +978,6 @@ function selectParentsForReproduction(potential_mothers, potential_fathers) {
     var parents = [];
     // goal: pair together males and females 
     // create parents == TOTAL_ORGANISMS / 2 (each couple reproduces roughly 2 offspring)
-    // change to TOTAL_ORGANISMS / 4 if makes sense
     for (var i = 0; i < (organisms.length / 2); i++) {
         mother_index = Math.floor(Math.random() * potential_mothers.length);
         father_index = Math.floor(Math.random() * potential_fathers.length);
@@ -1470,53 +1584,6 @@ function getGender() {
         gender = 'male';
     }
     return gender
-}
-
-// this function needs work
-// I don't think this function is called anywhere (keep just in case, be remember rAF rules)
-function fadeInPhases() {
-    var finished = false;
-    var opacity = 0.01;
-
-    return new Promise(resolve => {
-        function animate() {
-            if (!finished) {
-
-                // needs black box to prevent over-saturation
-            
-                ctx.font = "20px arial";
-
-                ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
-                ctx.fillText("Create New Generation", 10, 60);
-
-                ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
-                ctx.fillText("Evaluate Individuals", 10, 90);
-
-                ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
-                ctx.fillText("Select Most-Fit Individuals", 10, 120);
-
-                ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
-                ctx.fillText("Crossover", 10, 150);
-
-                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
-                ctx.fillText("Mutate", 10, 180);
-                
-                if (opacity >= 0.10) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.01;
-                }
-                frame_id = requestAnimationFrame(animate);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve("DRAW PHASES COMPLETE");
-            }
-        }
-        start_phase_fadein = requestAnimationFrame(animate);
-    })
 }
 
 function drawPhases() {
