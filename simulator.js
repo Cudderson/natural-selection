@@ -452,26 +452,16 @@ async function runGeneration() {
 // pre-sim animation (can make async function that awaits each part of the animation) (runPreSimAnimations())
 async function runPreSimAnimations() {
 
-    // explanation:
-    // genetic algorithm based on natural selection
-    // roulette wheel
-    // this explanation shouldn't be as deep as the README will be. Make it fun and give enough for the user to be engaged.
-
-    // "100" organisms were created with completely random genes.
-    // This society of organisms needs to reach the goal if it wants to survive. (draw goal?)
-    // Using a genetic algorithm based on natural selection, these organisms will undergo generations of
-    // reproduction, evaluation, selection, gene crossover and mutation, until they either succeed or fail to survive.
-    // ^ not bad. Maybe just go with this and tweak it if it needs it. Don't worry too much about looks right away
-
     // flow:
     // (only with dialogue on!)
     await fadeInSimulationSettings();
     // fade out sim settings
     await fadeInSimulationIntro();
-    // fade in goal?
     // fade out intro
+    await fadeInFakeGoal();
     await fadeInSimulationExplanation();
-    // fade out sim explanation
+    // fade out sim explanation & fake goal
+    // anything else needed before core animation runs
 
     return new Promise(resolve => {
         resolve("pre sim complete!");
@@ -526,17 +516,15 @@ function fadeInSimulationExplanation() {
             if (!finished) {
                 // Using a genetic algorithm based on natural selection, these organisms will undergo generations of
                 // reproduction, evaluation, selection, gene crossover and mutation, until they either succeed or fail to survive.
-                // ^ not bad. Maybe just go with this and tweak it if it needs it. Don't worry too much about looks right away
+
                 ctx.fillStyle = 'black';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillRect(0, 100, canvas.width, canvas.height);
 
                 ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
                 ctx.font = '22px arial';
                 ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
                 ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
                 ctx.fillText("until they succeed or fail to survive.", 350, 350);
-                // ctx.fillText("", 150, 330);
-
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -553,6 +541,36 @@ function fadeInSimulationExplanation() {
             }
         }
         start_sim_explanation_fadein = requestAnimationFrame(simExplanationFadeIn);
+    })
+}
+
+function fadeInFakeGoal() {
+    // used in intro animation
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function fakeGoalFadeIn() {
+            if (!finished) {
+                ctx.fillStyle = 'black';
+                ctx.fillRect(500, 50, 20, 20);
+                
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                ctx.fillRect(500, 50, 20, 20);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.01;
+                }
+                frame_id = requestAnimationFrame(fakeGoalFadeIn);
+            }
+            else {
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_fake_goal_fadein = requestAnimationFrame(fakeGoalFadeIn);
     })
 }
 
@@ -606,7 +624,6 @@ function fadeInSimulationSettings() {
         start_settings_fadein = requestAnimationFrame(simSettingsFadeIn);
     })
 }
-
 
 async function runEvaluationAnimation() {
     // do stuff
