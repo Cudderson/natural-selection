@@ -1,3 +1,4 @@
+// change to call title animation when ready
 document.addEventListener("DOMContentLoaded", readyForSim);
 
 // organism global defaults
@@ -127,8 +128,12 @@ class Goal {
     }
 }
 
-function readyForSim() {
+// title animation will be called instead of this
+async function readyForSim() {
+
     console.log("Simulation Ready!");
+    await fadeInTitleAnimation();
+    console.log("hi");
 }
 
 function displaySettingsForm() {
@@ -289,6 +294,57 @@ function finishApplyingSettings() {
 function stopSimulation() {
     // reloads the page
     document.location.reload();
+}
+
+// title animation
+function fadeInTitleAnimation() {
+    // this will just start as a placeholder animation
+    // let's just say that this animation never resolves?
+    var opacity = 0.00;
+    var finished = false;
+    // let's also have an organism that moves around
+    var title_organism = new Organism('male', INITIAL_X, INITIAL_Y, ctx);
+    title_organism.setRandomGenes();
+    //animations
+
+    return new Promise(resolve => {
+        function animateTitle() {
+            if (!finished) {
+                //animate
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+                ctx.font = "30px arial";
+                ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
+                ctx.fillText("TITLE SCREEN PLACEHOLDER", 275, 250);
+            
+                // move organism forever (works)
+                if (title_organism.index < GENE_COUNT) {
+                    title_organism.update();
+                    title_organism.move();
+                }
+                else {
+                    console.log("resetting gene index");
+                    title_organism.index = 0;
+                }
+
+                if (opacity < 1.00) {
+                    opacity += 0.01;
+                }
+
+                sleepTest(1000 / FPS); // control drawing FPS for organisms
+                frame_id = requestAnimationFrame(animateTitle);
+            }
+            else {
+                // this function does not currently resolve
+                // should probably resolve at some point, then resolve&recall to avoid stack errors
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_title_fadein = requestAnimationFrame(animateTitle);
+    })
+
 }
 
 async function runSimulation () {
