@@ -134,8 +134,9 @@ class Goal {
 // title animation will be called instead of this
 async function readyForSim() {
     console.log("Simulation Ready!");
+    var title_organisms = createTitleScreenOrganisms();
     do {
-        await fadeInTitleAnimation();
+        await fadeInTitleAnimation(title_organisms);
     }
     while (simulation_started === false);
 }
@@ -301,16 +302,12 @@ function stopSimulation() {
 }
 
 // title animation
-function fadeInTitleAnimation() {
-    // this will just start as a placeholder animation
-    // let's just say that this animation never resolves?
+function fadeInTitleAnimation(title_organisms) {
     var opacity = 0.00;
     var finished = false;
     var cycles = 0;
-    // let's also have an organism that moves around
-    var title_organism = new Organism('male', INITIAL_X, INITIAL_Y, ctx);
-    title_organism.setRandomGenes();
-    //animations
+
+    var logo = document.getElementById("logo");
 
     return new Promise(resolve => {
         function animateTitle() {
@@ -319,34 +316,38 @@ function fadeInTitleAnimation() {
                 ctx.fillStyle = 'black';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-                ctx.font = "30px arial";
-                ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
-                ctx.fillText("TITLE SCREEN PLACEHOLDER", 275, 250);
-            
-                // move organism forever (works)
-                if (title_organism.index < GENE_COUNT) {
-                    title_organism.update();
-                    title_organism.move();
-                }
-                else {
-                    cycles++;
-                    console.log("resetting gene index");
-                    title_organism.index = 0;
+                // move organisms forever (works)
+                for (var i = 0; i < title_organisms.length; i++) {
+                    if (title_organisms[0].index < GENE_COUNT) {
+                        title_organisms[i].update();
+                        title_organisms[i].move();
+                    }
+                    else {
+                        cycles++;
+                        console.log("Resetting Gene Index");
 
-                    if (cycles >= 5) {
-                        finished = true;
+                        for (var j = 0; j < title_organisms.length; j++) {
+                            title_organisms[j].index = 0;
+                        }
+
+                        if (cycles >= 5) {
+                            finished = true;
+                        }
                     }
                 }
+
+                // draw image instead
+                ctx.drawImage(logo, 105, 275);
 
                 if (opacity < 1.00) {
                     opacity += 0.01;
                 }
 
-                sleepTest(1000 / FPS); // control drawing FPS for organisms
+                sleepTest(750 / FPS); // control drawing FPS for organisms
                 frame_id = requestAnimationFrame(animateTitle);
             }
             else {
-                // resolves every 5 cycles to prevent overflow
+                // resolves every n cycles to prevent overflow
                 console.log("resolving title animation");
                 cancelAnimationFrame(frame_id);
                 resolve();
@@ -355,6 +356,20 @@ function fadeInTitleAnimation() {
         start_title_fadein = requestAnimationFrame(animateTitle);
     })
 
+}
+
+// organisms only for title screen
+function createTitleScreenOrganisms() {
+    var title_organisms = [];
+    for (var i = 0; i < 100; i++) {
+        // we need a random x&y value to start the organism at 
+        var random_x = Math.floor(Math.random() * canvas.width);
+        var random_y = Math.floor(Math.random() * canvas.height);
+        var new_organism = new Organism('female', random_x, random_y, ctx);
+        new_organism.setRandomGenes();
+        title_organisms.push(new_organism);
+    }
+    return title_organisms;
 }
 
 async function runSimulation () {
@@ -960,8 +975,8 @@ function createOrganisms () {
 }
 
 function getRandomGene(min, max) {
-    var random_x = Math.floor(Math.random() * (MAX_GENE - MIN_GENE + 1) + MIN_GENE);
-    var random_y = Math.floor(Math.random() * (MAX_GENE - MIN_GENE + 1) + MIN_GENE);
+    var random_x = Math.floor(Math.random() * (max - min + 1) + min);
+    var random_y = Math.floor(Math.random() * (max - min + 1) + min);
     var random_gene = [random_x, random_y];
     return random_gene;
 }

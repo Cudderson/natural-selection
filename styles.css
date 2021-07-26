@@ -15,6 +15,10 @@ body {
     border: 4px solid var(--darkviolet);
 }
 
+#logo {
+    display: none;
+}
+
 .canvas-container, .btn-container, .settings-container {
     margin: 0 auto;
     width: 1000px;
