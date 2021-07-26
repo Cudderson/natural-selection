@@ -36,6 +36,9 @@ var ctx = canvas.getContext("2d");
 // flag for post-success animations
 var simulation_succeeded = false;
 
+// flag to stop title animation
+var simulation_started = false;
+
 class Organism {
     constructor (gender, x, y, ctx) {
         this.gender = gender;
@@ -130,10 +133,11 @@ class Goal {
 
 // title animation will be called instead of this
 async function readyForSim() {
-
     console.log("Simulation Ready!");
-    await fadeInTitleAnimation();
-    console.log("hi");
+    do {
+        await fadeInTitleAnimation();
+    }
+    while (simulation_started === false);
 }
 
 function displaySettingsForm() {
@@ -302,6 +306,7 @@ function fadeInTitleAnimation() {
     // let's just say that this animation never resolves?
     var opacity = 0.00;
     var finished = false;
+    var cycles = 0;
     // let's also have an organism that moves around
     var title_organism = new Organism('male', INITIAL_X, INITIAL_Y, ctx);
     title_organism.setRandomGenes();
@@ -309,8 +314,8 @@ function fadeInTitleAnimation() {
 
     return new Promise(resolve => {
         function animateTitle() {
-            if (!finished) {
-                //animate
+            if (!finished && !simulation_started) {
+
                 ctx.fillStyle = 'black';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             
@@ -324,8 +329,13 @@ function fadeInTitleAnimation() {
                     title_organism.move();
                 }
                 else {
+                    cycles++;
                     console.log("resetting gene index");
                     title_organism.index = 0;
+
+                    if (cycles >= 5) {
+                        finished = true;
+                    }
                 }
 
                 if (opacity < 1.00) {
@@ -336,8 +346,8 @@ function fadeInTitleAnimation() {
                 frame_id = requestAnimationFrame(animateTitle);
             }
             else {
-                // this function does not currently resolve
-                // should probably resolve at some point, then resolve&recall to avoid stack errors
+                // resolves every 5 cycles to prevent overflow
+                console.log("resolving title animation");
                 cancelAnimationFrame(frame_id);
                 resolve();
             }
@@ -348,6 +358,8 @@ function fadeInTitleAnimation() {
 }
 
 async function runSimulation () {
+    simulation_started = true;
+
     console.log("Running Simulation with these settings:");
     console.log(`Total Organisms: ${TOTAL_ORGANISMS}`);
     console.log(`Gene Count: ${GENE_COUNT}`);
