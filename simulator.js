@@ -133,20 +133,20 @@ async function runPreSimAnimations() {
 
     // (only with dialogue on!)
     await fadeInSimulationSettings();
-    await sleepTest(2000);
+    await sleep(2000);
     await fadeOutSimulationSettings();
     await fadeInSimulationIntro();
-    await sleepTest(2000);
+    await sleep(2000);
     await fadeInFakeGoal();
     await fadeOutSimulationIntro();
     await fadeInSimulationExplanation();
-    await sleepTest(4000);
+    await sleep(4000);
     await fadeOutExplanationAndGoal();
-    await sleepTest(1000);
+    await sleep(1000);
     // anything else needed before core animation runs
     // testing if this is appropriate
     await fadeInStats(); 
-    await sleepTest(1000);
+    await sleep(1000);
 
     return new Promise(resolve => {
         resolve("pre sim complete!");
@@ -206,7 +206,7 @@ async function runGeneration() {
             simulation_succeeded = true;
 
             // give user time to see their win
-            await sleepTest(1500);
+            await sleep(1500);
             await fadeInSuccessMessage();
 
             do {
@@ -221,7 +221,7 @@ async function runGeneration() {
 
             if (key_pressed === 'Enter') {
                 console.log("Continuing Simulation.");
-                await sleepTest(500);
+                await sleep(500);
             }
             else if (key_pressed === 'q') {
                 console.log("Quitting Simulation.");
@@ -256,7 +256,7 @@ async function runGeneration() {
     // check extinction
     if (potential_mothers.length === 0 || potential_fathers.length === 0) {
         await fadeInExtinctionMessage();
-        await sleepTest(2000);
+        await sleep(2000);
         do {
             var exit_key = await getUserDecision();
             console.log(exit_key);
@@ -285,27 +285,27 @@ async function runGeneration() {
 
         await fadeInCrossoverPhaseText();
         await fadeInCrossoverDescriptionText();
-        await sleepTest(2000);
+        await sleep(2000);
         await fadeOutCrossoverDescriptionText();
         await fadeOutCrossoverPhaseText();
     
         await fadeInMutationPhaseText();
         await fadeInMutationDescriptionText();
-        await sleepTest(2000);
+        await sleep(2000);
         await fadeOutMutationDescriptionText();
         await fadeOutMutationPhaseText();
     
         await fadeInCreateNewGenPhaseText();
         await fadeInGenerationSummaryText();
-        await sleepTest(2000);
+        await sleep(2000);
         await fadeOutGenerationSummaryText();
         await fadeOutCreateNewGenPhaseText();
     }
     else {
         // without dialogue, we need to fade the organisms to black before reproduceNewGeneration() forgets old population
-        await sleepTest(1000);
+        await sleep(1000);
         await fadeToBlack(organisms);
-        await sleepTest(1000);
+        await sleep(1000);
         reproduceNewGeneration(parents);
     }
 
@@ -382,7 +382,7 @@ function updateAndMoveOrganisms(goal) {
                     finished = true;
                 }
 
-                sleepTest(1000 / FPS); // control drawing FPS for organisms
+                sleep(1000 / FPS); // control drawing FPS for organisms
                 frame_id = requestAnimationFrame(animateOrganisms);
             }
             else {
@@ -681,7 +681,7 @@ function fadeInTitleAnimation(title_organisms) {
                     opacity += 0.005;
                 }
 
-                sleepTest(750 / FPS); // control drawing FPS for organisms
+                sleep(750 / FPS); // control drawing FPS for organisms
                 frame_id = requestAnimationFrame(animateTitle);
             }
             else {
@@ -1218,7 +1218,7 @@ async function highlightClosestOrganism (closest_organism) {
     await fadeInClosestOrganism(closest_organism);
     await fadeClosestToOriginal(closest_organism);
     await fadeInClosestOrganism(closest_organism);
-    await sleepTest(1000);
+    await sleep(1000);
     await fadeToBlackTextClosestOrganism();
     await fadeClosestToOriginal(closest_organism);
     return new Promise(resolve => {
@@ -1375,19 +1375,19 @@ async function highlightChosenParents(parents) {
     await fadeToOriginal(parents, 'male');
     await fadeInFathers(parents);
     await fadeToOriginal(parents, 'male');
-    await sleepTest(1000);
+    await sleep(1000);
 
     // highlight all
     await fadeInMothers(parents);
     await fadeInFathers(parents);
     await fadeInNotChosen();
-    await sleepTest(1000); 
+    await sleep(1000); 
 
     // fade out all
     await fadeToBlackText();
     await fadeToOriginal(parents, 'both');
     await fadeToBlack(organisms);
-    await sleepTest(1000);
+    await sleep(1000);
 
     return new Promise(resolve => {
         resolve("Highlight Chosen Parents Animation Complete");
@@ -2515,7 +2515,7 @@ function finishApplyingSettings() {
 }
 
 // Utilities
-function sleepTest(milliseconds) {
+function sleep(milliseconds) {
     console.log(`Sleeping for ${(milliseconds / 1000)} second(s).`);
     const date = Date.now();
     let currentDate = null;
