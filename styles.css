@@ -15,12 +15,222 @@ body {
     border: 4px solid var(--darkviolet);
 }
 
-.canvas-container {
-    display: block;
+#logo {
+    display: none;
+}
+
+.canvas-container, .btn-container, .settings-container {
     margin: 0 auto;
     width: 1000px;
 }
 
+.settings-container {
+    display: none;
+    margin-bottom: .25rem;
+    width: 1000px;
+    height: 600px;
+    border: 4px solid var(--darkviolet);
+}
+
+#apply-form {
+    width: 600px;
+    margin: 0 auto;
+    margin-top: 100px;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    grid-template-rows: 1fr repeat(4, 1fr);
+    row-gap: 10px;
+}
+
+.settings-header {
+    grid-column: 1 / 3;
+    display: block;
+    font-size: 30px;
+    color: var(--darkviolet);
+}
+
+.organisms-setting-label,
+.movement-setting-label,
+.gene-setting-label,
+.mutation-setting-label {
+    grid-column: 1 / 2;
+    font-size: 40px;
+    color: var(--custom-green);
+}
+
+.dialogue-setting-span {
+    font-size: 40px;
+    color: var(--custom-green);
+}
+
+.setting-input {
+    width: 50%;
+    border: none;
+    border-bottom: 2px solid var(--custom-green);
+    text-align: right;
+    font-size: 30px;
+    background-color: black;
+    color: var(--custom-green);
+    outline: none;
+}
+
+.setting-submit {
+    display: block;
+    margin: 0 auto;
+    margin-top: 2rem;
+    border: 2px solid var(--custom-green);
+    border-radius: 3px;
+    padding: .75rem 2rem;
+    background-color: black;
+    color: var(--custom-green);
+    font-size: 30px;
+    transition: .25s;
+}
+
+.setting-submit:hover {
+    background-color: var(--custom-green);
+    color: black;
+    transition: .25s;
+}
+
+.dialogue-container {
+    grid-column: 2 / 3;
+    margin-left: 40px;
+}
+
+.error-container {
+    margin-top: 1rem;
+}
+
+/* consider using a better red color */
+.error-message {
+    display: block;
+    color: var(--mother-pink);
+    text-align: center;
+    font-size: 24px;
+}
+
+/* custom checkbox */
+.dialogue-setting-label {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 22px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Hide the browser default checkbox */
+  .dialogue-setting-label input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  
+  /* Create a custom checkbox */
+  .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 40px;
+    width: 40px;
+    border: 1px solid var(--custom-green);
+    border-radius: 4px;
+    background-color: black;
+  }
+  
+  /* On mouse-over, add darkgray background color */
+  .dialogue-setting-label:hover input ~ .checkmark {
+    background-color: #222;
+  }
+  
+  /* When the checkbox is checked, add black background */
+  .dialogue-setting-label input:checked ~ .checkmark {
+    background-color: black;
+  }
+  
+  /* checkmark/indicator (hidden when not checked) */
+  .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+  
+  /* Show the checkmark when checked */
+  .dialogue-setting-label input:checked ~ .checkmark:after {
+    display: block;
+  }
+  
+  /* checkmark/indicator */
+  .dialogue-setting-label .checkmark:after {
+    left: 12px;
+    top: 5px;
+    width: 10px;
+    height: 20px;
+    border: solid var(--custom-green);
+    border-width: 0 6px 6px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+  }
+/* end custom checkbox */
+
+.btn-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.start-btn, .stop-btn, .settings-btn {
+    /* display: block; */
+    padding: .5rem 1rem;
+    border: none;
+    border-radius: 2px;
+    font-size: 18px;
+    transition: .5s;
+}
+
+.start-btn {
+    /* display: inline-block; */
+    grid-column: 2 / 3;
+    margin: 0 auto;
+    background-color: var(--custom-green);
+}
+
+.start-btn:hover {
+    background-color: var(--darkviolet);
+    color: var(--custom-green);
+    transition: .5s;
+}
+
 .stop-btn {
     display: none;
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+    margin-right: auto;
+    background-color: var(--darkviolet);
+}
+
+.stop-btn:hover {
+    background-color: var(--mother-pink);
+    transition: .5s;
+}
+
+.settings-btn {
+    grid-column: 3 / 4;
+    margin-left: auto;
+    background-color: rgba(148, 0, 211, 1);
+    color: rgba(155, 245, 0, 1);
+}
+
+.settings-btn:hover {
+    color: rgba(255, 215, 0, 1);
 }
