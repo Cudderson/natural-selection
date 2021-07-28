@@ -337,10 +337,14 @@ function fadeInTitleAnimation(title_organisms) {
                 }
 
                 // draw image instead
+                // use globalAlpha, then reset
+                // could make this class Paintbrush in the future for this and goal class methods
+                ctx.globalAlpha = opacity;
                 ctx.drawImage(logo, 105, 275);
+                ctx.globalAlpha = 1;
 
                 if (opacity < 1.00) {
-                    opacity += 0.01;
+                    opacity += 0.005;
                 }
 
                 sleepTest(750 / FPS); // control drawing FPS for organisms
