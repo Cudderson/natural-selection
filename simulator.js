@@ -2391,26 +2391,12 @@ function displaySettingsForm() {
 
 }
 
-function preValidateMovementSetting(event) {
-
-    // prevent keystrokes that aren't === 1-7 || Backspace, <, > 
-    var movement_key = event.key;
-    if (movement_key > "0" && movement_key <= "7") {
-        return 0;
-    }
-    else if (movement_key === "Backspace" || movement_key === "ArrowLeft" || movement_key === "ArrowRight") {
-        return 0;
-    }
-    else {
-        return 1;
-    }
-}
-
 // this function could be split into more
+// should stop title screen animation when settings is called
 function validateSettingsForm() {
     // abstract this functions logic into helpers for readability
 
-    // get form input
+    // get form input (put these in the helper functions when done)
     var total_organisms_setting = document.getElementById("total-organisms");
     var movement_speed_setting = document.getElementById("move-speed");
     var gene_count_setting = document.getElementById("gene-count");
@@ -2425,64 +2411,33 @@ function validateSettingsForm() {
 
     // turn into functionslater : validateTotalOrganismsSetting(), or validateSettings()
     // set varaibles
-    if (typeof parseInt(total_organisms_setting.value) === 'number' && parseInt(total_organisms_setting.value) > 0) {
-        if (parseInt(total_organisms_setting.value > 9999)) {
-            TOTAL_ORGANISMS = 9999;
-        }
-        else {
-            TOTAL_ORGANISMS = Math.abs(parseInt(total_organisms_setting.value));
-        }
-        total_organisms_setting.style.borderBottom = '2px solid var(--custom-green)';
-    }
-    else {
-        total_organisms_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        error_message.innerHTML = "* Invalid number of organisms. Please input a positive number.";
-        return false;
-    }
 
-    if (typeof parseInt(gene_count_setting.value) === 'number' && parseInt(gene_count_setting.value) > 0) {
-        if (parseInt(gene_count_setting.value) > 1000) {
-            GENE_COUNT = 1000;
-        }
-        else {
-            GENE_COUNT = Math.abs(parseInt(gene_count_setting.value));
-        }
-        gene_count_setting.style.borderBottom = '2px solid var(--custom-green)';
-    }
-    else {
-        gene_count_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        error_message.innerHTML = "* Invalid gene count. Please input a positive number.";
-        return false;
-    }
+    //TEST
+    var settings_manager = {};
+    // ex.
 
-    // consider allowing float here
-    if (typeof parseInt(mutation_rate_setting.value) === 'number' && parseInt(mutation_rate_setting.value) > 0) {
-        if (parseInt(mutation_rate_setting.value) > 100) {
-            MUTATION_RATE = 1;
-        }
-        else {
-            MUTATION_RATE = parseInt(mutation_rate_setting.value) / 100;
-        }
-        mutation_rate_setting.style.borderBottom = '2px solid var(--custom-green)';
-    }
-    else {
-        mutation_rate_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        error_message.innerHTML = "Invalid mutation rate. Please input a positive percentage value. (3 = 3%)";
-        return false;
-    }
+    // settings_manager = {
+    //     "organisms_setting": [
+    //         "valid",
+    //         "",
+    //     ],
+    //     "gene_setting": [
+    //         "invalid",
+    //         "You can't do that because...",
+    //     ]
+    // }
 
-    // create max and min genes from movement speed
-    // pre-validated in preValidateMovementSetting();
-    if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 7) {
-        MIN_GENE = parseInt(movement_speed_setting.value) * -1;
-        MAX_GENE = parseInt(movement_speed_setting.value);
-        movement_speed_setting.style.borderBottom = "2px solid var(--custom-green)";
-    } 
-    else {
-        movement_speed_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        error_message.innerHTML = "Invalid movement speed. Please input a positive number between 1 - 7.";
-        return false;
-    }   
+    // query: var x = settings_manager["gene_setting"][0]
+    // result: x = "invalid"
+
+    // we should return valid/invalid as well as an error message or empty string
+
+    // returns error message or true
+    setting_validity_message = validateTotalOrganismsSetting(total_organisms_setting);
+    setting_validity_message = validateGeneCountSetting(gene_count_setting);
+    setting_validity_message = validateMutationRateSetting(mutation_rate_setting);
+    setting_validity_message = validateMovementSetting(movement_speed_setting);
+
 
     if (dialogue_setting.checked) {
         dialogue = true;
@@ -2498,6 +2453,88 @@ function validateSettingsForm() {
     // html/css changes made && vars updated
     // don't submit the form
     return false;
+}
+
+function validateTotalOrganismsSetting(total_organisms_setting) {
+    if (typeof parseInt(total_organisms_setting.value) === 'number' && parseInt(total_organisms_setting.value) > 0) {
+        if (parseInt(total_organisms_setting.value > 9999)) {
+            TOTAL_ORGANISMS = 9999;
+        }
+        else {
+            TOTAL_ORGANISMS = Math.abs(parseInt(total_organisms_setting.value));
+        }
+        total_organisms_setting.style.borderBottom = '2px solid var(--custom-green)';
+        return 100;
+    }
+    else {
+        total_organisms_setting.style.borderBottom = '2px solid var(--mother-pink)';
+        return "* Invalid number of organisms. Please input a positive number.";
+    }
+}
+
+function validateGeneCountSetting(gene_count_setting) {
+    if (typeof parseInt(gene_count_setting.value) === 'number' && parseInt(gene_count_setting.value) > 0) {
+        if (parseInt(gene_count_setting.value) > 1000) {
+            GENE_COUNT = 1000;
+        }
+        else {
+            GENE_COUNT = Math.abs(parseInt(gene_count_setting.value));
+        }
+        gene_count_setting.style.borderBottom = '2px solid var(--custom-green)';
+        return "valid";
+    }
+    else {
+        gene_count_setting.style.borderBottom = '2px solid var(--mother-pink)';
+        return "* Invalid gene count. Please input a positive number.";
+    }
+}
+
+function validateMutationRateSetting(mutation_rate_setting) {
+    // consider allowing float here
+    if (typeof parseInt(mutation_rate_setting.value) === 'number' && parseInt(mutation_rate_setting.value) > 0) {
+        if (parseInt(mutation_rate_setting.value) > 100) {
+            MUTATION_RATE = 1;
+        }
+        else {
+            MUTATION_RATE = parseInt(mutation_rate_setting.value) / 100;
+        }
+        mutation_rate_setting.style.borderBottom = '2px solid var(--custom-green)';
+        return "valid";
+    }
+    else {
+        mutation_rate_setting.style.borderBottom = '2px solid var(--mother-pink)';
+        return "Invalid mutation rate. Please input a positive percentage value. (3 = 3%)";
+    }
+}
+
+function preValidateMovementSetting(event) {
+
+    // prevent keystrokes that aren't === 1-7 || Backspace, <, > 
+    var movement_key = event.key;
+    if (movement_key > "0" && movement_key <= "7") {
+        return 0;
+    }
+    else if (movement_key === "Backspace" || movement_key === "ArrowLeft" || movement_key === "ArrowRight") {
+        return 0;
+    }
+    else {
+        return 1;
+    }
+}
+
+function validateMovementSetting(movement_speed_setting) {
+    // create max and min genes from movement speed
+    // pre-validated in preValidateMovementSetting();
+    if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 7) {
+        MIN_GENE = parseInt(movement_speed_setting.value) * -1;
+        MAX_GENE = parseInt(movement_speed_setting.value);
+        movement_speed_setting.style.borderBottom = "2px solid var(--custom-green)";
+        return "valid";
+    } 
+    else {
+        movement_speed_setting.style.borderBottom = '2px solid var(--mother-pink)';
+        return "Invalid movement speed. Please input a positive number between 1 - 7.";
+    }   
 }
 
 function finishApplyingSettings() {
