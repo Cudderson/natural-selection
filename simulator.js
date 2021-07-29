@@ -1,14 +1,4 @@
-// change to call title animation when ready
-document.addEventListener("DOMContentLoaded", readyForSim);
-
-// organism global defaults
-var TOTAL_ORGANISMS = 100;
-var GENE_COUNT = 250;
-var MUTATION_RATE = 0.03;
-var MIN_GENE = -5;
-var MAX_GENE = 5;
-// optional dialogue
-var dialogue = false;
+document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
 // starting coordinates for organisms and goal
 const INITIAL_X = 500; 
@@ -16,28 +6,35 @@ const INITIAL_Y = 500;
 const GOAL_X_POS = 500;
 const GOAL_Y_POS = 200;
 
-// frame rate
-const FPS = 30;
+// organism global default settings
+var TOTAL_ORGANISMS = 100;
+var GENE_COUNT = 250;
+var MUTATION_RATE = 0.03;
+var MIN_GENE = -5;
+var MAX_GENE = 5;
+var dialogue = false;
+
+// flags
+var simulation_started = false;
+var simulation_succeeded = false;
 
 // track total generations
 var generation_count = 0;
-
-// containers holding organisms and next-generation organisms
-var organisms = [];
-var offspring_organisms = [];
 
 // generation statistics
 var average_fitness = 0.00;
 var total_fitness = 0.00;
 
+// containers holding organisms and next-generation organisms
+var organisms = [];
+var offspring_organisms = [];
+
+// canvas & drawing context
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
 
-// flag for post-success animations
-var simulation_succeeded = false;
-
-// flag to stop title animation
-var simulation_started = false;
+// frame rate
+const FPS = 30;
 
 class Organism {
     constructor (gender, x, y, ctx) {
@@ -131,249 +128,29 @@ class Goal {
     }
 }
 
-// title animation will be called instead of this
-async function readyForSim() {
-    console.log("Simulation Ready!");
-    var title_organisms = createTitleScreenOrganisms();
-    do {
-        await fadeInTitleAnimation(title_organisms);
-    }
-    while (simulation_started === false);
-}
+// Main Drivers
+async function runPreSimAnimations() {
 
-function displaySettingsForm() {
-    var start_btn = document.getElementsByClassName("start-btn")[0];
-    start_btn.style.display = 'none';
-
-    var canvas_container = document.getElementsByClassName("canvas-container")[0];
-    var settings_container = document.getElementsByClassName("settings-container")[0];
-
-    canvas_container.style.display = 'none';
-    settings_container.style.display = 'block';
-
-    // movement setting helper (move/abstract)
-    var movement_speed_setting = document.getElementById("move-speed");
-    var error_message = document.getElementsByClassName("error-message")[0];
-
-    movement_speed_setting.addEventListener('focusin', function() {
-        error_message.style.color = "var(--closest_organism_gold)";
-        error_message.innerHTML = "Movement Speed Range: 1 - 7";
-        movement_speed_setting.addEventListener('focusout', function() {
-            error_message.style.color = 'var(--mother-pink)';
-            error_message.innerHTML = "";
-        })
-    })
-
-    movement_speed_setting.addEventListener('keydown', function(event) {
-        // function blocks keystrokes not within the acceptable range for movement speed
-        var keystroke = preValidateMovementSetting(event);
-        if (keystroke === 1) {
-            event.preventDefault();
-        }
-    });
-
-}
-
-function preValidateMovementSetting(event) {
-
-    // prevent keystrokes that aren't === 1-7 || Backspace, <, > 
-    var movement_key = event.key;
-    if (movement_key > "0" && movement_key <= "7") {
-        return 0;
-    }
-    else if (movement_key === "Backspace" || movement_key === "ArrowLeft" || movement_key === "ArrowRight") {
-        return 0;
-    }
-    else {
-        return 1;
-    }
-}
-
-function validateSettingsForm() {
-    // abstract this functions logic into helpers for readability
-
-    // get form input
-    var total_organisms_setting = document.getElementById("total-organisms");
-    var movement_speed_setting = document.getElementById("move-speed");
-    var gene_count_setting = document.getElementById("gene-count");
-    var mutation_rate_setting = document.getElementById("mutation-rate");
-    var dialogue_setting = document.getElementById("dialogue-checkbox");
-    // get error message
-    var error_message = document.getElementsByClassName("error-message")[0];
-
-    // clear error message
-    error_message.style.color = "var(--mother-pink)";
-    error_message.innerHTML = "";
-
-    // turn into functionslater : validateTotalOrganismsSetting(), or validateSettings()
-    // set varaibles
-    if (typeof parseInt(total_organisms_setting.value) === 'number' && parseInt(total_organisms_setting.value) > 0) {
-        if (parseInt(total_organisms_setting.value > 9999)) {
-            TOTAL_ORGANISMS = 9999;
-        }
-        else {
-            TOTAL_ORGANISMS = Math.abs(parseInt(total_organisms_setting.value));
-        }
-        total_organisms_setting.style.borderBottom = '2px solid var(--custom-green)';
-    }
-    else {
-        total_organisms_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        error_message.innerHTML = "* Invalid number of organisms. Please input a positive number.";
-        return false;
-    }
-
-    if (typeof parseInt(gene_count_setting.value) === 'number' && parseInt(gene_count_setting.value) > 0) {
-        if (parseInt(gene_count_setting.value) > 1000) {
-            GENE_COUNT = 1000;
-        }
-        else {
-            GENE_COUNT = Math.abs(parseInt(gene_count_setting.value));
-        }
-        gene_count_setting.style.borderBottom = '2px solid var(--custom-green)';
-    }
-    else {
-        gene_count_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        error_message.innerHTML = "* Invalid gene count. Please input a positive number.";
-        return false;
-    }
-
-    // consider allowing float here
-    if (typeof parseInt(mutation_rate_setting.value) === 'number' && parseInt(mutation_rate_setting.value) > 0) {
-        if (parseInt(mutation_rate_setting.value) > 100) {
-            MUTATION_RATE = 1;
-        }
-        else {
-            MUTATION_RATE = parseInt(mutation_rate_setting.value) / 100;
-        }
-        mutation_rate_setting.style.borderBottom = '2px solid var(--custom-green)';
-    }
-    else {
-        mutation_rate_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        error_message.innerHTML = "Invalid mutation rate. Please input a positive percentage value. (3 = 3%)";
-        return false;
-    }
-
-    // create max and min genes from movement speed
-    // pre-validated in preValidateMovementSetting();
-    if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 7) {
-        MIN_GENE = parseInt(movement_speed_setting.value) * -1;
-        MAX_GENE = parseInt(movement_speed_setting.value);
-        movement_speed_setting.style.borderBottom = "2px solid var(--custom-green)";
-    } 
-    else {
-        movement_speed_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        error_message.innerHTML = "Invalid movement speed. Please input a positive number between 1 - 7.";
-        return false;
-    }   
-
-    if (dialogue_setting.checked) {
-        dialogue = true;
-    }
-    else {
-        dialogue = false;
-    }
-
-    //return to original view (could be returnToTitleScreen() function?)
-
-    finishApplyingSettings();
-
-    // html/css changes made && vars updated
-    // don't submit the form
-    return false;
-}
-
-function finishApplyingSettings() {
-    // make html changes before function returns
-    var canvas_container = document.getElementsByClassName("canvas-container")[0];
-    var settings_container = document.getElementsByClassName("settings-container")[0];
-
-    canvas_container.style.display = 'block';
-    settings_container.style.display = 'none';
-
-    var start_btn = document.getElementsByClassName("start-btn")[0];
-    start_btn.style.display = 'block';
-
-    return 0;
-}
-
-function stopSimulation() {
-    // reloads the page
-    document.location.reload();
-}
-
-// title animation
-function fadeInTitleAnimation(title_organisms) {
-    var opacity = 0.00;
-    var finished = false;
-    var cycles = 0;
-
-    var logo = document.getElementById("logo");
+    // (only with dialogue on!)
+    await fadeInSimulationSettings();
+    await sleep(2000);
+    await fadeOutSimulationSettings();
+    await fadeInSimulationIntro();
+    await sleep(2000);
+    await fadeInFakeGoal();
+    await fadeOutSimulationIntro();
+    await fadeInSimulationExplanation();
+    await sleep(4000);
+    await fadeOutExplanationAndGoal();
+    await sleep(1000);
+    // anything else needed before core animation runs
+    // testing if this is appropriate
+    await fadeInStats(); 
+    await sleep(1000);
 
     return new Promise(resolve => {
-        function animateTitle() {
-            if (!finished && !simulation_started) {
-
-                ctx.fillStyle = 'black';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-                // move organisms forever (works)
-                for (var i = 0; i < title_organisms.length; i++) {
-                    if (title_organisms[0].index < GENE_COUNT) {
-                        title_organisms[i].update();
-                        title_organisms[i].move();
-                    }
-                    else {
-                        cycles++;
-                        console.log("Resetting Gene Index");
-
-                        for (var j = 0; j < title_organisms.length; j++) {
-                            title_organisms[j].index = 0;
-                        }
-
-                        if (cycles >= 5) {
-                            finished = true;
-                        }
-                    }
-                }
-
-                // draw image instead
-                // use globalAlpha, then reset
-                // could make this class Paintbrush in the future for this and goal class methods
-                ctx.globalAlpha = opacity;
-                ctx.drawImage(logo, 105, 275);
-                ctx.globalAlpha = 1;
-
-                if (opacity < 1.00) {
-                    opacity += 0.005;
-                }
-
-                sleepTest(750 / FPS); // control drawing FPS for organisms
-                frame_id = requestAnimationFrame(animateTitle);
-            }
-            else {
-                // resolves every n cycles to prevent overflow
-                console.log("resolving title animation");
-                cancelAnimationFrame(frame_id);
-                resolve();
-            }
-        }
-        start_title_fadein = requestAnimationFrame(animateTitle);
+        resolve("pre sim complete!");
     })
-
-}
-
-// organisms only for title screen
-function createTitleScreenOrganisms() {
-    var title_organisms = [];
-    for (var i = 0; i < 100; i++) {
-        // we need a random x&y value to start the organism at 
-        var random_x = Math.floor(Math.random() * canvas.width);
-        var random_y = Math.floor(Math.random() * canvas.height);
-        var new_organism = new Organism('female', random_x, random_y, ctx);
-        new_organism.setRandomGenes();
-        title_organisms.push(new_organism);
-    }
-    return title_organisms;
 }
 
 async function runSimulation () {
@@ -429,7 +206,7 @@ async function runGeneration() {
             simulation_succeeded = true;
 
             // give user time to see their win
-            await sleepTest(1500);
+            await sleep(1500);
             await fadeInSuccessMessage();
 
             do {
@@ -444,7 +221,7 @@ async function runGeneration() {
 
             if (key_pressed === 'Enter') {
                 console.log("Continuing Simulation.");
-                await sleepTest(500);
+                await sleep(500);
             }
             else if (key_pressed === 'q') {
                 console.log("Quitting Simulation.");
@@ -479,7 +256,7 @@ async function runGeneration() {
     // check extinction
     if (potential_mothers.length === 0 || potential_fathers.length === 0) {
         await fadeInExtinctionMessage();
-        await sleepTest(2000);
+        await sleep(2000);
         do {
             var exit_key = await getUserDecision();
             console.log(exit_key);
@@ -508,27 +285,27 @@ async function runGeneration() {
 
         await fadeInCrossoverPhaseText();
         await fadeInCrossoverDescriptionText();
-        await sleepTest(2000);
+        await sleep(2000);
         await fadeOutCrossoverDescriptionText();
         await fadeOutCrossoverPhaseText();
     
         await fadeInMutationPhaseText();
         await fadeInMutationDescriptionText();
-        await sleepTest(2000);
+        await sleep(2000);
         await fadeOutMutationDescriptionText();
         await fadeOutMutationPhaseText();
     
         await fadeInCreateNewGenPhaseText();
         await fadeInGenerationSummaryText();
-        await sleepTest(2000);
+        await sleep(2000);
         await fadeOutGenerationSummaryText();
         await fadeOutCreateNewGenPhaseText();
     }
     else {
         // without dialogue, we need to fade the organisms to black before reproduceNewGeneration() forgets old population
-        await sleepTest(1000);
+        await sleep(1000);
         await fadeToBlack(organisms);
-        await sleepTest(1000);
+        await sleep(1000);
         reproduceNewGeneration(parents);
     }
 
@@ -538,209 +315,414 @@ async function runGeneration() {
     })
 }
 
-// pre-sim animation (can make async function that awaits each part of the animation) (runPreSimAnimations())
-async function runPreSimAnimations() {
+function stopSimulation() {
+    // reloads the page
+    document.location.reload();
+}
 
-    // (only with dialogue on!)
-    await fadeInSimulationSettings();
-    await sleepTest(2000);
-    await fadeOutSimulationSettings();
-    await fadeInSimulationIntro();
-    await sleepTest(2000);
-    await fadeInFakeGoal();
-    await fadeOutSimulationIntro();
-    await fadeInSimulationExplanation();
-    await sleepTest(4000);
-    await fadeOutExplanationAndGoal();
-    await sleepTest(1000);
-    // anything else needed before core animation runs
-    // testing if this is appropriate
-    await fadeInStats(); 
-    await sleepTest(1000);
+// 1. Create Initial Population
+function createOrganisms () {
+    var gender;
+    var male_count = 0;
+    var female_count = 0;
+    // create equal number of males and females
+    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+        if (i % 2) {
+            gender = 'male';
+            male_count++;
+        }
+        else {
+            gender = 'female';
+            female_count++;
+        }
+        var organism = new Organism(gender, INITIAL_X, INITIAL_Y, ctx);
+        organism.setRandomGenes();
+        organisms.push(organism);
+    }
+    console.log(`FEMALES CREATED: ${female_count}, MALES CREATED: ${male_count}`);
+}
 
+function getRandomGene(min, max) {
+    var random_x = Math.floor(Math.random() * (max - min + 1) + min);
+    var random_y = Math.floor(Math.random() * (max - min + 1) + min);
+    var random_gene = [random_x, random_y];
+    return random_gene;
+}
+
+// 2. Evaluate
+function updateAndMoveOrganisms(goal) {
     return new Promise(resolve => {
-        resolve("pre sim complete!");
+        var total_moves = 0;
+        var finished = false;
+        var success_flag = false;
+        // why is this async?
+        async function animateOrganisms() {
+            if (!finished) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                goal.drawGoal();
+                goal.showStatistics();
+
+                if (dialogue) {
+                    drawEvaluationPhaseText();
+                }
+
+                for (var i = 0; i < organisms.length; i++) {
+                    if (organisms[i].reached_goal == false) {
+                        organisms[i].update();
+                        organisms[i].move();
+                        hasReachedGoal(organisms[i], goal);
+                    }
+                    else {
+                        updateSuccessfulOrganism(organisms[i]);
+                        success_flag = true;
+                    }
+                    total_moves++;
+                }
+                if (total_moves == (organisms.length * GENE_COUNT)) {
+                    finished = true;
+                }
+
+                sleep(1000 / FPS); // control drawing FPS for organisms
+                frame_id = requestAnimationFrame(animateOrganisms);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(frame_id);
+                resolve(success_flag);
+            }
+        }
+        start_animate_organisms = requestAnimationFrame(animateOrganisms);
     })
 }
 
-function fadeInSimulationIntro() {
+function hasReachedGoal(organism, goal) {
+    // check if within y-range 
+    if ((organism.y - (organism.radius / 2)) >= goal.y && (organism.y - (organism.radius / 2)) <= (goal.y + goal.size)) {
+        // check if within x-range
+        if ((organism.x - (organism.radius / 2)) >= goal.x && (organism.x - (organism.radius / 2)) <= (goal.x + goal.size)) {
+            // organism reached goal
+            organism.reached_goal = true;
+        }
+    }
+}
+
+async function evaluatePopulation() {
+    // to do
+    const shortest_distance_resolution = await getShortestDistanceToGoal();
+    const average_fitness = await calcPopulationFitness();
+
+    var population_resolution = {
+        'closest_organism': shortest_distance_resolution,
+        'average_fitness': average_fitness
+    }
+
+    return new Promise(resolve => {
+        resolve(population_resolution);
+    })
+}
+
+function getShortestDistanceToGoal() {
+
+    var shortest_distance = 10000;
+    var closest_organism_index;
+
+    // though this loop identifies closest organism, it ALSO updates organism's distance_to_goal attribute
+    for (var i = 0; i < organisms.length; i++) {
+        var distance_to_goal = organisms[i].calcDistanceToGoal();
+        if (distance_to_goal < shortest_distance) {
+            shortest_distance = distance_to_goal;
+            closest_organism_index = i;
+        }
+    }
+
+    var closest_organism = organisms[closest_organism_index];
+
+    // highlightClosestOrganism(closest_organism);
+    return closest_organism;
+}
+
+function calcPopulationFitness () {
+    return new Promise(resolve => {
+        // reset total_fitness before calculation
+        total_fitness = 0;
+        for (var i = 0; i < organisms.length; i++) {
+            organisms[i].calcFitness();
+            total_fitness += organisms[i].fitness;
+        }
+
+        var average_fitness = total_fitness / organisms.length;
+        resolve(average_fitness);
+    })
+}
+
+// 3. Selection
+async function runSelectionAnimations(closest_organism, parents) {
+    console.log("Called runSelectionAnimations()");
+    // maybe model other phases after this one
+    await highlightClosestOrganism(closest_organism);
+    await highlightChosenParents(parents);
+
+    return new Promise(resolve => {
+        resolve("Run Selection Animations Complete");
+    })
+}
+
+function beginSelectionProcess() {
+    // fill array with candidates for reproduction
+    var potential_mothers = [];
+    var potential_fathers = [];
+
+    for (var i = 0; i < organisms.length; i++) {
+        // Give organisms with negative fitness a chance to reproduce
+        if (organisms[i].fitness < 0) {
+            organisms[i].fitness = 0.01;
+        }
+
+        // I'm going to try this implementation >> (organism.fitness * 100) ** 1.25
+        console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
+        console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * 100) ** 2)} times.`);
+
+        for (var j = 0; j < Math.ceil((organisms[i].fitness * 100) ** 2); j++) {
+            if (organisms[i].gender === 'female') {
+                potential_mothers.push(organisms[i]);
+            }
+            else if (organisms[i].gender === 'male') {
+                potential_fathers.push(organisms[i]);
+            }
+        }
+    }
+
+    var potential_parents = {
+        'potential_mothers': potential_mothers,
+        'potential_fathers': potential_fathers
+    }
+
+    return new Promise(resolve => {
+        resolve(potential_parents);
+    })
+}
+
+function selectParentsForReproduction(potential_mothers, potential_fathers) {
+
+    // example
+    // var parents = [
+    //     [mother0, father0],
+    //     [mother1, father1],
+    //     ... 
+    //     [mother9, father9]
+    // ]
+
+    var parents = [];
+    // goal: pair together males and females 
+    // create parents == TOTAL_ORGANISMS / 2 (each couple reproduces roughly 2 offspring)
+    for (var i = 0; i < (organisms.length / 2); i++) {
+        mother_index = Math.floor(Math.random() * potential_mothers.length);
+        father_index = Math.floor(Math.random() * potential_fathers.length);
+
+        var mother = potential_mothers[mother_index];
+        var father = potential_fathers[father_index];
+
+        new_parents = [mother, father];
+
+        parents.push(new_parents);
+    }
+    return parents;
+}
+
+function reproduceNewGeneration(parents) {
+    for (var i = 0; i < parents.length; i++) {
+        var offspring_count = determineOffspringCount();
+
+        for (var j = 0; j < offspring_count; j++) {
+            var crossover_genes = crossover(parents[i]);
+            reproduce(crossover_genes);
+        }
+    }
+    // set offspring_organisms as next generation of organisms
+    organisms = offspring_organisms;
+    offspring_organisms = [];
+}
+
+function determineOffspringCount() {
+    possible_offspring_counts = [0, 0, 1, 1, 2, 2, 2, 3, 4, 5]; // sum = 20, 20/10items = 2avg
+    var offspring_count_index = Math.floor(Math.random() * possible_offspring_counts.length);
+    // all_indicies.push(offspring_count_index);
+    var offspring_count = possible_offspring_counts[offspring_count_index];
+    // all_offspring_counts.push(offspring_count);
+    return offspring_count;
+}
+
+// 4 & 5. Crossover & Mutate (Mutation handled on gene inheritance)
+function crossover(parents_to_crossover) {
+
+    var mother = parents_to_crossover[0];
+    var father = parents_to_crossover[1];
+
+    // create offspring's genes
+    var mother_gene_counter = 0;
+    var father_gene_counter = 0;
+    var mutated_gene_counter = 0;
+    var crossover_genes = [];
+
+    for (var j = 0; j < GENE_COUNT; j++) {
+        // select if mother or father gene will be used (50% probability)
+        var random_bool = Math.random();
+
+        // apply mutation for variance
+        // set upper and lower bound for gene mutation using MUTATION_RATE / 2
+        // this way, mother and father genes retain an equal chance of being chosen
+        if (random_bool < (MUTATION_RATE / 2) || random_bool > 1 - (MUTATION_RATE / 2)) {
+            mutated_gene = getRandomGene(MIN_GENE, MAX_GENE);
+            crossover_genes.push(mutated_gene);
+            mutated_gene_counter++;
+        }
+        // mother gene chosen
+        else if (random_bool < 0.5) {
+            mother_gene = mother.genes[j];
+            crossover_genes.push(mother_gene);
+            mother_gene_counter++;
+        }
+        // father gene chosen
+        else {
+            father_gene = father.genes[j];
+            crossover_genes.push(father_gene);
+            father_gene_counter++;
+        }
+    }
+    return crossover_genes;
+}
+
+function getGender() {
+    var gender_indicator = Math.random();
+    var gender;
+    if (gender_indicator < 0.5) {
+        gender = 'female';
+    }
+    else {
+        gender = 'male';
+    }
+    return gender
+}
+
+function reproduce(crossover_genes) {
+    offspring_gender = getGender();
+    offspring = new Organism(offspring_gender, INITIAL_X, INITIAL_Y, ctx);
+    offspring.genes = crossover_genes;
+    // push offspring to new population
+    offspring_organisms.push(offspring);
+}
+
+// *** Animations ***
+// Title Screen
+async function playTitleScreenAnimation() {
+    console.log("Simulation Ready!");
+
+    var title_organisms = createTitleScreenOrganisms();
+    
+    do {
+        console.log("Starting Title Animation");
+        var status = await fadeInTitleAnimation(title_organisms);
+        console.log(status);
+        if (status === "Stop Playing") {
+            displaySettingsForm();
+        }
+    }
+    while (simulation_started === false && status === "Keep Playing");
+}
+
+function createTitleScreenOrganisms() {
+    var title_organisms = [];
+    for (var i = 0; i < 100; i++) {
+        // we need a random x&y value to start the organism at 
+        var random_x = Math.floor(Math.random() * canvas.width);
+        var random_y = Math.floor(Math.random() * canvas.height);
+
+        var new_organism = new Organism('female', random_x, random_y, ctx);
+
+        // ** NEED TO ALTER fadeInTitleAnimation() IF ANYTHING HERE CHANGES
+        for (var j = 0; j < 250; j++) {
+            var random_gene = getRandomGene(-5, 5);
+            new_organism.genes.push(random_gene);
+        }
+
+        title_organisms.push(new_organism);
+    }
+    return title_organisms;
+}
+
+function fadeInTitleAnimation(title_organisms) {
     var opacity = 0.00;
     var finished = false;
-    return new Promise(resolve => {
-        function simIntroFadeIn() {
-            if (!finished) {
-                // "100" organisms were created with completely random genes.
-                // This society of organisms needs to reach the goal if it wants to survive. (draw goal?)
+    var cycles = 0;
 
-                // animation
-                // clear rect []
+    var logo = document.getElementById("logo");
+
+    var settings_btn = document.getElementsByClassName("settings-btn")[0];
+
+    return new Promise(resolve => {
+        function animateTitle() {
+            if (!finished && !simulation_started) {
+
+                // if settings clicked, resolve animation
+                settings_btn.addEventListener("click", function() {
+                    cancelAnimationFrame(frame_id);
+                    resolve("Stop Playing");
+                });
+
                 ctx.fillStyle = 'black';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+                // move organisms forever (works)
+                for (var i = 0; i < 100; i++) {
+                    if (title_organisms[0].index < 250) {
+                        // update and move
+                        if (title_organisms[i].index < 250) {
+                            title_organisms[i].x += title_organisms[i].genes[title_organisms[i].index][0];
+                            title_organisms[i].y += title_organisms[i].genes[title_organisms[i].index][1];
+                            title_organisms[i].index++;
+                        }
+                        title_organisms[i].move();
+                    }
+                    else {
+                        cycles++;
+                        console.log("Resetting Gene Index");
 
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.font = '28px arial';
-                ctx.fillText(`${TOTAL_ORGANISMS} organisms were created with completely random genes.`, 125, 290);
+                        for (var j = 0; j < 100; j++) {
+                            title_organisms[j].index = 0;
+                        }
 
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.font = '22px arial';
-                ctx.fillText("This society of organisms needs to reach the goal if it wants to survive.", 150, 330);
-
-                if (opacity >= 1.00) {
-                    finished = true;
+                        if (cycles >= 5) {
+                            finished = true;
+                        }
+                    }
                 }
-                else {
-                    opacity += 0.01;
+
+                // draw image instead
+                // use globalAlpha, then reset
+                // could make this class Paintbrush in the future for this and goal class methods
+                ctx.globalAlpha = opacity;
+                ctx.drawImage(logo, 105, 275);
+                ctx.globalAlpha = 1;
+
+                if (opacity < 1.00) {
+                    opacity += 0.005;
                 }
-                frame_id = requestAnimationFrame(simIntroFadeIn);
+
+                sleep(750 / FPS); // control drawing FPS for organisms
+                frame_id = requestAnimationFrame(animateTitle);
             }
             else {
-                //resolve
+                // resolves every n cycles to prevent overflow
                 cancelAnimationFrame(frame_id);
-                resolve();
+                resolve("Keep Playing");
             }
         }
-        start_sim_intro_fadein = requestAnimationFrame(simIntroFadeIn);
+        start_title_fadein = requestAnimationFrame(animateTitle);
     })
+
 }
 
-function fadeOutSimulationIntro() {
-    var finished = false;
-    var opacity = 1.00;
-    return new Promise(resolve => {
-        function simIntroFadeOut() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(0, 200, canvas.width, canvas.height);
-
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.font = '28px arial';
-                ctx.fillText(`${TOTAL_ORGANISMS} organisms were created with completely random genes.`, 125, 290);
-
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.font = '22px arial';
-                ctx.fillText("This society of organisms needs to reach the goal if it wants to survive.", 150, 330);
-
-                if (opacity <= 0.00) {
-                    finished = true;
-                }
-                else {
-                    opacity -= 0.02;
-                }
-                frame_id = requestAnimationFrame(simIntroFadeOut);
-            }
-            else {
-                cancelAnimationFrame(frame_id);
-                resolve();
-            }
-        }
-        start_sim_intro_fadeout = requestAnimationFrame(simIntroFadeOut);
-    })
-}
-
-function fadeInSimulationExplanation() {
-    var finished = false;
-    var opacity = 0.00;
-    return new Promise(resolve => {
-        function simExplanationFadeIn() {
-            if (!finished) {
-                // Using a genetic algorithm based on natural selection, these organisms will undergo generations of
-                // reproduction, evaluation, selection, gene crossover and mutation, until they either succeed or fail to survive.
-
-                ctx.fillStyle = 'black';
-                ctx.fillRect(0, 100, canvas.width, canvas.height);
-
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.font = '22px arial';
-                ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
-                ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
-                ctx.fillText("until they succeed or fail to survive.", 350, 350);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.01;
-                }
-                frame_id = requestAnimationFrame(simExplanationFadeIn);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve();
-            }
-        }
-        start_sim_explanation_fadein = requestAnimationFrame(simExplanationFadeIn);
-    })
-}
-
-function fadeInFakeGoal() {
-    // used in intro animation
-    var finished = false;
-    var opacity = 0.00;
-    return new Promise(resolve => {
-        function fakeGoalFadeIn() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(500, 50, 20, 20);
-                
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillRect(500, 50, 20, 20);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.01;
-                }
-                frame_id = requestAnimationFrame(fakeGoalFadeIn);
-            }
-            else {
-                cancelAnimationFrame(frame_id);
-                resolve();
-            }
-        }
-        start_fake_goal_fadein = requestAnimationFrame(fakeGoalFadeIn);
-    })
-}
-
-function fadeOutExplanationAndGoal() {
-    var finished = false;
-    var opacity = 1.00;
-    return new Promise(resolve => {
-        function explanationAndGoalFadeOut() {
-            if (!finished) {
-                //animate
-                ctx.fillStyle = 'black';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.font = '22px arial';
-                ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
-                ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
-                ctx.fillText("until they succeed or fail to survive.", 350, 350);
-
-                // fake goal
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillRect(500, 50, 20, 20);
-
-                if (opacity <= 0.00) {
-                    finished = true;
-                }
-                else {
-                    opacity -= 0.02;
-                }
-                frame_id = requestAnimationFrame(explanationAndGoalFadeOut);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve();
-            }
-        }
-        start_explanation_fadeout = requestAnimationFrame(explanationAndGoalFadeOut);
-    })
-}
-
+// Simulation Introduction
 function fadeInSimulationSettings() {
     // this will be called by runPreSimAnimations(), and run before the first generation
     var opacity = 0.00;
@@ -845,6 +827,184 @@ function fadeOutSimulationSettings() {
     })
 }
 
+function fadeInSimulationIntro() {
+    var opacity = 0.00;
+    var finished = false;
+    return new Promise(resolve => {
+        function simIntroFadeIn() {
+            if (!finished) {
+                // "100" organisms were created with completely random genes.
+                // This society of organisms needs to reach the goal if it wants to survive. (draw goal?)
+
+                // animation
+                // clear rect []
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.font = '28px arial';
+                ctx.fillText(`${TOTAL_ORGANISMS} organisms were created with completely random genes.`, 125, 290);
+
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.font = '22px arial';
+                ctx.fillText("This society of organisms needs to reach the goal if it wants to survive.", 150, 330);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.01;
+                }
+                frame_id = requestAnimationFrame(simIntroFadeIn);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_sim_intro_fadein = requestAnimationFrame(simIntroFadeIn);
+    })
+}
+
+function fadeInFakeGoal() {
+    // used in intro animation
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function fakeGoalFadeIn() {
+            if (!finished) {
+                ctx.fillStyle = 'black';
+                ctx.fillRect(500, 50, 20, 20);
+                
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                ctx.fillRect(500, 50, 20, 20);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.01;
+                }
+                frame_id = requestAnimationFrame(fakeGoalFadeIn);
+            }
+            else {
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_fake_goal_fadein = requestAnimationFrame(fakeGoalFadeIn);
+    })
+}
+
+function fadeOutSimulationIntro() {
+    var finished = false;
+    var opacity = 1.00;
+    return new Promise(resolve => {
+        function simIntroFadeOut() {
+            if (!finished) {
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 200, canvas.width, canvas.height);
+
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.font = '28px arial';
+                ctx.fillText(`${TOTAL_ORGANISMS} organisms were created with completely random genes.`, 125, 290);
+
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.font = '22px arial';
+                ctx.fillText("This society of organisms needs to reach the goal if it wants to survive.", 150, 330);
+
+                if (opacity <= 0.00) {
+                    finished = true;
+                }
+                else {
+                    opacity -= 0.02;
+                }
+                frame_id = requestAnimationFrame(simIntroFadeOut);
+            }
+            else {
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_sim_intro_fadeout = requestAnimationFrame(simIntroFadeOut);
+    })
+}
+
+function fadeInSimulationExplanation() {
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function simExplanationFadeIn() {
+            if (!finished) {
+                // Using a genetic algorithm based on natural selection, these organisms will undergo generations of
+                // reproduction, evaluation, selection, gene crossover and mutation, until they either succeed or fail to survive.
+
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 100, canvas.width, canvas.height);
+
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.font = '22px arial';
+                ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
+                ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
+                ctx.fillText("until they succeed or fail to survive.", 350, 350);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.01;
+                }
+                frame_id = requestAnimationFrame(simExplanationFadeIn);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_sim_explanation_fadein = requestAnimationFrame(simExplanationFadeIn);
+    })
+}
+
+function fadeOutExplanationAndGoal() {
+    var finished = false;
+    var opacity = 1.00;
+    return new Promise(resolve => {
+        function explanationAndGoalFadeOut() {
+            if (!finished) {
+                //animate
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.font = '22px arial';
+                ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
+                ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
+                ctx.fillText("until they succeed or fail to survive.", 350, 350);
+
+                // fake goal
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                ctx.fillRect(500, 50, 20, 20);
+
+                if (opacity <= 0.00) {
+                    finished = true;
+                }
+                else {
+                    opacity -= 0.02;
+                }
+                frame_id = requestAnimationFrame(explanationAndGoalFadeOut);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_explanation_fadeout = requestAnimationFrame(explanationAndGoalFadeOut);
+    })
+}
+
 function fadeInStats() {
     var finished = false;
     var opacity = 0.00;
@@ -880,50 +1040,72 @@ function fadeInStats() {
     })
 }
 
-function fadeInExtinctionMessage() {
+function drawPhases() {
+    ctx.font = "20px arial";
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Create New Generation", 10, 30);
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Evaluate Individuals", 10, 60);
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Select Most-Fit Individuals", 10, 90);
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Crossover", 10, 120);
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Mutate", 10, 150);
+}
+
+// Evaluation Phase
+function fadeInEvaluationPhaseText() {
     var finished = false;
     var opacity = 0.00;
+    var old_opacity = 1.00
     return new Promise(resolve => {
-        function extinctMessageFadeIn() {
+        function fadeInEvalText() {
             if (!finished) {
-                // clears
-                ctx.fillStyle = 'black';
+                ctx.clearRect(10, 10, 275, 200);
 
-                ctx.font = '50px arial';
-                ctx.fillText("FAILURE", 400, 250);
+                ctx.font = "20px arial";
 
-                ctx.font = "30px arial";
-                ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Create New Generation", 10, 30);
 
-                ctx.font = '22px arial';
-                ctx.fillText("Press 'Q' to exit the simulation.", 345, 425);
+                ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+                ctx.fillText("Evaluate Individuals", 10, 60);
 
-                // animations
-                ctx.font = '50px arial';
-                ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-                ctx.fillText("FAILURE", 400, 250);
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                ctx.fillText("Evaluate Individuals", 10, 60);
 
-                ctx.font = "22px arial";
-                ctx.fillText("Press 'Q' to exit the simulation.", 345, 425);
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
-                ctx.font = "30px arial";
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Crossover", 10, 120);
+
+                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+                ctx.fillText("Mutate", 10, 150);
 
                 if (opacity >= 1.00) {
                     finished = true;
                 }
                 else {
-                    opacity += 0.05;
+                    // testing decreasing opacity difference to increase animation duration
+                    opacity += 0.02;
+                    old_opacity -= 0.02;
                 }
-                frame_id = requestAnimationFrame(extinctMessageFadeIn);
+                var frame_id = requestAnimationFrame(fadeInEvalText);
             }
             else {
+                //resolve
                 cancelAnimationFrame(frame_id);
-                resolve();
+                resolve("Highlight Evaluation Text Complete.");
             }
         }
-        start_extinction_fadein = requestAnimationFrame(extinctMessageFadeIn);
+        start_eval_fade_in = requestAnimationFrame(fadeInEvalText);
     })
 }
 
@@ -942,269 +1124,23 @@ async function runEvaluationAnimation() {
     })
 }
 
-async function evaluatePopulation() {
-    // to do
-    const shortest_distance_resolution = await getShortestDistanceToGoal();
-    const average_fitness = await calcPopulationFitness();
+function drawEvaluationPhaseText() {
+    ctx.font = "20px arial";
 
-    var population_resolution = {
-        'closest_organism': shortest_distance_resolution,
-        'average_fitness': average_fitness
-    }
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Create New Generation", 10, 30);
 
-    return new Promise(resolve => {
-        resolve(population_resolution);
-    })
-}
+    ctx.fillStyle = 'rgba(155, 245, 0, 1)';
+    ctx.fillText("Evaluate Individuals", 10, 60);
 
-function createOrganisms () {
-    var gender;
-    var male_count = 0;
-    var female_count = 0;
-    // create equal number of males and females
-    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
-        if (i % 2) {
-            gender = 'male';
-            male_count++;
-        }
-        else {
-            gender = 'female';
-            female_count++;
-        }
-        var organism = new Organism(gender, INITIAL_X, INITIAL_Y, ctx);
-        organism.setRandomGenes();
-        organisms.push(organism);
-    }
-    console.log(`FEMALES CREATED: ${female_count}, MALES CREATED: ${male_count}`);
-}
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
-function getRandomGene(min, max) {
-    var random_x = Math.floor(Math.random() * (max - min + 1) + min);
-    var random_y = Math.floor(Math.random() * (max - min + 1) + min);
-    var random_gene = [random_x, random_y];
-    return random_gene;
-}
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Crossover", 10, 120);
 
-function updateAndMoveOrganisms(goal) {
-    return new Promise(resolve => {
-        var total_moves = 0;
-        var finished = false;
-        var success_flag = false;
-        // why is this async?
-        async function animateOrganisms() {
-            if (!finished) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                goal.drawGoal();
-                goal.showStatistics();
-
-                if (dialogue) {
-                    drawEvaluationPhaseText();
-                }
-
-                for (var i = 0; i < organisms.length; i++) {
-                    if (organisms[i].reached_goal == false) {
-                        organisms[i].update();
-                        organisms[i].move();
-                        hasReachedGoal(organisms[i], goal);
-                    }
-                    else {
-                        updateSuccessfulOrganism(organisms[i]);
-                        success_flag = true;
-                    }
-                    total_moves++;
-                }
-                if (total_moves == (organisms.length * GENE_COUNT)) {
-                    finished = true;
-                }
-
-                sleepTest(1000 / FPS); // control drawing FPS for organisms
-                frame_id = requestAnimationFrame(animateOrganisms);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve(success_flag);
-            }
-        }
-        start_animate_organisms = requestAnimationFrame(animateOrganisms);
-    })
-}
-
-function getShortestDistanceToGoal() {
-
-    var shortest_distance = 10000;
-    var closest_organism_index;
-
-    // though this loop identifies closest organism, it ALSO updates organism's distance_to_goal attribute
-    for (var i = 0; i < organisms.length; i++) {
-        var distance_to_goal = organisms[i].calcDistanceToGoal();
-        if (distance_to_goal < shortest_distance) {
-            shortest_distance = distance_to_goal;
-            closest_organism_index = i;
-        }
-    }
-
-    var closest_organism = organisms[closest_organism_index];
-
-    // highlightClosestOrganism(closest_organism);
-    return closest_organism;
-}
-
-function calcPopulationFitness () {
-    return new Promise(resolve => {
-        // reset total_fitness before calculation
-        total_fitness = 0;
-        for (var i = 0; i < organisms.length; i++) {
-            organisms[i].calcFitness();
-            total_fitness += organisms[i].fitness;
-        }
-
-        var average_fitness = total_fitness / organisms.length;
-        resolve(average_fitness);
-    })
-}
-
-function beginSelectionProcess() {
-    // fill array with candidates for reproduction
-    var potential_mothers = [];
-    var potential_fathers = [];
-
-    for (var i = 0; i < organisms.length; i++) {
-        // Give organisms with negative fitness a chance to reproduce
-        if (organisms[i].fitness < 0) {
-            organisms[i].fitness = 0.01;
-        }
-
-        // I'm going to try this implementation >> (organism.fitness * 100) ** 1.25
-        console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
-        console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * 100) ** 2)} times.`);
-
-        for (var j = 0; j < Math.ceil((organisms[i].fitness * 100) ** 2); j++) {
-            if (organisms[i].gender === 'female') {
-                potential_mothers.push(organisms[i]);
-            }
-            else if (organisms[i].gender === 'male') {
-                potential_fathers.push(organisms[i]);
-            }
-        }
-    }
-
-    var potential_parents = {
-        'potential_mothers': potential_mothers,
-        'potential_fathers': potential_fathers
-    }
-
-    return new Promise(resolve => {
-        resolve(potential_parents);
-    })
-}
-
-function selectParentsForReproduction(potential_mothers, potential_fathers) {
-
-    // example
-    // var parents = [
-    //     [mother0, father0],
-    //     [mother1, father1],
-    //     ... 
-    //     [mother9, father9]
-    // ]
-
-    var parents = [];
-    // goal: pair together males and females 
-    // create parents == TOTAL_ORGANISMS / 2 (each couple reproduces roughly 2 offspring)
-    for (var i = 0; i < (organisms.length / 2); i++) {
-        mother_index = Math.floor(Math.random() * potential_mothers.length);
-        father_index = Math.floor(Math.random() * potential_fathers.length);
-
-        var mother = potential_mothers[mother_index];
-        var father = potential_fathers[father_index];
-
-        new_parents = [mother, father];
-
-        parents.push(new_parents);
-    }
-    return parents;
-}
-
-function reproduceNewGeneration(parents) {
-    for (var i = 0; i < parents.length; i++) {
-        var offspring_count = determineOffspringCount();
-
-        for (var j = 0; j < offspring_count; j++) {
-            var crossover_genes = crossover(parents[i]);
-            reproduce(crossover_genes);
-        }
-    }
-    // set offspring_organisms as next generation of organisms
-    organisms = offspring_organisms;
-    offspring_organisms = [];
-}
-
-function determineOffspringCount() {
-    possible_offspring_counts = [0, 0, 1, 1, 2, 2, 2, 3, 4, 5]; // sum = 20, 20/10items = 2avg
-    var offspring_count_index = Math.floor(Math.random() * possible_offspring_counts.length);
-    // all_indicies.push(offspring_count_index);
-    var offspring_count = possible_offspring_counts[offspring_count_index];
-    // all_offspring_counts.push(offspring_count);
-    return offspring_count;
-}
-
-function crossover(parents_to_crossover) {
-
-    var mother = parents_to_crossover[0];
-    var father = parents_to_crossover[1];
-
-    // create offspring's genes
-    var mother_gene_counter = 0;
-    var father_gene_counter = 0;
-    var mutated_gene_counter = 0;
-    var crossover_genes = [];
-
-    for (var j = 0; j < GENE_COUNT; j++) {
-        // select if mother or father gene will be used (50% probability)
-        var random_bool = Math.random();
-
-        // apply mutation for variance
-        // set upper and lower bound for gene mutation using MUTATION_RATE / 2
-        // this way, mother and father genes retain an equal chance of being chosen
-        if (random_bool < (MUTATION_RATE / 2) || random_bool > 1 - (MUTATION_RATE / 2)) {
-            mutated_gene = getRandomGene(MIN_GENE, MAX_GENE);
-            crossover_genes.push(mutated_gene);
-            mutated_gene_counter++;
-        }
-        // mother gene chosen
-        else if (random_bool < 0.5) {
-            mother_gene = mother.genes[j];
-            crossover_genes.push(mother_gene);
-            mother_gene_counter++;
-        }
-        // father gene chosen
-        else {
-            father_gene = father.genes[j];
-            crossover_genes.push(father_gene);
-            father_gene_counter++;
-        }
-    }
-    return crossover_genes;
-}
-
-function reproduce(crossover_genes) {
-    offspring_gender = getGender();
-    offspring = new Organism(offspring_gender, INITIAL_X, INITIAL_Y, ctx);
-    offspring.genes = crossover_genes;
-    // push offspring to new population
-    offspring_organisms.push(offspring);
-}
-
-function hasReachedGoal(organism, goal) {
-    // check if within y-range 
-    if ((organism.y - (organism.radius / 2)) >= goal.y && (organism.y - (organism.radius / 2)) <= (goal.y + goal.size)) {
-        // check if within x-range
-        if ((organism.x - (organism.radius / 2)) >= goal.x && (organism.x - (organism.radius / 2)) <= (goal.x + goal.size)) {
-            // organism reached goal
-            organism.reached_goal = true;
-        }
-    }
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Mutate", 10, 150);
 }
 
 function updateSuccessfulOrganism(organism) {
@@ -1214,16 +1150,88 @@ function updateSuccessfulOrganism(organism) {
     organism.ctx.fill();
 }
 
-function sleepTest(milliseconds) {
-    console.log(`Sleeping for ${(milliseconds / 1000)} second(s).`);
-    const date = Date.now();
-    let currentDate = null;
-    do {
-        currentDate = Date.now();
-    } 
-    while (currentDate - date < milliseconds);
-    return new Promise((resolve, reject) => {
-        resolve("Response Processed.")
+function fadeOutEvaluationPhaseText() {
+    console.log("called");
+    return new Promise(resolve => {
+        var finished = false;
+        var opacity = 0.00;
+        var old_opacity = 1.00;
+
+        function fadeOutEvalText() {
+            if (!finished) {
+                // solution to over-saturation:
+                // each frame, draw the same text with less gold and then more gray
+                ctx.fillStyle = 'black';
+                ctx.fillRect(10, 40, 180, 20);
+
+                ctx.font = "20px arial";
+                ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
+                ctx.fillText("Evaluate Individuals", 10, 60);
+
+                ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+                ctx.fillText("Evaluate Individuals", 10, 60);
+
+                if (opacity >= 0.99) {
+                    finished = true;
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(10, 10, 275, 200);
+                    drawPhases();
+                }
+                else {
+                    opacity += 0.02;
+                    old_opacity -= 0.02;
+                }
+                console.log("requesting another frame ok");
+                // for some reason changing the var name makes animation work
+                frame_id_eval_fadeout = requestAnimationFrame(fadeOutEvalText);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(frame_id);
+                resolve("FADE OUT EVALUATE INDIVIDUALS DONE");
+            }
+        }
+        console.log("starting!");
+        start_eval_text_fadeout = requestAnimationFrame(fadeOutEvalText);
+    })
+}
+
+// Selection Phase
+function fadeInSelectionPhaseText() {
+    var finished = false;
+    var opacity = 0.00;
+    var old_opacity = 1.00;
+    return new Promise(resolve => {
+        function fadeInSelectionText() {
+            if (!finished) {
+                ctx.fillStyle = 'black';
+                ctx.fillRect(10, 70, 250, 20);
+
+                ctx.font = "20px arial";
+
+                ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+                ctx.fillText("Select Most-Fit Individuals", 10, 90);
+
+                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                ctx.fillText("Select Most-Fit Individuals", 10, 90);
+
+                if (opacity >= 0.99) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.02;
+                    old_opacity -= 0.02;
+                }
+                frame_id = requestAnimationFrame(fadeInSelectionText);
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(frame_id);
+                resolve("Highlight Evaluation Text Complete.");
+            }
+        }
+        console.log('startingg');
+        start_selection_text_fadein = requestAnimationFrame(fadeInSelectionText);
     })
 }
 
@@ -1236,43 +1244,11 @@ async function highlightClosestOrganism (closest_organism) {
     await fadeInClosestOrganism(closest_organism);
     await fadeClosestToOriginal(closest_organism);
     await fadeInClosestOrganism(closest_organism);
-    await sleepTest(1000);
+    await sleep(1000);
     await fadeToBlackTextClosestOrganism();
     await fadeClosestToOriginal(closest_organism);
     return new Promise(resolve => {
         resolve("Highlight Closest Organism Complete");
-    })
-}
-
-function fadeInClosestOrganism(closest_organism) {
-    console.log('fadeInClosestOrganism() called');
-    var finished = false;
-    var opacity = 0.00;
-    return new Promise(resolve => {
-        function fadeInClosest() {
-            if (!finished) {
-
-                closest_organism.ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
-                closest_organism.ctx.beginPath();
-                closest_organism.ctx.arc(closest_organism.x, closest_organism.y, closest_organism.radius, 0, Math.PI*2, false);
-                closest_organism.ctx.fill();
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.04;
-                    console.log(opacity);
-                }
-                frame_id = requestAnimationFrame(fadeInClosest);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE IN CLOSEST ORGANISM COMPLETE");
-            }
-        }
-        start_closest_fadein = requestAnimationFrame(fadeInClosest);
     })
 }
 
@@ -1311,6 +1287,38 @@ function fadeInClosestOrganismText() {
     })
 }
 
+function fadeInClosestOrganism(closest_organism) {
+    console.log('fadeInClosestOrganism() called');
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function fadeInClosest() {
+            if (!finished) {
+
+                closest_organism.ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
+                closest_organism.ctx.beginPath();
+                closest_organism.ctx.arc(closest_organism.x, closest_organism.y, closest_organism.radius, 0, Math.PI*2, false);
+                closest_organism.ctx.fill();
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.04;
+                    console.log(opacity);
+                }
+                frame_id = requestAnimationFrame(fadeInClosest);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(frame_id);
+                resolve("FADE IN CLOSEST ORGANISM COMPLETE");
+            }
+        }
+        start_closest_fadein = requestAnimationFrame(fadeInClosest);
+    })
+}
+
 function fadeClosestToOriginal(closest_organism) {
     console.log("fadeClosestToOriginal() called");
     var finished = false;
@@ -1341,6 +1349,39 @@ function fadeClosestToOriginal(closest_organism) {
     })
 }
 
+function fadeToBlackTextClosestOrganism() {
+    var finished = false;
+    var opacity = 1.00;
+    return new Promise(resolve => {
+        function fadeBlackClosest() {
+            if (!finished) {
+                // animate
+                // 'clear' text
+                ctx.fillStyle = 'black';
+                ctx.fillRect(750, 450, 275, 20);
+
+                ctx.font = "20px arial";
+                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
+                ctx.fillText("Most-Fit Individual", 800, 470);
+
+                if (opacity <= 0.01) {
+                    finished = true;
+                }
+                else {
+                    opacity -= 0.02;
+                }
+                frame_id =  requestAnimationFrame(fadeBlackClosest);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(frame_id);
+                resolve("FADE TO BLACK TEXT COMPLETE");
+            }
+        }
+        start_fade_black_closest = requestAnimationFrame(fadeBlackClosest);
+    })
+}
+
 async function highlightChosenParents(parents) {
 
     // highlight mothers
@@ -1360,54 +1401,22 @@ async function highlightChosenParents(parents) {
     await fadeToOriginal(parents, 'male');
     await fadeInFathers(parents);
     await fadeToOriginal(parents, 'male');
-    await sleepTest(1000);
+    await sleep(1000);
 
     // highlight all
     await fadeInMothers(parents);
     await fadeInFathers(parents);
     await fadeInNotChosen();
-    await sleepTest(1000); 
+    await sleep(1000); 
 
     // fade out all
     await fadeToBlackText();
     await fadeToOriginal(parents, 'both');
     await fadeToBlack(organisms);
-    await sleepTest(1000);
+    await sleep(1000);
 
     return new Promise(resolve => {
         resolve("Highlight Chosen Parents Animation Complete");
-    })
-}
-
-function fadeInMothers(parents) {
-    return new Promise(resolve => {
-        var opacity = 0.00;
-        var finished = false;
-
-        function motherFadeIn() {
-            if (!finished) {
-
-                for (var i = 0; i < parents.length; i++) {
-                    parents[i][0].ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-                    parents[i][0].ctx.beginPath();
-                    parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
-                    parents[i][0].ctx.fill();
-                }
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.03;
-                }
-                frame_id = requestAnimationFrame(motherFadeIn);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE IN MOTHERS COMPLETE");
-            }
-        }
-        start_mother_fade_in = requestAnimationFrame(motherFadeIn);
     })
 }
 
@@ -1444,36 +1453,6 @@ function fadeInMothersText() {
     })
 }
 
-function fadeInFathers(parents) {
-    return new Promise(resolve => {
-        var opacity = 0.00;
-        var finished = false;
-        function fatherFadeIn() {
-            if (!finished) {
-                for (var i = 0; i < parents.length; i++) {
-                    parents[i][1].ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
-                    parents[i][1].ctx.beginPath();
-                    parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
-                    parents[i][1].ctx.fill();
-                }
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.03;
-                }
-                frame_id = requestAnimationFrame(fatherFadeIn);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FATHERS FADE-IN COMPLETE");
-            }
-        }
-        start_father_fadein = requestAnimationFrame(fatherFadeIn);
-    })
-}
-
 function fadeInFathersText() {
     return new Promise(resolve => {
         var opacity = 0.00;
@@ -1505,34 +1484,65 @@ function fadeInFathersText() {
     })
 }
 
-function fadeInNotChosen() {
+function fadeInMothers(parents) {
     return new Promise(resolve => {
         var opacity = 0.00;
         var finished = false;
-        function notChosenFadeIn() {
-            if (!finished) {
-                // animate
-                ctx.fillStyle = 'black';
-                ctx.fillRect(750, 540, 275, 20);
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.fillText("Not Selected", 800, 560);
 
+        function motherFadeIn() {
+            if (!finished) {
+
+                for (var i = 0; i < parents.length; i++) {
+                    parents[i][0].ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+                    parents[i][0].ctx.beginPath();
+                    parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
+                    parents[i][0].ctx.fill();
+                }
                 if (opacity >= 1.00) {
                     finished = true;
                 }
                 else {
-                    opacity += 0.02;
+                    opacity += 0.03;
                 }
-                frame_id = requestAnimationFrame(notChosenFadeIn);
+                frame_id = requestAnimationFrame(motherFadeIn);
             }
             else {
                 // resolve
                 cancelAnimationFrame(frame_id);
-                resolve("NOT CHOSEN TEXT ANIMATION COMPLETE");
+                resolve("FADE IN MOTHERS COMPLETE");
             }
         }
-        start_not_chosen_fadein = requestAnimationFrame(notChosenFadeIn);
+        start_mother_fade_in = requestAnimationFrame(motherFadeIn);
+    })
+}
+
+function fadeInFathers(parents) {
+    return new Promise(resolve => {
+        var opacity = 0.00;
+        var finished = false;
+        function fatherFadeIn() {
+            if (!finished) {
+                for (var i = 0; i < parents.length; i++) {
+                    parents[i][1].ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
+                    parents[i][1].ctx.beginPath();
+                    parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
+                    parents[i][1].ctx.fill();
+                }
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.03;
+                }
+                frame_id = requestAnimationFrame(fatherFadeIn);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(frame_id);
+                resolve("FATHERS FADE-IN COMPLETE");
+            }
+        }
+        start_father_fadein = requestAnimationFrame(fatherFadeIn);
     })
 }
 
@@ -1592,47 +1602,34 @@ function fadeToOriginal(parents, gender) {
     })
 }
 
-function fadeToBlack(organisms) {
-    console.log("fadeToBlack(organisms) called!");
-    var finished = false;
-    var opacity = 1.00;
-    var executions = 0;
+function fadeInNotChosen() {
     return new Promise(resolve => {
-        function fadeToBlackOrganisms() {
+        var opacity = 0.00;
+        var finished = false;
+        function notChosenFadeIn() {
             if (!finished) {
                 // animate
-                for (var i = 0; i < organisms.length; i++) {
-                    // 'clear' organism from canvas
-                    organisms[i].ctx.fillStyle = 'black';
-                    organisms[i].ctx.beginPath();
-                    organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-                    organisms[i].ctx.fill();
+                ctx.fillStyle = 'black';
+                ctx.fillRect(750, 540, 275, 20);
+                ctx.font = "20px arial";
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.fillText("Not Selected", 800, 560);
 
-                    organisms[i].ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
-                    organisms[i].ctx.beginPath();
-                    organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-                    organisms[i].ctx.fill();
-                    executions++;
-                }
-
-                if (opacity <= 0.01) {
+                if (opacity >= 1.00) {
                     finished = true;
                 }
                 else {
-                    console.log(opacity);
-                    opacity -= 0.05;
+                    opacity += 0.02;
                 }
-                frame_id = requestAnimationFrame(fadeToBlackOrganisms);
+                frame_id = requestAnimationFrame(notChosenFadeIn);
             }
             else {
                 // resolve
-                console.log(`Expected Executions: ${organisms.length * 21}`);
-                console.log(`Executions: ${executions}`);
                 cancelAnimationFrame(frame_id);
-                resolve("FADE TO BLACK COMPLETE");
+                resolve("NOT CHOSEN TEXT ANIMATION COMPLETE");
             }
         }
-        start_organism_fade_to_black = requestAnimationFrame(fadeToBlackOrganisms);
+        start_not_chosen_fadein = requestAnimationFrame(notChosenFadeIn);
     })
 }
 
@@ -1675,219 +1672,47 @@ function fadeToBlackText() {
     })
 }
 
-function fadeToBlackTextClosestOrganism() {
+function fadeToBlack(organisms) {
+    console.log("fadeToBlack(organisms) called!");
     var finished = false;
     var opacity = 1.00;
+    var executions = 0;
     return new Promise(resolve => {
-        function fadeBlackClosest() {
+        function fadeToBlackOrganisms() {
             if (!finished) {
                 // animate
-                // 'clear' text
-                ctx.fillStyle = 'black';
-                ctx.fillRect(750, 450, 275, 20);
+                for (var i = 0; i < organisms.length; i++) {
+                    // 'clear' organism from canvas
+                    organisms[i].ctx.fillStyle = 'black';
+                    organisms[i].ctx.beginPath();
+                    organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+                    organisms[i].ctx.fill();
 
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
-                ctx.fillText("Most-Fit Individual", 800, 470);
+                    organisms[i].ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+                    organisms[i].ctx.beginPath();
+                    organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+                    organisms[i].ctx.fill();
+                    executions++;
+                }
 
                 if (opacity <= 0.01) {
                     finished = true;
                 }
                 else {
-                    opacity -= 0.02;
+                    console.log(opacity);
+                    opacity -= 0.05;
                 }
-                frame_id =  requestAnimationFrame(fadeBlackClosest);
+                frame_id = requestAnimationFrame(fadeToBlackOrganisms);
             }
             else {
                 // resolve
+                console.log(`Expected Executions: ${organisms.length * 21}`);
+                console.log(`Executions: ${executions}`);
                 cancelAnimationFrame(frame_id);
-                resolve("FADE TO BLACK TEXT COMPLETE");
+                resolve("FADE TO BLACK COMPLETE");
             }
         }
-        start_fade_black_closest = requestAnimationFrame(fadeBlackClosest);
-    })
-}
-
-function getGender() {
-    var gender_indicator = Math.random();
-    var gender;
-    if (gender_indicator < 0.5) {
-        gender = 'female';
-    }
-    else {
-        gender = 'male';
-    }
-    return gender
-}
-
-function drawPhases() {
-    ctx.font = "20px arial";
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Create New Generation", 10, 30);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Evaluate Individuals", 10, 60);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Crossover", 10, 120);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Mutate", 10, 150);
-}
-
-function fadeInEvaluationPhaseText() {
-    var finished = false;
-    var opacity = 0.00;
-    var old_opacity = 1.00
-    return new Promise(resolve => {
-        function fadeInEvalText() {
-            if (!finished) {
-                ctx.clearRect(10, 10, 275, 200);
-
-                ctx.font = "20px arial";
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 30);
-
-                ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
-                ctx.fillText("Evaluate Individuals", 10, 60);
-
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText("Evaluate Individuals", 10, 60);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover", 10, 120);
-
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Mutate", 10, 150);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    // testing decreasing opacity difference to increase animation duration
-                    opacity += 0.02;
-                    old_opacity -= 0.02;
-                }
-                var frame_id = requestAnimationFrame(fadeInEvalText);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("Highlight Evaluation Text Complete.");
-            }
-        }
-        start_eval_fade_in = requestAnimationFrame(fadeInEvalText);
-    })
-}
-
-function drawEvaluationPhaseText() {
-    ctx.font = "20px arial";
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Create New Generation", 10, 30);
-
-    ctx.fillStyle = 'rgba(155, 245, 0, 1)';
-    ctx.fillText("Evaluate Individuals", 10, 60);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Crossover", 10, 120);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Mutate", 10, 150);
-}
-
-function fadeOutEvaluationPhaseText() {
-    console.log("called");
-    return new Promise(resolve => {
-        var finished = false;
-        var opacity = 0.00;
-        var old_opacity = 1.00;
-
-        function fadeOutEvalText() {
-            if (!finished) {
-                // solution to over-saturation:
-                // each frame, draw the same text with less gold and then more gray
-                ctx.fillStyle = 'black';
-                ctx.fillRect(10, 40, 180, 20);
-
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
-                ctx.fillText("Evaluate Individuals", 10, 60);
-
-                ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-                ctx.fillText("Evaluate Individuals", 10, 60);
-
-                if (opacity >= 0.99) {
-                    finished = true;
-                    ctx.fillStyle = 'black';
-                    ctx.fillRect(10, 10, 275, 200);
-                    drawPhases();
-                }
-                else {
-                    opacity += 0.02;
-                    old_opacity -= 0.02;
-                }
-                console.log("requesting another frame ok");
-                // for some reason changing the var name makes animation work
-                frame_id_eval_fadeout = requestAnimationFrame(fadeOutEvalText);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE OUT EVALUATE INDIVIDUALS DONE");
-            }
-        }
-        console.log("starting!");
-        start_eval_text_fadeout = requestAnimationFrame(fadeOutEvalText);
-    })
-}
-
-function fadeInSelectionPhaseText() {
-    var finished = false;
-    var opacity = 0.00;
-    var old_opacity = 1.00;
-    return new Promise(resolve => {
-        function fadeInSelectionText() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(10, 70, 250, 20);
-
-                ctx.font = "20px arial";
-
-                ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
-                ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-                if (opacity >= 0.99) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.02;
-                    old_opacity -= 0.02;
-                }
-                frame_id = requestAnimationFrame(fadeInSelectionText);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("Highlight Evaluation Text Complete.");
-            }
-        }
-        console.log('startingg');
-        start_selection_text_fadein = requestAnimationFrame(fadeInSelectionText);
+        start_organism_fade_to_black = requestAnimationFrame(fadeToBlackOrganisms);
     })
 }
 
@@ -1933,6 +1758,7 @@ function fadeOutSelectionPhaseText() {
     })
 }
 
+// Crossover Phase
 function fadeInCrossoverPhaseText() {
     var finished = false;
     var opacity = 0.00;
@@ -2077,6 +1903,7 @@ function fadeOutCrossoverPhaseText() {
     })
 }
 
+// Mutation Phase
 function fadeInMutationPhaseText() {
     var finished = false;
     var opacity = 0.00;
@@ -2228,6 +2055,7 @@ function fadeOutMutationPhaseText() {
     })
 }
 
+// Generation Summary & Create New Generation
 function fadeInCreateNewGenPhaseText() {
     var finished = false;
     var opacity = 0.00;
@@ -2401,17 +2229,7 @@ function fadeOutCreateNewGenPhaseText() {
     })
 }
 
-async function runSelectionAnimations(closest_organism, parents) {
-    console.log("Called runSelectionAnimations()");
-    // maybe model other phases after this one
-    await highlightClosestOrganism(closest_organism);
-    await highlightChosenParents(parents);
-
-    return new Promise(resolve => {
-        resolve("Run Selection Animations Complete");
-    })
-}
-
+// Success/Fail
 function fadeInSuccessMessage() {
     var opacity = 0.00;
     var finished = false;
@@ -2514,6 +2332,249 @@ function fadeOutSuccessMessage() {
             }
         }
         start_success_fadeout = requestAnimationFrame(successFadeOut);
+    })
+}
+
+function fadeInExtinctionMessage() {
+    var finished = false;
+    var opacity = 0.00;
+    return new Promise(resolve => {
+        function extinctMessageFadeIn() {
+            if (!finished) {
+                // clears
+                ctx.fillStyle = 'black';
+
+                ctx.font = '50px arial';
+                ctx.fillText("Simulation Failed", 310, 250);
+
+                ctx.font = "30px arial";
+                ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
+
+                ctx.font = '22px arial';
+                ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
+
+                // animations
+                ctx.font = '50px arial';
+                ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+                ctx.fillText("Simulation Failed", 310, 250);
+
+                ctx.font = "22px arial";
+                ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
+
+                ctx.font = "30px arial";
+                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
+
+                if (opacity >= 1.00) {
+                    finished = true;
+                }
+                else {
+                    opacity += 0.05;
+                }
+                frame_id = requestAnimationFrame(extinctMessageFadeIn);
+            }
+            else {
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_extinction_fadein = requestAnimationFrame(extinctMessageFadeIn);
+    })
+}
+
+// *** Settings ***
+function displaySettingsForm() {
+    var start_btn = document.getElementsByClassName("start-btn")[0];
+    start_btn.style.display = 'none';
+
+    var canvas_container = document.getElementsByClassName("canvas-container")[0];
+    var settings_container = document.getElementsByClassName("settings-container")[0];
+
+    canvas_container.style.display = 'none';
+    settings_container.style.display = 'block';
+
+    // movement setting helper (move/abstract)
+    var movement_speed_setting = document.getElementById("move-speed");
+    var error_message = document.getElementsByClassName("error-message")[0];
+
+    movement_speed_setting.addEventListener('focusin', function() {
+        error_message.style.color = "var(--closest_organism_gold)";
+        error_message.innerHTML = "Movement Speed Range: 1 - 7";
+        movement_speed_setting.addEventListener('focusout', function() {
+            error_message.style.color = 'var(--mother-pink)';
+            error_message.innerHTML = "";
+        })
+    })
+
+    movement_speed_setting.addEventListener('keydown', function(event) {
+        // function blocks keystrokes not within the acceptable range for movement speed
+        var keystroke = preValidateMovementSetting(event);
+        if (keystroke === 1) {
+            event.preventDefault();
+        }
+    });
+
+}
+
+// should stop title screen animation when settings is called
+function validateSettingsForm() {
+
+    var error_message = document.getElementsByClassName("error-message")[0];
+
+    // clear error message on call
+    error_message.style.color = "var(--mother-pink)";
+    error_message.innerHTML = "";
+
+    var settings_manager = {};
+
+    // returns error message or "valid"
+    settings_manager['organisms_setting'] = validateTotalOrganismsSetting();
+    settings_manager['movement_setting'] = validateMovementSetting();
+    settings_manager['gene_setting'] = validateGeneCountSetting();
+    settings_manager['mutation_setting'] = validateMutationRateSetting();
+
+    // should make value red too, and change to green on keystroke
+    for (let message in settings_manager) {
+        if (settings_manager[message] != "valid") {
+            error_message.innerHTML = settings_manager[message];
+            return false;
+        }
+    }
+
+    // dialogue
+    var dialogue_setting = document.getElementById("dialogue-checkbox");
+    if (dialogue_setting.checked) {
+        dialogue = true;
+    }
+    else {
+        dialogue = false;
+    }
+
+    // returns to title screen
+    finishApplyingSettings();
+
+    // restart animation
+    playTitleScreenAnimation();
+
+    // don't submit the form
+    return false;
+}
+
+function validateTotalOrganismsSetting() {
+    var total_organisms_setting = document.getElementById("total-organisms");
+
+    if (typeof parseInt(total_organisms_setting.value) === 'number' && parseInt(total_organisms_setting.value) > 0) {
+        if (parseInt(total_organisms_setting.value > 9999)) {
+            TOTAL_ORGANISMS = 9999;
+        }
+        else {
+            TOTAL_ORGANISMS = Math.abs(parseInt(total_organisms_setting.value));
+        }
+        total_organisms_setting.style.borderBottom = '2px solid var(--custom-green)';
+        return 'valid';
+    }
+    else {
+        total_organisms_setting.style.borderBottom = '2px solid var(--mother-pink)';
+        return '* Invalid number of organisms. Please input a positive number.';
+    }
+}
+
+function validateGeneCountSetting() {
+    var gene_count_setting = document.getElementById("gene-count");
+
+    if (typeof parseInt(gene_count_setting.value) === 'number' && parseInt(gene_count_setting.value) > 0) {
+        if (parseInt(gene_count_setting.value) > 1000) {
+            GENE_COUNT = 1000;
+        }
+        else {
+            GENE_COUNT = Math.abs(parseInt(gene_count_setting.value));
+        }
+        gene_count_setting.style.borderBottom = '2px solid var(--custom-green)';
+        return "valid";
+    }
+    else {
+        gene_count_setting.style.borderBottom = '2px solid var(--mother-pink)';
+        return "* Invalid gene count. Please input a positive number.";
+    }
+}
+
+function validateMutationRateSetting() {
+    var mutation_rate_setting = document.getElementById("mutation-rate");
+
+    // consider allowing float here
+    if (typeof parseInt(mutation_rate_setting.value) === 'number' && parseInt(mutation_rate_setting.value) > 0) {
+        if (parseInt(mutation_rate_setting.value) > 100) {
+            MUTATION_RATE = 1;
+        }
+        else {
+            MUTATION_RATE = parseInt(mutation_rate_setting.value) / 100;
+        }
+        mutation_rate_setting.style.borderBottom = '2px solid var(--custom-green)';
+        return "valid";
+    }
+    else {
+        mutation_rate_setting.style.borderBottom = '2px solid var(--mother-pink)';
+        return "Invalid mutation rate. Please input a positive percentage value. (3 = 3%)";
+    }
+}
+
+function preValidateMovementSetting(event) {
+
+    // prevent keystrokes that aren't === 1-7 || Backspace, <, > 
+    var movement_key = event.key;
+    if (movement_key > "0" && movement_key <= "7") {
+        return 0;
+    }
+    else if (movement_key === "Backspace" || movement_key === "ArrowLeft" || movement_key === "ArrowRight") {
+        return 0;
+    }
+    else {
+        return 1;
+    }
+}
+
+function validateMovementSetting() {
+    var movement_speed_setting = document.getElementById("move-speed");
+
+    // create max and min genes from movement speed
+    // pre-validated in preValidateMovementSetting();
+    if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 7) {
+        MIN_GENE = parseInt(movement_speed_setting.value) * -1;
+        MAX_GENE = parseInt(movement_speed_setting.value);
+        movement_speed_setting.style.borderBottom = "2px solid var(--custom-green)";
+        return "valid";
+    } 
+    else {
+        movement_speed_setting.style.borderBottom = '2px solid var(--mother-pink)';
+        return "Invalid movement speed. Please input a positive number between 1 - 7.";
+    }   
+}
+
+function finishApplyingSettings() {
+    // make html changes before function returns
+    var canvas_container = document.getElementsByClassName("canvas-container")[0];
+    var settings_container = document.getElementsByClassName("settings-container")[0];
+
+    canvas_container.style.display = 'block';
+    settings_container.style.display = 'none';
+
+    var start_btn = document.getElementsByClassName("start-btn")[0];
+    start_btn.style.display = 'block';
+
+    return 0;
+}
+
+// Utilities
+function sleep(milliseconds) {
+    console.log(`Sleeping for ${(milliseconds / 1000)} second(s).`);
+    const date = Date.now();
+    let currentDate = null;
+    do {
+        currentDate = Date.now();
+    } 
+    while (currentDate - date < milliseconds);
+    return new Promise((resolve, reject) => {
+        resolve();
     })
 }
 
