@@ -629,8 +629,15 @@ function createTitleScreenOrganisms() {
         // we need a random x&y value to start the organism at 
         var random_x = Math.floor(Math.random() * canvas.width);
         var random_y = Math.floor(Math.random() * canvas.height);
+
         var new_organism = new Organism('female', random_x, random_y, ctx);
-        new_organism.setRandomGenes();
+
+        // ** NEED TO ALTER fadeInTitleAnimation() IF ANYTHING HERE CHANGES
+        for (var j = 0; j < 250; j++) {
+            var random_gene = getRandomGene(-5, 5);
+            new_organism.genes.push(random_gene);
+        }
+
         title_organisms.push(new_organism);
     }
     return title_organisms;
@@ -651,16 +658,21 @@ function fadeInTitleAnimation(title_organisms) {
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             
                 // move organisms forever (works)
-                for (var i = 0; i < title_organisms.length; i++) {
-                    if (title_organisms[0].index < GENE_COUNT) {
-                        title_organisms[i].update();
+                for (var i = 0; i < 100; i++) {
+                    if (title_organisms[0].index < 250) {
+                        // update and move
+                        if (title_organisms[i].index < 250) {
+                            title_organisms[i].x += title_organisms[i].genes[title_organisms[i].index][0];
+                            title_organisms[i].y += title_organisms[i].genes[title_organisms[i].index][1];
+                            title_organisms[i].index++;
+                        }
                         title_organisms[i].move();
                     }
                     else {
                         cycles++;
                         console.log("Resetting Gene Index");
 
-                        for (var j = 0; j < title_organisms.length; j++) {
+                        for (var j = 0; j < 100; j++) {
                             title_organisms[j].index = 0;
                         }
 
