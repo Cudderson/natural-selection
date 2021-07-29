@@ -2602,43 +2602,31 @@ function getUserDecision() {
 
 // TESTING BOUNDARIES ==============================================================
 
-// remember to change DOMContentLoaded callback when done
+// now, to put it all together, we should wait for a mousedown, which triggers another event listener for mouseover to redraw,
+// then waits for a mouseup to stop drawing.
 
 function testBoundaries() {
-    // take it one step at a time
-    // Let's have a button that let's us enter the testing mode
-    var boundary_btn = document.getElementsByClassName("boundary")[0];
-    boundary_btn.style.backgroundColor = "tan";
-
-    // enter testing mode when clicked
-    boundary_btn.addEventListener("click", function() {
-        boundary_btn.innerHTML = "TESTING";
-        boundary_btn.style.backgroundColor = "var(--custom-green)";
-        var start_btn = document.getElementsByClassName("start-btn")[0];
-        var settings_btn = document.getElementsByClassName("settings-btn")[0];
-        start_btn.style.display = 'none';
-        settings_btn.style.display = 'none';
-    });
-
     // Stores the initial position of the cursor
     let coordinates = {'x':0 , 'y':0}; 
-    
-    // This is the flag that we are going to use to 
-    // trigger drawing
-    let paint = false;
+    var canvas_data = canvas.getBoundingClientRect();
 
-    var x = canvas.getBoundingClientRect();
+    //  console.log("Logging Rect:")
+    //  for (var key in x) {
+    //      console.log(key, x[key]);
+    //  }
 
-    console.log("Logging Rect:")
-    for (var key in x) {
-        console.log(key, x[key]);
+    function getPixel(canvas_data, index) {
+        var i = index * 4;
+        var data = canvas_data.data;
+        console.log(`DATA: #{data}`);
+        return [data[i], data[i+1], data[i+2], data[i+3]];
     }
 
-    // Next, let's draw a rectangle for position testing
-    ctx.fillStyle = "orange";
-    ctx.fillRect(500, 300, 50, 50); // pos: 500, 300
+    function getPixelXY(canvas_data, x, y) {
+        var index = y * canvas_data.width + x; // not sure how this works but it does
+        return getPixel(canvas_data, index)
+    }
 
-    // now, let's attempt to let user click on canvas, then log their mouse position (works)
     function getMousePosition(canvas, event) {
         let rect = canvas.getBoundingClientRect();
         let x = event.clientX - rect.left;
@@ -2648,57 +2636,134 @@ function testBoundaries() {
         console.log(coordinates);
     }
 
+    function draw() {
+        ctx.fillStyle = 'red';
+        ctx.fillRect(coordinates['x'], coordinates['y'], 10, 10);
+    }
+
+    // respond to each event individually
+    canvas.addEventListener('mousedown', ___)
+    canvas.addEventListener('mouseover', ___)
+    canvas.addEventListener('mouseout', ___)
+    canvas.addEventListener('mouseup', ___)
+
+    // this is working to draw on canvas, but doesnt stop on mouseup.
     // canvas.addEventListener("mousedown", function(event) {
+    //     console.log("mousedown heard");
+    //     var done = false;
     //     getMousePosition(canvas, event);
-    //     console.log(coordinates);
-    // });
+    //     draw();
 
-    // let's test if we can detect if we clicked the square using pixel color
-    canvas.addEventListener("mousedown", function(event) {
-        // functions
-        function getPixel(canvas_data, index) {
-            var i = index * 4;
-            var data = canvas_data.data;
-            console.log(`DATA: #{data}`);
-            return [data[i], data[i+1], data[i+2], data[i+3]];
-        }
+    //     if (!done) {
+    //         canvas.onmousemove = function(event) {
+    //             console.log("mouseover heard");
+    //             getMousePosition(canvas, event);
+    //             draw();
+    //         };
+    //     }
 
-        function getPixelXY(canvas_data, x, y) {
-            var index = y * canvas_data.width + x; // not sure how this works but it does
-            return getPixel(canvas_data, index)
-        }
-
-        function drawDot() {
-            ctx.fillStyle = "red";
-            ctx.fillRect(coordinates['x'], coordinates['y'], 10, 10);
-        }
-
-        // get canvas data
-        var canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        // canvas_data: [r, g, b, a, r, g, b, a, r, g, b, a....]
-        
-        // update coordinates where user clicked
-        getMousePosition(canvas, event);
-
-        // we could easily check just the pixel that the user clicked, but it would be more efficient to save the entire canvas 
-        // and just check where we click
-        var pixel = getPixelXY(canvas_data, coordinates['x'], coordinates['y']);
-
-        // check if pixel in square (works)
-        // if (pixel[0] == 0) {
-        //     console.log("Not in square.", pixel);
-        // }
-        // else {
-        //     console.log("You clicked the square!", pixel);
-        // }
-
-        // next, let's try drawing on the canvas
-        // draw a dot
-        drawDot(); // works
-        
-    })
+    //     canvas.addEventListener("mouseup", function() {
+    //         console.log("mouse up heard!");
+    //         done = true;
+    //     });
+    // })
 }
 
+// =================================================================================
 
+// remember to change DOMContentLoaded callback when done
 
+// function testBoundaries() {
+//     // take it one step at a time
+//     // Let's have a button that let's us enter the testing mode
+//     var boundary_btn = document.getElementsByClassName("boundary")[0];
+//     boundary_btn.style.backgroundColor = "tan";
 
+//     // enter testing mode when clicked
+//     boundary_btn.addEventListener("click", function() {
+//         boundary_btn.innerHTML = "TESTING";
+//         boundary_btn.style.backgroundColor = "var(--custom-green)";
+//         var start_btn = document.getElementsByClassName("start-btn")[0];
+//         var settings_btn = document.getElementsByClassName("settings-btn")[0];
+//         start_btn.style.display = 'none';
+//         settings_btn.style.display = 'none';
+//     });
+
+//     // Stores the initial position of the cursor
+//     let coordinates = {'x':0 , 'y':0}; 
+    
+//     // This is the flag that we are going to use to 
+//     // trigger drawing
+//     let paint = false;
+
+//     var x = canvas.getBoundingClientRect();
+
+//     console.log("Logging Rect:")
+//     for (var key in x) {
+//         console.log(key, x[key]);
+//     }
+
+//     // Next, let's draw a rectangle for position testing
+//     ctx.fillStyle = "orange";
+//     ctx.fillRect(500, 300, 50, 50); // pos: 500, 300
+
+//     // now, let's attempt to let user click on canvas, then log their mouse position (works)
+//     function getMousePosition(canvas, event) {
+//         let rect = canvas.getBoundingClientRect();
+//         let x = event.clientX - rect.left;
+//         let y = event.clientY - rect.top;
+//         coordinates['x'] = x;
+//         coordinates['y'] = y;
+//         console.log(coordinates);
+//     }
+
+//     // canvas.addEventListener("mousedown", function(event) {
+//     //     getMousePosition(canvas, event);
+//     //     console.log(coordinates);
+//     // });
+
+//     // let's test if we can detect if we clicked the square using pixel color
+//     canvas.addEventListener("mousedown", function(event) {
+//         // functions
+//         function getPixel(canvas_data, index) {
+//             var i = index * 4;
+//             var data = canvas_data.data;
+//             console.log(`DATA: #{data}`);
+//             return [data[i], data[i+1], data[i+2], data[i+3]];
+//         }
+
+//         function getPixelXY(canvas_data, x, y) {
+//             var index = y * canvas_data.width + x; // not sure how this works but it does
+//             return getPixel(canvas_data, index)
+//         }
+
+//         function drawDot() {
+//             ctx.fillStyle = "red";
+//             ctx.fillRect(coordinates['x'], coordinates['y'], 10, 10);
+//         }
+
+//         // get canvas data
+//         var canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+//         // canvas_data: [r, g, b, a, r, g, b, a, r, g, b, a....]
+        
+//         // update coordinates where user clicked
+//         getMousePosition(canvas, event);
+
+//         // we could easily check just the pixel that the user clicked, but it would be more efficient to save the entire canvas 
+//         // and just check where we click
+//         var pixel = getPixelXY(canvas_data, coordinates['x'], coordinates['y']);
+
+//         // check if pixel in square (works)
+//         // if (pixel[0] == 0) {
+//         //     console.log("Not in square.", pixel);
+//         // }
+//         // else {
+//         //     console.log("You clicked the square!", pixel);
+//         // }
+
+//         // next, let's try drawing on the canvas
+//         // draw a dot
+//         drawDot(); // works
+
+//     })
+// }
