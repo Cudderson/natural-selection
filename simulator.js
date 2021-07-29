@@ -1950,7 +1950,7 @@ function fadeInMutationDescriptionText() {
                 ctx.fillRect(100, 275, 800, 150);
 
                 var description = "To maintain genetic diversity, a small percentage of random genes are mutated";
-                var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100)}%`.toString();
+                var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100).toFixed(2)}%`.toString();
 
                 ctx.font = "20px arial";
                 ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
@@ -1988,7 +1988,7 @@ function fadeOutMutationDescriptionText() {
                 ctx.fillRect(100, 275, 800, 150);
 
                 var description = "To maintain genetic diversity, a small percentage of random genes are mutated";
-                var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100)}%`.toString();
+                var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100).toFixed(2)}%`.toString();
 
                 ctx.font = "20px arial";
                 ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
@@ -2508,6 +2508,7 @@ function validateMutationRateSetting() {
         }
         else {
             MUTATION_RATE = parseInt(mutation_rate_setting.value) / 100;
+            console.log("MUT RATE: " + MUTATION_RATE);
         }
         mutation_rate_setting.style.borderBottom = '2px solid var(--custom-green)';
         return "valid";
