@@ -2309,7 +2309,6 @@ function fadeOutSuccessMessage() {
     })
 }
 
-// not done, needs better UI/text
 function fadeInExtinctionMessage() {
     var finished = false;
     var opacity = 0.00;
@@ -2320,21 +2319,21 @@ function fadeInExtinctionMessage() {
                 ctx.fillStyle = 'black';
 
                 ctx.font = '50px arial';
-                ctx.fillText("FAILURE", 400, 250);
+                ctx.fillText("Simulation Failed", 310, 250);
 
                 ctx.font = "30px arial";
                 ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
 
                 ctx.font = '22px arial';
-                ctx.fillText("Press 'Q' to exit the simulation.", 345, 425);
+                ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
 
                 // animations
                 ctx.font = '50px arial';
                 ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-                ctx.fillText("FAILURE", 400, 250);
+                ctx.fillText("Simulation Failed", 310, 250);
 
                 ctx.font = "22px arial";
-                ctx.fillText("Press 'Q' to exit the simulation.", 345, 425);
+                ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
 
                 ctx.font = "30px arial";
                 ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
