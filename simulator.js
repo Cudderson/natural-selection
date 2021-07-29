@@ -2391,54 +2391,33 @@ function displaySettingsForm() {
 
 }
 
-// this function could be split into more
 // should stop title screen animation when settings is called
 function validateSettingsForm() {
-    // abstract this functions logic into helpers for readability
 
-    // get form input (put these in the helper functions when done)
-    var total_organisms_setting = document.getElementById("total-organisms");
-    var movement_speed_setting = document.getElementById("move-speed");
-    var gene_count_setting = document.getElementById("gene-count");
-    var mutation_rate_setting = document.getElementById("mutation-rate");
-    var dialogue_setting = document.getElementById("dialogue-checkbox");
-    // get error message
     var error_message = document.getElementsByClassName("error-message")[0];
 
-    // clear error message
+    // clear error message on call
     error_message.style.color = "var(--mother-pink)";
     error_message.innerHTML = "";
 
-    // turn into functionslater : validateTotalOrganismsSetting(), or validateSettings()
-    // set varaibles
-
-    //TEST
     var settings_manager = {};
-    // ex.
 
-    // settings_manager = {
-    //     "organisms_setting": [
-    //         "valid",
-    //         "",
-    //     ],
-    //     "gene_setting": [
-    //         "invalid",
-    //         "You can't do that because...",
-    //     ]
-    // }
+    // returns error message or "valid"
+    settings_manager['organisms_setting'] = validateTotalOrganismsSetting();
+    settings_manager['movement_setting'] = validateMovementSetting();
+    settings_manager['gene_setting'] = validateGeneCountSetting();
+    settings_manager['mutation_setting'] = validateMutationRateSetting();
 
-    // query: var x = settings_manager["gene_setting"][0]
-    // result: x = "invalid"
+    // should make value red too, and change to green on keystroke
+    for (let message in settings_manager) {
+        if (settings_manager[message] != "valid") {
+            error_message.innerHTML = settings_manager[message];
+            return false;
+        }
+    }
 
-    // we should return valid/invalid as well as an error message or empty string
-
-    // returns error message or true
-    setting_validity_message = validateTotalOrganismsSetting(total_organisms_setting);
-    setting_validity_message = validateGeneCountSetting(gene_count_setting);
-    setting_validity_message = validateMutationRateSetting(mutation_rate_setting);
-    setting_validity_message = validateMovementSetting(movement_speed_setting);
-
-
+    // dialogue
+    var dialogue_setting = document.getElementById("dialogue-checkbox");
     if (dialogue_setting.checked) {
         dialogue = true;
     }
@@ -2446,16 +2425,16 @@ function validateSettingsForm() {
         dialogue = false;
     }
 
-    //return to original view (could be returnToTitleScreen() function?)
-
+    // returns to title screen
     finishApplyingSettings();
 
-    // html/css changes made && vars updated
     // don't submit the form
     return false;
 }
 
-function validateTotalOrganismsSetting(total_organisms_setting) {
+function validateTotalOrganismsSetting() {
+    var total_organisms_setting = document.getElementById("total-organisms");
+
     if (typeof parseInt(total_organisms_setting.value) === 'number' && parseInt(total_organisms_setting.value) > 0) {
         if (parseInt(total_organisms_setting.value > 9999)) {
             TOTAL_ORGANISMS = 9999;
@@ -2464,15 +2443,17 @@ function validateTotalOrganismsSetting(total_organisms_setting) {
             TOTAL_ORGANISMS = Math.abs(parseInt(total_organisms_setting.value));
         }
         total_organisms_setting.style.borderBottom = '2px solid var(--custom-green)';
-        return 100;
+        return 'valid';
     }
     else {
         total_organisms_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        return "* Invalid number of organisms. Please input a positive number.";
+        return '* Invalid number of organisms. Please input a positive number.';
     }
 }
 
-function validateGeneCountSetting(gene_count_setting) {
+function validateGeneCountSetting() {
+    var gene_count_setting = document.getElementById("gene-count");
+
     if (typeof parseInt(gene_count_setting.value) === 'number' && parseInt(gene_count_setting.value) > 0) {
         if (parseInt(gene_count_setting.value) > 1000) {
             GENE_COUNT = 1000;
@@ -2489,7 +2470,9 @@ function validateGeneCountSetting(gene_count_setting) {
     }
 }
 
-function validateMutationRateSetting(mutation_rate_setting) {
+function validateMutationRateSetting() {
+    var mutation_rate_setting = document.getElementById("mutation-rate");
+
     // consider allowing float here
     if (typeof parseInt(mutation_rate_setting.value) === 'number' && parseInt(mutation_rate_setting.value) > 0) {
         if (parseInt(mutation_rate_setting.value) > 100) {
@@ -2522,7 +2505,9 @@ function preValidateMovementSetting(event) {
     }
 }
 
-function validateMovementSetting(movement_speed_setting) {
+function validateMovementSetting() {
+    var movement_speed_setting = document.getElementById("move-speed");
+
     // create max and min genes from movement speed
     // pre-validated in preValidateMovementSetting();
     if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 7) {
@@ -2561,7 +2546,7 @@ function sleep(milliseconds) {
     } 
     while (currentDate - date < milliseconds);
     return new Promise((resolve, reject) => {
-        resolve("Response Processed.")
+        resolve();
     })
 }
 
