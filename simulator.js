@@ -616,11 +616,18 @@ function reproduce(crossover_genes) {
 // Title Screen
 async function playTitleScreenAnimation() {
     console.log("Simulation Ready!");
+
     var title_organisms = createTitleScreenOrganisms();
+    
     do {
-        await fadeInTitleAnimation(title_organisms);
+        console.log("Starting Title Animation");
+        var status = await fadeInTitleAnimation(title_organisms);
+        console.log(status);
+        if (status === "Stop Playing") {
+            displaySettingsForm();
+        }
     }
-    while (simulation_started === false);
+    while (simulation_started === false && status === "Keep Playing");
 }
 
 function createTitleScreenOrganisms() {
@@ -650,9 +657,17 @@ function fadeInTitleAnimation(title_organisms) {
 
     var logo = document.getElementById("logo");
 
+    var settings_btn = document.getElementsByClassName("settings-btn")[0];
+
     return new Promise(resolve => {
         function animateTitle() {
             if (!finished && !simulation_started) {
+
+                // if settings clicked, resolve animation
+                settings_btn.addEventListener("click", function() {
+                    cancelAnimationFrame(frame_id);
+                    resolve("Stop Playing");
+                });
 
                 ctx.fillStyle = 'black';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -698,9 +713,8 @@ function fadeInTitleAnimation(title_organisms) {
             }
             else {
                 // resolves every n cycles to prevent overflow
-                console.log("resolving title animation");
                 cancelAnimationFrame(frame_id);
-                resolve();
+                resolve("Keep Playing");
             }
         }
         start_title_fadein = requestAnimationFrame(animateTitle);
@@ -2438,6 +2452,9 @@ function validateSettingsForm() {
 
     // returns to title screen
     finishApplyingSettings();
+
+    // restart animation
+    playTitleScreenAnimation();
 
     // don't submit the form
     return false;
