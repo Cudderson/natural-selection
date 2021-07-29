@@ -2668,6 +2668,11 @@ function testBoundaries() {
             return getPixel(canvas_data, index)
         }
 
+        function drawDot() {
+            ctx.fillStyle = "red";
+            ctx.fillRect(coordinates['x'], coordinates['y'], 10, 10);
+        }
+
         // get canvas data
         var canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
         // canvas_data: [r, g, b, a, r, g, b, a, r, g, b, a....]
@@ -2680,12 +2685,17 @@ function testBoundaries() {
         var pixel = getPixelXY(canvas_data, coordinates['x'], coordinates['y']);
 
         // check if pixel in square (works)
-        if (pixel[0] == 0) {
-            console.log("Not in square.", pixel);
-        }
-        else {
-            console.log("You clicked the square!", pixel);
-        }
+        // if (pixel[0] == 0) {
+        //     console.log("Not in square.", pixel);
+        // }
+        // else {
+        //     console.log("You clicked the square!", pixel);
+        // }
+
+        // next, let's try drawing on the canvas
+        // draw a dot
+        drawDot(); // works
+        
     })
 }
 
