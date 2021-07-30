@@ -2606,7 +2606,7 @@ function getUserDecision() {
 // then waits for a mouseup to stop drawing.
 
 function testBoundaries() {
-    // Stores the initial position of the cursor
+    // Stores the position of the cursor
     let coordinates = {'x':0 , 'y':0}; 
     var canvas_data = canvas.getBoundingClientRect();
 
@@ -2627,46 +2627,38 @@ function testBoundaries() {
         return getPixel(canvas_data, index)
     }
 
-    function getMousePosition(canvas, event) {
-        let rect = canvas.getBoundingClientRect();
+    function updateMousePosition(event) {
+        let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
+
+        // store current mouse position
         let x = event.clientX - rect.left;
         let y = event.clientY - rect.top;
+
         coordinates['x'] = x;
         coordinates['y'] = y;
         console.log(coordinates);
     }
 
-    function draw() {
-        ctx.fillStyle = 'red';
-        ctx.fillRect(coordinates['x'], coordinates['y'], 10, 10);
+    function draw(event) {
+        if (event.buttons !== 1) {
+            // return if left-mouse button not pressed
+            return;
+        }
+        ctx.beginPath();
+        ctx.moveTo(coordinates['x'], coordinates['y']);
+        updateMousePosition(event);
+        ctx.lineTo(coordinates['x'], coordinates['y']);
+        ctx.strokeStyle = 'rgb(155, 245, 0)'; //green 
+        ctx.lineWidth = 20;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        ctx.closePath();
     }
 
-    // respond to each event individually
-    canvas.addEventListener('mousedown', ___)
-    canvas.addEventListener('mouseover', ___)
-    canvas.addEventListener('mouseout', ___)
-    canvas.addEventListener('mouseup', ___)
-
-    // this is working to draw on canvas, but doesnt stop on mouseup.
-    // canvas.addEventListener("mousedown", function(event) {
-    //     console.log("mousedown heard");
-    //     var done = false;
-    //     getMousePosition(canvas, event);
-    //     draw();
-
-    //     if (!done) {
-    //         canvas.onmousemove = function(event) {
-    //             console.log("mouseover heard");
-    //             getMousePosition(canvas, event);
-    //             draw();
-    //         };
-    //     }
-
-    //     canvas.addEventListener("mouseup", function() {
-    //         console.log("mouse up heard!");
-    //         done = true;
-    //     });
-    // })
+    // respond to each event individually (pass event for mouse position)
+    canvas.addEventListener('mouseenter', updateMousePosition);
+    canvas.addEventListener('mousedown', updateMousePosition);
+    canvas.addEventListener('mousemove', draw);
 }
 
 // =================================================================================
