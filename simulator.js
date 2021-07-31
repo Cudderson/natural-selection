@@ -2659,8 +2659,6 @@ function testBoundaries() {
     let coordinates = {'x':0 , 'y':0}; 
     var canvas_data = canvas.getBoundingClientRect();
 
-    var saved_bounds;
-
     //  console.log("Logging Rect:")
     //  for (var key in x) {
     //      console.log(key, x[key]);
@@ -2709,18 +2707,29 @@ function testBoundaries() {
     function saveBoundaries() {
         // should save the user's drawing and return to settings page (title animation for now)
         console.log("saveBoundaries() called");
+        var canvas = document.getElementById("main-canvas");
+        var ctx = canvas.getContext('2d');
 
         // create image var to hold canvas
         var boundary_to_save = new Image();
 
         // save canvas to src attribute
-        boundary_to_save.setAttribute('crossOrigin', '*'); //security error
+        // boundary_to_save.setAttribute('crossOrigin', '*'); //security error
         boundary_to_save.src = canvas.toDataURL("image/png"); // security error
 
-        // store in higher-level variable
-        saved_bounds = boundary_to_save;
-
         console.log("Bounds Saved!");
+
+        // we actually have 2 vars holding the canvas/image. 
+        // 'boundary_to_save' is local to this function
+        // 'saved_bounds' is global
+        ctx.fillStyle = 'darkred';
+        ctx.fillRect(0, 0, 1000, 600);
+        
+        // need to give image time to load before redrawing
+        boundary_to_save.onload = function() {
+            ctx.drawImage(boundary_to_save, 0, 0, canvas.width, canvas.height);
+        }
+        
     }
 
     // respond to each event individually (pass event for mouse position)
