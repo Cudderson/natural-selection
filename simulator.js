@@ -1,15 +1,16 @@
-// document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
-// teseting boundaries, will revert when done
-document.addEventListener("DOMContentLoaded", function() {
-    if (!testing_boundaries) {
-        playTitleScreenAnimation;
-    }
-    else {
-        testBoundaries();
-    }
-});
+document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
-const testing_boundaries = true;
+// testing boundaries, will revert when done
+// document.addEventListener("DOMContentLoaded", function() {
+//     if (!testing_boundaries) {
+//         playTitleScreenAnimation;
+//     }
+//     else {
+//         testBoundaries();
+//     }
+// });
+
+// const testing_boundaries = true;
 
 // starting coordinates for organisms and goal
 const INITIAL_X = 500; 
@@ -632,10 +633,16 @@ async function playTitleScreenAnimation() {
     
     do {
         console.log("Starting Title Animation");
+
         var status = await fadeInTitleAnimation(title_organisms);
-        console.log(status);
-        if (status === "Stop Playing") {
+
+        if (status === "Display Settings") {
+            console.log("Displaying Settings");
             displaySettingsForm();
+        }
+        else if (status === "TEST BOUNDARY MODE") {
+            console.log("Entering Boundary Mode");
+            testBoundaries();
         }
     }
     while (simulation_started === false && status === "Keep Playing");
@@ -669,6 +676,7 @@ function fadeInTitleAnimation(title_organisms) {
     var logo = document.getElementById("logo");
 
     var settings_btn = document.getElementsByClassName("settings-btn")[0];
+    var boundary_btn = document.getElementsByClassName("boundary")[0];
 
     return new Promise(resolve => {
         function animateTitle() {
@@ -677,7 +685,12 @@ function fadeInTitleAnimation(title_organisms) {
                 // if settings clicked, resolve animation
                 settings_btn.addEventListener("click", function() {
                     cancelAnimationFrame(frame_id);
-                    resolve("Stop Playing");
+                    resolve("Display Settings");
+                });
+
+                boundary_btn.addEventListener("click", function() {
+                    cancelAnimationFrame(frame_id);
+                    resolve("TEST BOUNDARY MODE");
                 });
 
                 ctx.fillStyle = 'black';
@@ -2606,6 +2619,25 @@ function getUserDecision() {
 // then waits for a mouseup to stop drawing.
 
 function testBoundaries() {
+
+    // clear canvas
+    ctx.fillStyle = 'black';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // html btns
+    var settings_btn = document.getElementsByClassName("settings-btn")[0];
+    var start_btn = document.getElementsByClassName("start-btn")[0];
+    var boundary_btn = document.getElementsByClassName("boundary")[0]
+
+    settings_btn.style.display = 'none';
+    start_btn.style.display = 'none';
+
+    boundary_btn.style.backgroundColor = "black";
+    boundary_btn.style.color = 'gold';
+    boundary_btn.innerHTML = 'IN TESTING MODE';
+    boundary_btn.style.fontSize = '20px';
+    boundary_btn.style.border = '2px solid gold';
+
     // Stores the position of the cursor
     let coordinates = {'x':0 , 'y':0}; 
     var canvas_data = canvas.getBoundingClientRect();
