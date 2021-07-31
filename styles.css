@@ -234,3 +234,7 @@ body {
 .settings-btn:hover {
     color: rgba(255, 215, 0, 1);
 }
+
+.save-boundaries-btn {
+    display: none;
+}

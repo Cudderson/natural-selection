@@ -2618,7 +2618,10 @@ function getUserDecision() {
 // now, to put it all together, we should wait for a mousedown, which triggers another event listener for mouseover to redraw,
 // then waits for a mouseup to stop drawing.
 
+// this function will be refactored/cleaned once proven working
 function testBoundaries() {
+
+    // eventually this will be called from the settings screen
 
     // clear canvas
     ctx.fillStyle = 'black';
@@ -2627,16 +2630,30 @@ function testBoundaries() {
     // html btns
     var settings_btn = document.getElementsByClassName("settings-btn")[0];
     var start_btn = document.getElementsByClassName("start-btn")[0];
-    var boundary_btn = document.getElementsByClassName("boundary")[0]
+    var stop_btn = document.getElementsByClassName("stop-btn")[0];
+    var boundary_btn = document.getElementsByClassName("boundary")[0];
+    var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
 
     settings_btn.style.display = 'none';
     start_btn.style.display = 'none';
 
+     // revert when leaving boundary mode
+    stop_btn.style.gridColumn = "2 / 3";
+    stop_btn.style.width = "100%";
+    stop_btn.innerHTML = "Cancel";
+    stop_btn.style.display = "block";
+
+    // note that this button doesn't not have functionality anymore
     boundary_btn.style.backgroundColor = "black";
     boundary_btn.style.color = 'gold';
     boundary_btn.innerHTML = 'IN TESTING MODE';
     boundary_btn.style.fontSize = '20px';
     boundary_btn.style.border = '2px solid gold';
+
+    save_bounds_btn.style.display = "block";
+    save_bounds_btn.style.gridColumn = "3 / 4";
+    save_bounds_btn.style.backgroundColor = "var(--custom-green)";
+    save_bounds_btn.style.fontSize = "20px";
 
     // Stores the position of the cursor
     let coordinates = {'x':0 , 'y':0}; 
@@ -2687,10 +2704,35 @@ function testBoundaries() {
         ctx.closePath();
     }
 
+    function saveBoundaries() {
+        // should save the user's drawing and return to settings page (title animation for now)
+        console.log("saveBoundaries() called");
+
+        // prove that we can save the drawimg
+        // save to var
+        ctx.save();
+
+        // clear and draw on canvas
+        // ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'darkblue';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // pass bounds to another function and see if it can draw it (not until working)
+        sleep(2000);
+        ctx.restore();
+    }
+
     // respond to each event individually (pass event for mouse position)
     canvas.addEventListener('mouseenter', updateMousePosition);
     canvas.addEventListener('mousedown', updateMousePosition);
     canvas.addEventListener('mousemove', draw);
+
+    save_bounds_btn.addEventListener("click", function() {
+        console.log("Saving Custom Boundaries");
+        saveBoundaries();
+        // or
+        // save = true;
+    });
 }
 
 // =================================================================================
