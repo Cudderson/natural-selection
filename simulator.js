@@ -25,6 +25,7 @@ var MUTATION_RATE = 0.03;
 var MIN_GENE = -5;
 var MAX_GENE = 5;
 var dialogue = false;
+var custom_boundary;
 
 // flags
 var simulation_started = false;
@@ -613,7 +614,7 @@ function getGender() {
     else {
         gender = 'male';
     }
-    return gender
+    return gender;
 }
 
 function reproduce(crossover_genes) {
@@ -676,7 +677,6 @@ function fadeInTitleAnimation(title_organisms) {
     var logo = document.getElementById("logo");
 
     var settings_btn = document.getElementsByClassName("settings-btn")[0];
-    var boundary_btn = document.getElementsByClassName("boundary")[0];
 
     return new Promise(resolve => {
         function animateTitle() {
@@ -686,11 +686,6 @@ function fadeInTitleAnimation(title_organisms) {
                 settings_btn.addEventListener("click", function() {
                     cancelAnimationFrame(frame_id);
                     resolve("Display Settings");
-                });
-
-                boundary_btn.addEventListener("click", function() {
-                    cancelAnimationFrame(frame_id);
-                    resolve("TEST BOUNDARY MODE");
                 });
 
                 ctx.fillStyle = 'black';
@@ -2408,9 +2403,18 @@ function fadeInExtinctionMessage() {
 
 // *** Settings ***
 function displaySettingsForm() {
+    // ensure only settings button showing
+    var settings_btn = document.getElementsByClassName("settings-btn")[0];
     var start_btn = document.getElementsByClassName("start-btn")[0];
-    start_btn.style.display = 'none';
+    var stop_btn = document.getElementsByClassName("stop-btn")[0];
+    var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
 
+    settings_btn.style.display = 'block';
+    start_btn.style.display = 'none';
+    stop_btn.style.display = 'none';
+    save_bounds_btn.style.display = 'none';
+
+    // turn off canvas, turn on settings
     var canvas_container = document.getElementsByClassName("canvas-container")[0];
     var settings_container = document.getElementsByClassName("settings-container")[0];
 
@@ -2426,6 +2430,7 @@ function displaySettingsForm() {
         }
         else {
             console.log("Checkbox: unchecked");
+            // should remove custom_boundary so sim doesn't think there is one
         }
     });
 
@@ -2633,8 +2638,6 @@ function getUserDecision() {
 // this function will be refactored/cleaned once proven working
 function testBoundaries() {
 
-    // eventually this will be called from the settings screen
-
     // turn off settings, turn on canvas
     var canvas_container = document.getElementsByClassName("canvas-container")[0];
     var settings_container = document.getElementsByClassName("settings-container")[0];
@@ -2650,7 +2653,6 @@ function testBoundaries() {
     var settings_btn = document.getElementsByClassName("settings-btn")[0];
     var start_btn = document.getElementsByClassName("start-btn")[0];
     var stop_btn = document.getElementsByClassName("stop-btn")[0];
-    var boundary_btn = document.getElementsByClassName("boundary")[0];
     var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
 
     settings_btn.style.display = 'none';
@@ -2661,13 +2663,6 @@ function testBoundaries() {
     stop_btn.style.width = "100%";
     stop_btn.innerHTML = "Cancel";
     stop_btn.style.display = "block";
-
-    // note that this button doesn't not have functionality anymore
-    boundary_btn.style.backgroundColor = "black";
-    boundary_btn.style.color = 'gold';
-    boundary_btn.innerHTML = 'IN TESTING MODE';
-    boundary_btn.style.fontSize = '20px';
-    boundary_btn.style.border = '2px solid gold';
 
     save_bounds_btn.style.display = "block";
     save_bounds_btn.style.gridColumn = "3 / 4";
@@ -2738,16 +2733,23 @@ function testBoundaries() {
 
         console.log("Bounds Saved!");
 
-        // we actually have 2 vars holding the canvas/image. 
-        // 'boundary_to_save' is local to this function
-        // 'saved_bounds' is global
-        ctx.fillStyle = 'darkred';
-        ctx.fillRect(0, 0, 1000, 600);
+        var saved_boundary = boundary_to_save;
+
+        return saved_boundary;
+
+
+        // code below this should be used elsewhere
+
+        // // we actually have 2 vars holding the canvas/image. 
+        // // 'boundary_to_save' is local to this function
+        // // 'saved_bounds' is global
+        // ctx.fillStyle = 'darkred';
+        // ctx.fillRect(0, 0, 1000, 600);
         
-        // need to give image time to load before redrawing
-        boundary_to_save.onload = function() {
-            ctx.drawImage(boundary_to_save, 0, 0, canvas.width, canvas.height);
-        }
+        // // need to give image time to load before redrawing
+        // boundary_to_save.onload = function() {
+        //     ctx.drawImage(boundary_to_save, 0, 0, canvas.width, canvas.height);
+        // }
         
     }
 
@@ -2758,9 +2760,12 @@ function testBoundaries() {
 
     save_bounds_btn.addEventListener("click", function() {
         console.log("Saving Custom Boundaries");
-        saveBoundaries();
-        // or
-        // save = true;
+
+        // store in global
+        custom_boundary = saveBoundaries();
+
+        // return user to settings screen
+        displaySettingsForm();
     });
 }
 
