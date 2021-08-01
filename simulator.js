@@ -198,20 +198,28 @@ async function testBoundarySim() {
     console.log("Hit Detection Test Complete.");
 }
 
+// these 2 functions not currently used
 function getPixel(canvas_data, index) {
+    console.log("6: called getPixel()");
     var i = index * 4;
     var data = canvas_data.data;
     console.log(`DATA: ${data}`);
+    console.log("7: returning getPixel()");
     return [data[i], data[i+1], data[i+2], data[i+3]];
 }
 
 function getPixelXY(x, y) {
-    var canvas = document.getElementById("main-canvas");
-    var canvas_data = canvas.getBoundingClientRect(); // adding 'var' here fixed it???
+    console.log("2: getPixelXY called")
+    // var canvas = document.getElementById("main-canvas"); keep just in case
+    // var canvas_data = canvas.getBoundingClientRect(); // adding 'var' here fixed it???
+    // maybe we want to use getImageData instead
+    var canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
     console.log(canvas_data);
     var index = y * canvas_data.width + x; // not sure how this works but it does
     // return getPixel(canvas_data, index)
-    return canvas_data, index
+    console.log("3: returning getPixelXY()");
+
+    return canvas_data, index;
 }
 
 function hitDetectionTest(test_boy) {
@@ -221,39 +229,55 @@ function hitDetectionTest(test_boy) {
         var position_rgba;
 
         function animateTestBoy() {
+            var canvas_data;
+            var index;
+
             if (!finished) {
-                //animate
-                // clear 
-                ctx.fillStyle = 'black';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                // draw boundary
-                ctx.drawImage(custom_boundary, 0, 0, canvas.width, canvas.height);
-
-                if (test_boy.index === GENE_COUNT) {
+                if (test_boy.index === GENE_COUNT - 1) {
                     finished = true;
                 }
                 else {
+                    // clear
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    // draw boundary
+                    ctx.drawImage(custom_boundary, 0, 0, canvas.width, canvas.height);
+
                     // update and move
                     test_boy.update();
                     test_boy.move();
                     
                     // here, we should perform our hit detection
                     // canvas_data = canvas.getBoundingClientRect();
-                    var canvas_data, index = getPixelXY(test_boy.x, test_boy.y);
-                    console.log(`canvas_data: ${canvas_data}`);
-                    console.log(`Index: ${index}`);
-                    // position_rgba = getPixel(canvas_data, index);
+                    // canvas_data = ctx.getImageData();
+
+                    // let's try to do it all here before splitting into functions
+                    // 1: get organism position (wait.. we easily know that.. do it anyway)
+                    canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    index = test_boy.y * canvas_data.width + test_boy.x;
+
+                    // 2. get pixel on that position
+                    var i = index * 4;
+                    var data = canvas_data.data;
+
+                    position_rgba = [data[i], data[i+1], data[i+2], data[i+3]];
                     
-                    // console.log("Current Position Pixel: " + position_rgba);
+                    console.log("Current Position Pixel: " + position_rgba);
+
+                    // well, it all works, but there's one problem
+                    // the function is checking for the pixel color at the location of the organism... which is always purple.
+                    // possible solution: check pixel color after organism.update(), but before organism.move()
+
                 }
+                sleep(1000 / FPS); // looks smoother without fps
+                frame_id = requestAnimationFrame(animateTestBoy);
             }
             else {
                 //resolve
                 cancelAnimationFrame(frame_id);
                 resolve();
             }
-            frame_id = requestAnimationFrame(animateTestBoy);
         }
         start_test_guy_animation = requestAnimationFrame(animateTestBoy);
     })
