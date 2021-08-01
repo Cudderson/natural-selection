@@ -2417,6 +2417,18 @@ function displaySettingsForm() {
     canvas_container.style.display = 'none';
     settings_container.style.display = 'block';
 
+    // boundaries
+    // listen for boundary checkbox to trigger testBoundaries()
+    var boundary_setting = document.getElementById("boundary-checkbox");
+    boundary_setting.addEventListener("change", function() {
+        if (this.checked) {
+            testBoundaries();
+        }
+        else {
+            console.log("Checkbox: unchecked");
+        }
+    });
+
     // movement setting helper (move/abstract)
     var movement_speed_setting = document.getElementById("move-speed");
     var error_message = document.getElementsByClassName("error-message")[0];
@@ -2622,6 +2634,13 @@ function getUserDecision() {
 function testBoundaries() {
 
     // eventually this will be called from the settings screen
+
+    // turn off settings, turn on canvas
+    var canvas_container = document.getElementsByClassName("canvas-container")[0];
+    var settings_container = document.getElementsByClassName("settings-container")[0];
+
+    canvas_container.style.display = 'block';
+    settings_container.style.display = 'none';
 
     // clear canvas
     ctx.fillStyle = 'black';
