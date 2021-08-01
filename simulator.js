@@ -227,13 +227,16 @@ function hitDetectionTest(test_boy) {
     return new Promise(resolve => {
         var finished = false;
         var position_rgba;
+        var test_boy_is_alive = true;
+        var total_moves = 0;
 
         function animateTestBoy() {
             var canvas_data;
             var index;
 
             if (!finished) {
-                if (test_boy.index === GENE_COUNT - 1) {
+                // this condition will change when more organisms added
+                if (total_moves >= GENE_COUNT) {
                     finished = true;
                 }
                 else {
@@ -244,13 +247,13 @@ function hitDetectionTest(test_boy) {
                     // draw boundary
                     ctx.drawImage(custom_boundary, 0, 0, canvas.width, canvas.height);
 
-                    // update and move
-                    test_boy.update();
-                    test_boy.move();
+                    // update
+                    if (test_boy_is_alive) {
+                        console.log("updating test boy");
+                        test_boy.update();
+                    } 
                     
                     // here, we should perform our hit detection
-                    // canvas_data = canvas.getBoundingClientRect();
-                    // canvas_data = ctx.getImageData();
 
                     // let's try to do it all here before splitting into functions
                     // 1: get organism position (wait.. we easily know that.. do it anyway)
@@ -260,19 +263,29 @@ function hitDetectionTest(test_boy) {
                     // 2. get pixel on that position
                     var i = index * 4;
                     var data = canvas_data.data;
-
                     position_rgba = [data[i], data[i+1], data[i+2], data[i+3]];
                     
                     console.log("Current Position Pixel: " + position_rgba);
+                    console.log(typeof position_rgba);
 
-                    // well, it all works, but there's one problem
-                    // the function is checking for the pixel color at the location of the organism... which is always purple.
-                    // possible solution: check pixel color after organism.update(), but before organism.move()
-
+                    // highlight organism red if he leaves safe area (dies)
+                    if (position_rgba[0] === 0 && position_rgba[1] === 0 && position_rgba[2] === 0) {
+                        test_boy.move();
+                    }
+                    else {
+                        test_boy_is_alive = false;
+                        console.log("test boy died");
+                        test_boy.ctx.fillStyle = 'red';
+                        test_boy.ctx.beginPath();
+                        test_boy.ctx.arc(test_boy.x, test_boy.y, test_boy.radius, 0, Math.PI*2, false);
+                        test_boy.ctx.fill();
+                    }
+                    total_moves++;
                 }
                 sleep(1000 / FPS); // looks smoother without fps
                 frame_id = requestAnimationFrame(animateTestBoy);
             }
+
             else {
                 //resolve
                 cancelAnimationFrame(frame_id);
