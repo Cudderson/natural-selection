@@ -61,6 +61,8 @@ class Organism {
         this.distance_to_goal;
         this.fitness;
         this.reached_goal = false;
+        // for boundary animations
+        this.is_alive = true;
     }
 
     setRandomGenes() {
@@ -190,10 +192,17 @@ async function testBoundarySim() {
     // ctx.drawImage(custom_boundary, 0, 0, canvas.width, canvas.height);
 
     // let's also have a organism that loops on screen
-    var test_boy = new Organism('male', INITIAL_X, INITIAL_Y, ctx);
-    test_boy.setRandomGenes();
+    // var test_boy = new Organism('male', INITIAL_X, INITIAL_Y, ctx);
+    // test_boy.setRandomGenes();
 
-    await hitDetectionTest(test_boy);
+    // 10 organisms this time
+    for (var i = 0; i < 10; i++) {
+        organism = new Organism('male', INITIAL_X, INITIAL_Y, ctx);
+        organism.setRandomGenes();
+        organisms.push(organism);
+    }
+
+    await hitDetectionTest(organisms);
 
     console.log("Hit Detection Test Complete.");
 }
@@ -222,21 +231,20 @@ function getPixelXY(x, y) {
     return canvas_data, index;
 }
 
-function hitDetectionTest(test_boy) {
+function hitDetectionTest(organisms) {
 
     return new Promise(resolve => {
         var finished = false;
         var position_rgba;
-        var test_boy_is_alive = true;
         var total_moves = 0;
 
-        function animateTestBoy() {
+        function animateOrganisms() {
             var canvas_data;
             var index;
 
             if (!finished) {
                 // this condition will change when more organisms added
-                if (total_moves >= GENE_COUNT) {
+                if (total_moves >= GENE_COUNT * organisms.length) {
                     finished = true;
                 }
                 else {
@@ -247,43 +255,48 @@ function hitDetectionTest(test_boy) {
                     // draw boundary
                     ctx.drawImage(custom_boundary, 0, 0, canvas.width, canvas.height);
 
-                    // update
-                    if (test_boy_is_alive) {
-                        console.log("updating test boy");
-                        test_boy.update();
-                    } 
+                    canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height); // keeping this outside greatly improves speed
                     
-                    // here, we should perform our hit detection
+                    // do it with 10 organisms (seems to already be pretty slow)
+                    for (var j = 0; j < organisms.length; j++) {
 
-                    // let's try to do it all here before splitting into functions
-                    // 1: get organism position (wait.. we easily know that.. do it anyway)
-                    canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    index = test_boy.y * canvas_data.width + test_boy.x;
+                        console.log(organisms[j]);
 
-                    // 2. get pixel on that position
-                    var i = index * 4;
-                    var data = canvas_data.data;
-                    position_rgba = [data[i], data[i+1], data[i+2], data[i+3]];
-                    
-                    console.log("Current Position Pixel: " + position_rgba);
-                    console.log(typeof position_rgba);
+                        // canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-                    // highlight organism red if he leaves safe area (dies)
-                    if (position_rgba[0] === 0 && position_rgba[1] === 0 && position_rgba[2] === 0) {
-                        test_boy.move();
+                        // update index
+                        if (organisms[j].is_alive) {
+                            organisms[j].update();
+                        }
+
+                        // get organisms position
+                        index = organisms[j].y * canvas.width + organisms[j].x;
+                        console.log(index);
+
+                        // get pixel on that position
+                        var i = index * 4;
+                        var data = canvas_data.data;
+                        position_rgba = [data[i], data[i+1], data[i+2], data[i+3]];
+                        
+                        console.log("Current Position Pixel: " + position_rgba);
+
+                        // --custom-green: rgba(155, 245, 0, 1);
+                        // highlight organism red if he leaves safe area (dies)
+                        if (position_rgba[0] === 155 && position_rgba[1] === 245 || organisms[j].is_alive === 'false') {
+                            organisms[j].is_alive = false;
+                            organisms[j].ctx.fillStyle = 'red';
+                            organisms[j].ctx.beginPath();
+                            organisms[j].ctx.arc(organisms[j].x, organisms[j].y, organisms[j].radius, 0, Math.PI*2, false);
+                            organisms[j].ctx.fill();
+                        }
+                        else {
+                            organisms[j].move();
+                        }
+                        total_moves++;
                     }
-                    else {
-                        test_boy_is_alive = false;
-                        console.log("test boy died");
-                        test_boy.ctx.fillStyle = 'red';
-                        test_boy.ctx.beginPath();
-                        test_boy.ctx.arc(test_boy.x, test_boy.y, test_boy.radius, 0, Math.PI*2, false);
-                        test_boy.ctx.fill();
-                    }
-                    total_moves++;
                 }
                 sleep(1000 / FPS); // looks smoother without fps
-                frame_id = requestAnimationFrame(animateTestBoy);
+                frame_id = requestAnimationFrame(animateOrganisms);
             }
 
             else {
@@ -292,7 +305,7 @@ function hitDetectionTest(test_boy) {
                 resolve();
             }
         }
-        start_test_guy_animation = requestAnimationFrame(animateTestBoy);
+        start_test_guy_animation = requestAnimationFrame(animateOrganisms);
     })
 }
 
