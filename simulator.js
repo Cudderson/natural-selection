@@ -195,12 +195,31 @@ async function testBoundarySim() {
 
     await hitDetectionTest(test_boy);
 
-    console.log("Resolution Complete.");
+    console.log("Hit Detection Test Complete.");
+}
+
+function getPixel(canvas_data, index) {
+    var i = index * 4;
+    var data = canvas_data.data;
+    console.log(`DATA: ${data}`);
+    return [data[i], data[i+1], data[i+2], data[i+3]];
+}
+
+function getPixelXY(x, y) {
+    var canvas = document.getElementById("main-canvas");
+    var canvas_data = canvas.getBoundingClientRect(); // adding 'var' here fixed it???
+    console.log(canvas_data);
+    var index = y * canvas_data.width + x; // not sure how this works but it does
+    // return getPixel(canvas_data, index)
+    return canvas_data, index
 }
 
 function hitDetectionTest(test_boy) {
-    var finished = false;
+
     return new Promise(resolve => {
+        var finished = false;
+        var position_rgba;
+
         function animateTestBoy() {
             if (!finished) {
                 //animate
@@ -218,6 +237,15 @@ function hitDetectionTest(test_boy) {
                     // update and move
                     test_boy.update();
                     test_boy.move();
+                    
+                    // here, we should perform our hit detection
+                    // canvas_data = canvas.getBoundingClientRect();
+                    var canvas_data, index = getPixelXY(test_boy.x, test_boy.y);
+                    console.log(`canvas_data: ${canvas_data}`);
+                    console.log(`Index: ${index}`);
+                    // position_rgba = getPixel(canvas_data, index);
+                    
+                    // console.log("Current Position Pixel: " + position_rgba);
                 }
             }
             else {
@@ -2739,24 +2767,15 @@ function testBoundaries() {
 
     // Stores the position of the cursor
     let coordinates = {'x':0 , 'y':0}; 
-    var canvas_data = canvas.getBoundingClientRect();
 
     //  console.log("Logging Rect:")
     //  for (var key in x) {
     //      console.log(key, x[key]);
     //  }
 
-    function getPixel(canvas_data, index) {
-        var i = index * 4;
-        var data = canvas_data.data;
-        console.log(`DATA: #{data}`);
-        return [data[i], data[i+1], data[i+2], data[i+3]];
-    }
 
-    function getPixelXY(canvas_data, x, y) {
-        var index = y * canvas_data.width + x; // not sure how this works but it does
-        return getPixel(canvas_data, index)
-    }
+    // **** getPixel() and getPixelXY() were moved to hitDetectionTest() ****
+
 
     function updateMousePosition(event) {
         let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
@@ -2804,21 +2823,6 @@ function testBoundaries() {
         var saved_boundary = boundary_to_save;
 
         return saved_boundary;
-
-
-        // code below this should be used elsewhere
-
-        // // we actually have 2 vars holding the canvas/image. 
-        // // 'boundary_to_save' is local to this function
-        // // 'saved_bounds' is global
-        // ctx.fillStyle = 'darkred';
-        // ctx.fillRect(0, 0, 1000, 600);
-        
-        // // need to give image time to load before redrawing
-        // boundary_to_save.onload = function() {
-        //     ctx.drawImage(boundary_to_save, 0, 0, canvas.width, canvas.height);
-        // }
-        
     }
 
     // respond to each event individually (pass event for mouse position)
