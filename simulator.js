@@ -166,7 +166,28 @@ async function runPreSimAnimations() {
     })
 }
 
+function checkSimType() {
+    // eventually, both sims will be the same, this is for testing
+    if (custom_boundary) {
+        testBoundarySim();
+    }
+    else {
+        console.log("nope");
+        runSimulation();
+    }
+}
+
+async function testBoundarySim() {
+    // update flag to resolve playTitleScreenAnimation()
+    simulation_started = true;
+
+    // clear
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
 async function runSimulation () {
+
     simulation_started = true;
 
     console.log("Running Simulation with these settings:");
