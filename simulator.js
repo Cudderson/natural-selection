@@ -166,6 +166,7 @@ async function runPreSimAnimations() {
     })
 }
 
+// function for testing custom boundary
 function checkSimType() {
     // eventually, both sims will be the same, this is for testing
     if (custom_boundary) {
@@ -184,7 +185,53 @@ async function testBoundarySim() {
     // clear
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // next, let's prove that we can redraw our custom boundary (works!)
+    // ctx.drawImage(custom_boundary, 0, 0, canvas.width, canvas.height);
+
+    // let's also have a organism that loops on screen
+    var test_boy = new Organism('male', INITIAL_X, INITIAL_Y, ctx);
+    test_boy.setRandomGenes();
+
+    await hitDetectionTest(test_boy);
+
+    console.log("Resolution Complete.");
 }
+
+function hitDetectionTest(test_boy) {
+    var finished = false;
+    return new Promise(resolve => {
+        function animateTestBoy() {
+            if (!finished) {
+                //animate
+                // clear 
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // draw boundary
+                ctx.drawImage(custom_boundary, 0, 0, canvas.width, canvas.height);
+
+                if (test_boy.index === GENE_COUNT) {
+                    finished = true;
+                }
+                else {
+                    // update and move
+                    test_boy.update();
+                    test_boy.move();
+                }
+            }
+            else {
+                //resolve
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+            frame_id = requestAnimationFrame(animateTestBoy);
+        }
+        start_test_guy_animation = requestAnimationFrame(animateTestBoy);
+    })
+}
+
+// END CUSTOM BOUNDARY SIM TEST
 
 async function runSimulation () {
 
