@@ -2909,14 +2909,16 @@ function testBoundaries() {
         if (boundary_validity === true) {
             console.log("Boundary: valid");
             // should resume as accepted
+            // return user to settings screen
+            displaySettingsForm();
         }
         else {
             console.log("Boundary: invalid");
             // should reject and display error message
-        }
 
-        // return user to settings screen
-        displaySettingsForm();
+            // for now, just turn the canvas border red
+            canvas.style.borderColor = 'var(--mother-pink)';
+        }
     });
 }
 
