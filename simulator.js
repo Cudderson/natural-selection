@@ -207,6 +207,19 @@ async function testBoundarySim() {
     console.log("Hit Detection Test Complete.");
 }
 
+function validateBoundary(boundary) {
+    // validate or reject user boundary
+    // since there's no rules yet, accept boolean for testing
+    if (boundary === true) {
+        // accept
+        return true;
+    }
+    else {
+        // reject
+        return false;
+    }
+}
+
 // these 2 functions not currently used
 function getPixel(canvas_data, index) {
     console.log("6: called getPixel()");
@@ -2885,6 +2898,22 @@ function testBoundaries() {
 
         // store in global
         custom_boundary = saveBoundaries();
+
+        // validate the boundary
+        // var boundary_validity = validateBoundary(custom_boundary);
+
+        // using boolean version for testing
+        var boundary_validity = validateBoundary(true);
+
+        // handle result
+        if (boundary_validity === true) {
+            console.log("Boundary: valid");
+            // should resume as accepted
+        }
+        else {
+            console.log("Boundary: invalid");
+            // should reject and display error message
+        }
 
         // return user to settings screen
         displaySettingsForm();
