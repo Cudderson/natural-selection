@@ -143,6 +143,41 @@ class Goal {
     }
 }
 
+class Boundary {
+    constructor() {
+        this.boundary = new Image();
+    }
+
+    save() {
+        // should save the user's drawing and return to settings page (title animation for now)
+        console.log("save() called");
+
+        var canvas = document.getElementById("main-canvas"); // do we need to declare these?
+        var ctx = canvas.getContext('2d');
+
+        // create image var to hold canvas
+        // var boundary_to_save = new Image();
+
+        // create Boundary object with Image to hold canvas drawing
+        // var new_boundary = new Boundary(new Image()); don't need
+
+        // save canvas to src attribute of Boundary object 'boundary' attribute (security error if not run on server (tainted canvas))
+        this.boundary.src = canvas.toDataURL("image/png");
+
+        // hitDetectionTest() doesn't work with class Boundary yet, uses global variable. (remove when updated)
+        custom_boundary = this.boundary;
+
+        console.log("Bounds Saved!");
+        console.log(typeof custom_boundary);
+
+        // var saved_boundary = boundary_to_save;
+
+        // don't return
+        // return saved_boundary;
+    }
+
+}
+
 // Main Drivers
 async function runPreSimAnimations() {
 
@@ -253,6 +288,7 @@ function getPixelXY(x, y) {
     return canvas_data, index;
 }
 
+// needs to be updated for new class Boundary()
 function hitDetectionTest(organisms) {
 
     return new Promise(resolve => {
@@ -2848,7 +2884,7 @@ function testBoundaries() {
 
     // **** getPixel() and getPixelXY() were moved to hitDetectionTest() ****
 
-
+    // would belong to class Paintbrush, not Boundary
     function updateMousePosition(event) {
         let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
 
@@ -2861,6 +2897,7 @@ function testBoundaries() {
         console.log(coordinates);
     }
 
+    // belongs to class Painbrush, not Boundary
     function draw(event) {
         if (event.buttons !== 1) {
             // return if left-mouse button not pressed
@@ -2877,26 +2914,6 @@ function testBoundaries() {
         ctx.closePath();
     }
 
-    function saveBoundaries() {
-        // should save the user's drawing and return to settings page (title animation for now)
-        console.log("saveBoundaries() called");
-        var canvas = document.getElementById("main-canvas");
-        var ctx = canvas.getContext('2d');
-
-        // create image var to hold canvas
-        var boundary_to_save = new Image();
-
-        // save canvas to src attribute
-        // boundary_to_save.setAttribute('crossOrigin', '*'); //security error
-        boundary_to_save.src = canvas.toDataURL("image/png"); // security error
-
-        console.log("Bounds Saved!");
-
-        var saved_boundary = boundary_to_save;
-
-        return saved_boundary;
-    }
-
     // respond to each event individually (pass event for mouse position)
     canvas.addEventListener('mouseenter', updateMousePosition);
     canvas.addEventListener('mousedown', updateMousePosition);
@@ -2905,8 +2922,11 @@ function testBoundaries() {
     save_bounds_btn.addEventListener("click", function() {
         console.log("Saving Custom Boundaries");
 
+        // create new Boundary object
+        var new_boundary = new Boundary();
+
         // store in global
-        custom_boundary = saveBoundaries();
+        new_boundary.save();
 
         // *****validate the boundary*****
         // var boundary_validity = validateBoundary(custom_boundary);
