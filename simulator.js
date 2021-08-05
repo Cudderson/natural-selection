@@ -220,6 +220,15 @@ function validateBoundary(boundary) {
     }
 }
 
+// called after validatedBoundary() returns true
+function createCheckpoints() {
+    // would class-based approach for the boundary be better?
+    // if this function works well, consider switching boundaries to class Boundary
+
+    // this should be visual at first so I can see what it's doing.
+    // for that, I'll need to draw the boundary over the canvas, then animate(optional) my algorithm.
+}
+
 // these 2 functions not currently used
 function getPixel(canvas_data, index) {
     console.log("6: called getPixel()");
@@ -2899,7 +2908,7 @@ function testBoundaries() {
         // store in global
         custom_boundary = saveBoundaries();
 
-        // validate the boundary
+        // *****validate the boundary*****
         // var boundary_validity = validateBoundary(custom_boundary);
 
         // using boolean version for testing
@@ -2909,6 +2918,12 @@ function testBoundaries() {
         if (boundary_validity === true) {
             console.log("Boundary: valid");
             // should resume as accepted
+
+            // we could generate the 'path' for the accepted boundary here (checkpoints)
+            // can move to main simulation if needed
+            // ***create checkpoints here***
+            // createCheckpoints();
+
             // return user to settings screen
             displaySettingsForm();
         }
