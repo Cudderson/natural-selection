@@ -266,28 +266,18 @@ function createCheckpoints() {
     // for that, I'll need to draw the boundary over the canvas, then animate(optional) my algorithm.
 }
 
-// these 2 functions not currently used
 function getPixel(canvas_data, index) {
-    console.log("6: called getPixel()");
     var i = index * 4;
     var data = canvas_data.data;
-    console.log(`DATA: ${data}`);
-    console.log("7: returning getPixel()");
+
     return [data[i], data[i+1], data[i+2], data[i+3]];
 }
 
-function getPixelXY(x, y) {
-    console.log("2: getPixelXY called")
-    // var canvas = document.getElementById("main-canvas"); keep just in case
-    // var canvas_data = canvas.getBoundingClientRect(); // adding 'var' here fixed it???
-    // maybe we want to use getImageData instead
-    var canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    console.log(canvas_data);
-    var index = y * canvas_data.width + x; // not sure how this works but it does
-    // return getPixel(canvas_data, index)
-    console.log("3: returning getPixelXY()");
+function getPixelXY(canvas_data, x, y) {
+    var index = y * canvas_data.width + x; // *** not sure how this works but it does ***
 
-    return canvas_data, index;
+    // return index;
+    return getPixel(canvas_data, index);
 }
 
 // needs to be updated for new class Boundary() (make class method?)
@@ -298,7 +288,6 @@ function hitDetectionTest(organisms) {
         var position_rgba;
         var total_moves = 0;
         var canvas_data;
-        var index;
 
         function animateOrganisms() {
 
@@ -320,25 +309,14 @@ function hitDetectionTest(organisms) {
                     // do it with 10 organisms (seems to already be pretty slow)
                     for (var j = 0; j < organisms.length; j++) {
 
-                        console.log(organisms[j]);
-
-                        // canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
                         // update index
                         if (organisms[j].is_alive) {
                             organisms[j].update();
                         }
 
-                        // get organisms position
-                        index = organisms[j].y * canvas.width + organisms[j].x;
-                        console.log(index);
-
-                        // get pixel on that position
-                        var i = index * 4;
-                        var data = canvas_data.data;
-                        position_rgba = [data[i], data[i+1], data[i+2], data[i+3]];
+                        position_rgba = getPixelXY(canvas_data, organisms[j].x, organisms[j].y);
                         
-                        console.log("Current Position Pixel: " + position_rgba);
+                        console.log("Current Position Pixel for Organism: " + position_rgba);
 
                         // --custom-green: rgba(155, 245, 0, 1);
                         // highlight organism red if he leaves safe area (dies)
@@ -2880,14 +2858,6 @@ function testBoundaries() {
     // Stores the position of the cursor
     let coordinates = {'x':0 , 'y':0}; 
 
-    //  console.log("Logging Rect:")
-    //  for (var key in x) {
-    //      console.log(key, x[key]);
-    //  }
-
-
-    // **** getPixel() and getPixelXY() were moved to hitDetectionTest() ****
-
     // would belong to class Paintbrush, not Boundary
     function updateMousePosition(event) {
         let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
@@ -2956,100 +2926,3 @@ function testBoundaries() {
 }
 
 // =================================================================================
-
-// remember to change DOMContentLoaded callback when done
-
-// function testBoundaries() {
-//     // take it one step at a time
-//     // Let's have a button that let's us enter the testing mode
-//     var boundary_btn = document.getElementsByClassName("boundary")[0];
-//     boundary_btn.style.backgroundColor = "tan";
-
-//     // enter testing mode when clicked
-//     boundary_btn.addEventListener("click", function() {
-//         boundary_btn.innerHTML = "TESTING";
-//         boundary_btn.style.backgroundColor = "var(--custom-green)";
-//         var start_btn = document.getElementsByClassName("start-btn")[0];
-//         var settings_btn = document.getElementsByClassName("settings-btn")[0];
-//         start_btn.style.display = 'none';
-//         settings_btn.style.display = 'none';
-//     });
-
-//     // Stores the initial position of the cursor
-//     let coordinates = {'x':0 , 'y':0}; 
-    
-//     // This is the flag that we are going to use to 
-//     // trigger drawing
-//     let paint = false;
-
-//     var x = canvas.getBoundingClientRect();
-
-//     console.log("Logging Rect:")
-//     for (var key in x) {
-//         console.log(key, x[key]);
-//     }
-
-//     // Next, let's draw a rectangle for position testing
-//     ctx.fillStyle = "orange";
-//     ctx.fillRect(500, 300, 50, 50); // pos: 500, 300
-
-//     // now, let's attempt to let user click on canvas, then log their mouse position (works)
-//     function getMousePosition(canvas, event) {
-//         let rect = canvas.getBoundingClientRect();
-//         let x = event.clientX - rect.left;
-//         let y = event.clientY - rect.top;
-//         coordinates['x'] = x;
-//         coordinates['y'] = y;
-//         console.log(coordinates);
-//     }
-
-//     // canvas.addEventListener("mousedown", function(event) {
-//     //     getMousePosition(canvas, event);
-//     //     console.log(coordinates);
-//     // });
-
-//     // let's test if we can detect if we clicked the square using pixel color
-//     canvas.addEventListener("mousedown", function(event) {
-//         // functions
-//         function getPixel(canvas_data, index) {
-//             var i = index * 4;
-//             var data = canvas_data.data;
-//             console.log(`DATA: #{data}`);
-//             return [data[i], data[i+1], data[i+2], data[i+3]];
-//         }
-
-//         function getPixelXY(canvas_data, x, y) {
-//             var index = y * canvas_data.width + x; // not sure how this works but it does
-//             return getPixel(canvas_data, index)
-//         }
-
-//         function drawDot() {
-//             ctx.fillStyle = "red";
-//             ctx.fillRect(coordinates['x'], coordinates['y'], 10, 10);
-//         }
-
-//         // get canvas data
-//         var canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-//         // canvas_data: [r, g, b, a, r, g, b, a, r, g, b, a....]
-        
-//         // update coordinates where user clicked
-//         getMousePosition(canvas, event);
-
-//         // we could easily check just the pixel that the user clicked, but it would be more efficient to save the entire canvas 
-//         // and just check where we click
-//         var pixel = getPixelXY(canvas_data, coordinates['x'], coordinates['y']);
-
-//         // check if pixel in square (works)
-//         // if (pixel[0] == 0) {
-//         //     console.log("Not in square.", pixel);
-//         // }
-//         // else {
-//         //     console.log("You clicked the square!", pixel);
-//         // }
-
-//         // next, let's try drawing on the canvas
-//         // draw a dot
-//         drawDot(); // works
-
-//     })
-// }
