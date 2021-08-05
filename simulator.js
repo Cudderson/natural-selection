@@ -150,30 +150,32 @@ class Boundary {
 
     save() {
         // should save the user's drawing and return to settings page (title animation for now)
-        console.log("save() called");
 
         var canvas = document.getElementById("main-canvas"); // do we need to declare these?
         var ctx = canvas.getContext('2d');
 
-        // create image var to hold canvas
-        // var boundary_to_save = new Image();
+        // var submitted_boundary = canvas.toDataURL("image/png"); <<< this will be used eventually
+        var submitted_boundary = true; // <<< this is a placeholder
 
-        // create Boundary object with Image to hold canvas drawing
-        // var new_boundary = new Boundary(new Image()); don't need
+        var boundary_is_valid = this.validate(submitted_boundary);
 
-        // save canvas to src attribute of Boundary object 'boundary' attribute (security error if not run on server (tainted canvas))
-        this.boundary.src = canvas.toDataURL("image/png");
+        if (boundary_is_valid) {
+            // save boundary to object and global
 
-        // hitDetectionTest() doesn't work with class Boundary yet, uses global variable. (remove when updated)
-        custom_boundary = this.boundary;
+            // save canvas to src attribute of Boundary object 'boundary' attribute (security error if not run on server (tainted canvas))
+            this.boundary.src = canvas.toDataURL("image/png");
 
-        console.log("Bounds Saved!");
-        console.log(typeof custom_boundary);
+            // hitDetectionTest() doesn't work with class Boundary yet, uses global variable. (remove when updated)
+            custom_boundary = this.boundary;
 
-        // var saved_boundary = boundary_to_save;
+            console.log("Bounds Saved!");
 
-        // don't return
-        // return saved_boundary;
+            return true;
+        }
+        else {
+            // reject
+            return false;
+        }
     }
 
     validate(boundary) {
@@ -2928,17 +2930,11 @@ function testBoundaries() {
         var new_boundary = new Boundary();
 
         // save (maybe validate() could be called in the save method?) *** make work first as own method, then combine
-        new_boundary.save();
-
-        // *****validate the boundary*****
-        // var boundary_validity = new_boundary.validate(custom_boundary);
-
-        // using boolean version for testing
-        var boundary_validity = new_boundary.validate(true);
+        var boundary_was_saved = new_boundary.save();
 
         // handle result
-        if (boundary_validity === true) {
-            console.log("Boundary: valid");
+        if (boundary_was_saved) {
+            console.log("Boundary: valid", "Status: saved");
             // should resume as accepted
 
             // we could generate the 'path' for the accepted boundary here (checkpoints)
@@ -2951,8 +2947,8 @@ function testBoundaries() {
         }
         else {
             console.log("Boundary: invalid");
+            
             // should reject and display error message
-
             // for now, just turn the canvas border red
             canvas.style.borderColor = 'var(--mother-pink)';
         }
