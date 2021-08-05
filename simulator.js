@@ -176,6 +176,19 @@ class Boundary {
         // return saved_boundary;
     }
 
+    validate(boundary) {
+        // validate or reject user boundary
+        // since there's no rules yet, accept boolean for testing
+        if (boundary === true) {
+            // accept
+            return true;
+        }
+        else {
+            // reject
+            return false;
+        }
+    }
+
 }
 
 // Main Drivers
@@ -240,19 +253,6 @@ async function testBoundarySim() {
     await hitDetectionTest(organisms);
 
     console.log("Hit Detection Test Complete.");
-}
-
-function validateBoundary(boundary) {
-    // validate or reject user boundary
-    // since there's no rules yet, accept boolean for testing
-    if (boundary === true) {
-        // accept
-        return true;
-    }
-    else {
-        // reject
-        return false;
-    }
 }
 
 // called after validatedBoundary() returns true
@@ -2634,7 +2634,9 @@ function displaySettingsForm() {
         }
         else {
             console.log("Checkbox: unchecked");
+
             // should remove custom_boundary so sim doesn't think there is one
+            custom_boundary = null;
         }
     });
 
@@ -2925,14 +2927,14 @@ function testBoundaries() {
         // create new Boundary object
         var new_boundary = new Boundary();
 
-        // store in global
+        // save (maybe validate() could be called in the save method?) *** make work first as own method, then combine
         new_boundary.save();
 
         // *****validate the boundary*****
-        // var boundary_validity = validateBoundary(custom_boundary);
+        // var boundary_validity = new_boundary.validate(custom_boundary);
 
         // using boolean version for testing
-        var boundary_validity = validateBoundary(true);
+        var boundary_validity = new_boundary.validate(true);
 
         // handle result
         if (boundary_validity === true) {
