@@ -290,17 +290,17 @@ function getPixelXY(x, y) {
     return canvas_data, index;
 }
 
-// needs to be updated for new class Boundary()
+// needs to be updated for new class Boundary() (make class method?)
 function hitDetectionTest(organisms) {
 
     return new Promise(resolve => {
         var finished = false;
         var position_rgba;
         var total_moves = 0;
+        var canvas_data;
+        var index;
 
         function animateOrganisms() {
-            var canvas_data;
-            var index;
 
             if (!finished) {
                 // this condition will change when more organisms added
@@ -2947,7 +2947,7 @@ function testBoundaries() {
         }
         else {
             console.log("Boundary: invalid");
-            
+
             // should reject and display error message
             // for now, just turn the canvas border red
             canvas.style.borderColor = 'var(--mother-pink)';
