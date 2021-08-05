@@ -166,7 +166,7 @@ class Boundary {
             this.boundary.src = canvas.toDataURL("image/png");
 
             // hitDetectionTest() doesn't work with class Boundary yet, uses global variable. (remove when updated)
-            custom_boundary = this.boundary;
+            custom_boundary = this;
 
             console.log("Bounds Saved!");
 
@@ -189,6 +189,13 @@ class Boundary {
             // reject
             return false;
         }
+    }
+
+    // called after validatedBoundary() returns true
+    createCheckpoints() {
+        // this should be visual at first so I can see what it's doing.
+        // for that, I'll need to draw the boundary over the canvas, then animate(optional) my algorithm.
+        console.log("createCheckpoints() called");
     }
 
 }
@@ -238,13 +245,6 @@ async function testBoundarySim() {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // next, let's prove that we can redraw our custom boundary (works!)
-    // ctx.drawImage(custom_boundary, 0, 0, canvas.width, canvas.height);
-
-    // let's also have a organism that loops on screen
-    // var test_boy = new Organism('male', INITIAL_X, INITIAL_Y, ctx);
-    // test_boy.setRandomGenes();
-
     // 10 organisms this time
     for (var i = 0; i < 10; i++) {
         organism = new Organism('male', INITIAL_X, INITIAL_Y, ctx);
@@ -255,15 +255,6 @@ async function testBoundarySim() {
     await hitDetectionTest(organisms);
 
     console.log("Hit Detection Test Complete.");
-}
-
-// called after validatedBoundary() returns true
-function createCheckpoints() {
-    // would class-based approach for the boundary be better?
-    // if this function works well, consider switching boundaries to class Boundary
-
-    // this should be visual at first so I can see what it's doing.
-    // for that, I'll need to draw the boundary over the canvas, then animate(optional) my algorithm.
 }
 
 function getPixel(canvas_data, index) {
@@ -302,7 +293,7 @@ function hitDetectionTest(organisms) {
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                     // draw boundary
-                    ctx.drawImage(custom_boundary, 0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(custom_boundary.boundary, 0, 0, canvas.width, canvas.height);
 
                     canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height); // keeping this outside greatly improves speed
                     
@@ -2909,8 +2900,8 @@ function testBoundaries() {
 
             // we could generate the 'path' for the accepted boundary here (checkpoints)
             // can move to main simulation if needed
-            // ***create checkpoints here***
-            // createCheckpoints();
+            // ***create checkpoints here*** (custom_boundary set in save() method)
+            custom_boundary.createCheckpoints();
 
             // return user to settings screen
             displaySettingsForm();
