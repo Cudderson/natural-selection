@@ -25,7 +25,11 @@ var MUTATION_RATE = 0.03;
 var MIN_GENE = -5;
 var MAX_GENE = 5;
 var dialogue = false;
+
+// boundary globals
 var custom_boundary;
+var top_boundary_coords = [];
+var bottom_boundary_coords = [];
 
 // flags
 var simulation_started = false;
@@ -196,6 +200,9 @@ class Boundary {
         // this should be visual at first so I can see what it's doing.
         // for that, I'll need to draw the boundary over the canvas, then animate(optional) my algorithm.
         console.log("createCheckpoints() called");
+        console.log(custom_boundary.boundary);
+
+        // ** WHEN THIS FUNCTION IS CALLED, ARRAYS OF LINE COORDS SHOULD ALREADY EXIST **
     }
 
 }
@@ -2877,6 +2884,9 @@ function testBoundaries() {
         ctx.lineCap = 'round';
         ctx.stroke();
         ctx.closePath();
+
+        // save coordiantes here **
+        top_boundary_coords.push([coordinates['x'], coordinates['y']]);
     }
 
     // respond to each event individually (pass event for mouse position)
@@ -2886,6 +2896,9 @@ function testBoundaries() {
 
     save_bounds_btn.addEventListener("click", function() {
         console.log("Saving Custom Boundaries");
+
+        // show saved boundary coords (only top so far)
+        console.log(top_boundary_coords);
 
         // create new Boundary object
         var new_boundary = new Boundary();
