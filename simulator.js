@@ -2855,24 +2855,7 @@ function getUserDecision() {
 
 // TESTING BOUNDARIES ==============================================================
 
-// now, to put it all together, we should wait for a mousedown, which triggers another event listener for mouseover to redraw,
-// then waits for a mouseup to stop drawing.
-
-// this function will be refactored/cleaned once proven working
-function testBoundaries() {
-
-    // turn off settings, turn on canvas
-    var canvas_container = document.getElementsByClassName("canvas-container")[0];
-    var settings_container = document.getElementsByClassName("settings-container")[0];
-
-    canvas_container.style.display = 'block';
-    settings_container.style.display = 'none';
-
-    // clear canvas
-    ctx.fillStyle = 'black';
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-
+function drawBoundaryBoilerplate() {
     // ** DRAW BOUNDARY BOILERPLATE
     // draw start/end points of boundary (make helper function later (drawBoundaryBoilerplate()))
     // top
@@ -2900,6 +2883,23 @@ function testBoundaries() {
     // phase area
     ctx.fillRect(0, 0, 248, 153);
     // ** END BOUNDARY BOILERPLATE **
+}
+
+// this function will be refactored/cleaned once proven working
+function testBoundaries() {
+
+    // turn off settings, turn on canvas
+    var canvas_container = document.getElementsByClassName("canvas-container")[0];
+    var settings_container = document.getElementsByClassName("settings-container")[0];
+
+    canvas_container.style.display = 'block';
+    settings_container.style.display = 'none';
+
+    // clear canvas
+    ctx.fillStyle = 'black';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawBoundaryBoilerplate();
 
     // html btns
     var settings_btn = document.getElementsByClassName("settings-btn")[0];
@@ -2956,6 +2956,13 @@ function testBoundaries() {
         // save coordiantes here **
         top_boundary_coords.push([coordinates['x'], coordinates['y']]);
     }
+
+    // next, we will implement drawing instructions
+    // plan:
+    // - We could have a variable that tracks which step of the boundary drawing phase the user is on
+    // - Depending on the step, different rules will apply.
+    // - On mousemove, rather than automatically drawing, a function should be called first to check
+    //   that the draw action is legal.
 
     // respond to each event individually (pass event for mouse position)
     canvas.addEventListener('mouseenter', updateMousePosition);
