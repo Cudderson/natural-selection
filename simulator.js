@@ -1213,7 +1213,7 @@ function fadeInStats() {
         function animate() {
             if (!finished) {
                 ctx.fillStyle = 'black';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillRect(738, 510, 250, 90);
             
                 this.ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
                 this.ctx.font = "22px arial";
@@ -1238,6 +1238,42 @@ function fadeInStats() {
             }
         }
         start_stats_fadein = requestAnimationFrame(animate);
+    })
+}
+
+// stats won't fade out on non-dialogue sims (reminder)
+function fadeOutStats() {
+    var finished = false;
+    var opacity = 1.00;
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                ctx.fillStyle = 'black';
+                ctx.fillRect(738, 510, 250, 90);
+            
+                this.ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                this.ctx.font = "22px arial";
+                this.ctx.fillText('Generation:', 740, 535);
+                this.ctx.fillText(generation_count.toString(), 940, 535);
+                this.ctx.fillText('Population Size:', 740, 560);
+                this.ctx.fillText(TOTAL_ORGANISMS.toString(), 940, 560);
+                this.ctx.fillText('Average Fitness:', 740, 585);
+                this.ctx.fillText("0.00", 940, 585);
+
+                if (opacity <= 0.00) {
+                    finished = true;
+                }
+                else {
+                    opacity -= 0.02;
+                }
+                frame_id = requestAnimationFrame(animate);
+            }
+            else {
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_stats_fadeout = requestAnimationFrame(animate);
     })
 }
 
