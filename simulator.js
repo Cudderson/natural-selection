@@ -426,14 +426,16 @@ async function runGeneration() {
             }
         }
     }
-    
-    const population_resolution = await evaluatePopulation(); // maybe don't await here
-    var closest_organism = population_resolution['closest_organism'];
-    average_fitness = population_resolution['average_fitness'];
 
     if (dialogue) {
         await fadeOutEvaluationPhaseText();
+        await fadeOutStats(); // put here to fade out stats before average fitness updated
+        await sleep(1000);
     }
+
+    const population_resolution = await evaluatePopulation(); // maybe don't await here
+    var closest_organism = population_resolution['closest_organism'];
+    average_fitness = population_resolution['average_fitness'];
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     if (dialogue) {
@@ -462,10 +464,9 @@ async function runGeneration() {
     }
 
     var parents = selectParentsForReproduction(potential_mothers, potential_fathers);
-
-    console.log("made it to here, calling runSelectionAnimations()"); // this means that fadeInSelectionPhaseText() resolves when opacity >= 1.00
-
+    
     if (dialogue) {
+        await sleep(1000);
         await runSelectionAnimations(closest_organism, parents);
         await fadeOutSelectionPhaseText(); 
     }
@@ -1209,6 +1210,7 @@ function fadeOutExplanationAndGoal() {
 function fadeInStats() {
     var finished = false;
     var opacity = 0.00;
+    average_fitness = Math.abs(Number(average_fitness)).toFixed(2);
     return new Promise(resolve => {
         function animate() {
             if (!finished) {
@@ -1222,7 +1224,7 @@ function fadeInStats() {
                 this.ctx.fillText('Population Size:', 740, 560);
                 this.ctx.fillText(TOTAL_ORGANISMS.toString(), 940, 560);
                 this.ctx.fillText('Average Fitness:', 740, 585);
-                this.ctx.fillText("0.00", 940, 585);
+                this.ctx.fillText(average_fitness.toString(), 940, 585);
 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -1245,6 +1247,7 @@ function fadeInStats() {
 function fadeOutStats() {
     var finished = false;
     var opacity = 1.00;
+    average_fitness = Math.abs(Number(average_fitness)).toFixed(2);
     return new Promise(resolve => {
         function animate() {
             if (!finished) {
@@ -1258,7 +1261,7 @@ function fadeOutStats() {
                 this.ctx.fillText('Population Size:', 740, 560);
                 this.ctx.fillText(TOTAL_ORGANISMS.toString(), 940, 560);
                 this.ctx.fillText('Average Fitness:', 740, 585);
-                this.ctx.fillText("0.00", 940, 585);
+                this.ctx.fillText(average_fitness.toString(), 940, 585);
 
                 if (opacity <= 0.00) {
                     finished = true;
