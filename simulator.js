@@ -2924,6 +2924,11 @@ function testBoundaries() {
     // Stores the position of the cursor
     let coordinates = {'x':0 , 'y':0}; 
 
+    // drawing flag and step tracker
+    // remember we have class Boundary too
+    var allowed_to_draw = false;
+    var boundary_step = "bottom-boundary";
+
     // would belong to class Paintbrush, not Boundary
     function updateMousePosition(event) {
         let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
@@ -2939,8 +2944,8 @@ function testBoundaries() {
 
     // belongs to class Painbrush, not Boundary
     function draw(event) {
-        if (event.buttons !== 1) {
-            // return if left-mouse button not pressed
+        if (event.buttons !== 1 || !allowed_to_draw) {
+            // return if left-mouse button not pressed or if user not allowed to draw
             return;
         }
         ctx.beginPath();
@@ -2957,17 +2962,60 @@ function testBoundaries() {
         top_boundary_coords.push([coordinates['x'], coordinates['y']]);
     }
 
-    // next, we will implement drawing instructions
-    // plan:
-    // - We could have a variable that tracks which step of the boundary drawing phase the user is on
-    // - Depending on the step, different rules will apply.
-    // - On mousemove, rather than automatically drawing, a function should be called first to check
-    //   that the draw action is legal.
+    function checkDraw(event) {
+        // this function is called on mousedown and will update the drawing flag that gives
+        // users ability to draw if legal
+        console.log("User would like to draw.");
+        
+        updateMousePosition(event);
 
+        if (boundary_step === 'bottom-boundary') {
+            // check that user is trying to draw from first connector (ctx.fillRect(150, 550, 20, 50))
+            // make helper function eventually
+            if (coordinates['x'] >= 150 && coordinates['x'] <= 170 && coordinates['y'] >= 550) {
+                console.log("You clicked on the connector!");
+                allowed_to_draw = true;
+            }
+            else {
+                console.log("Not allowed to draw, mouse not on connector.");
+                allowed_to_draw = false;
+            }
+        }
+    }
+
+    function validateBoundary(event) {
+        console.log("mouseup heard");
+        // should make sure that the user was allowed to draw, otherwise return
+        if (allowed_to_draw) {
+            // check boundary step
+            if (boundary_step === 'bottom-boundary') {
+                console.log("validating bottom boundary...");
+                updateMousePosition(event);
+
+                // check if boundary ended on endpoint
+                // endpoint: ctx.fillRect(950, 150, 50, 20);
+                if (coordinates['x'] >= 950 && coordinates['y'] >= 150 && coordinates['y'] <= 200) {
+                    // valid, update boundary step
+                    console.log("valid boundary");
+                    boundary_step = "top-boundary";
+                }
+                else {
+                    // invalid
+                    console.log("Invalid boundary.");
+                }   
+            }
+        }
+        else {
+            return;
+        }
+    }
+    
     // respond to each event individually (pass event for mouse position)
     canvas.addEventListener('mouseenter', updateMousePosition);
-    canvas.addEventListener('mousedown', updateMousePosition);
+    canvas.addEventListener('mousedown', checkDraw);
     canvas.addEventListener('mousemove', draw);
+    // function has similar name to class method, fix when combined later
+    canvas.addEventListener('mouseup', validateBoundary);
 
     save_bounds_btn.addEventListener("click", function() {
         console.log("Saving Custom Boundaries");
