@@ -2872,6 +2872,35 @@ function testBoundaries() {
     ctx.fillStyle = 'black';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+
+    // ** DRAW BOUNDARY BOILERPLATE
+    // draw start/end points of boundary (make helper function later (drawBoundaryBoilerplate()))
+    // top
+    ctx.fillStyle = 'red';
+    ctx.fillRect(830, 0, 20, 50);
+    ctx.fillRect(950, 150, 50, 20);
+    // bottom
+    ctx.fillStyle = 'red';
+    ctx.fillRect(0, 430, 50, 20);
+    ctx.fillRect(150, 550, 20, 50);
+    // placeholder goal
+    var placeholder_goal = new Goal(925, 50, 20, ctx);
+    placeholder_goal.drawGoal();
+
+    // we should also highlight the areas that users cannot draw in (2 rects to create border effect)
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    // stats border rect
+    ctx.fillRect(736, 508, 272, 92);
+    // phase border rect
+    ctx.fillRect(0, 0, 252, 157);
+
+    ctx.fillStyle = 'black';
+    // stats area (will need to erase when sim starts)
+    ctx.fillRect(740, 512, 270, 90);
+    // phase area
+    ctx.fillRect(0, 0, 248, 153);
+    // ** END BOUNDARY BOILERPLATE **
+
     // html btns
     var settings_btn = document.getElementsByClassName("settings-btn")[0];
     var start_btn = document.getElementsByClassName("start-btn")[0];
