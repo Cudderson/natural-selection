@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 const INITIAL_X = 500; 
 const INITIAL_Y = 500;
 const GOAL_X_POS = 500;
-const GOAL_Y_POS = 200;
+const GOAL_Y_POS = 50;
 
 // organism global default settings
 var TOTAL_ORGANISMS = 100;
@@ -137,13 +137,13 @@ class Goal {
         average_fitness = Number(average_fitness).toFixed(2);
         var population_size = organisms.length;
         this.ctx.fillStyle = 'rgba(155, 245, 0, 1)';
-        this.ctx.font = "26px arial";
-        this.ctx.fillText('Generation:', 10, 520);
-        this.ctx.fillText(generation_count.toString(), 210, 520);
-        this.ctx.fillText('Population Size:', 10, 550);
-        this.ctx.fillText(population_size.toString(), 210, 550);
-        this.ctx.fillText('Average Fitness:', 10, 580);
-        this.ctx.fillText(average_fitness.toString(), 210, 580);
+        this.ctx.font = "22px arial";
+        this.ctx.fillText('Generation:', 740, 535);
+        this.ctx.fillText(generation_count.toString(), 940, 535);
+        this.ctx.fillText('Population Size:', 740, 560);
+        this.ctx.fillText(population_size.toString(), 940, 560);
+        this.ctx.fillText('Average Fitness:', 740, 585);
+        this.ctx.fillText(average_fitness.toString(), 940, 585);
     }
 }
 
@@ -1216,14 +1216,14 @@ function fadeInStats() {
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             
                 this.ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                this.ctx.font = "26px arial";
-                this.ctx.fillText('Generation:', 10, 520);
-                this.ctx.fillText(generation_count.toString(), 210, 520);
-                this.ctx.fillText('Population Size:', 10, 550);
-                this.ctx.fillText(TOTAL_ORGANISMS.toString(), 210, 550);
-                this.ctx.fillText('Average Fitness:', 10, 580);
-                this.ctx.fillText("0.00", 210, 580);
-                
+                this.ctx.font = "22px arial";
+                this.ctx.fillText('Generation:', 740, 535);
+                this.ctx.fillText(generation_count.toString(), 940, 535);
+                this.ctx.fillText('Population Size:', 740, 560);
+                this.ctx.fillText(TOTAL_ORGANISMS.toString(), 940, 560);
+                this.ctx.fillText('Average Fitness:', 740, 585);
+                this.ctx.fillText("0.00", 940, 585);
+
                 if (opacity >= 1.00) {
                     finished = true;
                 }
