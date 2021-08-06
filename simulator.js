@@ -1,5 +1,17 @@
 document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
+// testing boundaries, will revert when done
+// document.addEventListener("DOMContentLoaded", function() {
+//     if (!testing_boundaries) {
+//         playTitleScreenAnimation;
+//     }
+//     else {
+//         testBoundaries();
+//     }
+// });
+
+// const testing_boundaries = true;
+
 // starting coordinates for organisms and goal
 const INITIAL_X = 500; 
 const INITIAL_Y = 500;
@@ -13,6 +25,11 @@ var MUTATION_RATE = 0.03;
 var MIN_GENE = -5;
 var MAX_GENE = 5;
 var dialogue = false;
+
+// boundary globals
+var custom_boundary;
+var top_boundary_coords = [];
+var bottom_boundary_coords = [];
 
 // flags
 var simulation_started = false;
@@ -48,6 +65,8 @@ class Organism {
         this.distance_to_goal;
         this.fitness;
         this.reached_goal = false;
+        // for boundary animations
+        this.is_alive = true;
     }
 
     setRandomGenes() {
@@ -128,6 +147,66 @@ class Goal {
     }
 }
 
+class Boundary {
+    constructor() {
+        this.boundary = new Image();
+    }
+
+    save() {
+        // should save the user's drawing and return to settings page (title animation for now)
+
+        var canvas = document.getElementById("main-canvas"); // do we need to declare these?
+        var ctx = canvas.getContext('2d');
+
+        // var submitted_boundary = canvas.toDataURL("image/png"); <<< this will be used eventually
+        var submitted_boundary = true; // <<< this is a placeholder
+
+        var boundary_is_valid = this.validate(submitted_boundary);
+
+        if (boundary_is_valid) {
+            // save boundary to object and global
+
+            // save canvas to src attribute of Boundary object 'boundary' attribute (security error if not run on server (tainted canvas))
+            this.boundary.src = canvas.toDataURL("image/png");
+
+            // hitDetectionTest() doesn't work with class Boundary yet, uses global variable. (remove when updated)
+            custom_boundary = this;
+
+            console.log("Bounds Saved!");
+
+            return true;
+        }
+        else {
+            // reject
+            return false;
+        }
+    }
+
+    validate(boundary) {
+        // validate or reject user boundary
+        // since there's no rules yet, accept boolean for testing
+        if (boundary === true) {
+            // accept
+            return true;
+        }
+        else {
+            // reject
+            return false;
+        }
+    }
+
+    // called after validatedBoundary() returns true
+    createCheckpoints() {
+        // this should be visual at first so I can see what it's doing.
+        // for that, I'll need to draw the boundary over the canvas, then animate(optional) my algorithm.
+        console.log("createCheckpoints() called");
+        console.log(custom_boundary.boundary);
+
+        // ** WHEN THIS FUNCTION IS CALLED, ARRAYS OF LINE COORDS SHOULD ALREADY EXIST **
+    }
+
+}
+
 // Main Drivers
 async function runPreSimAnimations() {
 
@@ -153,7 +232,123 @@ async function runPreSimAnimations() {
     })
 }
 
+// function for testing custom boundary
+function checkSimType() {
+    // eventually, both sims will be the same, this is for testing
+    if (custom_boundary) {
+        testBoundarySim();
+    }
+    else {
+        console.log("nope");
+        runSimulation();
+    }
+}
+
+async function testBoundarySim() {
+    // update flag to resolve playTitleScreenAnimation()
+    simulation_started = true;
+
+    // clear
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 10 organisms this time
+    for (var i = 0; i < 10; i++) {
+        organism = new Organism('male', INITIAL_X, INITIAL_Y, ctx);
+        organism.setRandomGenes();
+        organisms.push(organism);
+    }
+
+    await hitDetectionTest(organisms);
+
+    console.log("Hit Detection Test Complete.");
+}
+
+function getPixel(canvas_data, index) {
+    var i = index * 4;
+    var data = canvas_data.data;
+
+    return [data[i], data[i+1], data[i+2], data[i+3]];
+}
+
+function getPixelXY(canvas_data, x, y) {
+    var index = y * canvas_data.width + x; // *** not sure how this works but it does ***
+
+    // return index;
+    return getPixel(canvas_data, index);
+}
+
+// needs to be updated for new class Boundary() (make class method?)
+function hitDetectionTest(organisms) {
+
+    return new Promise(resolve => {
+        var finished = false;
+        var position_rgba;
+        var total_moves = 0;
+        var canvas_data;
+
+        function animateOrganisms() {
+
+            if (!finished) {
+                // this condition will change when more organisms added
+                if (total_moves >= GENE_COUNT * organisms.length) {
+                    finished = true;
+                }
+                else {
+                    // clear
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    // draw boundary
+                    ctx.drawImage(custom_boundary.boundary, 0, 0, canvas.width, canvas.height);
+
+                    canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height); // keeping this outside greatly improves speed
+                    
+                    // do it with 10 organisms (seems to already be pretty slow)
+                    for (var j = 0; j < organisms.length; j++) {
+
+                        // update index
+                        if (organisms[j].is_alive) {
+                            organisms[j].update();
+                        }
+
+                        position_rgba = getPixelXY(canvas_data, organisms[j].x, organisms[j].y);
+                        
+                        console.log("Current Position Pixel for Organism: " + position_rgba);
+
+                        // --custom-green: rgba(155, 245, 0, 1);
+                        // highlight organism red if he leaves safe area (dies)
+                        if (position_rgba[0] === 155 && position_rgba[1] === 245 || organisms[j].is_alive === 'false') {
+                            organisms[j].is_alive = false;
+                            organisms[j].ctx.fillStyle = 'red';
+                            organisms[j].ctx.beginPath();
+                            organisms[j].ctx.arc(organisms[j].x, organisms[j].y, organisms[j].radius, 0, Math.PI*2, false);
+                            organisms[j].ctx.fill();
+                        }
+                        else {
+                            organisms[j].move();
+                        }
+                        total_moves++;
+                    }
+                }
+                sleep(1000 / FPS); // looks smoother without fps
+                frame_id = requestAnimationFrame(animateOrganisms);
+            }
+
+            else {
+                //resolve
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_test_guy_animation = requestAnimationFrame(animateOrganisms);
+    })
+}
+
+// END CUSTOM BOUNDARY SIM TEST
+
 async function runSimulation () {
+
     simulation_started = true;
 
     console.log("Running Simulation with these settings:");
@@ -601,7 +796,7 @@ function getGender() {
     else {
         gender = 'male';
     }
-    return gender
+    return gender;
 }
 
 function reproduce(crossover_genes) {
@@ -621,10 +816,16 @@ async function playTitleScreenAnimation() {
     
     do {
         console.log("Starting Title Animation");
+
         var status = await fadeInTitleAnimation(title_organisms);
-        console.log(status);
-        if (status === "Stop Playing") {
+
+        if (status === "Display Settings") {
+            console.log("Displaying Settings");
             displaySettingsForm();
+        }
+        else if (status === "TEST BOUNDARY MODE") {
+            console.log("Entering Boundary Mode");
+            testBoundaries();
         }
     }
     while (simulation_started === false && status === "Keep Playing");
@@ -666,7 +867,7 @@ function fadeInTitleAnimation(title_organisms) {
                 // if settings clicked, resolve animation
                 settings_btn.addEventListener("click", function() {
                     cancelAnimationFrame(frame_id);
-                    resolve("Stop Playing");
+                    resolve("Display Settings");
                 });
 
                 ctx.fillStyle = 'black';
@@ -1950,7 +2151,7 @@ function fadeInMutationDescriptionText() {
                 ctx.fillRect(100, 275, 800, 150);
 
                 var description = "To maintain genetic diversity, a small percentage of random genes are mutated";
-                var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100)}%`.toString();
+                var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100).toFixed(2)}%`.toString();
 
                 ctx.font = "20px arial";
                 ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
@@ -1988,7 +2189,7 @@ function fadeOutMutationDescriptionText() {
                 ctx.fillRect(100, 275, 800, 150);
 
                 var description = "To maintain genetic diversity, a small percentage of random genes are mutated";
-                var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100)}%`.toString();
+                var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100).toFixed(2)}%`.toString();
 
                 ctx.font = "20px arial";
                 ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
@@ -2384,14 +2585,38 @@ function fadeInExtinctionMessage() {
 
 // *** Settings ***
 function displaySettingsForm() {
+    // ensure only settings button showing
+    var settings_btn = document.getElementsByClassName("settings-btn")[0];
     var start_btn = document.getElementsByClassName("start-btn")[0];
-    start_btn.style.display = 'none';
+    var stop_btn = document.getElementsByClassName("stop-btn")[0];
+    var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
 
+    settings_btn.style.display = 'block';
+    start_btn.style.display = 'none';
+    stop_btn.style.display = 'none';
+    save_bounds_btn.style.display = 'none';
+
+    // turn off canvas, turn on settings
     var canvas_container = document.getElementsByClassName("canvas-container")[0];
     var settings_container = document.getElementsByClassName("settings-container")[0];
 
     canvas_container.style.display = 'none';
     settings_container.style.display = 'block';
+
+    // boundaries
+    // listen for boundary checkbox to trigger testBoundaries()
+    var boundary_setting = document.getElementById("boundary-checkbox");
+    boundary_setting.addEventListener("change", function() {
+        if (this.checked) {
+            testBoundaries();
+        }
+        else {
+            console.log("Checkbox: unchecked");
+
+            // should remove custom_boundary so sim doesn't think there is one
+            custom_boundary = null;
+        }
+    });
 
     // movement setting helper (move/abstract)
     var movement_speed_setting = document.getElementById("move-speed");
@@ -2508,6 +2733,7 @@ function validateMutationRateSetting() {
         }
         else {
             MUTATION_RATE = parseInt(mutation_rate_setting.value) / 100;
+            console.log("MUT RATE: " + MUTATION_RATE);
         }
         mutation_rate_setting.style.borderBottom = '2px solid var(--custom-green)';
         return "valid";
@@ -2587,3 +2813,120 @@ function getUserDecision() {
         });
     })
 }
+
+// TESTING BOUNDARIES ==============================================================
+
+// now, to put it all together, we should wait for a mousedown, which triggers another event listener for mouseover to redraw,
+// then waits for a mouseup to stop drawing.
+
+// this function will be refactored/cleaned once proven working
+function testBoundaries() {
+
+    // turn off settings, turn on canvas
+    var canvas_container = document.getElementsByClassName("canvas-container")[0];
+    var settings_container = document.getElementsByClassName("settings-container")[0];
+
+    canvas_container.style.display = 'block';
+    settings_container.style.display = 'none';
+
+    // clear canvas
+    ctx.fillStyle = 'black';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // html btns
+    var settings_btn = document.getElementsByClassName("settings-btn")[0];
+    var start_btn = document.getElementsByClassName("start-btn")[0];
+    var stop_btn = document.getElementsByClassName("stop-btn")[0];
+    var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
+
+    settings_btn.style.display = 'none';
+    start_btn.style.display = 'none';
+
+     // revert when leaving boundary mode
+    stop_btn.style.gridColumn = "2 / 3";
+    stop_btn.style.width = "100%";
+    stop_btn.innerHTML = "Cancel";
+    stop_btn.style.display = "block";
+
+    save_bounds_btn.style.display = "block";
+    save_bounds_btn.style.gridColumn = "3 / 4";
+    save_bounds_btn.style.backgroundColor = "var(--custom-green)";
+    save_bounds_btn.style.fontSize = "20px";
+
+    // Stores the position of the cursor
+    let coordinates = {'x':0 , 'y':0}; 
+
+    // would belong to class Paintbrush, not Boundary
+    function updateMousePosition(event) {
+        let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
+
+        // store current mouse position
+        let x = event.clientX - rect.left;
+        let y = event.clientY - rect.top;
+
+        coordinates['x'] = x;
+        coordinates['y'] = y;
+        console.log(coordinates);
+    }
+
+    // belongs to class Painbrush, not Boundary
+    function draw(event) {
+        if (event.buttons !== 1) {
+            // return if left-mouse button not pressed
+            return;
+        }
+        ctx.beginPath();
+        ctx.moveTo(coordinates['x'], coordinates['y']);
+        updateMousePosition(event);
+        ctx.lineTo(coordinates['x'], coordinates['y']);
+        ctx.strokeStyle = 'rgb(155, 245, 0)'; //green 
+        ctx.lineWidth = 20;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        ctx.closePath();
+
+        // save coordiantes here **
+        top_boundary_coords.push([coordinates['x'], coordinates['y']]);
+    }
+
+    // respond to each event individually (pass event for mouse position)
+    canvas.addEventListener('mouseenter', updateMousePosition);
+    canvas.addEventListener('mousedown', updateMousePosition);
+    canvas.addEventListener('mousemove', draw);
+
+    save_bounds_btn.addEventListener("click", function() {
+        console.log("Saving Custom Boundaries");
+
+        // show saved boundary coords (only top so far)
+        console.log(top_boundary_coords);
+
+        // create new Boundary object
+        var new_boundary = new Boundary();
+
+        // save (maybe validate() could be called in the save method?) *** make work first as own method, then combine
+        var boundary_was_saved = new_boundary.save();
+
+        // handle result
+        if (boundary_was_saved) {
+            console.log("Boundary: valid", "Status: saved");
+            // should resume as accepted
+
+            // we could generate the 'path' for the accepted boundary here (checkpoints)
+            // can move to main simulation if needed
+            // ***create checkpoints here*** (custom_boundary set in save() method)
+            custom_boundary.createCheckpoints();
+
+            // return user to settings screen
+            displaySettingsForm();
+        }
+        else {
+            console.log("Boundary: invalid");
+
+            // should reject and display error message
+            // for now, just turn the canvas border red
+            canvas.style.borderColor = 'var(--mother-pink)';
+        }
+    });
+}
+
+// =================================================================================

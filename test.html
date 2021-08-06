@@ -41,6 +41,14 @@
               <span class="checkmark"></span>
             </label>
           </div>
+          <!--boundary setting (uses dialogue class styling)-->
+          <span class="dialogue-setting-span">Custom Boundaries</span>
+          <div class="dialogue-container">
+            <label class="dialogue-setting-label">
+              <input id="boundary-checkbox" type="checkbox">
+              <span class="checkmark"></span>
+            </label>
+          </div>
         </div>
         <!-- these are beneath the grid -->
         <input class="setting-submit" type="submit" value="Apply">
@@ -51,7 +59,8 @@
     </div>
   </div>
   <div class="btn-container">
-    <button class="start-btn" onclick="runSimulation()">Run Simulation</button>
+    <button class="save-boundaries-btn">Apply Boundaries</button>
+    <button class="start-btn" onclick="checkSimType()">Run Simulation</button>
     <button class="settings-btn">Settings</button>
     <button class="stop-btn" onclick="stopSimulation()">Stop Simulation</button>
   </div>
