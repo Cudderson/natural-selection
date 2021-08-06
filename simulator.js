@@ -149,37 +149,56 @@ class Goal {
 
 class Boundary {
     constructor() {
-        this.boundary = new Image();
+        this.top_boundary = new Image();
+        this.bottom_boundary = new Image();
+        this.full_boundary = new Image();
     }
 
-    save() {
+    save(boundary_type) {
         // should save the user's drawing and return to settings page (title animation for now)
 
         var canvas = document.getElementById("main-canvas"); // do we need to declare these?
         var ctx = canvas.getContext('2d');
 
         // var submitted_boundary = canvas.toDataURL("image/png"); <<< this will be used eventually
-        var submitted_boundary = true; // <<< this is a placeholder
+        var submitted_boundary = true; // <<< this is a placeholder, (ADJUST FOR MULTIPLE BOUNDARIES)
 
-        var boundary_is_valid = this.validate(submitted_boundary);
+        // var boundary_is_valid = this.validate(submitted_boundary); not ready for this yet (plus, should be already validated)
 
-        if (boundary_is_valid) {
-            // save boundary to object and global
+        // no validation in class yet.
 
-            // save canvas to src attribute of Boundary object 'boundary' attribute (security error if not run on server (tainted canvas))
-            this.boundary.src = canvas.toDataURL("image/png");
+        var boundary_to_save = canvas.toDataURL("image/png");
 
-            // hitDetectionTest() doesn't work with class Boundary yet, uses global variable. (remove when updated)
-            custom_boundary = this;
-
-            console.log("Bounds Saved!");
-
-            return true;
+        if (boundary_type === 'bottom') {
+            this.bottom_boundary = boundary_to_save;
+        }
+        else if (boundary_type === 'top') {
+            console.log("saving top boundary");
         }
         else {
-            // reject
-            return false;
+            // save full
+            console.log("saving full boundary");
         }
+
+
+        // Validation Code not used, save for integration
+        // if (boundary_is_valid) {
+        //     // save boundary to object and global
+
+        //     // save canvas to src attribute of Boundary object 'boundary' attribute (security error if not run on server (tainted canvas))
+        //     this.boundary.src = canvas.toDataURL("image/png");
+
+        //     // hitDetectionTest() doesn't work with class Boundary yet, uses global variable. (remove when updated)
+        //     custom_boundary = this;
+
+        //     console.log("Bounds Saved!");
+
+        //     return true;
+        // }
+        // else {
+        //     // reject
+        //     return false;
+        // }
     }
 
     validate(boundary) {
@@ -2857,6 +2876,11 @@ function getUserDecision() {
 
 function drawBoundaryBoilerplate() {
     // ** DRAW BOUNDARY BOILERPLATE
+
+    // clear canvas
+    ctx.fillStyle = 'black';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     // draw start/end points of boundary (make helper function later (drawBoundaryBoilerplate()))
     // top
     ctx.fillStyle = 'red';
@@ -2895,10 +2919,6 @@ function testBoundaries() {
     canvas_container.style.display = 'block';
     settings_container.style.display = 'none';
 
-    // clear canvas
-    ctx.fillStyle = 'black';
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     drawBoundaryBoilerplate();
 
     // html btns
@@ -2928,6 +2948,9 @@ function testBoundaries() {
     // remember we have class Boundary too
     var allowed_to_draw = false;
     var boundary_step = "bottom-boundary";
+
+    // create new boundary
+    var new_boundary = new Boundary();
 
     // would belong to class Paintbrush, not Boundary
     function updateMousePosition(event) {
@@ -2983,6 +3006,7 @@ function testBoundaries() {
         }
     }
 
+    // break this down into smaller function when all working
     function validateBoundary(event) {
         console.log("mouseup heard");
         // should make sure that the user was allowed to draw, otherwise return
@@ -2998,10 +3022,16 @@ function testBoundaries() {
                     // valid, update boundary step
                     console.log("valid boundary");
                     boundary_step = "top-boundary";
+
+                    // store bottom-boundary
+                    new_boundary.save('bottom');
                 }
                 else {
                     // invalid
                     console.log("Invalid boundary.");
+                    // redraw boilerplate
+                    drawBoundaryBoilerplate();
+                    // error message (not written yet);
                 }   
             }
         }
@@ -3021,13 +3051,13 @@ function testBoundaries() {
         console.log("Saving Custom Boundaries");
 
         // show saved boundary coords (only top so far)
-        console.log(top_boundary_coords);
+        // console.log(top_boundary_coords);
 
         // create new Boundary object
-        var new_boundary = new Boundary();
+        // var new_boundary = new Boundary();
 
         // save (maybe validate() could be called in the save method?) *** make work first as own method, then combine
-        var boundary_was_saved = new_boundary.save();
+        // var boundary_was_saved = new_boundary.save();
 
         // handle result
         if (boundary_was_saved) {
