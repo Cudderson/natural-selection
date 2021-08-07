@@ -2938,9 +2938,6 @@ function testBoundaries() {
     stop_btn.style.display = "block";
 
     save_bounds_btn.style.display = "block";
-    save_bounds_btn.style.gridColumn = "3 / 4";
-    save_bounds_btn.style.backgroundColor = "var(--custom-green)";
-    save_bounds_btn.style.fontSize = "20px";
 
     // Stores the position of the cursor
     let coordinates = {'x':0 , 'y':0}; 
@@ -3036,6 +3033,12 @@ function testBoundaries() {
 
                     // store bottom-boundary
                     new_boundary.save('bottom');
+
+                    // make connectors green
+                    ctx.fillStyle = 'rgb(155, 245, 0)';
+                    ctx.fillRect(950, 150, 50, 20);
+                    ctx.fillRect(150, 550, 20, 50);
+
                 }
                 else {
                     // invalid
@@ -3058,6 +3061,15 @@ function testBoundaries() {
 
                     // store top-boundary
                     new_boundary.save('top');
+
+                    // make top-boundary connectors green
+                    ctx.fillStyle = 'rgb(155, 245, 0)';
+                    ctx.fillRect(830, 0, 20, 50);
+                    ctx.fillRect(0, 430, 50, 20);
+
+                    // next, we should make an unclickable button clickable when both top and bottom are validated/saved
+                    save_bounds_btn.style.backgroundColor = "var(--custom-green)";
+                    save_bounds_btn.style.pointerEvents = 'auto';
                 }
                 else {
                     // invalid
@@ -3067,6 +3079,11 @@ function testBoundaries() {
 
                     // draw valid bottom-boundary
                     ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
+
+                    // make valid bottom-boundary connectors green
+                    ctx.fillStyle = 'rgb(155, 245, 0)';
+                    ctx.fillRect(950, 150, 50, 20);
+                    ctx.fillRect(150, 550, 20, 50);
 
                     // error message (not written yet)
                 }
