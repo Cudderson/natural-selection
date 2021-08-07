@@ -155,8 +155,7 @@ class Boundary {
     }
 
     save(boundary_type) {
-        // should save the user's drawing and return to settings page (title animation for now)
-
+        
         var canvas = document.getElementById("main-canvas"); // do we need to declare these?
         var ctx = canvas.getContext('2d');
 
@@ -170,10 +169,12 @@ class Boundary {
         var boundary_to_save = canvas.toDataURL("image/png");
 
         if (boundary_type === 'bottom') {
-            this.bottom_boundary = boundary_to_save;
+            console.log("saving bottom-boundary");
+            this.bottom_boundary.src = boundary_to_save;
         }
         else if (boundary_type === 'top') {
             console.log("saving top boundary");
+            this.top_boundary.src = boundary_to_save;
         }
         else {
             // save full
@@ -3004,6 +3005,16 @@ function testBoundaries() {
                 allowed_to_draw = false;
             }
         }
+        else if (boundary_step === 'top-boundary') {
+            // check that user is trying to draw from the first connector (ctx.fillRect(0, 430, 50, 20))
+            if (coordinates['x'] >= 0 && coordinates['x'] <= 50 && coordinates['y'] >= 430 && coordinates['y'] <= 450) {
+                allowed_to_draw = true;
+            }
+            else {
+                console.log("Not allowed to draw, mouse not on connector.");
+                allowed_to_draw = false;
+            }
+        }
     }
 
     // break this down into smaller function when all working
@@ -3033,6 +3044,32 @@ function testBoundaries() {
                     drawBoundaryBoilerplate();
                     // error message (not written yet);
                 }   
+            }
+            else if (boundary_step === "top-boundary") {
+                console.log("validating top-boundary...");
+                updateMousePosition(event);
+
+                // check if boundary on endpoint
+                // endpoint: (ctx.fillRect(830, 0, 20, 50))
+                if (coordinates['x'] >= 830 && coordinates['x'] <= 850 && coordinates['y'] <= 50) {
+                    // valid, update boundary step
+                    console.log("valid boundary");
+                    boundary_step = 'full-boundary';
+
+                    // store top-boundary
+                    new_boundary.save('top');
+                }
+                else {
+                    // invalid
+                    console.log("Invalid boundary.");
+                    // redraw boilerplate
+                    drawBoundaryBoilerplate();
+
+                    // draw valid bottom-boundary
+                    ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
+
+                    // error message (not written yet)
+                }
             }
         }
         else {
