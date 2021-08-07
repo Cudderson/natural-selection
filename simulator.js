@@ -3189,6 +3189,17 @@ function testBoundaries() {
 
         // to validate, we should just make sure that our createCheckpoints() function worked, but we don't have that yet.
 
+        // (remove when refactored)
+        // remove white dot, line and return goal to normal color
+        drawBoundaryBoilerplate();
+
+        ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
+
+        // // make connectors green (hopefully won't need to do this)
+        ctx.fillStyle = 'rgb(155, 245, 0)';
+        ctx.fillRect(830, 0, 20, 50);
+        ctx.fillRect(0, 430, 50, 20);
+
         // save full boundary
         new_boundary.save('full');
 
