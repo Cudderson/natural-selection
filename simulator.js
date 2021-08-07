@@ -50,6 +50,9 @@ var offspring_organisms = [];
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
 
+// ********** name conflicts with canvas_data in hitDetectionTest, need to fix
+var canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
 // frame rate
 const FPS = 30;
 
@@ -202,17 +205,29 @@ class Boundary {
         // }
     }
 
-    validate(boundary) {
+    validate() {
         // validate or reject user boundary
-        // since there's no rules yet, accept boolean for testing
-        if (boundary === true) {
-            // accept
-            return true;
-        }
-        else {
-            // reject
-            return false;
-        }
+        // plan:
+        //  - we'll spawn a 1x1 pixel square at the spawn point, and move it through the boundary until it finds the goal.
+        //  - if it reaches goal, boundary is valid
+        //  - else, return false
+
+        // we also want this to be visual.
+        // it will start as just a drawing, but it can be made into an animation if we run into trouble
+
+        // draw a dot at spawn point (now in validateBoundaryConnection())
+        // ctx.fillStyle = 'white';
+        // ctx.beginPath();
+        // ctx.arc(80, 510, 10, 0, Math.PI*2, false);
+        // ctx.fill();
+
+        // ***
+        // another idea: user proof
+        // make the user draw a line from starting point to goal to confirm that the path is valid
+        // if cursor position pixel is green, delete and redraw
+        // this isn't as cool as doing it dynamically, but I'm not sure that writing a pathfinding algorithm would be worth the time.
+        // let's just do it this way until we think of a better one. (checkpoints need to be created too)
+
     }
 
     // called after validatedBoundary() returns true
@@ -322,6 +337,7 @@ function hitDetectionTest(organisms) {
                     // draw boundary
                     ctx.drawImage(custom_boundary.boundary, 0, 0, canvas.width, canvas.height);
 
+                    // *** maybe global would be better for this. Because the image data with boundaries is all I care about
                     canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height); // keeping this outside greatly improves speed
                     
                     // do it with 10 organisms (seems to already be pretty slow)
@@ -2969,18 +2985,44 @@ function testBoundaries() {
             // return if left-mouse button not pressed or if user not allowed to draw
             return;
         }
+
+        if (boundary_step != 'full-boundary') {
+
+        }
+        else {
+
+        }
         ctx.beginPath();
         ctx.moveTo(coordinates['x'], coordinates['y']);
         updateMousePosition(event);
-        ctx.lineTo(coordinates['x'], coordinates['y']);
-        ctx.strokeStyle = 'rgb(155, 245, 0)'; //green 
-        ctx.lineWidth = 20;
+
+        // draw different line depending on boundary_step
+        if (boundary_step === 'full-boundary') {
+
+            // get pixel color before drawing, reject if green
+            pixel_data = getPixelXY(canvas_data_bad_practice, coordinates['x'], coordinates['y']);
+
+            if (pixel_data[0] == 155) {
+                // green touched, reject
+                console.log("illegal white line. returning.");
+                allowed_to_draw = false;
+                return;
+            }
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 1;
+        }
+        else {
+            ctx.strokeStyle = 'rgb(155, 245, 0)'; //green 
+            ctx.lineWidth = 20;
+        }
+
         ctx.lineCap = 'round';
+        ctx.lineTo(coordinates['x'], coordinates['y']);
         ctx.stroke();
         ctx.closePath();
 
         // save coordiantes here **
-        top_boundary_coords.push([coordinates['x'], coordinates['y']]);
+        // top_boundary_coords.push([coordinates['x'], coordinates['y']]);
     }
 
     function checkDraw(event) {
@@ -3011,6 +3053,20 @@ function testBoundaries() {
                 console.log("Not allowed to draw, mouse not on connector.");
                 allowed_to_draw = false;
             }
+        }
+        // final step: draw line from spawn to goal
+        else if (boundary_step === 'full-boundary') {
+            // check that user is trying to draw from the white dot (ctx.arc(80, 510, 10, 0, Math.PI*2, false))
+            if (coordinates['x'] >= 70 && coordinates['x'] <= 90 && 
+                coordinates['y'] >= 500 && coordinates['y'] <= 520 ) {
+
+                allowed_to_draw = true;
+            }
+            else {
+                console.log("You missed the white dot...");
+                allowed_to_draw = false;
+            } 
+
         }
     }
 
@@ -3067,9 +3123,23 @@ function testBoundaries() {
                     ctx.fillRect(830, 0, 20, 50);
                     ctx.fillRect(0, 430, 50, 20);
 
+                    // NOT YET (this will come after while line validated)
                     // next, we should make an unclickable button clickable when both top and bottom are validated/saved
-                    save_bounds_btn.style.backgroundColor = "var(--custom-green)";
-                    save_bounds_btn.style.pointerEvents = 'auto';
+                    // save_bounds_btn.style.backgroundColor = "var(--custom-green)";
+                    // save_bounds_btn.style.pointerEvents = 'auto';
+
+                    // draw white dot for next step
+                    ctx.fillStyle = 'white';
+                    ctx.beginPath();
+                    ctx.arc(80, 510, 10, 0, Math.PI*2, false);
+                    ctx.fill();
+
+                    // update canvas data?
+                    canvas = document.getElementById("main-canvas");
+                    ctx = canvas.getContext("2d");
+                    canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                    allowed_to_draw = false; // unsure
                 }
                 else {
                     // invalid
@@ -3133,25 +3203,25 @@ function testBoundaries() {
         // var boundary_was_saved = new_boundary.save();
 
         // handle result
-        if (boundary_was_saved) {
-            console.log("Boundary: valid", "Status: saved");
-            // should resume as accepted
+        // if (boundary_was_saved) {
+        //     console.log("Boundary: valid", "Status: saved");
+        //     // should resume as accepted
 
-            // we could generate the 'path' for the accepted boundary here (checkpoints)
-            // can move to main simulation if needed
-            // ***create checkpoints here*** (custom_boundary set in save() method)
-            custom_boundary.createCheckpoints();
+        //     // we could generate the 'path' for the accepted boundary here (checkpoints)
+        //     // can move to main simulation if needed
+        //     // ***create checkpoints here*** (custom_boundary set in save() method)
+        //     custom_boundary.createCheckpoints();
 
-            // return user to settings screen
-            displaySettingsForm();
-        }
-        else {
-            console.log("Boundary: invalid");
+        //     // return user to settings screen
+        //     displaySettingsForm();
+        // }
+        // else {
+        //     console.log("Boundary: invalid");
 
-            // should reject and display error message
-            // for now, just turn the canvas border red
-            canvas.style.borderColor = 'var(--mother-pink)';
-        }
+        //     // should reject and display error message
+        //     // for now, just turn the canvas border red
+        //     canvas.style.borderColor = 'var(--mother-pink)';
+        // }
         // END OLD CODE =====================================
     });
 }
