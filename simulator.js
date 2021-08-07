@@ -3015,7 +3015,7 @@ function testBoundaries() {
     }
 
     // break this down into smaller function when all working
-    function validateBoundary(event) {
+    function validateBoundaryConnection(event) {
         console.log("mouseup heard");
         // should make sure that the user was allowed to draw, otherwise return
         if (allowed_to_draw) {
@@ -3099,11 +3099,30 @@ function testBoundaries() {
     canvas.addEventListener('mousedown', checkDraw);
     canvas.addEventListener('mousemove', draw);
     // function has similar name to class method, fix when combined later
-    canvas.addEventListener('mouseup', validateBoundary);
+    canvas.addEventListener('mouseup', validateBoundaryConnection);
 
     save_bounds_btn.addEventListener("click", function() {
         console.log("Saving Custom Boundaries");
 
+
+        // ******
+        // At this point, both top and bottom boundaries are drawn and connected
+        // user has been given the option to Apply/Save their boundary and they clicked this button
+        // When they click this, we should perform our full-boundary validation, then save
+
+        // this is where class method validate() could be used
+        // (validateBoundaryConnection() could/should be made to a class method too, possibly renamed)
+
+        // ********** HEY! **********
+        // If this doesn't work, consider that the eventListener was created before new_boundary was initialized
+
+        // validate() can be made async to make an animation, but we won't start with that
+        var full_boundary_is_valid = new_boundary.validate();
+
+        // then, if full_boundary was valid, save(), then return to settings menu for now
+
+
+        // OLD CODE ============================================
         // show saved boundary coords (only top so far)
         // console.log(top_boundary_coords);
 
@@ -3133,6 +3152,7 @@ function testBoundaries() {
             // for now, just turn the canvas border red
             canvas.style.borderColor = 'var(--mother-pink)';
         }
+        // END OLD CODE =====================================
     });
 }
 
