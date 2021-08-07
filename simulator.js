@@ -1,17 +1,5 @@
 document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
-// testing boundaries, will revert when done
-// document.addEventListener("DOMContentLoaded", function() {
-//     if (!testing_boundaries) {
-//         playTitleScreenAnimation;
-//     }
-//     else {
-//         testBoundaries();
-//     }
-// });
-
-// const testing_boundaries = true;
-
 // starting coordinates for organisms and goal
 const INITIAL_X = 500; 
 const INITIAL_Y = 500;
@@ -162,13 +150,6 @@ class Boundary {
         var canvas = document.getElementById("main-canvas"); // do we need to declare these?
         var ctx = canvas.getContext('2d');
 
-        // var submitted_boundary = canvas.toDataURL("image/png"); <<< this will be used eventually
-        var submitted_boundary = true; // <<< this is a placeholder, (ADJUST FOR MULTIPLE BOUNDARIES)
-
-        // var boundary_is_valid = this.validate(submitted_boundary); not ready for this yet (plus, should be already validated)
-
-        // no validation in class yet.
-
         var boundary_to_save = canvas.toDataURL("image/png");
 
         if (boundary_type === 'bottom') {
@@ -179,55 +160,16 @@ class Boundary {
             console.log("saving top boundary");
             this.top_boundary.src = boundary_to_save;
         }
-        else {
+        else if (boundary_type === 'full') {
             // save full
             console.log("saving full boundary");
+            // we should have to do any extra work here. By this point, the boundary should be as-is
+            this.full_boundary.src = canvas.toDataURL("image/png");
         }
-
-
-        // Validation Code not used, save for integration
-        // if (boundary_is_valid) {
-        //     // save boundary to object and global
-
-        //     // save canvas to src attribute of Boundary object 'boundary' attribute (security error if not run on server (tainted canvas))
-        //     this.boundary.src = canvas.toDataURL("image/png");
-
-        //     // hitDetectionTest() doesn't work with class Boundary yet, uses global variable. (remove when updated)
-        //     custom_boundary = this;
-
-        //     console.log("Bounds Saved!");
-
-        //     return true;
-        // }
-        // else {
-        //     // reject
-        //     return false;
-        // }
     }
 
     validate() {
-        // validate or reject user boundary
-        // plan:
-        //  - we'll spawn a 1x1 pixel square at the spawn point, and move it through the boundary until it finds the goal.
-        //  - if it reaches goal, boundary is valid
-        //  - else, return false
-
-        // we also want this to be visual.
-        // it will start as just a drawing, but it can be made into an animation if we run into trouble
-
-        // draw a dot at spawn point (now in validateBoundaryConnection())
-        // ctx.fillStyle = 'white';
-        // ctx.beginPath();
-        // ctx.arc(80, 510, 10, 0, Math.PI*2, false);
-        // ctx.fill();
-
-        // ***
-        // another idea: user proof
-        // make the user draw a line from starting point to goal to confirm that the path is valid
-        // if cursor position pixel is green, delete and redraw
-        // this isn't as cool as doing it dynamically, but I'm not sure that writing a pathfinding algorithm would be worth the time.
-        // let's just do it this way until we think of a better one. (checkpoints need to be created too)
-
+        console.log("unused class method");
     }
 
     // called after validatedBoundary() returns true
@@ -335,7 +277,7 @@ function hitDetectionTest(organisms) {
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                     // draw boundary
-                    ctx.drawImage(custom_boundary.boundary, 0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
 
                     // *** maybe global would be better for this. Because the image data with boundaries is all I care about
                     canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height); // keeping this outside greatly improves speed
@@ -3144,11 +3086,6 @@ function testBoundaries() {
                     ctx.fillRect(830, 0, 20, 50);
                     ctx.fillRect(0, 430, 50, 20);
 
-                    // NOT YET (this will come after while line validated)
-                    // next, we should make an unclickable button clickable when both top and bottom are validated/saved
-                    // save_bounds_btn.style.backgroundColor = "var(--custom-green)";
-                    // save_bounds_btn.style.pointerEvents = 'auto';
-
                     // draw white dot for next step
                     ctx.fillStyle = 'white';
                     ctx.beginPath();
@@ -3200,7 +3137,8 @@ function testBoundaries() {
                     ctx.fillRect(925, 50, 20, 20);
 
                     // this is where the Apply/Save/Confirm button should become available
-                    // ********************************************************************
+                    save_bounds_btn.style.backgroundColor = "var(--custom-green)";
+                    save_bounds_btn.style.pointerEvents = 'auto';
                 }
                 else {
                     console.log("INVALID BAD");
@@ -3249,49 +3187,16 @@ function testBoundaries() {
         // user has been given the option to Apply/Save their boundary and they clicked this button
         // When they click this, we should perform our full-boundary validation, then save
 
-        // this is where class method validate() could be used
-        // (validateBoundaryConnection() could/should be made to a class method too, possibly renamed)
+        // to validate, we should just make sure that our createCheckpoints() function worked, but we don't have that yet.
 
-        // ********** HEY! **********
-        // If this doesn't work, consider that the eventListener was created before new_boundary was initialized
+        // save full boundary
+        new_boundary.save('full');
 
-        // validate() can be made async to make an animation, but we won't start with that
-        var full_boundary_is_valid = new_boundary.validate();
+        // still using custom_boundary global, I don't like it
+        custom_boundary = new_boundary;
 
-        // then, if full_boundary was valid, save(), then return to settings menu for now
-
-
-        // OLD CODE ============================================
-        // show saved boundary coords (only top so far)
-        // console.log(top_boundary_coords);
-
-        // create new Boundary object
-        // var new_boundary = new Boundary();
-
-        // save (maybe validate() could be called in the save method?) *** make work first as own method, then combine
-        // var boundary_was_saved = new_boundary.save();
-
-        // handle result
-        // if (boundary_was_saved) {
-        //     console.log("Boundary: valid", "Status: saved");
-        //     // should resume as accepted
-
-        //     // we could generate the 'path' for the accepted boundary here (checkpoints)
-        //     // can move to main simulation if needed
-        //     // ***create checkpoints here*** (custom_boundary set in save() method)
-        //     custom_boundary.createCheckpoints();
-
-        //     // return user to settings screen
-        //     displaySettingsForm();
-        // }
-        // else {
-        //     console.log("Boundary: invalid");
-
-        //     // should reject and display error message
-        //     // for now, just turn the canvas border red
-        //     canvas.style.borderColor = 'var(--mother-pink)';
-        // }
-        // END OLD CODE =====================================
+        // return to settings
+        displaySettingsForm();
     });
 }
 
