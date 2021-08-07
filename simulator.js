@@ -2986,12 +2986,6 @@ function testBoundaries() {
             return;
         }
 
-        if (boundary_step != 'full-boundary') {
-
-        }
-        else {
-
-        }
         ctx.beginPath();
         ctx.moveTo(coordinates['x'], coordinates['y']);
         updateMousePosition(event);
@@ -3006,6 +3000,29 @@ function testBoundaries() {
                 // green touched, reject
                 console.log("illegal white line. returning.");
                 allowed_to_draw = false;
+
+                // should erase white line (redraw everything except the white line)
+                // this should be it's own function too (this same code is repeated in validateBoundaryConnection())
+                // draw boilerplate and top&bottom boundaries
+                drawBoundaryBoilerplate();
+                ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
+                ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
+
+                // make valid top-boundary connectors green
+                ctx.fillStyle = 'rgb(155, 245, 0)';
+                ctx.fillRect(830, 0, 20, 50);
+                ctx.fillRect(0, 430, 50, 20);
+
+                // draw white dot
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(80, 510, 10, 0, Math.PI*2, false);
+                ctx.fill();
+
+                // make goal new color (can be a flag in drawBoundaryBoilerplate())
+                ctx.fillStyle = 'rgb(232, 0, 118)';
+                ctx.fillRect(925, 50, 20, 20);
+                
                 return;
             }
             ctx.strokeStyle = 'white';
@@ -3067,6 +3084,10 @@ function testBoundaries() {
                 allowed_to_draw = false;
             } 
 
+        }
+        else if (boundary_step === 'confirmation') {
+            // don't allow user to draw in confirmation phase
+            allowed_to_draw = false;
         }
     }
 
@@ -3134,6 +3155,10 @@ function testBoundaries() {
                     ctx.arc(80, 510, 10, 0, Math.PI*2, false);
                     ctx.fill();
 
+                    // make goal new color (can be a flag in drawBoundaryBoilerplate())
+                    ctx.fillStyle = 'rgb(232, 0, 118)';
+                    ctx.fillRect(925, 50, 20, 20);
+
                     // update canvas data?
                     canvas = document.getElementById("main-canvas");
                     ctx = canvas.getContext("2d");
@@ -3156,6 +3181,50 @@ function testBoundaries() {
                     ctx.fillRect(150, 550, 20, 50);
 
                     // error message (not written yet)
+                }
+            }
+            else if (boundary_step === 'full-boundary') {
+                // check if user ended line on goal
+                // Goal(925, 50, 20, ctx);
+                if (coordinates['x'] >= 925 && coordinates['x'] <= 945 &&
+                    coordinates['y'] >= 50 && coordinates['y'] <= 70) {
+
+                    console.log("VALID NICE");
+
+                    // don't let user draw anymore
+                    boundary_step = 'confirmation';
+                    allowed_to_draw = false;
+
+                    // make goal white to show success
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(925, 50, 20, 20);
+
+                    // this is where the Apply/Save/Confirm button should become available
+                    // ********************************************************************
+                }
+                else {
+                    console.log("INVALID BAD");
+                    // erase line and return to last step
+
+                    // draw boilerplate and top&bottom boundaries
+                    drawBoundaryBoilerplate();
+                    ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
+
+                    // make valid top-boundary connectors green (avoid this by changing color before saving canvas)
+                    ctx.fillStyle = 'rgb(155, 245, 0)';
+                    ctx.fillRect(830, 0, 20, 50);
+                    ctx.fillRect(0, 430, 50, 20);
+
+                    // draw white dot
+                    ctx.fillStyle = 'white';
+                    ctx.beginPath();
+                    ctx.arc(80, 510, 10, 0, Math.PI*2, false);
+                    ctx.fill();
+
+                    // make goal new color (can be a flag in drawBoundaryBoilerplate())
+                    ctx.fillStyle = 'rgb(232, 0, 118)';
+                    ctx.fillRect(925, 50, 20, 20);
                 }
             }
         }
