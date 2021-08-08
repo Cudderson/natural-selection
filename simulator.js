@@ -2950,11 +2950,6 @@ function testBoundaries() {
                 ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
                 ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
 
-                // make valid top-boundary connectors green
-                ctx.fillStyle = 'rgb(155, 245, 0)';
-                ctx.fillRect(830, 0, 20, 50);
-                ctx.fillRect(0, 430, 50, 20);
-
                 // draw white dot
                 ctx.fillStyle = 'white';
                 ctx.beginPath();
@@ -3050,14 +3045,13 @@ function testBoundaries() {
                     console.log("valid boundary");
                     boundary_step = "top-boundary";
 
-                    // store bottom-boundary
-                    new_boundary.save('bottom');
-
                     // make connectors green
                     ctx.fillStyle = 'rgb(155, 245, 0)';
                     ctx.fillRect(950, 150, 50, 20);
                     ctx.fillRect(150, 550, 20, 50);
 
+                    // store bottom-boundary
+                    new_boundary.save('bottom');
                 }
                 else {
                     // invalid
@@ -3078,13 +3072,13 @@ function testBoundaries() {
                     console.log("valid boundary");
                     boundary_step = 'full-boundary';
 
-                    // store top-boundary
-                    new_boundary.save('top');
-
                     // make top-boundary connectors green
                     ctx.fillStyle = 'rgb(155, 245, 0)';
                     ctx.fillRect(830, 0, 20, 50);
                     ctx.fillRect(0, 430, 50, 20);
+
+                    // store top-boundary
+                    new_boundary.save('top');
 
                     // draw white dot for next step
                     ctx.fillStyle = 'white';
@@ -3096,7 +3090,7 @@ function testBoundaries() {
                     ctx.fillStyle = 'rgb(232, 0, 118)';
                     ctx.fillRect(925, 50, 20, 20);
 
-                    // update canvas data?
+                    // update canvas data
                     canvas = document.getElementById("main-canvas");
                     ctx = canvas.getContext("2d");
                     canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -3111,11 +3105,6 @@ function testBoundaries() {
 
                     // draw valid bottom-boundary
                     ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
-
-                    // make valid bottom-boundary connectors green
-                    ctx.fillStyle = 'rgb(155, 245, 0)';
-                    ctx.fillRect(950, 150, 50, 20);
-                    ctx.fillRect(150, 550, 20, 50);
 
                     // error message (not written yet)
                 }
@@ -3146,13 +3135,7 @@ function testBoundaries() {
 
                     // draw boilerplate and top&bottom boundaries
                     drawBoundaryBoilerplate();
-                    ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
                     ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
-
-                    // make valid top-boundary connectors green (avoid this by changing color before saving canvas)
-                    ctx.fillStyle = 'rgb(155, 245, 0)';
-                    ctx.fillRect(830, 0, 20, 50);
-                    ctx.fillRect(0, 430, 50, 20);
 
                     // draw white dot
                     ctx.fillStyle = 'white';
@@ -3194,11 +3177,6 @@ function testBoundaries() {
         drawBoundaryBoilerplate();
 
         ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
-
-        // // make connectors green (hopefully won't need to do this)
-        ctx.fillStyle = 'rgb(155, 245, 0)';
-        ctx.fillRect(830, 0, 20, 50);
-        ctx.fillRect(0, 430, 50, 20);
 
         // save full boundary
         new_boundary.save('full');
