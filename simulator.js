@@ -309,14 +309,102 @@ class Boundary {
         console.log(`Coordinates for Bottom Boundary: `);
 
         // this allows us to view coords as 2d arrays
-        for (var i = 0; i < this.bottom_boundary_coords.length; i++) {
-            console.log(this.bottom_boundary_coords[i]);
+        for (let k = 0; k < this.bottom_boundary_coords.length; k++) {
+            console.log(this.bottom_boundary_coords[k]);
         }
 
         console.log("Lengths:");
         console.log(`bottom: ${this.bottom_boundary_coords.length}, top: ${this.top_boundary_coords.length}`);
 
-        // now that we have the coordinates, let's plan how we will implement the plan.
+        // determine which boundary has more coordinates
+        var longest_boundary_coords;
+        var target_length;
+        var removal_factor;
+
+        if (this.top_boundary_coords.length > this.bottom_boundary_coords.length) {
+            // top longer
+            longest_boundary_coords = this.top_boundary_coords;
+            target_length = this.bottom_boundary_coords.length;
+            removal_factor = Math.ceil(this.top_boundary_coords.length / this.bottom_boundary_coords.length);
+        }
+        else if (this.bottom_boundary_coords.length > this.top_boundary_coords.length) {
+            // bottom longer
+            longest_boundary_coords = this.bottom_boundary_coords;
+            target_length = this.top_boundary_coords.length;
+            removal_factor = Math.ceil(this.bottom_boundary_coords.length / this.top_boundary_coords.length);
+        }
+        else {
+            // equal
+            // don't know how to handle yet
+        }
+
+        console.log(target_length);
+        console.log(removal_factor);
+
+        var num_coords_to_remove = longest_boundary_coords.length - target_length;
+        var percent_to_remove = num_coords_to_remove / longest_boundary_coords.length;
+        var random_percentage;
+        var removed = 0;
+        var kept = 0;
+
+        console.log(`# to remove: ${num_coords_to_remove}`);
+        console.log(`% to remove: ${percent_to_remove}`);
+
+        console.log(`Starting loop. Longest length = ${longest_boundary_coords.length}`)
+
+        var preserved_longest_length = longest_boundary_coords.length; // so that splicing doesn't affect array size
+
+        for (let i = 0; i < preserved_longest_length; i++) {
+            random_percentage = Math.random();
+
+            if (random_percentage < percent_to_remove) {
+                // remove
+                console.log(`Removed coord ${i}: ${random_percentage}`);
+
+                // need to remember the amount removed so that we remove the correct coord from the changing array
+                longest_boundary_coords.splice((i - removed), 1);
+                removed++;
+            }
+            else {
+                console.log(`Kept coord ${i}: ${random_percentage}`);
+                kept++;
+            }
+
+            if (longest_boundary_coords.length === target_length) {
+                console.log("BREAKING");
+                break;
+            }
+        }
+
+        console.log(`Loop finished. Longest new size: ${longest_boundary_coords.length}`);
+
+        console.log("Total Removed: " + removed);
+        console.log(`Total Kept: ${kept}`);
+        console.log(`% removed (desired): ${percent_to_remove}`);
+        console.log(`% removed (actual): ${removed / preserved_longest_length}`)
+
+        // now we should have an array that's 'close' to the length of the target
+        console.log(`New Length of longest array: ${longest_boundary_coords.length}`);
+        console.log(`Target Length: ${target_length}`);
+
+        // at this point, the longest_coordinate set is either the same size as the shortest, or slightly larger
+        // let's trim off the extra if there is any
+
+        if (longest_boundary_coords.length !== target_length) {
+            do {
+                // remove a random coordinate
+                var coordinate_to_remove = Math.floor(Math.random() * longest_boundary_coords.length);
+                longest_boundary_coords.splice(coordinate_to_remove, 1);
+            }
+            while (longest_boundary_coords.length !== target_length);
+        }
+
+        console.log("We should now have to coordinate sets of the same length");
+        console.log(`Longest: ${longest_boundary_coords.length}`);
+        console.log(target_length);
+
+        // works up to here!
+        // I think we still need to assign the modified coordinate_array to the class attribute
     }
 }
 
@@ -3190,7 +3278,7 @@ function enterBoundaryCreationMode() {
                 else {
                     // reset top boundary coords when illegal line drawn
                     new_boundary.top_boundary_coords = [];
-                    
+
                     // error message
                 }
             }
