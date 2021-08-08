@@ -148,7 +148,7 @@ class Boundary {
         this.full_boundary = new Image();
     }
 
-    toggleBoundaryMode() {
+    applyBoundaryModeStyles() {
         // turn off settings, turn on canvas
         var canvas_container = document.getElementsByClassName("canvas-container")[0];
         var settings_container = document.getElementsByClassName("settings-container")[0];
@@ -194,7 +194,20 @@ class Boundary {
         else if (boundary_type === 'full') {
             // save full
             console.log("saving full boundary");
-            // we should have to do any extra work here. By this point, the boundary should be as-is
+            drawBoundaryBoilerplate();
+
+            ctx.drawImage(this.top_boundary, 0, 0, canvas.width, canvas.height);
+    
+            // remove white dot and revert goal color
+            ctx.fillStyle = 'rgb(155, 245, 0)';
+            ctx.fillRect(925, 50, 20, 20);
+    
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(80, 510, 12, 0, Math.PI*2, false);
+            ctx.fill();
+
+            // save image as full-boundary
             this.full_boundary.src = canvas.toDataURL("image/png");
         }
     }
@@ -297,6 +310,8 @@ class Boundary {
         // ** WHEN THIS FUNCTION IS CALLED, ARRAYS OF LINE COORDS SHOULD ALREADY EXIST **
     }
 }
+
+// class Paintbrush() {}
 
 // Main Drivers
 async function runPreSimAnimations() {
@@ -916,7 +931,7 @@ async function playTitleScreenAnimation() {
         }
         else if (status === "TEST BOUNDARY MODE") {
             console.log("Entering Boundary Mode");
-            testBoundaries();
+            enterBoundaryCreationMode();
         }
     }
     while (simulation_started === false && status === "Keep Playing");
@@ -2733,11 +2748,11 @@ function displaySettingsForm() {
     settings_container.style.display = 'block';
 
     // boundaries
-    // listen for boundary checkbox to trigger testBoundaries()
+    // listen for boundary checkbox to trigger enterBoundaryCreationMode()
     var boundary_setting = document.getElementById("boundary-checkbox");
     boundary_setting.addEventListener("change", function() {
         if (this.checked) {
-            testBoundaries();
+            enterBoundaryCreationMode();
         }
         else {
             console.log("Checkbox: unchecked");
@@ -2993,19 +3008,23 @@ function updateMousePosition(event) {
 }
 
 // this function will be refactored/cleaned once proven working
-function testBoundaries() {
+// this code should either simply prepare the user for boundary mode, or perform all boundary drawing/validation
+// think how this will be worked into the main flow
+// could be:
+// enterBoundaryCreationMode >>> applyBoundaryModeStyles >>> createBoundaries, but it's good enough for now
+function enterBoundaryCreationMode() {
 
-    // planning for class method translation
+
+    // drawing flag and step tracker
+    var allowed_to_draw = false; // could be method of Paintbrush
+    var boundary_step = "bottom-boundary"; // could be attribute of Boundary? idk..
 
     // create new boundary
     var new_boundary = new Boundary();
 
-    new_boundary.toggleBoundaryMode();
+    new_boundary.applyBoundaryModeStyles();
 
-    // drawing flag and step tracker
-    // remember we have class Boundary too
-    var allowed_to_draw = false;
-    var boundary_step = "bottom-boundary";
+    // here and down would be in createBoundaries() (we would define boundary_step in createBoundaries()) ************************
 
     // belongs to class Painbrush, not Boundary
     function draw(event) {
@@ -3066,7 +3085,7 @@ function testBoundaries() {
     }
 
     // will belong to class Paintbrush, not Boundary
-    function checkDraw(event) {
+    function requestDrawingPermission(event) {
         // this function is called on mousedown and will update the drawing flag that gives
         // users ability to draw if legal
         console.log("User would like to draw.");
@@ -3176,16 +3195,6 @@ function testBoundaries() {
                     // draw boilerplate and top&bottom boundaries
                     drawBoundaryBoilerplate();
                     ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
-        
-                    // draw white dot
-                    ctx.fillStyle = 'white';
-                    ctx.beginPath();
-                    ctx.arc(80, 510, 10, 0, Math.PI*2, false);
-                    ctx.fill();
-        
-                    // make goal new color (can be a flag in drawBoundaryBoilerplate())
-                    ctx.fillStyle = 'rgb(232, 0, 118)';
-                    ctx.fillRect(925, 50, 20, 20);
                 }
             }
         }
@@ -3196,7 +3205,7 @@ function testBoundaries() {
     
     // respond to each event individually (pass event for mouse position)
     canvas.addEventListener('mouseenter', updateMousePosition);
-    canvas.addEventListener('mousedown', checkDraw);
+    canvas.addEventListener('mousedown', requestDrawingPermission);
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', validateBoundaryConnection);
 
@@ -3213,11 +3222,9 @@ function testBoundaries() {
 
         // to validate, we should just make sure that our createCheckpoints() function worked, but we don't have that yet.
 
-        // (remove when refactored)
-        // remove white dot, line and return goal to normal color
-        drawBoundaryBoilerplate();
 
-        ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
+        // ============== makes sense to call new_boundary.createCheckpoints() here =====================
+        
 
         // save full boundary
         new_boundary.save('full');
