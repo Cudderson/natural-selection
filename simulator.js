@@ -16,8 +16,6 @@ var dialogue = false;
 
 // boundary globals
 var custom_boundary;
-var top_boundary_coords = [];
-var bottom_boundary_coords = [];
 
 // flags
 var simulation_started = false;
@@ -146,6 +144,8 @@ class Boundary {
         this.top_boundary = new Image();
         this.bottom_boundary = new Image();
         this.full_boundary = new Image();
+        this.top_boundary_coords = [];
+        this.bottom_boundary_coords = [];
     }
 
     applyBoundaryModeStyles() {
@@ -305,9 +305,18 @@ class Boundary {
         // this should be visual at first so I can see what it's doing.
         // for that, I'll need to draw the boundary over the canvas, then animate(optional) my algorithm.
         console.log("createCheckpoints() called");
-        console.log(custom_boundary.boundary);
 
-        // ** WHEN THIS FUNCTION IS CALLED, ARRAYS OF LINE COORDS SHOULD ALREADY EXIST **
+        console.log(`Coordinates for Bottom Boundary: `);
+
+        // this allows us to view coords as 2d arrays
+        for (var i = 0; i < this.bottom_boundary_coords.length; i++) {
+            console.log(this.bottom_boundary_coords[i]);
+        }
+
+        console.log("Lengths:");
+        console.log(`bottom: ${this.bottom_boundary_coords.length}, top: ${this.top_boundary_coords.length}`);
+
+        // now that we have the coordinates, let's plan how we will implement the plan.
     }
 }
 
@@ -3004,7 +3013,7 @@ function updateMousePosition(event) {
     coordinates['x'] = event.clientX - rect.left;
     coordinates['y'] = event.clientY - rect.top;
 
-    console.log(coordinates);
+    // console.log(coordinates);
 }
 
 // this function will be refactored/cleaned once proven working
@@ -3073,15 +3082,23 @@ function enterBoundaryCreationMode() {
         else {
             ctx.strokeStyle = 'rgb(155, 245, 0)'; //green 
             ctx.lineWidth = 20;
+
+            // store coordinates here while drawing boundaries
+            if (boundary_step === 'bottom-boundary') {
+                // save to bottom coords
+                new_boundary.bottom_boundary_coords.push([coordinates['x'], coordinates['y']]);
+            }
+            else {
+                // save to top coords
+                new_boundary.top_boundary_coords.push([coordinates['x'], coordinates['y']]);
+            }
+
         }
 
         ctx.lineCap = 'round';
         ctx.lineTo(coordinates['x'], coordinates['y']);
         ctx.stroke();
         ctx.closePath();
-
-        // save coordiantes here **
-        // top_boundary_coords.push([coordinates['x'], coordinates['y']]);
     }
 
     // will belong to class Paintbrush, not Boundary
@@ -3154,6 +3171,9 @@ function enterBoundaryCreationMode() {
                     boundary_step = "top-boundary";
                 }
                 else {
+                    // erase bottom-boundary coords when illegal line drawn
+                    new_boundary.bottom_boundary_coords = [];
+
                     console.log("invalid");
                     // error message 
                 }
@@ -3168,6 +3188,9 @@ function enterBoundaryCreationMode() {
                     boundary_step = 'full-boundary';
                 }
                 else {
+                    // reset top boundary coords when illegal line drawn
+                    new_boundary.top_boundary_coords = [];
+                    
                     // error message
                 }
             }
@@ -3224,7 +3247,7 @@ function enterBoundaryCreationMode() {
 
 
         // ============== makes sense to call new_boundary.createCheckpoints() here =====================
-        
+        // we will call it after saving for now, to see visuals better
 
         // save full boundary
         new_boundary.save('full');
@@ -3232,8 +3255,11 @@ function enterBoundaryCreationMode() {
         // still using custom_boundary global, I don't like it
         custom_boundary = new_boundary;
 
+        // ===== this should be called before save method when complete =====
+        new_boundary.createCheckpoints();
+
         // return to settings
-        displaySettingsForm();
+        // displaySettingsForm(); turned off while testing checkpoints
     });
 }
 
