@@ -168,10 +168,6 @@ class Boundary {
         }
     }
 
-    validate() {
-        console.log("unused class method");
-    }
-
     // called after validatedBoundary() returns true
     createCheckpoints() {
         // this should be visual at first so I can see what it's doing.
@@ -2871,6 +2867,9 @@ function drawBoundaryBoilerplate() {
 // this function will be refactored/cleaned once proven working
 function testBoundaries() {
 
+    // planning for class method translation
+
+    // METHOD: toggleBoundaryMode()
     // turn off settings, turn on canvas
     var canvas_container = document.getElementsByClassName("canvas-container")[0];
     var settings_container = document.getElementsByClassName("settings-container")[0];
@@ -2896,6 +2895,7 @@ function testBoundaries() {
     stop_btn.style.display = "block";
 
     save_bounds_btn.style.display = "block";
+    // =====================================
 
     // Stores the position of the cursor
     let coordinates = {'x':0 , 'y':0}; 
