@@ -199,16 +199,6 @@ class Boundary {
         }
     }
 
-    // called after validatedBoundary() returns true
-    createCheckpoints() {
-        // this should be visual at first so I can see what it's doing.
-        // for that, I'll need to draw the boundary over the canvas, then animate(optional) my algorithm.
-        console.log("createCheckpoints() called");
-        console.log(custom_boundary.boundary);
-
-        // ** WHEN THIS FUNCTION IS CALLED, ARRAYS OF LINE COORDS SHOULD ALREADY EXIST **
-    }
-
     validateBottom(event) {
         console.log("validating bottom boundary...");
 
@@ -298,6 +288,14 @@ class Boundary {
         }
     }
 
+    createCheckpoints() {
+        // this should be visual at first so I can see what it's doing.
+        // for that, I'll need to draw the boundary over the canvas, then animate(optional) my algorithm.
+        console.log("createCheckpoints() called");
+        console.log(custom_boundary.boundary);
+
+        // ** WHEN THIS FUNCTION IS CALLED, ARRAYS OF LINE COORDS SHOULD ALREADY EXIST **
+    }
 }
 
 // Main Drivers
@@ -315,8 +313,6 @@ async function runPreSimAnimations() {
     await sleep(4000);
     await fadeOutExplanationAndGoal();
     await sleep(1000);
-    // anything else needed before core animation runs
-    // testing if this is appropriate
     await fadeInStats(); 
     await sleep(1000);
 
@@ -3069,6 +3065,7 @@ function testBoundaries() {
         // top_boundary_coords.push([coordinates['x'], coordinates['y']]);
     }
 
+    // will belong to class Paintbrush, not Boundary
     function checkDraw(event) {
         // this function is called on mousedown and will update the drawing flag that gives
         // users ability to draw if legal
@@ -3201,7 +3198,6 @@ function testBoundaries() {
     canvas.addEventListener('mouseenter', updateMousePosition);
     canvas.addEventListener('mousedown', checkDraw);
     canvas.addEventListener('mousemove', draw);
-    // function has similar name to class method, fix when combined later
     canvas.addEventListener('mouseup', validateBoundaryConnection);
 
     // make class method
