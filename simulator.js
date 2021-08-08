@@ -301,6 +301,40 @@ class Boundary {
         }
     }
 
+    determineLongestBoundary() {
+        // determine which boundary has more coordinates
+        // var longest_boundary_coords;
+        // var target_length;
+        // var removal_factor;
+        var longest;
+
+        if (this.top_boundary_coords.length > this.bottom_boundary_coords.length) {
+            // top longer
+            longest = "top";
+            // longest_boundary_coords = this.top_boundary_coords;
+            // target_length = this.bottom_boundary_coords.length;
+            // removal_factor = Math.ceil(this.top_boundary_coords.length / this.bottom_boundary_coords.length);
+        }
+        else if (this.bottom_boundary_coords.length > this.top_boundary_coords.length) {
+            // bottom longer
+            longest = 'bottom';
+            // longest_boundary_coords = this.bottom_boundary_coords;
+            // target_length = this.top_boundary_coords.length;
+            // removal_factor = Math.ceil(this.bottom_boundary_coords.length / this.top_boundary_coords.length);
+        }
+        else {
+            longest = 'neither';
+            // equal
+            // don't know how to handle yet
+        }
+
+        // console.log(target_length);
+        // console.log(removal_factor);
+
+        return longest;
+    }
+
+    // refactoring
     createCheckpoints() {
         // this should be visual at first so I can see what it's doing.
         // for that, I'll need to draw the boundary over the canvas, then animate(optional) my algorithm.
@@ -316,30 +350,26 @@ class Boundary {
         console.log("Lengths:");
         console.log(`bottom: ${this.bottom_boundary_coords.length}, top: ${this.top_boundary_coords.length}`);
 
-        // determine which boundary has more coordinates
+        // call here (return string)
+        var longest_boundary = this.determineLongestBoundary();
         var longest_boundary_coords;
         var target_length;
-        var removal_factor;
+        // var removal_factor; // not used?
 
-        if (this.top_boundary_coords.length > this.bottom_boundary_coords.length) {
-            // top longer
+        // possibly handle this in determineLongest() so we can declare: longest_boundary_coords, target_length = determineLongestBoundary()
+        if (longest_boundary === 'top') {
             longest_boundary_coords = this.top_boundary_coords;
             target_length = this.bottom_boundary_coords.length;
-            removal_factor = Math.ceil(this.top_boundary_coords.length / this.bottom_boundary_coords.length);
         }
-        else if (this.bottom_boundary_coords.length > this.top_boundary_coords.length) {
-            // bottom longer
+        else if (longest_boundary === 'bottom') {
             longest_boundary_coords = this.bottom_boundary_coords;
             target_length = this.top_boundary_coords.length;
-            removal_factor = Math.ceil(this.bottom_boundary_coords.length / this.top_boundary_coords.length);
         }
         else {
-            // equal
-            // don't know how to handle yet
+            // 'neither' returned
         }
 
-        console.log(target_length);
-        console.log(removal_factor);
+        /// ===== stopped refactoring here =====
 
         var num_coords_to_remove = longest_boundary_coords.length - target_length;
         var percent_to_remove = num_coords_to_remove / longest_boundary_coords.length;
