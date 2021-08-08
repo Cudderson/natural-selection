@@ -44,6 +44,9 @@ var canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.heigh
 // frame rate
 const FPS = 30;
 
+// Stores the position of the cursor
+let coordinates = {'x':0 , 'y':0};
+
 class Organism {
     constructor (gender, x, y, ctx) {
         this.gender = gender;
@@ -145,6 +148,34 @@ class Boundary {
         this.full_boundary = new Image();
     }
 
+    toggleBoundaryMode() {
+        // turn off settings, turn on canvas
+        var canvas_container = document.getElementsByClassName("canvas-container")[0];
+        var settings_container = document.getElementsByClassName("settings-container")[0];
+
+        canvas_container.style.display = 'block';
+        settings_container.style.display = 'none';
+
+        drawBoundaryBoilerplate();
+
+        // html btns
+        var settings_btn = document.getElementsByClassName("settings-btn")[0];
+        var start_btn = document.getElementsByClassName("start-btn")[0];
+        var stop_btn = document.getElementsByClassName("stop-btn")[0];
+        var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
+
+        settings_btn.style.display = 'none';
+        start_btn.style.display = 'none';
+
+        // revert when leaving boundary mode
+        stop_btn.style.gridColumn = "2 / 3";
+        stop_btn.style.width = "100%";
+        stop_btn.innerHTML = "Cancel";
+        stop_btn.style.display = "block";
+
+        save_bounds_btn.style.display = "block";
+    }
+
     save(boundary_type) {
         
         var canvas = document.getElementById("main-canvas"); // do we need to declare these?
@@ -176,6 +207,95 @@ class Boundary {
         console.log(custom_boundary.boundary);
 
         // ** WHEN THIS FUNCTION IS CALLED, ARRAYS OF LINE COORDS SHOULD ALREADY EXIST **
+    }
+
+    validateBottom(event) {
+        console.log("validating bottom boundary...");
+
+        updateMousePosition(event);
+
+        // check if boundary ended on endpoint
+        // endpoint: ctx.fillRect(950, 150, 50, 20);
+        if (coordinates['x'] >= 950 && coordinates['y'] >= 150 && coordinates['y'] <= 200) {
+            // valid, update boundary step
+            console.log("valid boundary");
+
+            // make connectors green
+            ctx.fillStyle = 'rgb(155, 245, 0)';
+            ctx.fillRect(950, 150, 50, 20);
+            ctx.fillRect(150, 550, 20, 50);
+
+            return true;
+        }
+        else {
+            // invalid
+            console.log("Invalid boundary.");
+            // redraw boilerplate
+            drawBoundaryBoilerplate();
+            // error message (not written yet);
+            return false;
+        }   
+    }
+
+    validateTop(event) {
+        console.log("validating top-boundary...");
+
+        updateMousePosition(event);
+
+        // check if boundary on endpoint
+        // endpoint: (ctx.fillRect(830, 0, 20, 50))
+        if (coordinates['x'] >= 830 && coordinates['x'] <= 850 && coordinates['y'] <= 50) {
+            // valid, update boundary step
+            console.log("valid boundary");
+
+            // make top-boundary connectors green
+            ctx.fillStyle = 'rgb(155, 245, 0)';
+            ctx.fillRect(830, 0, 20, 50);
+            ctx.fillRect(0, 430, 50, 20);
+
+            // draw white dot for next step
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(80, 510, 10, 0, Math.PI*2, false);
+            ctx.fill();
+
+            // make goal new color (can be a flag in drawBoundaryBoilerplate())
+            ctx.fillStyle = 'rgb(232, 0, 118)';
+            ctx.fillRect(925, 50, 20, 20);
+
+            // update canvas data
+            canvas = document.getElementById("main-canvas");
+            ctx = canvas.getContext("2d");
+            canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+            return true;
+        }
+        else {
+            // invalid
+            console.log("Invalid boundary.");
+            // redraw boilerplate
+            drawBoundaryBoilerplate();
+
+            // draw valid bottom-boundary
+            ctx.drawImage(this.bottom_boundary, 0, 0, canvas.width, canvas.height);
+
+            // error message (not written yet)
+
+            return false;
+        }
+    }
+
+    validateFull() {
+        // check if user ended line on goal
+        // Goal(925, 50, 20, ctx);
+        if (coordinates['x'] >= 925 && coordinates['x'] <= 945 &&
+            coordinates['y'] >= 50 && coordinates['y'] <= 70) {
+
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
 }
@@ -2829,6 +2949,7 @@ function getUserDecision() {
 
 // TESTING BOUNDARIES ==============================================================
 
+// could make class method
 function drawBoundaryBoilerplate() {
     // ** DRAW BOUNDARY BOILERPLATE
 
@@ -2864,62 +2985,31 @@ function drawBoundaryBoilerplate() {
     // ** END BOUNDARY BOILERPLATE **
 }
 
+// would belong to class Paintbrush, not Boundary
+function updateMousePosition(event) {
+    let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
+
+    // store current mouse position
+    coordinates['x'] = event.clientX - rect.left;
+    coordinates['y'] = event.clientY - rect.top;
+
+    console.log(coordinates);
+}
+
 // this function will be refactored/cleaned once proven working
 function testBoundaries() {
 
     // planning for class method translation
 
-    // METHOD: toggleBoundaryMode()
-    // turn off settings, turn on canvas
-    var canvas_container = document.getElementsByClassName("canvas-container")[0];
-    var settings_container = document.getElementsByClassName("settings-container")[0];
+    // create new boundary
+    var new_boundary = new Boundary();
 
-    canvas_container.style.display = 'block';
-    settings_container.style.display = 'none';
-
-    drawBoundaryBoilerplate();
-
-    // html btns
-    var settings_btn = document.getElementsByClassName("settings-btn")[0];
-    var start_btn = document.getElementsByClassName("start-btn")[0];
-    var stop_btn = document.getElementsByClassName("stop-btn")[0];
-    var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
-
-    settings_btn.style.display = 'none';
-    start_btn.style.display = 'none';
-
-     // revert when leaving boundary mode
-    stop_btn.style.gridColumn = "2 / 3";
-    stop_btn.style.width = "100%";
-    stop_btn.innerHTML = "Cancel";
-    stop_btn.style.display = "block";
-
-    save_bounds_btn.style.display = "block";
-    // =====================================
-
-    // Stores the position of the cursor
-    let coordinates = {'x':0 , 'y':0}; 
+    new_boundary.toggleBoundaryMode();
 
     // drawing flag and step tracker
     // remember we have class Boundary too
     var allowed_to_draw = false;
     var boundary_step = "bottom-boundary";
-
-    // create new boundary
-    var new_boundary = new Boundary();
-
-    // would belong to class Paintbrush, not Boundary
-    function updateMousePosition(event) {
-        let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
-
-        // store current mouse position
-        let x = event.clientX - rect.left;
-        let y = event.clientY - rect.top;
-
-        coordinates['x'] = x;
-        coordinates['y'] = y;
-        console.log(coordinates);
-    }
 
     // belongs to class Painbrush, not Boundary
     function draw(event) {
@@ -2984,6 +3074,9 @@ function testBoundaries() {
         // users ability to draw if legal
         console.log("User would like to draw.");
         
+        // need to grab coords since updateMousePosition() can't update function var anymore.
+        // possible solution: global coordinates variable
+        // trying that now.
         updateMousePosition(event);
 
         if (boundary_step === 'bottom-boundary') {
@@ -2994,7 +3087,8 @@ function testBoundaries() {
                 allowed_to_draw = true;
             }
             else {
-                console.log("Not allowed to draw, mouse not on connector.");
+                console.log("Not allowed to draw, mouse not on connector:");
+                console.log(coordinates);
                 allowed_to_draw = false;
             }
         }
@@ -3029,98 +3123,47 @@ function testBoundaries() {
     }
 
     // break this down into smaller function when all working
+    // should this whole thing be a class method?
     function validateBoundaryConnection(event) {
         console.log("mouseup heard");
         // should make sure that the user was allowed to draw, otherwise return
         if (allowed_to_draw) {
             // check boundary step
             if (boundary_step === 'bottom-boundary') {
-                console.log("validating bottom boundary...");
-                updateMousePosition(event);
+                let bottom_boundary_is_valid = new_boundary.validateBottom(event);
 
-                // check if boundary ended on endpoint
-                // endpoint: ctx.fillRect(950, 150, 50, 20);
-                if (coordinates['x'] >= 950 && coordinates['y'] >= 150 && coordinates['y'] <= 200) {
-                    // valid, update boundary step
-                    console.log("valid boundary");
-                    boundary_step = "top-boundary";
-
-                    // make connectors green
-                    ctx.fillStyle = 'rgb(155, 245, 0)';
-                    ctx.fillRect(950, 150, 50, 20);
-                    ctx.fillRect(150, 550, 20, 50);
-
-                    // store bottom-boundary
+                if (bottom_boundary_is_valid) {
+                    // update step and store boundary
                     new_boundary.save('bottom');
+                    boundary_step = "top-boundary";
                 }
                 else {
-                    // invalid
-                    console.log("Invalid boundary.");
-                    // redraw boilerplate
-                    drawBoundaryBoilerplate();
-                    // error message (not written yet);
-                }   
+                    console.log("invalid");
+                    // error message 
+                }
             }
             else if (boundary_step === "top-boundary") {
-                console.log("validating top-boundary...");
-                updateMousePosition(event);
+                let top_boundary_is_valid = new_boundary.validateTop(event);
 
-                // check if boundary on endpoint
-                // endpoint: (ctx.fillRect(830, 0, 20, 50))
-                if (coordinates['x'] >= 830 && coordinates['x'] <= 850 && coordinates['y'] <= 50) {
-                    // valid, update boundary step
-                    console.log("valid boundary");
-                    boundary_step = 'full-boundary';
-
-                    // make top-boundary connectors green
-                    ctx.fillStyle = 'rgb(155, 245, 0)';
-                    ctx.fillRect(830, 0, 20, 50);
-                    ctx.fillRect(0, 430, 50, 20);
-
+                if (top_boundary_is_valid) {
+                    // update step and store boundary
                     // store top-boundary
                     new_boundary.save('top');
-
-                    // draw white dot for next step
-                    ctx.fillStyle = 'white';
-                    ctx.beginPath();
-                    ctx.arc(80, 510, 10, 0, Math.PI*2, false);
-                    ctx.fill();
-
-                    // make goal new color (can be a flag in drawBoundaryBoilerplate())
-                    ctx.fillStyle = 'rgb(232, 0, 118)';
-                    ctx.fillRect(925, 50, 20, 20);
-
-                    // update canvas data
-                    canvas = document.getElementById("main-canvas");
-                    ctx = canvas.getContext("2d");
-                    canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-                    allowed_to_draw = false; // unsure
+                    boundary_step = 'full-boundary';
                 }
                 else {
-                    // invalid
-                    console.log("Invalid boundary.");
-                    // redraw boilerplate
-                    drawBoundaryBoilerplate();
-
-                    // draw valid bottom-boundary
-                    ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
-
-                    // error message (not written yet)
+                    // error message
                 }
             }
             else if (boundary_step === 'full-boundary') {
-                // check if user ended line on goal
-                // Goal(925, 50, 20, ctx);
-                if (coordinates['x'] >= 925 && coordinates['x'] <= 945 &&
-                    coordinates['y'] >= 50 && coordinates['y'] <= 70) {
+                // hereeeee
+                let full_boundary_is_valid = new_boundary.validateFull();
 
-                    console.log("VALID NICE");
-
-                    // don't let user draw anymore
+                if (full_boundary_is_valid) {
+                    // update step
                     boundary_step = 'confirmation';
                     allowed_to_draw = false;
-
+                    
                     // make goal white to show success
                     ctx.fillStyle = 'white';
                     ctx.fillRect(925, 50, 20, 20);
@@ -3130,19 +3173,19 @@ function testBoundaries() {
                     save_bounds_btn.style.pointerEvents = 'auto';
                 }
                 else {
-                    console.log("INVALID BAD");
-                    // erase line and return to last step
+                    // error message
 
+                    // erase line and return to last step
                     // draw boilerplate and top&bottom boundaries
                     drawBoundaryBoilerplate();
                     ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
-
+        
                     // draw white dot
                     ctx.fillStyle = 'white';
                     ctx.beginPath();
                     ctx.arc(80, 510, 10, 0, Math.PI*2, false);
                     ctx.fill();
-
+        
                     // make goal new color (can be a flag in drawBoundaryBoilerplate())
                     ctx.fillStyle = 'rgb(232, 0, 118)';
                     ctx.fillRect(925, 50, 20, 20);
@@ -3161,6 +3204,8 @@ function testBoundaries() {
     // function has similar name to class method, fix when combined later
     canvas.addEventListener('mouseup', validateBoundaryConnection);
 
+    // make class method
+    let save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
     save_bounds_btn.addEventListener("click", function() {
         console.log("Saving Custom Boundaries");
 
