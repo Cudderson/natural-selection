@@ -1,22 +1,10 @@
 document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
-// testing boundaries, will revert when done
-// document.addEventListener("DOMContentLoaded", function() {
-//     if (!testing_boundaries) {
-//         playTitleScreenAnimation;
-//     }
-//     else {
-//         testBoundaries();
-//     }
-// });
-
-// const testing_boundaries = true;
-
 // starting coordinates for organisms and goal
 const INITIAL_X = 500; 
 const INITIAL_Y = 500;
 const GOAL_X_POS = 500;
-const GOAL_Y_POS = 200;
+const GOAL_Y_POS = 50;
 
 // organism global default settings
 var TOTAL_ORGANISMS = 100;
@@ -28,8 +16,6 @@ var dialogue = false;
 
 // boundary globals
 var custom_boundary;
-var top_boundary_coords = [];
-var bottom_boundary_coords = [];
 
 // flags
 var simulation_started = false;
@@ -50,8 +36,14 @@ var offspring_organisms = [];
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
 
+// ********** name conflicts with canvas_data in hitDetectionTest, need to fix
+var canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
 // frame rate
 const FPS = 30;
+
+// Stores the position of the cursor
+let coordinates = {'x':0 , 'y':0};
 
 class Organism {
     constructor (gender, x, y, ctx) {
@@ -137,75 +129,331 @@ class Goal {
         average_fitness = Number(average_fitness).toFixed(2);
         var population_size = organisms.length;
         this.ctx.fillStyle = 'rgba(155, 245, 0, 1)';
-        this.ctx.font = "26px arial";
-        this.ctx.fillText('Generation:', 10, 520);
-        this.ctx.fillText(generation_count.toString(), 210, 520);
-        this.ctx.fillText('Population Size:', 10, 550);
-        this.ctx.fillText(population_size.toString(), 210, 550);
-        this.ctx.fillText('Average Fitness:', 10, 580);
-        this.ctx.fillText(average_fitness.toString(), 210, 580);
+        this.ctx.font = "22px arial";
+        this.ctx.fillText('Generation:', 740, 535);
+        this.ctx.fillText(generation_count.toString(), 940, 535);
+        this.ctx.fillText('Population Size:', 740, 560);
+        this.ctx.fillText(population_size.toString(), 940, 560);
+        this.ctx.fillText('Average Fitness:', 740, 585);
+        this.ctx.fillText(average_fitness.toString(), 940, 585);
     }
 }
 
 class Boundary {
     constructor() {
-        this.boundary = new Image();
+        this.top_boundary = new Image();
+        this.bottom_boundary = new Image();
+        this.full_boundary = new Image();
+        this.top_boundary_coordinates = [];
+        this.bottom_boundary_coordinates = [];
     }
 
-    save() {
-        // should save the user's drawing and return to settings page (title animation for now)
+    applyBoundaryModeStyles() {
+        // turn off settings, turn on canvas
+        var canvas_container = document.getElementsByClassName("canvas-container")[0];
+        var settings_container = document.getElementsByClassName("settings-container")[0];
 
+        canvas_container.style.display = 'block';
+        settings_container.style.display = 'none';
+
+        drawBoundaryBoilerplate();
+
+        // html btns
+        var settings_btn = document.getElementsByClassName("settings-btn")[0];
+        var start_btn = document.getElementsByClassName("start-btn")[0];
+        var stop_btn = document.getElementsByClassName("stop-btn")[0];
+        var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
+
+        settings_btn.style.display = 'none';
+        start_btn.style.display = 'none';
+
+        // revert when leaving boundary mode
+        stop_btn.style.gridColumn = "2 / 3";
+        stop_btn.style.width = "100%";
+        stop_btn.innerHTML = "Cancel";
+        stop_btn.style.display = "block";
+
+        save_bounds_btn.style.display = "block";
+    }
+
+    save(boundary_type) {
+        
         var canvas = document.getElementById("main-canvas"); // do we need to declare these?
         var ctx = canvas.getContext('2d');
 
-        // var submitted_boundary = canvas.toDataURL("image/png"); <<< this will be used eventually
-        var submitted_boundary = true; // <<< this is a placeholder
+        var boundary_to_save = canvas.toDataURL("image/png");
 
-        var boundary_is_valid = this.validate(submitted_boundary);
+        if (boundary_type === 'bottom') {
+            console.log("saving bottom-boundary");
+            this.bottom_boundary.src = boundary_to_save;
+        }
+        else if (boundary_type === 'top') {
+            console.log("saving top boundary");
+            this.top_boundary.src = boundary_to_save;
+        }
+        else if (boundary_type === 'full') {
+            // save full
+            console.log("saving full boundary");
+            drawBoundaryBoilerplate();
 
-        if (boundary_is_valid) {
-            // save boundary to object and global
+            ctx.drawImage(this.top_boundary, 0, 0, canvas.width, canvas.height);
+    
+            // remove white dot and revert goal color
+            ctx.fillStyle = 'rgb(155, 245, 0)';
+            ctx.fillRect(925, 50, 20, 20);
+    
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(80, 510, 12, 0, Math.PI*2, false);
+            ctx.fill();
 
-            // save canvas to src attribute of Boundary object 'boundary' attribute (security error if not run on server (tainted canvas))
-            this.boundary.src = canvas.toDataURL("image/png");
+            // save image as full-boundary
+            this.full_boundary.src = canvas.toDataURL("image/png");
+        }
+    }
 
-            // hitDetectionTest() doesn't work with class Boundary yet, uses global variable. (remove when updated)
-            custom_boundary = this;
+    validateBottom(event) {
+        console.log("validating bottom boundary...");
 
-            console.log("Bounds Saved!");
+        updateMousePosition(event);
+
+        // check if boundary ended on endpoint
+        // endpoint: ctx.fillRect(950, 150, 50, 20);
+        if (coordinates['x'] >= 950 && coordinates['y'] >= 150 && coordinates['y'] <= 200) {
+            // valid, update boundary step
+            console.log("valid boundary");
+
+            // make connectors green
+            ctx.fillStyle = 'rgb(155, 245, 0)';
+            ctx.fillRect(950, 150, 50, 20);
+            ctx.fillRect(150, 550, 20, 50);
 
             return true;
         }
         else {
-            // reject
+            // invalid
+            console.log("Invalid boundary.");
+            // redraw boilerplate
+            drawBoundaryBoilerplate();
+            // error message (not written yet);
             return false;
-        }
+        }   
     }
 
-    validate(boundary) {
-        // validate or reject user boundary
-        // since there's no rules yet, accept boolean for testing
-        if (boundary === true) {
-            // accept
+    validateTop(event) {
+        console.log("validating top-boundary...");
+
+        updateMousePosition(event);
+
+        // check if boundary on endpoint
+        // endpoint: (ctx.fillRect(830, 0, 20, 50))
+        if (coordinates['x'] >= 830 && coordinates['x'] <= 850 && coordinates['y'] <= 50) {
+            // valid, update boundary step
+            console.log("valid boundary");
+
+            // make top-boundary connectors green
+            ctx.fillStyle = 'rgb(155, 245, 0)';
+            ctx.fillRect(830, 0, 20, 50);
+            ctx.fillRect(0, 430, 50, 20);
+
+            // draw white dot for next step
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(80, 510, 10, 0, Math.PI*2, false);
+            ctx.fill();
+
+            // make goal new color (can be a flag in drawBoundaryBoilerplate())
+            ctx.fillStyle = 'rgb(232, 0, 118)';
+            ctx.fillRect(925, 50, 20, 20);
+
+            // update canvas data
+            canvas = document.getElementById("main-canvas");
+            ctx = canvas.getContext("2d");
+            canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
             return true;
         }
         else {
-            // reject
+            // invalid
+            console.log("Invalid boundary.");
+            // redraw boilerplate
+            drawBoundaryBoilerplate();
+
+            // draw valid bottom-boundary
+            ctx.drawImage(this.bottom_boundary, 0, 0, canvas.width, canvas.height);
+
+            // error message (not written yet)
+
             return false;
         }
     }
 
-    // called after validatedBoundary() returns true
+    validateFull() {
+        // check if user ended line on goal
+        // Goal(925, 50, 20, ctx);
+        if (coordinates['x'] >= 925 && coordinates['x'] <= 945 &&
+            coordinates['y'] >= 50 && coordinates['y'] <= 70) {
+
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    determineLongestBoundary() {
+        // determine which boundary has more coordinates
+        let longest_text;
+        let longest_boundary;
+        let target_length;
+
+        if (this.top_boundary_coordinates.length > this.bottom_boundary_coordinates.length) {
+            // top longer
+            longest_text = 'top';
+            longest_boundary = this.top_boundary_coordinates;
+            target_length = this.bottom_boundary_coordinates.length;
+        }
+        else if (this.bottom_boundary_coordinates.length > this.top_boundary_coordinates.length) {
+            // bottom longer
+            longest_text = 'bottom';
+            longest_boundary = this.bottom_boundary_coordinates;
+            target_length = this.top_boundary_coordinates.length;
+        }
+        else {
+            longest_text = 'neither';
+        }
+
+        return [longest_text, longest_boundary, target_length];
+    }
+
+    trimLongestBoundaryCoordinates(longest_boundary_coordinates, target_length) {
+        var num_coords_to_remove = longest_boundary_coordinates.length - target_length;
+        var percent_of_coords_to_remove = num_coords_to_remove / longest_boundary_coordinates.length;
+        var coords_removed = 0;
+        var coords_kept = 0;
+        var random_percentage;
+
+        console.log(`# of coordinates we need to remove: ${num_coords_to_remove}`);
+        console.log(`which is ${percent_of_coords_to_remove}% of ${longest_boundary_coordinates.length}`);
+
+        console.log(`Starting loop`);
+
+        // since splicing changes array size, preserve the length here so that we can evaluate all coordinates
+        var preserved_longest_length = longest_boundary_coordinates.length;
+
+        for (let i = 0; i < preserved_longest_length; i++) {
+            random_percentage = Math.random();
+
+            if (random_percentage < percent_of_coords_to_remove) {
+                // remove
+                console.log(`removed coordinate ${i}: ${random_percentage}`);
+
+                // need to remember the amount coords_removed so that we remove the correct coord from the changing array
+                longest_boundary_coordinates.splice((i - coords_removed), 1);
+                coords_removed++;
+            }
+            else {
+                console.log(`kept coordinate ${i}: ${random_percentage}`);
+                coords_kept++;
+            }
+
+            if (longest_boundary_coordinates.length === target_length) {
+                console.log("BREAKING");
+                break;
+            }
+        }
+
+        console.log("Loop finished.");
+        console.log("Total coordinates removed: " + coords_removed);
+        console.log(`Total coordinates kept: ${coords_kept}`);
+
+        console.log(`% coordinates removed (desired): ${percent_of_coords_to_remove}`);
+        console.log(`% coordinates removed (actual): ${coords_removed / preserved_longest_length}`);
+
+        console.log(`Longest boundary new size: ${longest_boundary_coordinates.length}`);
+        console.log(`Target Length (length of shortest boundary): ${target_length}`);
+
+        // at this point, the longest_coordinate set is either the same size as the shortest, or slightly larger
+        // let's trim off the extra if there is any
+        if (longest_boundary_coordinates.length !== target_length) {
+            console.log("Trimming extra coordinates")
+            do {
+                // remove a random coordinate
+                var coordinate_to_remove = Math.floor(Math.random() * longest_boundary_coordinates.length);
+                longest_boundary_coordinates.splice(coordinate_to_remove, 1);
+            }
+            while (longest_boundary_coordinates.length !== target_length);
+        }
+
+        console.log("We should now have to coordinate sets of the same length");
+        console.log(`Longest Boundary Length: ${longest_boundary_coordinates.length}`);
+        console.log(`Shortest Boundary Length: ${target_length}`);
+
+        return longest_boundary_coordinates;
+    }
+
+    prepareBoundaryForCheckpoints() {
+        console.log("preparing boundary for checkpoints...");
+
+        // console.log(`Coordinates for Bottom Boundary: `);
+        // // this allows us to view coords as 2d arrays
+        // for (let k = 0; k < this.bottom_boundary_coordinates.length; k++) {
+        //     console.log(this.bottom_boundary_coordinates[k]);
+        // }
+
+        console.log("Initial Boundary Lengths:");
+        console.log(`bottom: ${this.bottom_boundary_coordinates.length}, top: ${this.top_boundary_coordinates.length}`);
+
+        // Identify longest boundary for trimming (target_length = length of shortest boundary)
+        var longest_boundary_and_target = this.determineLongestBoundary();
+
+        var longest_text = longest_boundary_and_target[0];
+        var longest_boundary_coordinates = longest_boundary_and_target[1];
+        var target_length = longest_boundary_and_target[2];
+
+        // execute if boundary coordinate array lengths are not same size
+        if (longest_text !== 'neither') {
+
+            // trim longest boundary coordiantes to length of shortest boundary coordinates
+            let trimmed_coordinates = this.trimLongestBoundaryCoordinates(longest_boundary_coordinates, target_length);
+
+            // save trimmed coordinates to boundary
+            if (longest_text === 'top') {
+                //save top
+                this.top_boundary_coordinates = trimmed_coordinates;
+            }
+            else if (longest_text === 'bottom') {
+                //save bottom
+                this.bottom_boundary_coordinates = trimmed_coordinates;
+            }
+        }
+    }
+
     createCheckpoints() {
-        // this should be visual at first so I can see what it's doing.
-        // for that, I'll need to draw the boundary over the canvas, then animate(optional) my algorithm.
-        console.log("createCheckpoints() called");
-        console.log(custom_boundary.boundary);
+        // this will start as a visual for my sake, but will eventually be invisible
+        // no animation needed unless errors
 
-        // ** WHEN THIS FUNCTION IS CALLED, ARRAYS OF LINE COORDS SHOULD ALREADY EXIST **
+        // goal: On the canvas, draw lines connecting points from top and bottom boundary coordinate arrays, such that the points
+        //       that are connected share the same array indicies
+
+        // step 1: loop over all coordinates in both arrays
+        ctx.fillStyle = 'white';
+        ctx.strokeWidth = 1;
+        ctx.lineCap = 'round';
+        for (let i = 0; i < this.top_boundary_coordinates.length; i++) {
+            // step 2: draw a line from top[coordinate] to bottom[coordinate]
+            ctx.beginPath();
+            ctx.moveTo(this.top_boundary_coordinates[i][0], this.top_boundary_coordinates[i][1])
+            ctx.lineTo(this.bottom_boundary_coordinates[i][0], this.bottom_boundary_coordinates[i][1]);
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        console.log("Line drawing complete");
     }
-
 }
+
+// class Paintbrush() {}
 
 // Main Drivers
 async function runPreSimAnimations() {
@@ -222,8 +470,6 @@ async function runPreSimAnimations() {
     await sleep(4000);
     await fadeOutExplanationAndGoal();
     await sleep(1000);
-    // anything else needed before core animation runs
-    // testing if this is appropriate
     await fadeInStats(); 
     await sleep(1000);
 
@@ -300,8 +546,9 @@ function hitDetectionTest(organisms) {
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                     // draw boundary
-                    ctx.drawImage(custom_boundary.boundary, 0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
 
+                    // *** maybe global would be better for this. Because the image data with boundaries is all I care about
                     canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height); // keeping this outside greatly improves speed
                     
                     // do it with 10 organisms (seems to already be pretty slow)
@@ -426,14 +673,16 @@ async function runGeneration() {
             }
         }
     }
-    
-    const population_resolution = await evaluatePopulation(); // maybe don't await here
-    var closest_organism = population_resolution['closest_organism'];
-    average_fitness = population_resolution['average_fitness'];
 
     if (dialogue) {
         await fadeOutEvaluationPhaseText();
+        await fadeOutStats(); // put here to fade out stats before average fitness updated
+        await sleep(1000);
     }
+
+    const population_resolution = await evaluatePopulation(); // maybe don't await here
+    var closest_organism = population_resolution['closest_organism'];
+    average_fitness = population_resolution['average_fitness'];
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     if (dialogue) {
@@ -462,10 +711,9 @@ async function runGeneration() {
     }
 
     var parents = selectParentsForReproduction(potential_mothers, potential_fathers);
-
-    console.log("made it to here, calling runSelectionAnimations()"); // this means that fadeInSelectionPhaseText() resolves when opacity >= 1.00
-
+    
     if (dialogue) {
+        await sleep(1000);
         await runSelectionAnimations(closest_organism, parents);
         await fadeOutSelectionPhaseText(); 
     }
@@ -825,7 +1073,7 @@ async function playTitleScreenAnimation() {
         }
         else if (status === "TEST BOUNDARY MODE") {
             console.log("Entering Boundary Mode");
-            testBoundaries();
+            enterBoundaryCreationMode();
         }
     }
     while (simulation_started === false && status === "Keep Playing");
@@ -1209,21 +1457,22 @@ function fadeOutExplanationAndGoal() {
 function fadeInStats() {
     var finished = false;
     var opacity = 0.00;
+    average_fitness = Math.abs(Number(average_fitness)).toFixed(2);
     return new Promise(resolve => {
         function animate() {
             if (!finished) {
                 ctx.fillStyle = 'black';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillRect(738, 510, 250, 90);
             
                 this.ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                this.ctx.font = "26px arial";
-                this.ctx.fillText('Generation:', 10, 520);
-                this.ctx.fillText(generation_count.toString(), 210, 520);
-                this.ctx.fillText('Population Size:', 10, 550);
-                this.ctx.fillText(TOTAL_ORGANISMS.toString(), 210, 550);
-                this.ctx.fillText('Average Fitness:', 10, 580);
-                this.ctx.fillText("0.00", 210, 580);
-                
+                this.ctx.font = "22px arial";
+                this.ctx.fillText('Generation:', 740, 535);
+                this.ctx.fillText(generation_count.toString(), 940, 535);
+                this.ctx.fillText('Population Size:', 740, 560);
+                this.ctx.fillText(TOTAL_ORGANISMS.toString(), 940, 560);
+                this.ctx.fillText('Average Fitness:', 740, 585);
+                this.ctx.fillText(average_fitness.toString(), 940, 585);
+
                 if (opacity >= 1.00) {
                     finished = true;
                 }
@@ -1238,6 +1487,43 @@ function fadeInStats() {
             }
         }
         start_stats_fadein = requestAnimationFrame(animate);
+    })
+}
+
+// stats won't fade out on non-dialogue sims (reminder)
+function fadeOutStats() {
+    var finished = false;
+    var opacity = 1.00;
+    average_fitness = Math.abs(Number(average_fitness)).toFixed(2);
+    return new Promise(resolve => {
+        function animate() {
+            if (!finished) {
+                ctx.fillStyle = 'black';
+                ctx.fillRect(738, 510, 250, 90);
+            
+                this.ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                this.ctx.font = "22px arial";
+                this.ctx.fillText('Generation:', 740, 535);
+                this.ctx.fillText(generation_count.toString(), 940, 535);
+                this.ctx.fillText('Population Size:', 740, 560);
+                this.ctx.fillText(TOTAL_ORGANISMS.toString(), 940, 560);
+                this.ctx.fillText('Average Fitness:', 740, 585);
+                this.ctx.fillText(average_fitness.toString(), 940, 585);
+
+                if (opacity <= 0.00) {
+                    finished = true;
+                }
+                else {
+                    opacity -= 0.02;
+                }
+                frame_id = requestAnimationFrame(animate);
+            }
+            else {
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_stats_fadeout = requestAnimationFrame(animate);
     })
 }
 
@@ -2604,11 +2890,11 @@ function displaySettingsForm() {
     settings_container.style.display = 'block';
 
     // boundaries
-    // listen for boundary checkbox to trigger testBoundaries()
+    // listen for boundary checkbox to trigger enterBoundaryCreationMode()
     var boundary_setting = document.getElementById("boundary-checkbox");
     boundary_setting.addEventListener("change", function() {
         if (this.checked) {
-            testBoundaries();
+            enterBoundaryCreationMode();
         }
         else {
             console.log("Checkbox: unchecked");
@@ -2816,116 +3102,294 @@ function getUserDecision() {
 
 // TESTING BOUNDARIES ==============================================================
 
-// now, to put it all together, we should wait for a mousedown, which triggers another event listener for mouseover to redraw,
-// then waits for a mouseup to stop drawing.
-
-// this function will be refactored/cleaned once proven working
-function testBoundaries() {
-
-    // turn off settings, turn on canvas
-    var canvas_container = document.getElementsByClassName("canvas-container")[0];
-    var settings_container = document.getElementsByClassName("settings-container")[0];
-
-    canvas_container.style.display = 'block';
-    settings_container.style.display = 'none';
+// could make class method
+function drawBoundaryBoilerplate() {
+    // ** DRAW BOUNDARY BOILERPLATE
 
     // clear canvas
     ctx.fillStyle = 'black';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // html btns
-    var settings_btn = document.getElementsByClassName("settings-btn")[0];
-    var start_btn = document.getElementsByClassName("start-btn")[0];
-    var stop_btn = document.getElementsByClassName("stop-btn")[0];
-    var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
+    // draw start/end points of boundary (make helper function later (drawBoundaryBoilerplate()))
+    // top
+    ctx.fillStyle = 'red';
+    ctx.fillRect(830, 0, 20, 50);
+    ctx.fillRect(950, 150, 50, 20);
+    // bottom
+    ctx.fillStyle = 'red';
+    ctx.fillRect(0, 430, 50, 20);
+    ctx.fillRect(150, 550, 20, 50);
+    // placeholder goal
+    var placeholder_goal = new Goal(925, 50, 20, ctx);
+    placeholder_goal.drawGoal();
 
-    settings_btn.style.display = 'none';
-    start_btn.style.display = 'none';
+    // we should also highlight the areas that users cannot draw in (2 rects to create border effect)
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    // stats border rect
+    ctx.fillRect(736, 508, 272, 92);
+    // phase border rect
+    ctx.fillRect(0, 0, 252, 157);
 
-     // revert when leaving boundary mode
-    stop_btn.style.gridColumn = "2 / 3";
-    stop_btn.style.width = "100%";
-    stop_btn.innerHTML = "Cancel";
-    stop_btn.style.display = "block";
+    ctx.fillStyle = 'black';
+    // stats area (will need to erase when sim starts)
+    ctx.fillRect(740, 512, 270, 90);
+    // phase area
+    ctx.fillRect(0, 0, 248, 153);
+    // ** END BOUNDARY BOILERPLATE **
+}
 
-    save_bounds_btn.style.display = "block";
-    save_bounds_btn.style.gridColumn = "3 / 4";
-    save_bounds_btn.style.backgroundColor = "var(--custom-green)";
-    save_bounds_btn.style.fontSize = "20px";
+// would belong to class Paintbrush, not Boundary
+function updateMousePosition(event) {
+    let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
 
-    // Stores the position of the cursor
-    let coordinates = {'x':0 , 'y':0}; 
+    // store current mouse position
+    coordinates['x'] = event.clientX - rect.left;
+    coordinates['y'] = event.clientY - rect.top;
 
-    // would belong to class Paintbrush, not Boundary
-    function updateMousePosition(event) {
-        let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
+    // console.log(coordinates);
+}
 
-        // store current mouse position
-        let x = event.clientX - rect.left;
-        let y = event.clientY - rect.top;
+// this function will be refactored/cleaned once proven working
+// this code should either simply prepare the user for boundary mode, or perform all boundary drawing/validation
+// think how this will be worked into the main flow
+// could be:
+// enterBoundaryCreationMode >>> applyBoundaryModeStyles >>> createBoundaries, but it's good enough for now
+function enterBoundaryCreationMode() {
 
-        coordinates['x'] = x;
-        coordinates['y'] = y;
-        console.log(coordinates);
-    }
+
+    // drawing flag and step tracker
+    var allowed_to_draw = false; // could be method of Paintbrush
+    var boundary_step = "bottom-boundary"; // could be attribute of Boundary? idk..
+
+    // create new boundary
+    var new_boundary = new Boundary();
+
+    new_boundary.applyBoundaryModeStyles();
+
+    // here and down would be in createBoundaries() (we would define boundary_step in createBoundaries()) ************************
 
     // belongs to class Painbrush, not Boundary
     function draw(event) {
-        if (event.buttons !== 1) {
-            // return if left-mouse button not pressed
+        if (event.buttons !== 1 || !allowed_to_draw) {
+            // return if left-mouse button not pressed or if user not allowed to draw
             return;
         }
+
         ctx.beginPath();
         ctx.moveTo(coordinates['x'], coordinates['y']);
         updateMousePosition(event);
-        ctx.lineTo(coordinates['x'], coordinates['y']);
-        ctx.strokeStyle = 'rgb(155, 245, 0)'; //green 
-        ctx.lineWidth = 20;
+
+        // draw different line depending on boundary_step
+        if (boundary_step === 'full-boundary') {
+
+            // get pixel color before drawing, reject if green
+            pixel_data = getPixelXY(canvas_data_bad_practice, coordinates['x'], coordinates['y']);
+
+            if (pixel_data[0] == 155) {
+                // green touched, reject
+                console.log("illegal white line. returning.");
+                allowed_to_draw = false;
+
+                // should erase white line (redraw everything except the white line)
+                // this should be it's own function too (this same code is repeated in validateBoundaryConnection())
+                // draw boilerplate and top&bottom boundaries
+                drawBoundaryBoilerplate();
+                ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
+                ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
+
+                // draw white dot
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(80, 510, 10, 0, Math.PI*2, false);
+                ctx.fill();
+
+                // make goal new color (can be a flag in drawBoundaryBoilerplate())
+                ctx.fillStyle = 'rgb(232, 0, 118)';
+                ctx.fillRect(925, 50, 20, 20);
+                
+                return;
+            }
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 1;
+        }
+        else {
+            ctx.strokeStyle = 'rgb(155, 245, 0)'; //green 
+            ctx.lineWidth = 20;
+
+            // store coordinates here while drawing boundaries
+            if (boundary_step === 'bottom-boundary') {
+                // save to bottom coords
+                new_boundary.bottom_boundary_coordinates.push([coordinates['x'], coordinates['y']]);
+            }
+            else {
+                // save to top coords
+                new_boundary.top_boundary_coordinates.push([coordinates['x'], coordinates['y']]);
+            }
+
+        }
+
         ctx.lineCap = 'round';
+        ctx.lineTo(coordinates['x'], coordinates['y']);
         ctx.stroke();
         ctx.closePath();
-
-        // save coordiantes here **
-        top_boundary_coords.push([coordinates['x'], coordinates['y']]);
     }
 
+    // will belong to class Paintbrush, not Boundary
+    function requestDrawingPermission(event) {
+        // this function is called on mousedown and will update the drawing flag that gives
+        // users ability to draw if legal
+        console.log("User would like to draw.");
+        
+        // need to grab coords since updateMousePosition() can't update function var anymore.
+        // possible solution: global coordinates variable
+        // trying that now.
+        updateMousePosition(event);
+
+        if (boundary_step === 'bottom-boundary') {
+            // check that user is trying to draw from first connector (ctx.fillRect(150, 550, 20, 50))
+            // make helper function eventually
+            if (coordinates['x'] >= 150 && coordinates['x'] <= 170 && coordinates['y'] >= 550) {
+                console.log("You clicked on the connector!");
+                allowed_to_draw = true;
+            }
+            else {
+                console.log("Not allowed to draw, mouse not on connector:");
+                console.log(coordinates);
+                allowed_to_draw = false;
+            }
+        }
+        else if (boundary_step === 'top-boundary') {
+            // check that user is trying to draw from the first connector (ctx.fillRect(0, 430, 50, 20))
+            if (coordinates['x'] >= 0 && coordinates['x'] <= 50 && coordinates['y'] >= 430 && coordinates['y'] <= 450) {
+                allowed_to_draw = true;
+            }
+            else {
+                console.log("Not allowed to draw, mouse not on connector.");
+                allowed_to_draw = false;
+            }
+        }
+        // final step: draw line from spawn to goal
+        else if (boundary_step === 'full-boundary') {
+            // check that user is trying to draw from the white dot (ctx.arc(80, 510, 10, 0, Math.PI*2, false))
+            if (coordinates['x'] >= 70 && coordinates['x'] <= 90 && 
+                coordinates['y'] >= 500 && coordinates['y'] <= 520 ) {
+
+                allowed_to_draw = true;
+            }
+            else {
+                console.log("You missed the white dot...");
+                allowed_to_draw = false;
+            } 
+
+        }
+        else if (boundary_step === 'confirmation') {
+            // don't allow user to draw in confirmation phase
+            allowed_to_draw = false;
+        }
+    }
+
+    // break this down into smaller function when all working
+    // should this whole thing be a class method?
+    function validateBoundaryConnection(event) {
+        console.log("mouseup heard");
+        // should make sure that the user was allowed to draw, otherwise return
+        if (allowed_to_draw) {
+            // check boundary step
+            if (boundary_step === 'bottom-boundary') {
+                let bottom_boundary_is_valid = new_boundary.validateBottom(event);
+
+                if (bottom_boundary_is_valid) {
+                    // update step and store boundary
+                    new_boundary.save('bottom');
+                    boundary_step = "top-boundary";
+                }
+                else {
+                    // erase bottom-boundary coords when illegal line drawn
+                    new_boundary.bottom_boundary_coordinates = [];
+
+                    console.log("invalid");
+                    // error message 
+                }
+            }
+            else if (boundary_step === "top-boundary") {
+                let top_boundary_is_valid = new_boundary.validateTop(event);
+
+                if (top_boundary_is_valid) {
+                    // update step and store boundary
+                    // store top-boundary
+                    new_boundary.save('top');
+                    boundary_step = 'full-boundary';
+                }
+                else {
+                    // reset top boundary coords when illegal line drawn
+                    new_boundary.top_boundary_coordinates = [];
+
+                    // error message
+                }
+            }
+            else if (boundary_step === 'full-boundary') {
+                // hereeeee
+                let full_boundary_is_valid = new_boundary.validateFull();
+
+                if (full_boundary_is_valid) {
+                    // update step
+                    boundary_step = 'confirmation';
+                    allowed_to_draw = false;
+                    
+                    // make goal white to show success
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(925, 50, 20, 20);
+
+                    // this is where the Apply/Save/Confirm button should become available
+                    save_bounds_btn.style.backgroundColor = "var(--custom-green)";
+                    save_bounds_btn.style.pointerEvents = 'auto';
+                }
+                else {
+                    // error message
+
+                    // erase line and return to last step
+                    // draw boilerplate and top&bottom boundaries
+                    drawBoundaryBoilerplate();
+                    ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
+                }
+            }
+        }
+        else {
+            return;
+        }
+    }
+    
     // respond to each event individually (pass event for mouse position)
     canvas.addEventListener('mouseenter', updateMousePosition);
-    canvas.addEventListener('mousedown', updateMousePosition);
+    canvas.addEventListener('mousedown', requestDrawingPermission);
     canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', validateBoundaryConnection);
+
+    // make class method?
+    let save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
 
     save_bounds_btn.addEventListener("click", function() {
         console.log("Saving Custom Boundaries");
 
-        // show saved boundary coords (only top so far)
-        console.log(top_boundary_coords);
+        // save full boundary
+        new_boundary.save('full');
 
-        // create new Boundary object
-        var new_boundary = new Boundary();
+        // normalize boundary coordinate array sizes
+        new_boundary.prepareBoundaryForCheckpoints();
 
-        // save (maybe validate() could be called in the save method?) *** make work first as own method, then combine
-        var boundary_was_saved = new_boundary.save();
+        // let's make sure the boundaries are same length and not the same values
+        // console.log(custom_boundary.top_boundary_coordinates.length, custom_boundary.bottom_boundary_coordinates.length);
+        // console.log(custom_boundary.top_boundary_coordinates, custom_boundary.bottom_boundary_coordinates);
 
-        // handle result
-        if (boundary_was_saved) {
-            console.log("Boundary: valid", "Status: saved");
-            // should resume as accepted
+        // ===== here =====
+        // next, we'll create the checkpoints to be used by our fitness function
+        new_boundary.createCheckpoints();
 
-            // we could generate the 'path' for the accepted boundary here (checkpoints)
-            // can move to main simulation if needed
-            // ***create checkpoints here*** (custom_boundary set in save() method)
-            custom_boundary.createCheckpoints();
+        // still using custom_boundary global, I don't like it ==!CHANGE!==
+        custom_boundary = new_boundary;
 
-            // return user to settings screen
-            displaySettingsForm();
-        }
-        else {
-            console.log("Boundary: invalid");
-
-            // should reject and display error message
-            // for now, just turn the canvas border red
-            canvas.style.borderColor = 'var(--mother-pink)';
-        }
+        // return to settings
+        // displaySettingsForm(); turned off while testing checkpoints
     });
 }
 

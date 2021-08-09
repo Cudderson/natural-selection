@@ -237,4 +237,8 @@ body {
 
 .save-boundaries-btn {
     display: none;
+    grid-column: 3 / 4;
+    background-color: rgba(200, 200, 200, .2);
+    pointer-events: none;
+    font-size: 20px;
 }
