@@ -440,16 +440,34 @@ class Boundary {
         ctx.fillStyle = 'white';
         ctx.strokeWidth = 1;
         ctx.lineCap = 'round';
+        var step = Math.ceil(this.top_boundary_coordinates.length / 10);
+        var line_counter=  0;
+
         for (let i = 0; i < this.top_boundary_coordinates.length; i++) {
             // step 2: draw a line from top[coordinate] to bottom[coordinate]
-            ctx.beginPath();
-            ctx.moveTo(this.top_boundary_coordinates[i][0], this.top_boundary_coordinates[i][1])
-            ctx.lineTo(this.bottom_boundary_coordinates[i][0], this.bottom_boundary_coordinates[i][1]);
-            ctx.stroke();
-            ctx.closePath();
+            // let's say, for now, that we want just 10 lines drawn
+            // we could divide the total by 10, 243 / 10 = 24.3
+            // if i % Math.ceil(24.3) === 0: draw line
+            if (i % step === 0) {
+                ctx.beginPath();
+                ctx.moveTo(this.top_boundary_coordinates[i][0], this.top_boundary_coordinates[i][1])
+                ctx.lineTo(this.bottom_boundary_coordinates[i][0], this.bottom_boundary_coordinates[i][1]);
+                ctx.stroke();
+                ctx.closePath();
+                line_counter++;
+
+                // draw dot on middle of each line (distance between x's - distance between y's)
+                let mid_x = Math.floor((this.top_boundary_coordinates[i][0] + this.bottom_boundary_coordinates[i][0]) / 2); 
+                let mid_y = Math.floor((this.top_boundary_coordinates[i][1] + this.bottom_boundary_coordinates[i][1]) / 2);
+                ctx.beginPath();
+                ctx.arc(mid_x, mid_y, 10, 0, Math.PI*2, false);
+                ctx.fill();
+                
+            }
         }
 
         console.log("Line drawing complete");
+        console.log(`Should be 10 lines: ${line_counter}`);
     }
 }
 
