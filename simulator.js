@@ -428,6 +428,29 @@ class Boundary {
             }
         }
     }
+
+    createCheckpoints() {
+        // this will start as a visual for my sake, but will eventually be invisible
+        // no animation needed unless errors
+
+        // goal: On the canvas, draw lines connecting points from top and bottom boundary coordinate arrays, such that the points
+        //       that are connected share the same array indicies
+
+        // step 1: loop over all coordinates in both arrays
+        ctx.fillStyle = 'white';
+        ctx.strokeWidth = 1;
+        ctx.lineCap = 'round';
+        for (let i = 0; i < this.top_boundary_coordinates.length; i++) {
+            // step 2: draw a line from top[coordinate] to bottom[coordinate]
+            ctx.beginPath();
+            ctx.moveTo(this.top_boundary_coordinates[i][0], this.top_boundary_coordinates[i][1])
+            ctx.lineTo(this.bottom_boundary_coordinates[i][0], this.bottom_boundary_coordinates[i][1]);
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        console.log("Line drawing complete");
+    }
 }
 
 // class Paintbrush() {}
@@ -3354,12 +3377,16 @@ function enterBoundaryCreationMode() {
         // normalize boundary coordinate array sizes
         new_boundary.prepareBoundaryForCheckpoints();
 
+        // let's make sure the boundaries are same length and not the same values
+        // console.log(custom_boundary.top_boundary_coordinates.length, custom_boundary.bottom_boundary_coordinates.length);
+        // console.log(custom_boundary.top_boundary_coordinates, custom_boundary.bottom_boundary_coordinates);
+
+        // ===== here =====
+        // next, we'll create the checkpoints to be used by our fitness function
+        new_boundary.createCheckpoints();
+
         // still using custom_boundary global, I don't like it ==!CHANGE!==
         custom_boundary = new_boundary;
-
-        // let's make sure the boundaries are same length and not the same values
-        console.log(custom_boundary.top_boundary_coordinates.length, custom_boundary.bottom_boundary_coordinates.length);
-        console.log(custom_boundary.top_boundary_coordinates, custom_boundary.bottom_boundary_coordinates);
 
         // return to settings
         // displaySettingsForm(); turned off while testing checkpoints
