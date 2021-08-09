@@ -144,8 +144,8 @@ class Boundary {
         this.top_boundary = new Image();
         this.bottom_boundary = new Image();
         this.full_boundary = new Image();
-        this.top_boundary_coords = [];
-        this.bottom_boundary_coords = [];
+        this.top_boundary_coordinates = [];
+        this.bottom_boundary_coordinates = [];
     }
 
     applyBoundaryModeStyles() {
@@ -303,138 +303,130 @@ class Boundary {
 
     determineLongestBoundary() {
         // determine which boundary has more coordinates
-        // var longest_boundary_coords;
-        // var target_length;
-        // var removal_factor;
-        var longest;
+        let longest_text;
+        let longest_boundary;
+        let target_length;
 
-        if (this.top_boundary_coords.length > this.bottom_boundary_coords.length) {
+        if (this.top_boundary_coordinates.length > this.bottom_boundary_coordinates.length) {
             // top longer
-            longest = "top";
-            // longest_boundary_coords = this.top_boundary_coords;
-            // target_length = this.bottom_boundary_coords.length;
-            // removal_factor = Math.ceil(this.top_boundary_coords.length / this.bottom_boundary_coords.length);
+            longest_text = 'top';
+            longest_boundary = this.top_boundary_coordinates;
+            target_length = this.bottom_boundary_coordinates.length;
         }
-        else if (this.bottom_boundary_coords.length > this.top_boundary_coords.length) {
+        else if (this.bottom_boundary_coordinates.length > this.top_boundary_coordinates.length) {
             // bottom longer
-            longest = 'bottom';
-            // longest_boundary_coords = this.bottom_boundary_coords;
-            // target_length = this.top_boundary_coords.length;
-            // removal_factor = Math.ceil(this.bottom_boundary_coords.length / this.top_boundary_coords.length);
+            longest_text = 'bottom';
+            longest_boundary = this.bottom_boundary_coordinates;
+            target_length = this.top_boundary_coordinates.length;
         }
         else {
-            longest = 'neither';
-            // equal
-            // don't know how to handle yet
+            longest_text = 'neither';
         }
 
-        // console.log(target_length);
-        // console.log(removal_factor);
-
-        return longest;
+        return [longest_text, longest_boundary, target_length];
     }
 
-    // refactoring
-    createCheckpoints() {
-        // this should be visual at first so I can see what it's doing.
-        // for that, I'll need to draw the boundary over the canvas, then animate(optional) my algorithm.
-        console.log("createCheckpoints() called");
-
-        console.log(`Coordinates for Bottom Boundary: `);
-
-        // this allows us to view coords as 2d arrays
-        for (let k = 0; k < this.bottom_boundary_coords.length; k++) {
-            console.log(this.bottom_boundary_coords[k]);
-        }
-
-        console.log("Lengths:");
-        console.log(`bottom: ${this.bottom_boundary_coords.length}, top: ${this.top_boundary_coords.length}`);
-
-        // call here (return string)
-        var longest_boundary = this.determineLongestBoundary();
-        var longest_boundary_coords;
-        var target_length;
-        // var removal_factor; // not used?
-
-        // possibly handle this in determineLongest() so we can declare: longest_boundary_coords, target_length = determineLongestBoundary()
-        if (longest_boundary === 'top') {
-            longest_boundary_coords = this.top_boundary_coords;
-            target_length = this.bottom_boundary_coords.length;
-        }
-        else if (longest_boundary === 'bottom') {
-            longest_boundary_coords = this.bottom_boundary_coords;
-            target_length = this.top_boundary_coords.length;
-        }
-        else {
-            // 'neither' returned
-        }
-
-        /// ===== stopped refactoring here =====
-
-        var num_coords_to_remove = longest_boundary_coords.length - target_length;
-        var percent_to_remove = num_coords_to_remove / longest_boundary_coords.length;
+    trimLongestBoundaryCoordinates(longest_boundary_coordinates, target_length) {
+        var num_coords_to_remove = longest_boundary_coordinates.length - target_length;
+        var percent_of_coords_to_remove = num_coords_to_remove / longest_boundary_coordinates.length;
+        var coords_removed = 0;
+        var coords_kept = 0;
         var random_percentage;
-        var removed = 0;
-        var kept = 0;
 
-        console.log(`# to remove: ${num_coords_to_remove}`);
-        console.log(`% to remove: ${percent_to_remove}`);
+        console.log(`# of coordinates we need to remove: ${num_coords_to_remove}`);
+        console.log(`which is ${percent_of_coords_to_remove}% of ${longest_boundary_coordinates.length}`);
 
-        console.log(`Starting loop. Longest length = ${longest_boundary_coords.length}`)
+        console.log(`Starting loop`);
 
-        var preserved_longest_length = longest_boundary_coords.length; // so that splicing doesn't affect array size
+        // since splicing changes array size, preserve the length here so that we can evaluate all coordinates
+        var preserved_longest_length = longest_boundary_coordinates.length;
 
         for (let i = 0; i < preserved_longest_length; i++) {
             random_percentage = Math.random();
 
-            if (random_percentage < percent_to_remove) {
+            if (random_percentage < percent_of_coords_to_remove) {
                 // remove
-                console.log(`Removed coord ${i}: ${random_percentage}`);
+                console.log(`removed coordinate ${i}: ${random_percentage}`);
 
-                // need to remember the amount removed so that we remove the correct coord from the changing array
-                longest_boundary_coords.splice((i - removed), 1);
-                removed++;
+                // need to remember the amount coords_removed so that we remove the correct coord from the changing array
+                longest_boundary_coordinates.splice((i - coords_removed), 1);
+                coords_removed++;
             }
             else {
-                console.log(`Kept coord ${i}: ${random_percentage}`);
-                kept++;
+                console.log(`kept coordinate ${i}: ${random_percentage}`);
+                coords_kept++;
             }
 
-            if (longest_boundary_coords.length === target_length) {
+            if (longest_boundary_coordinates.length === target_length) {
                 console.log("BREAKING");
                 break;
             }
         }
 
-        console.log(`Loop finished. Longest new size: ${longest_boundary_coords.length}`);
+        console.log("Loop finished.");
+        console.log("Total coordinates removed: " + coords_removed);
+        console.log(`Total coordinates kept: ${coords_kept}`);
 
-        console.log("Total Removed: " + removed);
-        console.log(`Total Kept: ${kept}`);
-        console.log(`% removed (desired): ${percent_to_remove}`);
-        console.log(`% removed (actual): ${removed / preserved_longest_length}`)
+        console.log(`% coordinates removed (desired): ${percent_of_coords_to_remove}`);
+        console.log(`% coordinates removed (actual): ${coords_removed / preserved_longest_length}`);
 
-        // now we should have an array that's 'close' to the length of the target
-        console.log(`New Length of longest array: ${longest_boundary_coords.length}`);
-        console.log(`Target Length: ${target_length}`);
+        console.log(`Longest boundary new size: ${longest_boundary_coordinates.length}`);
+        console.log(`Target Length (length of shortest boundary): ${target_length}`);
 
         // at this point, the longest_coordinate set is either the same size as the shortest, or slightly larger
         // let's trim off the extra if there is any
-
-        if (longest_boundary_coords.length !== target_length) {
+        if (longest_boundary_coordinates.length !== target_length) {
+            console.log("Trimming extra coordinates")
             do {
                 // remove a random coordinate
-                var coordinate_to_remove = Math.floor(Math.random() * longest_boundary_coords.length);
-                longest_boundary_coords.splice(coordinate_to_remove, 1);
+                var coordinate_to_remove = Math.floor(Math.random() * longest_boundary_coordinates.length);
+                longest_boundary_coordinates.splice(coordinate_to_remove, 1);
             }
-            while (longest_boundary_coords.length !== target_length);
+            while (longest_boundary_coordinates.length !== target_length);
         }
 
         console.log("We should now have to coordinate sets of the same length");
-        console.log(`Longest: ${longest_boundary_coords.length}`);
-        console.log(target_length);
+        console.log(`Longest Boundary Length: ${longest_boundary_coordinates.length}`);
+        console.log(`Shortest Boundary Length: ${target_length}`);
 
-        // works up to here!
-        // I think we still need to assign the modified coordinate_array to the class attribute
+        return longest_boundary_coordinates;
+    }
+
+    prepareBoundaryForCheckpoints() {
+        console.log("preparing boundary for checkpoints...");
+
+        // console.log(`Coordinates for Bottom Boundary: `);
+        // // this allows us to view coords as 2d arrays
+        // for (let k = 0; k < this.bottom_boundary_coordinates.length; k++) {
+        //     console.log(this.bottom_boundary_coordinates[k]);
+        // }
+
+        console.log("Initial Boundary Lengths:");
+        console.log(`bottom: ${this.bottom_boundary_coordinates.length}, top: ${this.top_boundary_coordinates.length}`);
+
+        // Identify longest boundary for trimming (target_length = length of shortest boundary)
+        var longest_boundary_and_target = this.determineLongestBoundary();
+
+        var longest_text = longest_boundary_and_target[0];
+        var longest_boundary_coordinates = longest_boundary_and_target[1];
+        var target_length = longest_boundary_and_target[2];
+
+        // execute if boundary coordinate array lengths are not same size
+        if (longest_text !== 'neither') {
+
+            // trim longest boundary coordiantes to length of shortest boundary coordinates
+            let trimmed_coordinates = this.trimLongestBoundaryCoordinates(longest_boundary_coordinates, target_length);
+
+            // save trimmed coordinates to boundary
+            if (longest_text === 'top') {
+                //save top
+                this.top_boundary_coordinates = trimmed_coordinates;
+            }
+            else if (longest_text === 'bottom') {
+                //save bottom
+                this.bottom_boundary_coordinates = trimmed_coordinates;
+            }
+        }
     }
 }
 
@@ -3204,11 +3196,11 @@ function enterBoundaryCreationMode() {
             // store coordinates here while drawing boundaries
             if (boundary_step === 'bottom-boundary') {
                 // save to bottom coords
-                new_boundary.bottom_boundary_coords.push([coordinates['x'], coordinates['y']]);
+                new_boundary.bottom_boundary_coordinates.push([coordinates['x'], coordinates['y']]);
             }
             else {
                 // save to top coords
-                new_boundary.top_boundary_coords.push([coordinates['x'], coordinates['y']]);
+                new_boundary.top_boundary_coordinates.push([coordinates['x'], coordinates['y']]);
             }
 
         }
@@ -3290,7 +3282,7 @@ function enterBoundaryCreationMode() {
                 }
                 else {
                     // erase bottom-boundary coords when illegal line drawn
-                    new_boundary.bottom_boundary_coords = [];
+                    new_boundary.bottom_boundary_coordinates = [];
 
                     console.log("invalid");
                     // error message 
@@ -3307,7 +3299,7 @@ function enterBoundaryCreationMode() {
                 }
                 else {
                     // reset top boundary coords when illegal line drawn
-                    new_boundary.top_boundary_coords = [];
+                    new_boundary.top_boundary_coordinates = [];
 
                     // error message
                 }
@@ -3350,31 +3342,24 @@ function enterBoundaryCreationMode() {
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', validateBoundaryConnection);
 
-    // make class method
+    // make class method?
     let save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
+
     save_bounds_btn.addEventListener("click", function() {
         console.log("Saving Custom Boundaries");
-
-
-        // ******
-        // At this point, both top and bottom boundaries are drawn and connected
-        // user has been given the option to Apply/Save their boundary and they clicked this button
-        // When they click this, we should perform our full-boundary validation, then save
-
-        // to validate, we should just make sure that our createCheckpoints() function worked, but we don't have that yet.
-
-
-        // ============== makes sense to call new_boundary.createCheckpoints() here =====================
-        // we will call it after saving for now, to see visuals better
 
         // save full boundary
         new_boundary.save('full');
 
-        // still using custom_boundary global, I don't like it
+        // normalize boundary coordinate array sizes
+        new_boundary.prepareBoundaryForCheckpoints();
+
+        // still using custom_boundary global, I don't like it ==!CHANGE!==
         custom_boundary = new_boundary;
 
-        // ===== this should be called before save method when complete =====
-        new_boundary.createCheckpoints();
+        // let's make sure the boundaries are same length and not the same values
+        console.log(custom_boundary.top_boundary_coordinates.length, custom_boundary.bottom_boundary_coordinates.length);
+        console.log(custom_boundary.top_boundary_coordinates, custom_boundary.bottom_boundary_coordinates);
 
         // return to settings
         // displaySettingsForm(); turned off while testing checkpoints
