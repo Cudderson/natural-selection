@@ -146,6 +146,7 @@ class Boundary {
         this.full_boundary = new Image();
         this.top_boundary_coordinates = [];
         this.bottom_boundary_coordinates = [];
+        this.checkpoints = [];
     }
 
     applyBoundaryModeStyles() {
@@ -462,12 +463,19 @@ class Boundary {
                 ctx.beginPath();
                 ctx.arc(mid_x, mid_y, 10, 0, Math.PI*2, false);
                 ctx.fill();
-                
+
+                // store checkpoint coordinates
+                this.checkpoints.push([mid_x, mid_y]);
             }
         }
 
         console.log("Line drawing complete");
         console.log(`Should be 10 lines: ${line_counter}`);
+
+        console.log("Your checkpoint coordinates:");
+        console.log(this.checkpoints);
+        console.log(this.checkpoints[0]);
+        console.log(this.checkpoints[0][0]);
     }
 }
 
