@@ -524,9 +524,13 @@ async function testBoundarySim() {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // boundary simulations start organisms at different spawn point
+    const INITIAL_X_BOUND = 50;
+    const INITIAL_Y_BOUND = 550;
+
     // 10 organisms this time
-    for (var i = 0; i < 10; i++) {
-        organism = new Organism('male', INITIAL_X, INITIAL_Y, ctx);
+    for (var i = 0; i < 20; i++) {
+        organism = new Organism('male', INITIAL_X_BOUND, INITIAL_Y_BOUND, ctx);
         organism.setRandomGenes();
         organisms.push(organism);
     }
@@ -3415,7 +3419,7 @@ function enterBoundaryCreationMode() {
         custom_boundary = new_boundary;
 
         // return to settings
-        // displaySettingsForm(); turned off while testing checkpoints
+        // displaySettingsForm(); //turned off while testing checkpoints
     });
 }
 
