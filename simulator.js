@@ -146,7 +146,9 @@ class Boundary {
         this.full_boundary = new Image();
         this.top_boundary_coordinates = [];
         this.bottom_boundary_coordinates = [];
-        this.checkpoints = [];
+        // this.checkpoints = [];
+        // this.checkpoints = {'coordinates': [], 'size': null};
+        this.checkpoints = [{'coordinates': [], 'size': null}];
     }
 
     applyBoundaryModeStyles() {
@@ -459,7 +461,7 @@ class Boundary {
                 ctx.fill();
 
                 // store checkpoint coordinates
-                this.checkpoints.push([mid_x, mid_y]);
+                this.checkpoints.push({'coordinates': [mid_x, mid_y]});
             }
         }
 
@@ -475,29 +477,34 @@ class Boundary {
         // step 1: draw line connecting each checkpoint (we can maybe do in within loop after working)
         for (let j = 0; j < this.checkpoints.length - 1; j++) {
             ctx.beginPath();
-            ctx.moveTo(this.checkpoints[j][0], this.checkpoints[j][1]);
-            ctx.lineTo(this.checkpoints[j+1][0], this.checkpoints[j+1][1]);
+            ctx.moveTo(this.checkpoints[j].coordinates[0], this.checkpoints[j].coordinates[1]);
+            ctx.lineTo(this.checkpoints[j+1].coordinates[0], this.checkpoints[j+1].coordinates[1]);
             ctx.stroke();
             ctx.closePath();
 
             // let's now mark the halfway point between each line drawn
-            let path_mid_x = Math.floor((this.checkpoints[j][0] + this.checkpoints[j+1][0]) / 2);
-            let path_mid_y = Math.floor((this.checkpoints[j][1] + this.checkpoints[j+1][1]) / 2);
+            let path_mid_x = Math.floor((this.checkpoints[j].coordinates[0] + this.checkpoints[j+1].coordinates[0]) / 2);
+            let path_mid_y = Math.floor((this.checkpoints[j].coordinates[1] + this.checkpoints[j+1].coordinates[1]) / 2);
             ctx.fillStyle = 'orange';
             ctx.beginPath();
             ctx.arc(path_mid_x, path_mid_y, 5, 0, Math.PI*2, false);
             ctx.fill();
             ctx.closePath();
+
+            // the point of all of this is to determine what size the checkpoint should be drawn
+            // the size (radius) of a checkpoint is its shortest distance to a halfway point
+            // if we start at checkpoint 1, it should be easier to figure out.
+
         }
 
 
         console.log("Line drawing complete");
         console.log(`Should be 10 lines: ${line_counter}`);
 
-        console.log("Your checkpoint coordinates:");
-        console.log(this.checkpoints);
-        console.log(this.checkpoints[0]);
-        console.log(this.checkpoints[0][0]);
+        // console.log("Your checkpoint coordinates:");
+        // console.log(this.checkpoints);
+        // console.log(this.checkpoints[0]);
+        // console.log(this.checkpoints[0][0]);
     }
 }
 
