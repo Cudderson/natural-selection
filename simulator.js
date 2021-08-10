@@ -431,12 +431,6 @@ class Boundary {
     }
 
     createCheckpoints() {
-        // this will start as a visual for my sake, but will eventually be invisible
-        // no animation needed unless errors
-
-        // goal: On the canvas, draw lines connecting points from top and bottom boundary coordinate arrays, such that the points
-        //       that are connected share the same array indicies
-
         // step 1: loop over all coordinates in both arrays
         ctx.fillStyle = 'white';
         ctx.strokeWidth = 1;
@@ -468,6 +462,19 @@ class Boundary {
                 this.checkpoints.push([mid_x, mid_y]);
             }
         }
+
+        // *** improving checkpoints ***
+        // we also want to store some information about a checkpoint's size, so drawing will require no extra calculations
+
+        // step 1: draw line connecting each checkpoint (we can maybe do in within loop after working)
+        for (let j = 0; j < this.checkpoints.length - 1; j++) {
+            ctx.beginPath();
+            ctx.moveTo(this.checkpoints[j][0], this.checkpoints[j][1]);
+            ctx.lineTo(this.checkpoints[j+1][0], this.checkpoints[j+1][1]);
+            ctx.stroke();
+            ctx.closePath();
+        }
+
 
         console.log("Line drawing complete");
         console.log(`Should be 10 lines: ${line_counter}`);
@@ -583,7 +590,16 @@ function hitDetectionTest(organisms) {
                     // draw boundary
                     ctx.drawImage(custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
 
-                    // do it with 10 organisms (seems to already be pretty slow)
+                    // (FOR TESTING) draw checkpoints
+                    // ctx.fillStyle = 'white';
+                    // for (let i = 0; i < custom_boundary.checkpoints.length; i++) {
+                    //     ctx.beginPath();
+                    //     ctx.arc(custom_boundary.checkpoints[i][0], custom_boundary.checkpoints[i][1], 10, 0, Math.PI*2, false);
+                    //     ctx.fill();
+                    //     ctx.closePath();
+                    // }
+
+                    // do it with 10 organisms
                     for (var j = 0; j < organisms.length; j++) {
 
                         // update index
@@ -3421,7 +3437,7 @@ function enterBoundaryCreationMode() {
         custom_boundary = new_boundary;
 
         // return to settings
-        displaySettingsForm(); //turned off while testing checkpoints
+        // displaySettingsForm(); //turned off while testing checkpoints
     });
 }
 
