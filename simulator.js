@@ -558,10 +558,15 @@ function getPixelXY(canvas_data, x, y) {
 function hitDetectionTest(organisms) {
 
     return new Promise(resolve => {
+        // clear and draw boundary
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
+
+        var canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height); // capture canvas for collision testing
         var finished = false;
         var position_rgba;
         var total_moves = 0;
-        var canvas_data;
 
         function animateOrganisms() {
 
@@ -578,9 +583,6 @@ function hitDetectionTest(organisms) {
                     // draw boundary
                     ctx.drawImage(custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
 
-                    // *** maybe global would be better for this. Because the image data with boundaries is all I care about
-                    canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height); // keeping this outside greatly improves speed
-                    
                     // do it with 10 organisms (seems to already be pretty slow)
                     for (var j = 0; j < organisms.length; j++) {
 
@@ -591,7 +593,7 @@ function hitDetectionTest(organisms) {
 
                         position_rgba = getPixelXY(canvas_data, organisms[j].x, organisms[j].y);
                         
-                        console.log("Current Position Pixel for Organism: " + position_rgba);
+                        console.log(`Current Position Pixel for Organism ${j}: ` + position_rgba);
 
                         // --custom-green: rgba(155, 245, 0, 1);
                         // highlight organism red if he leaves safe area (dies)
@@ -3419,7 +3421,7 @@ function enterBoundaryCreationMode() {
         custom_boundary = new_boundary;
 
         // return to settings
-        // displaySettingsForm(); //turned off while testing checkpoints
+        displaySettingsForm(); //turned off while testing checkpoints
     });
 }
 
