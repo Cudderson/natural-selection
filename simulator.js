@@ -466,12 +466,27 @@ class Boundary {
         // *** improving checkpoints ***
         // we also want to store some information about a checkpoint's size, so drawing will require no extra calculations
 
+        // notes: 
+        // - we technically have enough information before this to draw polygons representing each checkpoint area, but that
+        //   would require too complex hit-detection. We instead should use a rect or arc for consistency.
+        // - rects can't be drawn at an angle though, so we will start with an arc. Ultimately, we just want a checkpoint to cover
+        //   the largest calulable area on the path without overlapping another.
+
         // step 1: draw line connecting each checkpoint (we can maybe do in within loop after working)
         for (let j = 0; j < this.checkpoints.length - 1; j++) {
             ctx.beginPath();
             ctx.moveTo(this.checkpoints[j][0], this.checkpoints[j][1]);
             ctx.lineTo(this.checkpoints[j+1][0], this.checkpoints[j+1][1]);
             ctx.stroke();
+            ctx.closePath();
+
+            // let's now mark the halfway point between each line drawn
+            let path_mid_x = Math.floor((this.checkpoints[j][0] + this.checkpoints[j+1][0]) / 2);
+            let path_mid_y = Math.floor((this.checkpoints[j][1] + this.checkpoints[j+1][1]) / 2);
+            ctx.fillStyle = 'orange';
+            ctx.beginPath();
+            ctx.arc(path_mid_x, path_mid_y, 5, 0, Math.PI*2, false);
+            ctx.fill();
             ctx.closePath();
         }
 
