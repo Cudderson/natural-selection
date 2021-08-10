@@ -432,6 +432,7 @@ class Boundary {
         }
     }
 
+    // too long, needs refactoring once all put together
     createCheckpoints() {
         // step 1: loop over all coordinates in both arrays
         ctx.fillStyle = 'white';
@@ -614,6 +615,42 @@ async function testBoundarySim() {
     }
 
     await hitDetectionTest(organisms);
+
+    // at last, we finally have checkpoints that are dynamically sized.
+    // we can now work on our fitness function
+    // make this a function as soon as you can
+
+    // we should loop over checkpoints, check all organisms, rather than loop over all organisms, check every checkpoint
+    // this will allow us to stop once an organism is found (backwards loop)
+    for (let k = custom_boundary.checkpoints.length - 1; k >= 0; k--) {
+        for (let j = 0; j < organisms.length; j++) {
+            // determine if organism is within the perimeter of the current checkpoint being checked
+            let x_lower_bound = (custom_boundary.checkpoints[k].coordinates[0]) - custom_boundary.checkpoints[k].size;
+            let x_upper_bound = (custom_boundary.checkpoints[k].coordinates[0]) + custom_boundary.checkpoints[k].size;
+            let y_lower_bound = (custom_boundary.checkpoints[k].coordinates[1]) - custom_boundary.checkpoints[k].size;
+            let y_upper_bound = (custom_boundary.checkpoints[k].coordinates[1]) + custom_boundary.checkpoints[k].size;
+
+            // can replace vars with definitions once confident working
+            // check if organism within x && y bounds of checkpoint we're checking
+            if (organisms[j].x > x_lower_bound && organisms[j].x < x_upper_bound) {
+                if (organisms[j].y > y_lower_bound && organisms[j].y < y_upper_bound) {
+                    console.log("We have found the farthest checkpoint.");
+                    // draw the checkpoint that was reached
+                    ctx.fillStyle = 'white';
+                    ctx.strokeWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(
+                        custom_boundary.checkpoints[k].coordinates[0], 
+                        custom_boundary.checkpoints[k].coordinates[1],
+                        custom_boundary.checkpoints[k].size, 0, Math.PI*2, false
+                    );
+                    ctx.stroke();
+                    ctx.closePath();
+                    break;
+                }
+            }
+        }
+    }
 
     console.log("Hit Detection Test Complete.");
 }
@@ -3508,7 +3545,7 @@ function enterBoundaryCreationMode() {
         custom_boundary = new_boundary;
 
         // return to settings
-        // displaySettingsForm(); //turned off while testing checkpoints
+        displaySettingsForm(); //turned off while testing checkpoints
     });
 }
 
