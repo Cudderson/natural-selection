@@ -148,7 +148,7 @@ class Boundary {
         this.bottom_boundary_coordinates = [];
         // this.checkpoints = [];
         // this.checkpoints = {'coordinates': [], 'size': null};
-        this.checkpoints = [{'coordinates': [], 'size': null}];
+        this.checkpoints = []; // push dictionaries containing coordinates, halfway_point, and size
     }
 
     applyBoundaryModeStyles() {
@@ -457,7 +457,7 @@ class Boundary {
                 let mid_x = Math.floor((this.top_boundary_coordinates[i][0] + this.bottom_boundary_coordinates[i][0]) / 2); 
                 let mid_y = Math.floor((this.top_boundary_coordinates[i][1] + this.bottom_boundary_coordinates[i][1]) / 2);
                 ctx.beginPath();
-                ctx.arc(mid_x, mid_y, 10, 0, Math.PI*2, false);
+                ctx.arc(mid_x, mid_y, 2, 0, Math.PI*2, false);
                 ctx.fill();
 
                 // store checkpoint coordinates
@@ -465,14 +465,13 @@ class Boundary {
             }
         }
 
+        // console.log("Line drawing complete");
+        // console.log(`Should be 10 lines: ${line_counter}`);
+
+
         // *** improving checkpoints ***
         // we also want to store some information about a checkpoint's size, so drawing will require no extra calculations
-
-        // notes: 
-        // - we technically have enough information before this to draw polygons representing each checkpoint area, but that
-        //   would require too complex hit-detection. We instead should use a rect or arc for consistency.
-        // - rects can't be drawn at an angle though, so we will start with an arc. Ultimately, we just want a checkpoint to cover
-        //   the largest calulable area on the path without overlapping another.
+        // Ultimately, we just want a checkpoint to cover the largest calulable area on the path without overlapping another.
 
         // step 1: draw line connecting each checkpoint (we can maybe do in within loop after working)
         for (let j = 0; j < this.checkpoints.length - 1; j++) {
@@ -491,20 +490,70 @@ class Boundary {
             ctx.fill();
             ctx.closePath();
 
-            // the point of all of this is to determine what size the checkpoint should be drawn
-            // the size (radius) of a checkpoint is its shortest distance to a halfway point
-            // if we start at checkpoint 1, it should be easier to figure out.
-
+            // store checkpoint's halfway point to the next checkpoint as 'halfway_point': [x, y]
+            this.checkpoints[j].halfway_point = [path_mid_x, path_mid_y];
         }
 
+        // determine size using halfway points (loop from 1 to 8 (skips first and last checkpoint))
+        for (let k = 1; k < this.checkpoints.length - 1; k++) {
+            // determine length from checkpoint to previous checkpoints halfway point
+            let current_location = this.checkpoints[k].coordinates;
+            let previous_halfway_point = this.checkpoints[k-1].halfway_point;
 
-        console.log("Line drawing complete");
-        console.log(`Should be 10 lines: ${line_counter}`);
+            // c^2 = a^2 + b^2
+            let distance_to_previous_halfway_point_squared = (
+                (current_location[0] - previous_halfway_point[0]) ** 2) + ((current_location[1] - previous_halfway_point[1]) ** 2
+            );
+            let distance_to_previous_halfway_point = Math.sqrt(distance_to_previous_halfway_point_squared);
 
-        // console.log("Your checkpoint coordinates:");
-        // console.log(this.checkpoints);
-        // console.log(this.checkpoints[0]);
-        // console.log(this.checkpoints[0][0]);
+
+            // now determine distance to OWN halfway point
+            let own_halfway_point = this.checkpoints[k].halfway_point;
+
+            // c^2 = a^2 + b^2
+            let distance_to_own_halfway_point_squared = (
+                (current_location[0] - own_halfway_point[0]) ** 2) + ((current_location[1] - own_halfway_point[1]) ** 2
+            );
+            let distance_to_own_halfway_point = Math.sqrt(distance_to_own_halfway_point_squared);
+
+            // determine shortest distance and store as size
+            if (distance_to_previous_halfway_point < distance_to_own_halfway_point) {
+                console.log(`For checkpoint ${k}, the distance to PREVIOUS halfway point is shortest.`);
+                console.log(`previous: ${distance_to_previous_halfway_point}`);
+                console.log(`own: ${distance_to_own_halfway_point}`);
+
+                this.checkpoints[k].size = Math.floor(distance_to_previous_halfway_point);
+            }
+            else {
+                console.log(`For checkpoint ${k}, the distance to OWN halfway point is shortest.`);
+                console.log(`previous: ${distance_to_previous_halfway_point}`);
+                console.log(`own: ${distance_to_own_halfway_point}`);
+
+                this.checkpoints[k].size = Math.floor(distance_to_own_halfway_point);
+            }
+
+            // this is all working. checkpoint[0] doesn't check for previous halfway point, and checkpoint[9] doesn't check for own!
+        }
+
+        // maybe we remove first/last checkpoints at this stage?? <<<<<< not a bad idea
+        // for now, let's just assign them arbitrary sizes
+        this.checkpoints[0].size = 20;
+        this.checkpoints[9].size = 20;
+
+        // to confirm, display sizes for each checkpoint
+        for (let m = 0; m < this.checkpoints.length; m++) {
+            console.log(`Size of checkpoint ${m}: ${this.checkpoints[m].size}`);
+        }
+
+        // complete! checkpoints can be drawn with appropriate sizes now.
+
+        // === Draw Checkpoints ===
+        for (let p = 0; p < this.checkpoints.length; p++) {
+            ctx.beginPath();
+            ctx.arc(this.checkpoints[p].coordinates[0], this.checkpoints[p].coordinates[1], this.checkpoints[p].size, 0, Math.PI*2, false);
+            ctx.stroke();
+            ctx.closePath();
+        }
     }
 }
 
