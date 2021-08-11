@@ -609,7 +609,7 @@ async function testBoundarySim() {
     const INITIAL_Y_BOUND = 550;
 
     // 10 organisms this time
-    for (var i = 0; i < 20; i++) {
+    for (var i = 0; i < 220; i++) {
         organism = new Organism('male', INITIAL_X_BOUND, INITIAL_Y_BOUND, ctx);
         organism.setRandomGenes();
         organisms.push(organism);
@@ -626,9 +626,16 @@ async function testBoundarySim() {
     // this will allow us to stop once an organism is found (backwards loop)
 
     var closest_checkpoint_not_reached;
+    var closest_found = false;
 
     for (let k = custom_boundary.checkpoints.length - 1; k >= 0; k--) {
+        console.log("k-loop iteration started");
+        if (closest_found) {
+            console.log("breaking out of k-loop, closest was found");
+            break;
+        }
         for (let j = 0; j < organisms.length; j++) {
+            console.log("j-loop iteration started");
             // determine if organism is within the perimeter of the current checkpoint being checked
             let x_lower_bound = (custom_boundary.checkpoints[k].coordinates[0]) - custom_boundary.checkpoints[k].size;
             let x_upper_bound = (custom_boundary.checkpoints[k].coordinates[0]) + custom_boundary.checkpoints[k].size;
@@ -663,18 +670,23 @@ async function testBoundarySim() {
                         );
                         ctx.stroke();
                         ctx.closePath;
+
+                        // we should store the next checkpoint not reached, as this will be used to determine fitness
+                        closest_checkpoint_not_reached = custom_boundary.checkpoints[k+1];
+                        closest_found = true;
+                        console.log(`closest set: ${k+1}`);
+
+                        console.log("breaking");
                         break;
                     }
                     else {
-                        console.log("k = custom_boundary.checkpoints.length - 1");
+                        console.log("k = custom_boundary.checkpoints.length - 1, no checkpoint set!!!!!! (need to finish)");
                     }
-
-                    // we should store the next checkpoint not reached, as this will be used to determine fitness
-                    closest_checkpoint_not_reached = custom_boundary.checkpoints[k+1];
                 }
             }
         }
     }
+    console.log("Loops over");
 
     // with the next checkpoint not yet reached, we can determine fitness!
 
@@ -692,6 +704,8 @@ async function testBoundarySim() {
         let distance_to_checkpoint_squared = horizontal_distance_squared + vertical_distance_squared;
 
         organisms[n].distance_to_next_checkpoint = Math.sqrt(distance_to_checkpoint_squared);
+        console.log("Distance to next-closest checkpoint for organism " + n + ":");
+        console.log(organisms[n].distance_to_next_checkpoint);
     }
 
     // we should have each organism's distance the closest checkpoint not yet reached.
@@ -708,6 +722,35 @@ async function testBoundarySim() {
     // -
 
     // this works because distance_to_goal with never be greater than 'height' (the max distance to goal)
+
+    // do we actually want to measure fitness by distance to next checkpoint not reached? 
+    // consider that only 1 organism could reach a checkpoint, and the next-closest checkpoint is set as the following one.
+    // in that scenario, all organisms except one would have a fitness < 0, because only one organism is potentially at least as
+    // far as the checkpoint we're measuring from
+
+    // potential solution: measure fitness from 2 checkpoints back frmo the next-closest (edge case on first and second checkpoint)
+    
+    // let's imagine some scenarios and what should happen in them:
+    // * no checkpoint reached
+    // - fitness based on distance from spawn point to checkpoint #2
+
+    // * checkpoint #1 reached [0]
+    // - fitness based on distance from spawn to checkpoint #2 (same as scenario 1)
+
+    // * checkpoint #2 reached [1]
+    // - fitness based on distance from checkpoint #1 to checkpoint #3
+
+    // * checkpoint #3 reached [2]
+    // - fitness based on distance from checkpoint #2 to checkpoint #4
+
+    // ** general rule: fitness based on distance from checkpoint_reached - 1 to checkpoint reached + 1
+    // - negative-fitness organisms will be given a small chance to be selected
+
+    // * final checkpoint reached [9]
+    // - fitness based on distance from checkpoint #8 to goal
+
+    // when a checkpoint is reached, ex. checkpoint #4, future generations will automatically receive 'credit' for reaching checkpoint#4
+    // (checkpoint reached cannot descend)
 
     console.log("testBoundarySim() Complete.");
 }
