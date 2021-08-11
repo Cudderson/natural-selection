@@ -618,10 +618,13 @@ async function testBoundarySim() {
 
     // at last, we finally have checkpoints that are dynamically sized.
     // we can now work on our fitness function
-    // make this a function as soon as you can
+    // make this a function as soon as you can (after fitness, we can begin to incorporate everything, will do then)
 
     // we should loop over checkpoints, check all organisms, rather than loop over all organisms, check every checkpoint
     // this will allow us to stop once an organism is found (backwards loop)
+
+    var closest_checkpoint_not_reached;
+
     for (let k = custom_boundary.checkpoints.length - 1; k >= 0; k--) {
         for (let j = 0; j < organisms.length; j++) {
             // determine if organism is within the perimeter of the current checkpoint being checked
@@ -636,7 +639,7 @@ async function testBoundarySim() {
                 if (organisms[j].y > y_lower_bound && organisms[j].y < y_upper_bound) {
                     console.log("We have found the farthest checkpoint.");
                     // draw the checkpoint that was reached
-                    ctx.fillStyle = 'white';
+                    ctx.strokeStyle = 'white';
                     ctx.strokeWidth = 1;
                     ctx.beginPath();
                     ctx.arc(
@@ -646,11 +649,34 @@ async function testBoundarySim() {
                     );
                     ctx.stroke();
                     ctx.closePath();
-                    break;
+
+                    // lets also draw the next checkpoint not reached (the checkpoint fitness is based on)
+                    if (k != custom_boundary.checkpoints.length - 1) {
+                        ctx.strokeStyle = 'darkred';
+                        ctx.beginPath();
+                        ctx.arc(
+                            custom_boundary.checkpoints[k+1].coordinates[0],
+                            custom_boundary.checkpoints[k+1].coordinates[1],
+                            custom_boundary.checkpoints[k+1].size, 0, Math.PI*2, false 
+                        );
+                        ctx.stroke();
+                        ctx.closePath;
+                        break;
+                    }
+                    else {
+                        console.log("k = custom_boundary.checkpoints.length - 1");
+                    }
+
+                    // we should store the next checkpoint not reached, as this will be used to determine fitness
+                    closest_checkpoint_not_reached = custom_boundary.checkpoints[k+1];
                 }
             }
         }
     }
+
+    // with the next checkpoint not yet reached, we can determine fitness!
+
+    // =====FITNESS FUNCTION FOR BOUNDARY SIMULATIONS=====
 
     console.log("Hit Detection Test Complete.");
 }
