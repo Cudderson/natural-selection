@@ -14,6 +14,10 @@ var MIN_GENE = -5;
 var MAX_GENE = 5;
 var dialogue = false;
 
+// boundary simulations start organisms at different spawn point
+const INITIAL_X_BOUND = 50;
+const INITIAL_Y_BOUND = 550;
+
 // boundary globals
 var custom_boundary;
 
@@ -54,7 +58,8 @@ class Organism {
         this.radius = 5;
         this.index = 0;
         this.genes = [];
-        this.distance_to_goal;
+        this.distance_to_goal; // for normal sim type
+        this.distance_to_next_checkpoint; //for boundary sim type
         this.fitness;
         this.reached_goal = false;
         // for boundary animations
@@ -146,6 +151,9 @@ class Boundary {
         this.full_boundary = new Image();
         this.top_boundary_coordinates = [];
         this.bottom_boundary_coordinates = [];
+        // this.checkpoints = [];
+        // this.checkpoints = {'coordinates': [], 'size': null};
+        this.checkpoints = []; // push dictionaries containing coordinates, halfway_point, and size
     }
 
     applyBoundaryModeStyles() {
@@ -429,27 +437,129 @@ class Boundary {
         }
     }
 
+    // too long, needs refactoring once all put together
     createCheckpoints() {
-        // this will start as a visual for my sake, but will eventually be invisible
-        // no animation needed unless errors
-
-        // goal: On the canvas, draw lines connecting points from top and bottom boundary coordinate arrays, such that the points
-        //       that are connected share the same array indicies
-
         // step 1: loop over all coordinates in both arrays
         ctx.fillStyle = 'white';
         ctx.strokeWidth = 1;
         ctx.lineCap = 'round';
+        var step = Math.ceil(this.top_boundary_coordinates.length / 10);
+        var line_counter=  0;
+
         for (let i = 0; i < this.top_boundary_coordinates.length; i++) {
             // step 2: draw a line from top[coordinate] to bottom[coordinate]
+            // let's say, for now, that we want just 10 lines drawn
+            // we could divide the total by 10, 243 / 10 = 24.3
+            // if i % Math.ceil(24.3) === 0: draw line
+            if (i % step === 0) {
+                ctx.beginPath();
+                ctx.moveTo(this.top_boundary_coordinates[i][0], this.top_boundary_coordinates[i][1])
+                ctx.lineTo(this.bottom_boundary_coordinates[i][0], this.bottom_boundary_coordinates[i][1]);
+                ctx.stroke();
+                ctx.closePath();
+                line_counter++;
+
+                // draw dot on middle of each line (distance between x's - distance between y's)
+                let mid_x = Math.floor((this.top_boundary_coordinates[i][0] + this.bottom_boundary_coordinates[i][0]) / 2); 
+                let mid_y = Math.floor((this.top_boundary_coordinates[i][1] + this.bottom_boundary_coordinates[i][1]) / 2);
+                ctx.beginPath();
+                ctx.arc(mid_x, mid_y, 2, 0, Math.PI*2, false);
+                ctx.fill();
+
+                // store checkpoint coordinates
+                this.checkpoints.push({'coordinates': [mid_x, mid_y]});
+            }
+        }
+
+        // console.log("Line drawing complete");
+        // console.log(`Should be 10 lines: ${line_counter}`);
+
+
+        // *** improving checkpoints ***
+        // we also want to store some information about a checkpoint's size, so drawing will require no extra calculations
+        // Ultimately, we just want a checkpoint to cover the largest calulable area on the path without overlapping another.
+
+        // step 1: draw line connecting each checkpoint (we can maybe do in within loop after working)
+        for (let j = 0; j < this.checkpoints.length - 1; j++) {
             ctx.beginPath();
-            ctx.moveTo(this.top_boundary_coordinates[i][0], this.top_boundary_coordinates[i][1])
-            ctx.lineTo(this.bottom_boundary_coordinates[i][0], this.bottom_boundary_coordinates[i][1]);
+            ctx.moveTo(this.checkpoints[j].coordinates[0], this.checkpoints[j].coordinates[1]);
+            ctx.lineTo(this.checkpoints[j+1].coordinates[0], this.checkpoints[j+1].coordinates[1]);
+            ctx.stroke();
+            ctx.closePath();
+
+            // let's now mark the halfway point between each line drawn
+            let path_mid_x = Math.floor((this.checkpoints[j].coordinates[0] + this.checkpoints[j+1].coordinates[0]) / 2);
+            let path_mid_y = Math.floor((this.checkpoints[j].coordinates[1] + this.checkpoints[j+1].coordinates[1]) / 2);
+            ctx.fillStyle = 'orange';
+            ctx.beginPath();
+            ctx.arc(path_mid_x, path_mid_y, 5, 0, Math.PI*2, false);
+            ctx.fill();
+            ctx.closePath();
+
+            // store checkpoint's halfway point to the next checkpoint as 'halfway_point': [x, y]
+            this.checkpoints[j].halfway_point = [path_mid_x, path_mid_y];
+        }
+
+        // determine size using halfway points (loop from 1 to 8 (skips first and last checkpoint))
+        for (let k = 1; k < this.checkpoints.length - 1; k++) {
+            // determine length from checkpoint to previous checkpoints halfway point
+            let current_location = this.checkpoints[k].coordinates;
+            let previous_halfway_point = this.checkpoints[k-1].halfway_point;
+
+            // c^2 = a^2 + b^2
+            let distance_to_previous_halfway_point_squared = (
+                (current_location[0] - previous_halfway_point[0]) ** 2) + ((current_location[1] - previous_halfway_point[1]) ** 2
+            );
+            let distance_to_previous_halfway_point = Math.sqrt(distance_to_previous_halfway_point_squared);
+
+
+            // now determine distance to OWN halfway point
+            let own_halfway_point = this.checkpoints[k].halfway_point;
+
+            // c^2 = a^2 + b^2
+            let distance_to_own_halfway_point_squared = (
+                (current_location[0] - own_halfway_point[0]) ** 2) + ((current_location[1] - own_halfway_point[1]) ** 2
+            );
+            let distance_to_own_halfway_point = Math.sqrt(distance_to_own_halfway_point_squared);
+
+            // determine shortest distance and store as size
+            if (distance_to_previous_halfway_point < distance_to_own_halfway_point) {
+                console.log(`For checkpoint ${k}, the distance to PREVIOUS halfway point is shortest.`);
+                console.log(`previous: ${distance_to_previous_halfway_point}`);
+                console.log(`own: ${distance_to_own_halfway_point}`);
+
+                this.checkpoints[k].size = Math.floor(distance_to_previous_halfway_point);
+            }
+            else {
+                console.log(`For checkpoint ${k}, the distance to OWN halfway point is shortest.`);
+                console.log(`previous: ${distance_to_previous_halfway_point}`);
+                console.log(`own: ${distance_to_own_halfway_point}`);
+
+                this.checkpoints[k].size = Math.floor(distance_to_own_halfway_point);
+            }
+
+            // this is all working. checkpoint[0] doesn't check for previous halfway point, and checkpoint[9] doesn't check for own!
+        }
+
+        // maybe we remove first/last checkpoints at this stage?? <<<<<< not a bad idea
+        // for now, let's just assign them arbitrary sizes
+        this.checkpoints[0].size = 20;
+        this.checkpoints[9].size = 20;
+
+        // to confirm, display sizes for each checkpoint
+        for (let m = 0; m < this.checkpoints.length; m++) {
+            console.log(`Size of checkpoint ${m}: ${this.checkpoints[m].size}`);
+        }
+
+        // complete! checkpoints can be drawn with appropriate sizes now.
+
+        // === Draw Checkpoints ===
+        for (let p = 0; p < this.checkpoints.length; p++) {
+            ctx.beginPath();
+            ctx.arc(this.checkpoints[p].coordinates[0], this.checkpoints[p].coordinates[1], this.checkpoints[p].size, 0, Math.PI*2, false);
             ctx.stroke();
             ctx.closePath();
         }
-
-        console.log("Line drawing complete");
     }
 }
 
@@ -499,15 +609,255 @@ async function testBoundarySim() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // 10 organisms this time
-    for (var i = 0; i < 10; i++) {
-        organism = new Organism('male', INITIAL_X, INITIAL_Y, ctx);
+    for (var i = 0; i < 220; i++) {
+        organism = new Organism('male', INITIAL_X_BOUND, INITIAL_Y_BOUND, ctx);
         organism.setRandomGenes();
         organisms.push(organism);
     }
 
     await hitDetectionTest(organisms);
-
     console.log("Hit Detection Test Complete.");
+
+    // at last, we finally have checkpoints that are dynamically sized.
+
+    // we should loop over checkpoints, check all organisms, rather than loop over all organisms, check every checkpoint
+    // this will allow us to stop once an organism is found (backwards loop)
+
+    var previous_checkpoint;
+    var current_checkpoint;
+    var next_checkpoint;
+    var reached_checkpoint = false;
+
+    for (let k = custom_boundary.checkpoints.length - 1; k >= 0; k--) {
+        console.log("k-loop iteration started");
+        if (reached_checkpoint) {
+            console.log("breaking out of k-loop, checkpoint was reached");
+            break;
+        }
+        for (let j = 0; j < organisms.length; j++) {
+            console.log("j-loop iteration started");
+            // determine if organism is within the perimeter of the current checkpoint being checked
+            let x_lower_bound = (custom_boundary.checkpoints[k].coordinates[0]) - custom_boundary.checkpoints[k].size;
+            let x_upper_bound = (custom_boundary.checkpoints[k].coordinates[0]) + custom_boundary.checkpoints[k].size;
+            let y_lower_bound = (custom_boundary.checkpoints[k].coordinates[1]) - custom_boundary.checkpoints[k].size;
+            let y_upper_bound = (custom_boundary.checkpoints[k].coordinates[1]) + custom_boundary.checkpoints[k].size;
+
+            // can replace vars with definitions once confident working
+            // check if organism within x && y bounds of checkpoint we're checking
+            if (organisms[j].x > x_lower_bound && organisms[j].x < x_upper_bound) {
+                if (organisms[j].y > y_lower_bound && organisms[j].y < y_upper_bound) {
+
+                    console.log("We have reached a checkpoint.");
+
+                    reached_checkpoint = true;
+                    current_checkpoint = k;
+
+                    if (k === custom_boundary.checkpoints.length - 1) {
+                        // final checkpoint was reached:
+                        // previous = k-1, next = goal
+                        previous_checkpoint = k - 1;
+                        next_checkpoint = 'goal';
+                    } 
+                    else if (k >= 1) {
+                        // at least second checkpoint was reached:
+                        // previous = k-1, next = k+1
+                        previous_checkpoint = k - 1;
+                        next_checkpoint = k + 1;
+                    }
+                    else {
+                        // k = 0, first checkpoint reached:
+                        // previous: spawn point, next: k+1
+                        previous_checkpoint = 'spawn';
+                        next_checkpoint = k + 1;
+                    }
+
+                    console.log("breaking");
+                    break;
+                }
+            }
+        }
+    }
+    console.log("Loops over, drawing checkpoints");
+
+    // draw the checkpoint that was reached
+    drawCurrentCheckpoint(current_checkpoint);
+
+    // draw the previous checkpoint (the checkpoint fitness is measured from)
+    drawPreviousCheckpoint(previous_checkpoint);
+
+    // draw the next checkpoint not reached (the checkpoint fitness measured to)
+    drawNextCheckpoint(next_checkpoint);
+
+    console.log("done drawing checkpoints");
+
+    // with the next checkpoint not yet reached, we can determine fitness!
+
+    // =====FITNESS FUNCTION FOR BOUNDARY SIMULATIONS=====
+    // we can now do this very similarly to the OG simulation fitness function
+    // as always, this will become class methods when integrated into full program
+
+    // before fitness, we must calculate each organism's distance to the closest checkpoint not yet reached
+    // calculate distance to closest checkpoint not yet reached
+    for (let n = 0; n < organisms.length; n++) {
+        // in future, make sure organism is alive before calculating its distance
+        // distance^2 = a^2 + b^2
+        let horizontal_distance_squared = (organisms[n].x - custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2;
+        let vertical_distance_squared = (organisms[n].y - custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2;
+        let distance_to_checkpoint_squared = horizontal_distance_squared + vertical_distance_squared;
+
+        organisms[n].distance_to_next_checkpoint = Math.sqrt(distance_to_checkpoint_squared);
+        console.log("Distance to next-closest checkpoint for organism " + n + ":");
+        console.log(organisms[n].distance_to_next_checkpoint);
+    }
+
+    // we should have each organism's distance the closest checkpoint not yet reached.
+
+    // let's imagine some scenarios and what should happen in them:
+    // * no checkpoint reached
+    // - fitness based on distance from spawn point to checkpoint #2
+
+    // * checkpoint #1 reached [0]
+    // - fitness based on distance from spawn to checkpoint #2 [1] (same as scenario 1)
+
+    // * checkpoint #2 reached [1]
+    // - fitness based on distance from checkpoint #1 [0] to checkpoint #3 [2]
+
+    // * checkpoint #3 reached [2]
+    // - fitness based on distance from checkpoint #2 [1] to checkpoint #4 [3]
+
+    // ** general rule: fitness based on distance from checkpoint_reached - 1 to checkpoint reached + 1
+    // - negative-fitness organisms will be given a small chance to be selected
+
+    // * final checkpoint reached [9]
+    // - fitness based on distance from checkpoint #8 to goal
+
+    // when a checkpoint is reached, ex. checkpoint #4, future generations will automatically receive 'credit' for reaching checkpoint#4
+    // (checkpoint reached cannot descend)
+
+    // to calculate fitness, we need:
+    // 1. the point we're measuring from (spawn point or checkpoint) (previous_checkpoint)
+    // 2. the point we're measuring to (closest checkpoint not yet reached) (next_checkpoint)
+    // 3. organisms' distance to closest checkpoint not yet reached (organism.distance_to_next_checkpoint)
+
+    // we will measure k-1 >> k+1 as a straight line, as an organism's distance to k+1 is a straight line
+
+    // ============= now, we determine fitness ========================
+    // here is the original fitness function for normal sims:
+
+    // -
+    // height = distance between starting location(y) and goal.y
+    // var height = INITIAL_Y - GOAL_Y_POS;
+
+    // var normalized_distance_to_goal = this.distance_to_goal / height;
+    // this.fitness = 1 - normalized_distance_to_goal;
+    // -
+
+    // this works because distance_to_goal will never be greater than 'height' (the max distance to goal) unless organism goes backwards
+
+    // we'll refer to 'height' as 'scale' for this fitness function
+    // (try to combine fitness functions together for both sims?)
+
+    console.log("caclulating fitness for each organism...");
+
+    var scale = setScale(previous_checkpoint, next_checkpoint);
+    console.log(`Scale: ${scale}`);
+
+    // with our scale, we can now create a fitness score for each organism using scale and an organism's distance to next checkpoint
+    // make function
+    for (let f = 0; f < organisms.length; f++) {
+        let normalized_distance_to_next_checkpoint = organisms[f].distance_to_next_checkpoint / scale;
+        organisms[f].fitness = 1 - normalized_distance_to_next_checkpoint;
+
+        console.log(`fitness for organism ${f}: ${organisms[f].fitness}`);
+
+        if (organisms[f].fitness <= 0) {
+            organisms[f].fitness = 0.01;
+            console.log("changed fitness to .01 to give chance of selection");
+        }
+    }
+    console.log("fitness function complete");
+    console.log("testBoundarySim() Complete.");
+
+    // we now have a fitness score for each organism. This will allow us to move into the selection phase
+    // consider if this is the point where we begin to incorporate with main simulation?
+}
+
+function drawCurrentCheckpoint(index) {
+    // draw farthest checkpoint reached
+    ctx.strokeStyle = 'white';
+    ctx.strokeWidth = 1;
+    ctx.beginPath();
+    ctx.arc(
+        custom_boundary.checkpoints[index].coordinates[0], 
+        custom_boundary.checkpoints[index].coordinates[1],
+        custom_boundary.checkpoints[index].size, 0, Math.PI*2, false
+    );
+    ctx.stroke();
+    ctx.closePath();
+}
+
+function drawPreviousCheckpoint(index) {
+    // draw checkpoint_reached - 1 or spawn point
+    if (index === 'spawn') {
+        // highlight spawn point
+        console.log("highlighting spawn point green");
+        ctx.strokeStyle = 'rgb(155, 245, 0)';
+        ctx.strokeWidth = 3;
+        ctx.beginPath();
+        ctx.arc(INITIAL_X_BOUND, INITIAL_Y_BOUND, 10, 0, Math.PI*2, false);
+        ctx.stroke();
+        ctx.closePath();
+    }
+    else {
+        // highlight k-1
+        console.log("highlighting k-1 checkpoint green");
+        ctx.strokeStyle = 'rgb(155, 245, 0)';
+        ctx.beginPath();
+        ctx.arc(
+            custom_boundary.checkpoints[index].coordinates[0],
+            custom_boundary.checkpoints[index].coordinates[1],
+            custom_boundary.checkpoints[index].size, 0, Math.PI*2, false
+        );
+        ctx.stroke();
+        ctx.closePath();
+    }
+}
+
+function drawNextCheckpoint(index) {
+    // draw next checkpoint not yet reached
+    if (index === 'goal') {
+        // goal is the checkpoint, should circle goal
+        console.log("k = custom_boundary.checkpoints.length - 1, no checkpoint set!!!!!! (need to finish)");
+    }
+    else {
+        ctx.strokeStyle = 'darkred';
+        ctx.beginPath();
+        ctx.arc(
+            custom_boundary.checkpoints[index].coordinates[0],
+            custom_boundary.checkpoints[index].coordinates[1],
+            custom_boundary.checkpoints[index].size, 0, Math.PI*2, false 
+        );
+        ctx.stroke();
+        ctx.closePath;
+    }
+}
+
+function setScale(previous_checkpoint, next_checkpoint) {
+    // scale = distance between previous checkpoint and next checkpoint (make own function 'setScale()')
+    // c^2 = a^2 + b^2
+    let checkpoints_horizontal_distance_squared = (
+        (custom_boundary.checkpoints[previous_checkpoint].coordinates[0] - custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2
+    );
+    let checkpoints_vertical_distance_squared = (
+        (custom_boundary.checkpoints[previous_checkpoint].coordinates[1] - custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2
+    );
+    let distance_from_previous_to_next_checkpoint_squared = checkpoints_horizontal_distance_squared + checkpoints_vertical_distance_squared;
+
+    let distance_from_previous_to_next_checkpoint = Math.sqrt(distance_from_previous_to_next_checkpoint_squared);
+
+    let scale = distance_from_previous_to_next_checkpoint;
+
+    return scale;
 }
 
 function getPixel(canvas_data, index) {
@@ -528,10 +878,15 @@ function getPixelXY(canvas_data, x, y) {
 function hitDetectionTest(organisms) {
 
     return new Promise(resolve => {
+        // clear and draw boundary
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
+
+        var canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height); // capture canvas for collision testing
         var finished = false;
         var position_rgba;
         var total_moves = 0;
-        var canvas_data;
 
         function animateOrganisms() {
 
@@ -548,10 +903,16 @@ function hitDetectionTest(organisms) {
                     // draw boundary
                     ctx.drawImage(custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
 
-                    // *** maybe global would be better for this. Because the image data with boundaries is all I care about
-                    canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height); // keeping this outside greatly improves speed
-                    
-                    // do it with 10 organisms (seems to already be pretty slow)
+                    // (FOR TESTING) draw checkpoints
+                    // ctx.fillStyle = 'white';
+                    // for (let i = 0; i < custom_boundary.checkpoints.length; i++) {
+                    //     ctx.beginPath();
+                    //     ctx.arc(custom_boundary.checkpoints[i][0], custom_boundary.checkpoints[i][1], 10, 0, Math.PI*2, false);
+                    //     ctx.fill();
+                    //     ctx.closePath();
+                    // }
+
+                    // do it with 10 organisms
                     for (var j = 0; j < organisms.length; j++) {
 
                         // update index
@@ -561,7 +922,7 @@ function hitDetectionTest(organisms) {
 
                         position_rgba = getPixelXY(canvas_data, organisms[j].x, organisms[j].y);
                         
-                        console.log("Current Position Pixel for Organism: " + position_rgba);
+                        console.log(`Current Position Pixel for Organism ${j}: ` + position_rgba);
 
                         // --custom-green: rgba(155, 245, 0, 1);
                         // highlight organism red if he leaves safe area (dies)
@@ -3389,7 +3750,7 @@ function enterBoundaryCreationMode() {
         custom_boundary = new_boundary;
 
         // return to settings
-        // displaySettingsForm(); turned off while testing checkpoints
+        displaySettingsForm(); //turned off while testing checkpoints
     });
 }
 
