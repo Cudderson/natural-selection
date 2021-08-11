@@ -54,7 +54,8 @@ class Organism {
         this.radius = 5;
         this.index = 0;
         this.genes = [];
-        this.distance_to_goal;
+        this.distance_to_goal; // for normal sim type
+        this.distance_to_next_checkpoint; //for boundary sim type
         this.fitness;
         this.reached_goal = false;
         // for boundary animations
@@ -615,6 +616,7 @@ async function testBoundarySim() {
     }
 
     await hitDetectionTest(organisms);
+    console.log("Hit Detection Test Complete.");
 
     // at last, we finally have checkpoints that are dynamically sized.
     // we can now work on our fitness function
@@ -677,8 +679,37 @@ async function testBoundarySim() {
     // with the next checkpoint not yet reached, we can determine fitness!
 
     // =====FITNESS FUNCTION FOR BOUNDARY SIMULATIONS=====
+    // we can now do this very similarly to the OG simulation fitness function
+    // as always, this will become class methods when integrated into full program
 
-    console.log("Hit Detection Test Complete.");
+    // before fitness, we must calculate each organism's distance to the closest checkpoint not yet reached
+    // calculate distance to closest checkpoint not yet reached
+    for (let n = 0; n < organisms.length; n++) {
+        // in future, make sure organism is alive before calculating its distance
+        // distance^2 = a^2 + b^2
+        let horizontal_distance_squared = (organisms[n].x - closest_checkpoint_not_reached.coordinates[0]) ** 2;
+        let vertical_distance_squared = (organisms[n].y - closest_checkpoint_not_reached.coordinates[1]) ** 2;
+        let distance_to_checkpoint_squared = horizontal_distance_squared + vertical_distance_squared;
+
+        organisms[n].distance_to_next_checkpoint = Math.sqrt(distance_to_checkpoint_squared);
+    }
+
+    // we should have each organism's distance the closest checkpoint not yet reached.
+
+    // now, we determine fitness
+    // here is the original fitness function for normal sims:
+
+    // -
+    // height = distance between starting location(y) and goal.y
+    // var height = INITIAL_Y - GOAL_Y_POS;
+
+    // var normalized_distance_to_goal = this.distance_to_goal / height;
+    // this.fitness = 1 - normalized_distance_to_goal;
+    // -
+
+    // this works because distance_to_goal with never be greater than 'height' (the max distance to goal)
+
+    console.log("testBoundarySim() Complete.");
 }
 
 function getPixel(canvas_data, index) {
