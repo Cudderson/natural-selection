@@ -674,14 +674,26 @@ function drawNextCheckpoint(index) {
 }
 
 function setScale(previous_checkpoint, next_checkpoint) {
+    if (previous_checkpoint === 'spawn') {
+
+        var checkpoints_horizontal_distance_squared = (
+            (INITIAL_X_BOUND - custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2
+        );
+        var checkpoints_vertical_distance_squared = (
+            (INITIAL_Y_BOUND - custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2
+        );
+    }
+    else {
+        var checkpoints_horizontal_distance_squared = (
+            (custom_boundary.checkpoints[previous_checkpoint].coordinates[0] - custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2
+        );
+        var checkpoints_vertical_distance_squared = (
+            (custom_boundary.checkpoints[previous_checkpoint].coordinates[1] - custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2
+        );
+    }
     // scale = distance between previous checkpoint and next checkpoint (make own function 'setScale()')
     // c^2 = a^2 + b^2
-    let checkpoints_horizontal_distance_squared = (
-        (custom_boundary.checkpoints[previous_checkpoint].coordinates[0] - custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2
-    );
-    let checkpoints_vertical_distance_squared = (
-        (custom_boundary.checkpoints[previous_checkpoint].coordinates[1] - custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2
-    );
+
     let distance_from_previous_to_next_checkpoint_squared = checkpoints_horizontal_distance_squared + checkpoints_vertical_distance_squared;
 
     let distance_from_previous_to_next_checkpoint = Math.sqrt(distance_from_previous_to_next_checkpoint_squared);
@@ -1128,8 +1140,12 @@ async function runGeneration() {
         var checkpoint_data = getFarthestCheckpointReached();
         // optionally draw checkpoints here (functions already made)
 
+        console.log(checkpoint_data);
+
         // ===== calc/set each organism's distance to goal and identify closest =====
         var closest_organism = getShortestDistanceToCheckpoint(checkpoint_data['next']);
+
+        console.log(closest_organism);
 
         // calculate fitness of each organism (set as instance attr.)
         var scale = setScale(checkpoint_data['previous'], checkpoint_data['next']);
@@ -1146,9 +1162,23 @@ async function runGeneration() {
         // this isn't a huge deal right now, stats just won't be good until they are.
     }
 
-
     // ===== left off here =====
+    // since we have a fitness score, the rest of the code should work on its own here (minus passing params to new gen)
+    // reconsider if fitness should instead be based off the goal position (can add lengths of lines drawn for checkpoints)
+    // this would allow a proper population fitness as well
 
+    // it would be something like this:
+    // 1. determine length of line from spawn>goal (using checkpoints)
+    // 2. determine farthest checkpoint reached
+    // 3. fitness = 1 - (length_of_organism_to_goal / length_of_spawn_to_goal)
+    // ex. fitness = 1 - (200 / 1200), === 0.83
+
+    // length_of_organism_to_goal could be determined by the length of organism to next_checkpoint not reached + length of
+    // next_checkpoint to goal
+
+    // this way, we are more likely to choose organisms closest to the next checkpoint, which is what we want anyway.
+
+    // ===== if needed, try in testBoundarySim() first =====
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     if (dialogue) {
@@ -1364,10 +1394,11 @@ function calcPopulationFitnessBounds(scale) {
 
         console.log(`fitness for organism ${f}: ${organisms[f].fitness}`);
 
-        if (organisms[f].fitness <= 0) {
-            organisms[f].fitness = 0.01;
-            console.log("changed fitness to .01 to give chance of selection");
-        }
+        // this is handled in beginSelectionProcess(), save just in case
+        // if (organisms[f].fitness <= 0) {
+        //     organisms[f].fitness = 0.01;
+        //     console.log("changed fitness to .01 to give chance of selection");
+        // }
     }
     console.log("fitness function complete");
 }
