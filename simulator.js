@@ -43,7 +43,7 @@ var offspring_organisms = [];
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
 
-// ********** name conflicts with canvas_data in hitDetectionTest, need to fix
+// ********** name conflicts with canvas_data in updateAndMoveOrganismsBounds, need to fix
 var canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
 // frame rate
@@ -706,7 +706,9 @@ function getPixelXY(canvas_data, x, y) {
 }
 
 // needs to be updated for new class Boundary() (make class method?)
-function hitDetectionTest(organisms) {
+function updateAndMoveOrganismsBounds() {
+    // 'organisms' was a param but I don't think we need to pass it because it's global
+    // updateAndMoveOrganisms() returns a success flag
 
     return new Promise(resolve => {
         // clear and draw boundary
@@ -777,10 +779,57 @@ function hitDetectionTest(organisms) {
             else {
                 //resolve
                 cancelAnimationFrame(frame_id);
-                resolve();
+                // ======! resolving 'false' until success logic implemented !======
+                resolve(false);
             }
         }
         start_test_guy_animation = requestAnimationFrame(animateOrganisms);
+    })
+}
+
+// moved here for integration from evaluation phase section
+function updateAndMoveOrganisms(goal) {
+    return new Promise(resolve => {
+        var total_moves = 0;
+        var finished = false;
+        var success_flag = false;
+        // why is this async?
+        async function animateOrganisms() {
+            if (!finished) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                goal.drawGoal();
+                goal.showStatistics();
+
+                if (dialogue) {
+                    drawEvaluationPhaseText();
+                }
+
+                for (var i = 0; i < organisms.length; i++) {
+                    if (organisms[i].reached_goal == false) {
+                        organisms[i].update();
+                        organisms[i].move();
+                        hasReachedGoal(organisms[i], goal);
+                    }
+                    else {
+                        updateSuccessfulOrganism(organisms[i]);
+                        success_flag = true;
+                    }
+                    total_moves++;
+                }
+                if (total_moves == (organisms.length * GENE_COUNT)) {
+                    finished = true;
+                }
+
+                sleep(1000 / FPS); // control drawing FPS for organisms
+                frame_id = requestAnimationFrame(animateOrganisms);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(frame_id);
+                resolve(success_flag);
+            }
+        }
+        start_animate_organisms = requestAnimationFrame(animateOrganisms);
     })
 }
 
@@ -799,7 +848,7 @@ async function testBoundarySim() {
         organisms.push(organism);
     }
 
-    await hitDetectionTest(organisms);
+    await updateAndMoveOrganismsBounds(organisms);
     console.log("Hit Detection Test Complete.");
 
     // at last, we finally have checkpoints that are dynamically sized.
@@ -1064,6 +1113,8 @@ async function runGeneration() {
         await sleep(1000);
     }
 
+    // ===== currently here on integration =====
+
     const population_resolution = await evaluatePopulation(); // maybe don't await here
     var closest_organism = population_resolution['closest_organism'];
     average_fitness = population_resolution['average_fitness'];
@@ -1188,50 +1239,8 @@ function getRandomGene(min, max) {
 }
 
 // 2. Evaluate
-function updateAndMoveOrganisms(goal) {
-    return new Promise(resolve => {
-        var total_moves = 0;
-        var finished = false;
-        var success_flag = false;
-        // why is this async?
-        async function animateOrganisms() {
-            if (!finished) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                goal.drawGoal();
-                goal.showStatistics();
 
-                if (dialogue) {
-                    drawEvaluationPhaseText();
-                }
-
-                for (var i = 0; i < organisms.length; i++) {
-                    if (organisms[i].reached_goal == false) {
-                        organisms[i].update();
-                        organisms[i].move();
-                        hasReachedGoal(organisms[i], goal);
-                    }
-                    else {
-                        updateSuccessfulOrganism(organisms[i]);
-                        success_flag = true;
-                    }
-                    total_moves++;
-                }
-                if (total_moves == (organisms.length * GENE_COUNT)) {
-                    finished = true;
-                }
-
-                sleep(1000 / FPS); // control drawing FPS for organisms
-                frame_id = requestAnimationFrame(animateOrganisms);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve(success_flag);
-            }
-        }
-        start_animate_organisms = requestAnimationFrame(animateOrganisms);
-    })
-}
+// updateAndMoveOrganisms() was here, moved for integration
 
 function hasReachedGoal(organism, goal) {
     // check if within y-range 
@@ -1993,18 +2002,19 @@ function fadeInEvaluationPhaseText() {
 
 async function runEvaluationAnimation() {
 
-    // starting here
     // need to draw goal at location depending on sim type
     if (sim_type === 'classic') {
         var goal = new Goal(GOAL_X_POS, GOAL_Y_POS, 20, ctx);
+        var success_flag = await updateAndMoveOrganisms(goal); // ideally don't pass in goal here
     }
     else {
-        var goal = new Goal(GOAL_X_POS_BOUNDS, GOAL_Y_POS_BOUNDS, 20, ctx);
+        // var goal = new Goal(GOAL_X_POS_BOUNDS, GOAL_Y_POS_BOUNDS, 20, ctx); not sure if needed (goal saved in boundary drawing)
+        var success_flag = await updateAndMoveOrganismsBounds();
     }
 
-    // currently here
+    // updateAndMoveOrganisms() is the classic version of boundary sim's updateAndMoveOrganismsBounds()
+    // we can combine them (standalone for now)
 
-    var success_flag = await updateAndMoveOrganisms(goal); // ideally don't pass in goal here
     return new Promise((resolve, reject) => {
         if (success_flag) {
             resolve(true);
