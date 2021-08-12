@@ -755,7 +755,7 @@ function updateAndMoveOrganismsBounds() {
 
                         position_rgba = getPixelXY(canvas_data, organisms[j].x, organisms[j].y);
                         
-                        console.log(`Current Position Pixel for Organism ${j}: ` + position_rgba);
+                        // console.log(`Current Position Pixel for Organism ${j}: ` + position_rgba);
 
                         // --custom-green: rgba(155, 245, 0, 1);
                         // highlight organism red if he leaves safe area (dies)
@@ -833,25 +833,8 @@ function updateAndMoveOrganisms(goal) {
     })
 }
 
-async function testBoundarySim() {
-    // update flag to resolve playTitleScreenAnimation()
-    simulation_started = true;
-
-    // clear
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // 10 organisms this time
-    for (var i = 0; i < 220; i++) {
-        organism = new Organism('male', INITIAL_X_BOUND, INITIAL_Y_BOUND, ctx);
-        organism.setRandomGenes();
-        organisms.push(organism);
-    }
-
-    await updateAndMoveOrganismsBounds(organisms);
-    console.log("Hit Detection Test Complete.");
-
-    // at last, we finally have checkpoints that are dynamically sized.
+function getFarthestCheckpointReached() {
+    // **NOTE: this function doesn't handle when 0 checkpoints are reached yet !!**
 
     // we should loop over checkpoints, check all organisms, rather than loop over all organisms, check every checkpoint
     // this will allow us to stop once an organism is found (backwards loop)
@@ -910,6 +893,42 @@ async function testBoundarySim() {
             }
         }
     }
+    console.log("break successful. returning previous, current, and next checkpoints");
+    if (reached_checkpoint) {
+        return {
+            'previous': previous_checkpoint,
+            'current': current_checkpoint,
+            'next': next_checkpoint
+        }
+    }
+    else {
+        return "shoot. no one reached a checkpoint. returning this string.";
+    }
+}
+
+async function testBoundarySim() {
+    // update flag to resolve playTitleScreenAnimation()
+    simulation_started = true;
+
+    // clear
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 10 organisms this time
+    for (var i = 0; i < 220; i++) {
+        organism = new Organism('male', INITIAL_X_BOUND, INITIAL_Y_BOUND, ctx);
+        organism.setRandomGenes();
+        organisms.push(organism);
+    }
+
+    await updateAndMoveOrganismsBounds(organisms);
+    console.log("Hit Detection Test Complete.");
+
+    // at last, we finally have checkpoints that are dynamically sized.
+
+    // code here was moved to getFarthestCheckpointReached();
+    getFarthestCheckpointReached();
+
     console.log("Loops over, drawing checkpoints");
 
     // draw the checkpoint that was reached
@@ -930,20 +949,8 @@ async function testBoundarySim() {
     // as always, this will become class methods when integrated into full program
 
     // before fitness, we must calculate each organism's distance to the closest checkpoint not yet reached
-    // calculate distance to closest checkpoint not yet reached
-    for (let n = 0; n < organisms.length; n++) {
-        // in future, make sure organism is alive before calculating its distance
-        // distance^2 = a^2 + b^2
-        let horizontal_distance_squared = (organisms[n].x - custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2;
-        let vertical_distance_squared = (organisms[n].y - custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2;
-        let distance_to_checkpoint_squared = horizontal_distance_squared + vertical_distance_squared;
 
-        organisms[n].distance_to_next_checkpoint = Math.sqrt(distance_to_checkpoint_squared);
-        console.log("Distance to next-closest checkpoint for organism " + n + ":");
-        console.log(organisms[n].distance_to_next_checkpoint);
-    }
-
-    // we should have each organism's distance the closest checkpoint not yet reached.
+    var closest_organism = getShortestDistanceToCheckpoint(next_checkpoint);
 
     // let's imagine some scenarios and what should happen in them:
     // * no checkpoint reached
@@ -997,18 +1004,9 @@ async function testBoundarySim() {
 
     // with our scale, we can now create a fitness score for each organism using scale and an organism's distance to next checkpoint
     // make function
-    for (let f = 0; f < organisms.length; f++) {
-        let normalized_distance_to_next_checkpoint = organisms[f].distance_to_next_checkpoint / scale;
-        organisms[f].fitness = 1 - normalized_distance_to_next_checkpoint;
 
-        console.log(`fitness for organism ${f}: ${organisms[f].fitness}`);
+    calcPopulationFitnessBounds(scale);
 
-        if (organisms[f].fitness <= 0) {
-            organisms[f].fitness = 0.01;
-            console.log("changed fitness to .01 to give chance of selection");
-        }
-    }
-    console.log("fitness function complete");
     console.log("testBoundarySim() Complete.");
 
     // we now have a fitness score for each organism. This will allow us to move into the selection phase
@@ -1113,11 +1111,44 @@ async function runGeneration() {
         await sleep(1000);
     }
 
-    // ===== currently here on integration =====
+    if (sim_type === 'classic') {
+        const population_resolution = await evaluatePopulation(); // maybe don't await here
+        var closest_organism = population_resolution['closest_organism'];
+        average_fitness = population_resolution['average_fitness'];
+    }
+    else if (sim_type === 'boundary') {
+        // here we need to:
+        // [x] calc each organisms distance to checkpoint (set as instance attribute)
+        // [x] identify the closest to goal (return it)
+        // [x] calculate fitness of each organism (set as instance attribute) 
+        // [] calculate average fitness of population (return it) (set global total_fitness to 0 before execution)
 
-    const population_resolution = await evaluatePopulation(); // maybe don't await here
-    var closest_organism = population_resolution['closest_organism'];
-    average_fitness = population_resolution['average_fitness'];
+        // we first need to determine the farthest checkpooint reached by the population
+        // this returns previous, current, and next, in case we want to draw the checkpoints for some reason
+        var checkpoint_data = getFarthestCheckpointReached();
+        // optionally draw checkpoints here (functions already made)
+
+        // ===== calc/set each organism's distance to goal and identify closest =====
+        var closest_organism = getShortestDistanceToCheckpoint(checkpoint_data['next']);
+
+        // calculate fitness of each organism (set as instance attr.)
+        var scale = setScale(checkpoint_data['previous'], checkpoint_data['next']);
+        console.log(`Scale: ${scale}`);
+
+        // fitness should be a little different for boundary sims
+        // 1. the fitness we currently calculate is based on distance to next_checkpoint, which is just used to select organisms
+        // 2. maybe we should also calculate a fitness score based on distance to goal?
+        //    - distance from spawn to goal (center-line) - distance from spawn to organism!
+        // 3. this long (real) fitness function will not be used in selection, though. 
+        calcPopulationFitnessBounds(scale); // this only sets organisms fitness, doesn't not compute pop. fitness or average fitness
+
+        // read above ^, we do not have a meaningful pop. fitness or average fitness, just the fitness scores based on scale
+        // this isn't a huge deal right now, stats just won't be good until they are.
+    }
+
+
+    // ===== left off here =====
+
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     if (dialogue) {
@@ -1284,7 +1315,31 @@ function getShortestDistanceToGoal() {
 
     var closest_organism = organisms[closest_organism_index];
 
-    // highlightClosestOrganism(closest_organism);
+    return closest_organism;
+}
+
+function getShortestDistanceToCheckpoint(next_checkpoint) {
+    var shortest_distance_to_checkpoint = 10000;
+    var closest_organism;
+
+    // calculate distance to closest checkpoint not yet reached
+    for (let n = 0; n < organisms.length; n++) {
+        // in future, make sure organism is alive before calculating its distance
+        // distance^2 = a^2 + b^2
+        let horizontal_distance_squared = (organisms[n].x - custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2;
+        let vertical_distance_squared = (organisms[n].y - custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2;
+        let distance_to_checkpoint_squared = horizontal_distance_squared + vertical_distance_squared;
+
+        organisms[n].distance_to_next_checkpoint = Math.sqrt(distance_to_checkpoint_squared);
+        console.log("Distance to next-closest checkpoint for organism " + n + ":");
+        console.log(organisms[n].distance_to_next_checkpoint);
+
+        if (organisms[n].distance_to_next_checkpoint < shortest_distance_to_checkpoint) {
+            shortest_distance_to_checkpoint = organisms[n].distance_to_next_checkpoint;
+            closest_organism = organisms[n]; // return only index if works better
+        }
+    }
+    // we should have each organism's distance the closest checkpoint not yet reached.
     return closest_organism;
 }
 
@@ -1300,6 +1355,21 @@ function calcPopulationFitness () {
         var average_fitness = total_fitness / organisms.length;
         resolve(average_fitness);
     })
+}
+
+function calcPopulationFitnessBounds(scale) {
+    for (let f = 0; f < organisms.length; f++) {
+        let normalized_distance_to_next_checkpoint = organisms[f].distance_to_next_checkpoint / scale;
+        organisms[f].fitness = 1 - normalized_distance_to_next_checkpoint;
+
+        console.log(`fitness for organism ${f}: ${organisms[f].fitness}`);
+
+        if (organisms[f].fitness <= 0) {
+            organisms[f].fitness = 0.01;
+            console.log("changed fitness to .01 to give chance of selection");
+        }
+    }
+    console.log("fitness function complete");
 }
 
 // 3. Selection
