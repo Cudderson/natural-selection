@@ -14,9 +14,11 @@ var MIN_GENE = -5;
 var MAX_GENE = 5;
 var dialogue = false;
 
-// boundary simulations start organisms at different spawn point
+// boundary simulations start organisms/goal at different location
 const INITIAL_X_BOUND = 50;
 const INITIAL_Y_BOUND = 550;
+const GOAL_X_POS_BOUNDS = 925;
+const GOAL_Y_POS_BOUNDS = 50;
 
 // boundary globals
 var custom_boundary;
@@ -1001,8 +1003,6 @@ async function runSimulation () {
     /// PHASE: CREATE NEW GENERATION/POPULATION
     createOrganisms();
     console.log("Amount of organisms created = " + organisms.length);
-
-    // == left off here ==
 
     do {
         const result = await runGeneration();
@@ -1992,8 +1992,17 @@ function fadeInEvaluationPhaseText() {
 }
 
 async function runEvaluationAnimation() {
-    // do stuff
-    var goal = new Goal(GOAL_X_POS, GOAL_Y_POS, 20, ctx);
+
+    // starting here
+    // need to draw goal at location depending on sim type
+    if (sim_type === 'classic') {
+        var goal = new Goal(GOAL_X_POS, GOAL_Y_POS, 20, ctx);
+    }
+    else {
+        var goal = new Goal(GOAL_X_POS_BOUNDS, GOAL_Y_POS_BOUNDS, 20, ctx);
+    }
+
+    // currently here
 
     var success_flag = await updateAndMoveOrganisms(goal); // ideally don't pass in goal here
     return new Promise((resolve, reject) => {
