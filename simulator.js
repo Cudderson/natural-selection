@@ -1,7 +1,5 @@
 document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
-// ========== begin boundary integration ==========
-
 // starting coordinates for organisms and goal
 const INITIAL_X = 500; 
 const INITIAL_Y = 500;
@@ -24,6 +22,7 @@ const INITIAL_Y_BOUND = 550;
 var custom_boundary;
 
 // flags
+var sim_type;
 var simulation_started = false;
 var simulation_succeeded = false;
 
@@ -543,10 +542,15 @@ class Boundary {
             // this is all working. checkpoint[0] doesn't check for previous halfway point, and checkpoint[9] doesn't check for own!
         }
 
+        console.log('num of checkpoints: (if 10, code should work)');
+        console.log(this.checkpoints.length);
+
         // maybe we remove first/last checkpoints at this stage?? <<<<<< not a bad idea
         // for now, let's just assign them arbitrary sizes
+        // CODE SOMETIMES BREAKS HERE, probably not enough checkpoints created?
         this.checkpoints[0].size = 20;
-        this.checkpoints[9].size = 20;
+        // this.checkpoints[9].size = 20;
+        this.checkpoints[this.checkpoints.length - 1].size = 20; // testing if this is a legitimate fix (all code must be dynamic)
 
         // to confirm, display sizes for each checkpoint
         for (let m = 0; m < this.checkpoints.length; m++) {
@@ -570,13 +574,15 @@ class Boundary {
 // Main Drivers
 async function runPreSimAnimations() {
 
+    // *** pre-sim animations will vary slightly (death, boundary), depending on sim type ***
+
     // (only with dialogue on!)
     await fadeInSimulationSettings();
     await sleep(2000);
     await fadeOutSimulationSettings();
     await fadeInSimulationIntro();
     await sleep(2000);
-    await fadeInFakeGoal();
+    await fadeInFakeGoal(); // *** this will need to be changed for boundary sims
     await fadeOutSimulationIntro();
     await fadeInSimulationExplanation();
     await sleep(4000);
@@ -590,16 +596,190 @@ async function runPreSimAnimations() {
     })
 }
 
-// function for testing custom boundary
+// this function will be deleted after integration, can just call runSimulation() directly
 function checkSimType() {
     // eventually, both sims will be the same, this is for testing
     if (custom_boundary) {
-        testBoundarySim();
+        // testBoundarySim();
+
+        // integration testing
+        runSimulation();
     }
     else {
         console.log("nope");
         runSimulation();
     }
+}
+
+function drawCurrentCheckpoint(index) {
+    // draw farthest checkpoint reached
+    ctx.strokeStyle = 'white';
+    ctx.strokeWidth = 1;
+    ctx.beginPath();
+    ctx.arc(
+        custom_boundary.checkpoints[index].coordinates[0], 
+        custom_boundary.checkpoints[index].coordinates[1],
+        custom_boundary.checkpoints[index].size, 0, Math.PI*2, false
+    );
+    ctx.stroke();
+    ctx.closePath();
+}
+
+function drawPreviousCheckpoint(index) {
+    // draw checkpoint_reached - 1 or spawn point
+    if (index === 'spawn') {
+        // highlight spawn point
+        console.log("highlighting spawn point green");
+        ctx.strokeStyle = 'rgb(155, 245, 0)';
+        ctx.strokeWidth = 3;
+        ctx.beginPath();
+        ctx.arc(INITIAL_X_BOUND, INITIAL_Y_BOUND, 10, 0, Math.PI*2, false);
+        ctx.stroke();
+        ctx.closePath();
+    }
+    else {
+        // highlight k-1
+        console.log("highlighting k-1 checkpoint green");
+        ctx.strokeStyle = 'rgb(155, 245, 0)';
+        ctx.beginPath();
+        ctx.arc(
+            custom_boundary.checkpoints[index].coordinates[0],
+            custom_boundary.checkpoints[index].coordinates[1],
+            custom_boundary.checkpoints[index].size, 0, Math.PI*2, false
+        );
+        ctx.stroke();
+        ctx.closePath();
+    }
+}
+
+function drawNextCheckpoint(index) {
+    // draw next checkpoint not yet reached
+    if (index === 'goal') {
+        // goal is the checkpoint, should circle goal
+        console.log("k = custom_boundary.checkpoints.length - 1, no checkpoint set!!!!!! (need to finish)");
+    }
+    else {
+        ctx.strokeStyle = 'darkred';
+        ctx.beginPath();
+        ctx.arc(
+            custom_boundary.checkpoints[index].coordinates[0],
+            custom_boundary.checkpoints[index].coordinates[1],
+            custom_boundary.checkpoints[index].size, 0, Math.PI*2, false 
+        );
+        ctx.stroke();
+        ctx.closePath;
+    }
+}
+
+function setScale(previous_checkpoint, next_checkpoint) {
+    // scale = distance between previous checkpoint and next checkpoint (make own function 'setScale()')
+    // c^2 = a^2 + b^2
+    let checkpoints_horizontal_distance_squared = (
+        (custom_boundary.checkpoints[previous_checkpoint].coordinates[0] - custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2
+    );
+    let checkpoints_vertical_distance_squared = (
+        (custom_boundary.checkpoints[previous_checkpoint].coordinates[1] - custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2
+    );
+    let distance_from_previous_to_next_checkpoint_squared = checkpoints_horizontal_distance_squared + checkpoints_vertical_distance_squared;
+
+    let distance_from_previous_to_next_checkpoint = Math.sqrt(distance_from_previous_to_next_checkpoint_squared);
+
+    let scale = distance_from_previous_to_next_checkpoint;
+
+    return scale;
+}
+
+function getPixel(canvas_data, index) {
+    var i = index * 4;
+    var data = canvas_data.data;
+
+    return [data[i], data[i+1], data[i+2], data[i+3]];
+}
+
+function getPixelXY(canvas_data, x, y) {
+    var index = y * canvas_data.width + x; // *** not sure how this works but it does ***
+
+    // return index;
+    return getPixel(canvas_data, index);
+}
+
+// needs to be updated for new class Boundary() (make class method?)
+function hitDetectionTest(organisms) {
+
+    return new Promise(resolve => {
+        // clear and draw boundary
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
+
+        var canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height); // capture canvas for collision testing
+        var finished = false;
+        var position_rgba;
+        var total_moves = 0;
+
+        function animateOrganisms() {
+
+            if (!finished) {
+                // this condition will change when more organisms added
+                if (total_moves >= GENE_COUNT * organisms.length) {
+                    finished = true;
+                }
+                else {
+                    // clear
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    // draw boundary
+                    ctx.drawImage(custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
+
+                    // (FOR TESTING) draw checkpoints
+                    // ctx.fillStyle = 'white';
+                    // for (let i = 0; i < custom_boundary.checkpoints.length; i++) {
+                    //     ctx.beginPath();
+                    //     ctx.arc(custom_boundary.checkpoints[i][0], custom_boundary.checkpoints[i][1], 10, 0, Math.PI*2, false);
+                    //     ctx.fill();
+                    //     ctx.closePath();
+                    // }
+
+                    // do it with 10 organisms
+                    for (var j = 0; j < organisms.length; j++) {
+
+                        // update index
+                        if (organisms[j].is_alive) {
+                            organisms[j].update();
+                        }
+
+                        position_rgba = getPixelXY(canvas_data, organisms[j].x, organisms[j].y);
+                        
+                        console.log(`Current Position Pixel for Organism ${j}: ` + position_rgba);
+
+                        // --custom-green: rgba(155, 245, 0, 1);
+                        // highlight organism red if he leaves safe area (dies)
+                        if (position_rgba[0] === 155 && position_rgba[1] === 245 || organisms[j].is_alive === 'false') {
+                            organisms[j].is_alive = false;
+                            organisms[j].ctx.fillStyle = 'red';
+                            organisms[j].ctx.beginPath();
+                            organisms[j].ctx.arc(organisms[j].x, organisms[j].y, organisms[j].radius, 0, Math.PI*2, false);
+                            organisms[j].ctx.fill();
+                        }
+                        else {
+                            organisms[j].move();
+                        }
+                        total_moves++;
+                    }
+                }
+                sleep(1000 / FPS); // looks smoother without fps
+                frame_id = requestAnimationFrame(animateOrganisms);
+            }
+
+            else {
+                //resolve
+                cancelAnimationFrame(frame_id);
+                resolve();
+            }
+        }
+        start_test_guy_animation = requestAnimationFrame(animateOrganisms);
+    })
 }
 
 async function testBoundarySim() {
@@ -783,181 +963,20 @@ async function testBoundarySim() {
     // we now have a fitness score for each organism. This will allow us to move into the selection phase
     // consider if this is the point where we begin to incorporate with main simulation?
 }
-
-function drawCurrentCheckpoint(index) {
-    // draw farthest checkpoint reached
-    ctx.strokeStyle = 'white';
-    ctx.strokeWidth = 1;
-    ctx.beginPath();
-    ctx.arc(
-        custom_boundary.checkpoints[index].coordinates[0], 
-        custom_boundary.checkpoints[index].coordinates[1],
-        custom_boundary.checkpoints[index].size, 0, Math.PI*2, false
-    );
-    ctx.stroke();
-    ctx.closePath();
-}
-
-function drawPreviousCheckpoint(index) {
-    // draw checkpoint_reached - 1 or spawn point
-    if (index === 'spawn') {
-        // highlight spawn point
-        console.log("highlighting spawn point green");
-        ctx.strokeStyle = 'rgb(155, 245, 0)';
-        ctx.strokeWidth = 3;
-        ctx.beginPath();
-        ctx.arc(INITIAL_X_BOUND, INITIAL_Y_BOUND, 10, 0, Math.PI*2, false);
-        ctx.stroke();
-        ctx.closePath();
-    }
-    else {
-        // highlight k-1
-        console.log("highlighting k-1 checkpoint green");
-        ctx.strokeStyle = 'rgb(155, 245, 0)';
-        ctx.beginPath();
-        ctx.arc(
-            custom_boundary.checkpoints[index].coordinates[0],
-            custom_boundary.checkpoints[index].coordinates[1],
-            custom_boundary.checkpoints[index].size, 0, Math.PI*2, false
-        );
-        ctx.stroke();
-        ctx.closePath();
-    }
-}
-
-function drawNextCheckpoint(index) {
-    // draw next checkpoint not yet reached
-    if (index === 'goal') {
-        // goal is the checkpoint, should circle goal
-        console.log("k = custom_boundary.checkpoints.length - 1, no checkpoint set!!!!!! (need to finish)");
-    }
-    else {
-        ctx.strokeStyle = 'darkred';
-        ctx.beginPath();
-        ctx.arc(
-            custom_boundary.checkpoints[index].coordinates[0],
-            custom_boundary.checkpoints[index].coordinates[1],
-            custom_boundary.checkpoints[index].size, 0, Math.PI*2, false 
-        );
-        ctx.stroke();
-        ctx.closePath;
-    }
-}
-
-function setScale(previous_checkpoint, next_checkpoint) {
-    // scale = distance between previous checkpoint and next checkpoint (make own function 'setScale()')
-    // c^2 = a^2 + b^2
-    let checkpoints_horizontal_distance_squared = (
-        (custom_boundary.checkpoints[previous_checkpoint].coordinates[0] - custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2
-    );
-    let checkpoints_vertical_distance_squared = (
-        (custom_boundary.checkpoints[previous_checkpoint].coordinates[1] - custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2
-    );
-    let distance_from_previous_to_next_checkpoint_squared = checkpoints_horizontal_distance_squared + checkpoints_vertical_distance_squared;
-
-    let distance_from_previous_to_next_checkpoint = Math.sqrt(distance_from_previous_to_next_checkpoint_squared);
-
-    let scale = distance_from_previous_to_next_checkpoint;
-
-    return scale;
-}
-
-function getPixel(canvas_data, index) {
-    var i = index * 4;
-    var data = canvas_data.data;
-
-    return [data[i], data[i+1], data[i+2], data[i+3]];
-}
-
-function getPixelXY(canvas_data, x, y) {
-    var index = y * canvas_data.width + x; // *** not sure how this works but it does ***
-
-    // return index;
-    return getPixel(canvas_data, index);
-}
-
-// needs to be updated for new class Boundary() (make class method?)
-function hitDetectionTest(organisms) {
-
-    return new Promise(resolve => {
-        // clear and draw boundary
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
-
-        var canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height); // capture canvas for collision testing
-        var finished = false;
-        var position_rgba;
-        var total_moves = 0;
-
-        function animateOrganisms() {
-
-            if (!finished) {
-                // this condition will change when more organisms added
-                if (total_moves >= GENE_COUNT * organisms.length) {
-                    finished = true;
-                }
-                else {
-                    // clear
-                    ctx.fillStyle = 'black';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                    // draw boundary
-                    ctx.drawImage(custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
-
-                    // (FOR TESTING) draw checkpoints
-                    // ctx.fillStyle = 'white';
-                    // for (let i = 0; i < custom_boundary.checkpoints.length; i++) {
-                    //     ctx.beginPath();
-                    //     ctx.arc(custom_boundary.checkpoints[i][0], custom_boundary.checkpoints[i][1], 10, 0, Math.PI*2, false);
-                    //     ctx.fill();
-                    //     ctx.closePath();
-                    // }
-
-                    // do it with 10 organisms
-                    for (var j = 0; j < organisms.length; j++) {
-
-                        // update index
-                        if (organisms[j].is_alive) {
-                            organisms[j].update();
-                        }
-
-                        position_rgba = getPixelXY(canvas_data, organisms[j].x, organisms[j].y);
-                        
-                        console.log(`Current Position Pixel for Organism ${j}: ` + position_rgba);
-
-                        // --custom-green: rgba(155, 245, 0, 1);
-                        // highlight organism red if he leaves safe area (dies)
-                        if (position_rgba[0] === 155 && position_rgba[1] === 245 || organisms[j].is_alive === 'false') {
-                            organisms[j].is_alive = false;
-                            organisms[j].ctx.fillStyle = 'red';
-                            organisms[j].ctx.beginPath();
-                            organisms[j].ctx.arc(organisms[j].x, organisms[j].y, organisms[j].radius, 0, Math.PI*2, false);
-                            organisms[j].ctx.fill();
-                        }
-                        else {
-                            organisms[j].move();
-                        }
-                        total_moves++;
-                    }
-                }
-                sleep(1000 / FPS); // looks smoother without fps
-                frame_id = requestAnimationFrame(animateOrganisms);
-            }
-
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve();
-            }
-        }
-        start_test_guy_animation = requestAnimationFrame(animateOrganisms);
-    })
-}
-
 // END CUSTOM BOUNDARY SIM TEST
 
 async function runSimulation () {
+
+    // ===== integrating boundary code into core simulation =====
+
+    // ** for now, our flag will be the existence of a created boundary **
+    // this flag will be global to start. if we want to make it more local, we'll need to pass sim_type to functions. undecided.
+    if (custom_boundary) {
+        sim_type = 'boundary';
+    }
+    else {
+        sim_type = 'classic';
+    }
 
     simulation_started = true;
 
@@ -982,6 +1001,8 @@ async function runSimulation () {
     /// PHASE: CREATE NEW GENERATION/POPULATION
     createOrganisms();
     console.log("Amount of organisms created = " + organisms.length);
+
+    // == left off here ==
 
     do {
         const result = await runGeneration();
@@ -1128,9 +1149,18 @@ function stopSimulation() {
 
 // 1. Create Initial Population
 function createOrganisms () {
-    var gender;
-    var male_count = 0;
-    var female_count = 0;
+    let gender;
+    let male_count = 0;
+    let female_count = 0;
+    let spawn_x = INITIAL_X;
+    let spawn_y = INITIAL_Y;
+
+    // update spawn point if boundary simulation
+    if (sim_type === 'boundary') {
+        spawn_x = INITIAL_X_BOUND;
+        spawn_y = INITIAL_Y_BOUND;
+    }
+
     // create equal number of males and females
     for (var i = 0; i < TOTAL_ORGANISMS; i++) {
         if (i % 2) {
@@ -1141,11 +1171,13 @@ function createOrganisms () {
             gender = 'female';
             female_count++;
         }
-        var organism = new Organism(gender, INITIAL_X, INITIAL_Y, ctx);
+        var organism = new Organism(gender, spawn_x, spawn_y, ctx);
         organism.setRandomGenes();
         organisms.push(organism);
     }
     console.log(`FEMALES CREATED: ${female_count}, MALES CREATED: ${male_count}`);
+
+    // consider not making organisms global, but pass it to runGeneration()/runSimulation() from here
 }
 
 function getRandomGene(min, max) {
