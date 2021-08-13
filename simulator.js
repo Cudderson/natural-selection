@@ -602,10 +602,11 @@ async function runPreSimAnimations() {
 function checkSimType() {
     // eventually, both sims will be the same, this is for testing
     if (custom_boundary) {
-        // testBoundarySim();
+        // testing new boundary fitness function
+        testBoundarySim();
 
         // integration testing
-        runSimulation();
+        // runSimulation();
     }
     else {
         console.log("nope");
@@ -1011,13 +1012,18 @@ async function testBoundarySim() {
 
     console.log("caclulating fitness for each organism...");
 
-    var scale = setScale(previous_checkpoint, next_checkpoint);
-    console.log(`Scale: ${scale}`);
+    // var scale = setScale(previous_checkpoint, next_checkpoint);
+    // console.log(`Scale: ${scale}`);
 
-    // with our scale, we can now create a fitness score for each organism using scale and an organism's distance to next checkpoint
-    // make function
+    // // with our scale, we can now create a fitness score for each organism using scale and an organism's distance to next checkpoint
+    // // make function
 
-    calcPopulationFitnessBounds(scale);
+    // calcPopulationFitnessBounds(scale);
+
+    // testing new boundary fitness function
+    // this will require an adjustment to setScale() too.
+    // do it in here, make functions when working.
+    // **changed checkSimType() to call testBoundarySim() while testing**
 
     console.log("testBoundarySim() Complete.");
 
@@ -1179,6 +1185,8 @@ async function runGeneration() {
     // this way, we are more likely to choose organisms closest to the next checkpoint, which is what we want anyway.
 
     // ===== if needed, try in testBoundarySim() first =====
+
+    // testing new fitness function in testBoundarySim()
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     if (dialogue) {
