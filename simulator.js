@@ -61,7 +61,7 @@ class Organism {
         this.radius = 5;
         this.index = 0;
         this.genes = [];
-        this.distance_to_goal; // for normal sim type
+        this.distance_to_goal; // for normal and boundary sim types
         this.distance_to_next_checkpoint; //for boundary sim type
         this.fitness;
         this.reached_goal = false;
@@ -963,7 +963,7 @@ async function testBoundarySim() {
 
     // before fitness, we must calculate each organism's distance to the closest checkpoint not yet reached
 
-    var closest_organism = getShortestDistanceToCheckpoint(checkpoint_data['next']);
+    // var closest_organism = getShortestDistanceToNextCheckpoint(checkpoint_data['next']);
 
     // let's imagine some scenarios and what should happen in them:
     // * no checkpoint reached
@@ -1065,7 +1065,8 @@ async function testBoundarySim() {
     let final_to_goal_vertical_distance_squared = (
         custom_boundary.checkpoints[custom_boundary.checkpoints.length - 1].coordinates[1] - GOAL_Y_POS_BOUNDS) ** 2;
     let distance_squared = final_to_goal_horizontal_distance_squared + final_to_goal_vertical_distance_squared;
-    let distance_from_final_checkpoint_to_goal = Math.sqrt(distance_squared);
+
+    var distance_from_final_checkpoint_to_goal = Math.sqrt(distance_squared);
 
     scale += distance_from_final_checkpoint_to_goal;
 
@@ -1081,6 +1082,7 @@ async function testBoundarySim() {
     let distance_straight_line_spawn_to_goal = Math.sqrt(c_squared);
 
     // compare, and let's see if they are close
+    // this is only useful on straight-line boundary to goal
     console.log(`scale and straight line distance from spawn to goal computed.`);
     console.log(`Scale: ${scale}`);
     console.log(`Straight-line spawn to goal: ${distance_straight_line_spawn_to_goal}`);
@@ -1088,7 +1090,57 @@ async function testBoundarySim() {
     // they came out the same! new scale function is complete (could separate spawn>>first_checkpoint distance to own function on integration)
 
     // === stopped here ===
+    // new fitness function
 
+    // here is the original fitness function for normal sims for reference:
+
+    // -
+    // height = distance between starting location(y) and goal.y
+    // var height = INITIAL_Y - GOAL_Y_POS;
+
+    // var normalized_distance_to_goal = this.distance_to_goal / height;
+    // this.fitness = 1 - normalized_distance_to_goal;
+    // -
+
+    // === pseudo ===
+    // we already have scale
+    // var normalized_distance_to_goal = organisms_distance_to goal / scale
+    // - organisms_distance_to_goal is its distance to next_checkpoint + distance of next_checkpoint to goal (already have this)
+    
+    // calculate organisms distance to next_checkpoint
+    // this also updates each organism's distance_to_next_checkpoint attribute
+    var closest_organism = getShortestDistanceToNextCheckpoint(checkpoint_data["next"]);
+
+    // calculate distance of next_checkpoint_to_goal
+    var cumulative_distance = 0.00;
+    for (let index = checkpoint_data['next'] + 1; index < custom_boundary.checkpoints.length; index++) {
+        let horizontal_squared = (
+            custom_boundary.checkpoints[index].coordinates[0] - 
+            custom_boundary.checkpoints[index-1].coordinates[0]) ** 2;
+
+        let vertical_squared = (
+            custom_boundary.checkpoints[index].coordinates[1] -
+            custom_boundary.checkpoints[index-1].coordinates[1]) ** 2;
+
+        let distance_squared = horizontal_squared + vertical_squared;
+
+        cumulative_distance += Math.sqrt(distance_squared);
+    }
+
+    var distance_from_next_checkpoint_to_goal = cumulative_distance;
+    console.log(`distance from next checkpoint to goal = ${distance_from_next_checkpoint_to_goal}`);
+
+    // == new fitness function ==
+    var normalized_distance_to_goal;
+    var boundary_total_fitness = 0.00;
+    for (let i = 0; i < organisms.length; i++) {
+        normalized_distance_to_goal = (organisms[i].distance_to_next_checkpoint + distance_from_next_checkpoint_to_goal) / scale;
+        organisms[i].fitness = 1 - normalized_distance_to_goal;
+        console.log(`fitness for organism ${i}: ${organisms[i].fitness}`);
+        boundary_total_fitness += organisms[i].fitness;
+    }
+    var boundary_average_fitness = boundary_total_fitness / organisms.length;
+    console.log(`avg fitness: ${boundary_average_fitness}`);
 
     console.log("testBoundarySim() Complete.");
 
@@ -1213,7 +1265,7 @@ async function runGeneration() {
         console.log(checkpoint_data);
 
         // ===== calc/set each organism's distance to goal and identify closest =====
-        var closest_organism = getShortestDistanceToCheckpoint(checkpoint_data['next']);
+        var closest_organism = getShortestDistanceToNextCheckpoint(checkpoint_data['next']);
 
         console.log(closest_organism);
 
@@ -1420,7 +1472,7 @@ function getShortestDistanceToGoal() {
     return closest_organism;
 }
 
-function getShortestDistanceToCheckpoint(next_checkpoint) {
+function getShortestDistanceToNextCheckpoint(next_checkpoint) {
     var shortest_distance_to_checkpoint = 10000;
     var closest_organism;
 
