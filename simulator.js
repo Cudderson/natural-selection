@@ -156,7 +156,7 @@ class Boundary {
         this.bottom_boundary_coordinates = [];
         // this.checkpoints = [];
         // this.checkpoints = {'coordinates': [], 'size': null};
-        this.checkpoints = []; // push dictionaries containing coordinates, halfway_point, and size
+        this.checkpoints = []; // push dictionaries containing coordinates, halfway_point, distance_to_goal, and size
     }
 
     applyBoundaryModeStyles() {
@@ -560,7 +560,9 @@ class Boundary {
         }
 
         // complete! checkpoints can be drawn with appropriate sizes now.
+    }
 
+    drawCheckpoints() {
         // === Draw Checkpoints ===
         for (let p = 0; p < this.checkpoints.length; p++) {
             ctx.beginPath();
@@ -674,71 +676,46 @@ function drawNextCheckpoint(index) {
     }
 }
 
-function setScaleOld(previous_checkpoint, next_checkpoint) {
-    if (previous_checkpoint === 'spawn') {
-
-        var checkpoints_horizontal_distance_squared = (
-            (INITIAL_X_BOUND - custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2
-        );
-        var checkpoints_vertical_distance_squared = (
-            (INITIAL_Y_BOUND - custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2
-        );
-    }
-    else {
-        var checkpoints_horizontal_distance_squared = (
-            (custom_boundary.checkpoints[previous_checkpoint].coordinates[0] - custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2
-        );
-        var checkpoints_vertical_distance_squared = (
-            (custom_boundary.checkpoints[previous_checkpoint].coordinates[1] - custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2
-        );
-    }
-    // scale = distance between previous checkpoint and next checkpoint (make own function 'setScaleOld()')
-    // c^2 = a^2 + b^2
-
-    let distance_from_previous_to_next_checkpoint_squared = checkpoints_horizontal_distance_squared + checkpoints_vertical_distance_squared;
-
-    let distance_from_previous_to_next_checkpoint = Math.sqrt(distance_from_previous_to_next_checkpoint_squared);
-
-    let scale = distance_from_previous_to_next_checkpoint;
-
-    return scale;
-}
-
 function setScale() {
-    // this function should:
-    // compute sum of lengths of lines connecting epicenters from spawn to checkpoints to goal
+    // compute the lengths of lines connecting epicenters from spawn to checkpoints to goal
     // store the individual line lengths in data structure for future reference
-
     // consider recursion here? base case = i === 0
 
     var scale = 0.00;
 
-    for (let i = 0; i < custom_boundary.checkpoints.length; i++) {
-        if (i === 0) {
-            // add distance from spawn to checkpoint[0] on first iteration
-            let horizontal_distance_squared = (INITIAL_X_BOUND - custom_boundary.checkpoints[i].coordinates[0]) ** 2;
-            let vertical_distance_squared = (INITIAL_Y_BOUND - custom_boundary.checkpoints[i].coordinates[1]) ** 2;
-            let distance_squared = horizontal_distance_squared + vertical_distance_squared;
-            let distance_from_spawn_to_first_checkpoint = Math.sqrt(distance_squared);
-            scale += distance_from_spawn_to_first_checkpoint;
-        }
-        else {
-            // compute distance from last checkpoint to current
-            let horizontal_distance_squared = (
-                custom_boundary.checkpoints[i].coordinates[0] - 
-                custom_boundary.checkpoints[i-1].coordinates[0]) ** 2;
-            
-            let vertical_distance_squared = (
-                custom_boundary.checkpoints[i].coordinates[1] - 
-                custom_boundary.checkpoints[i-1].coordinates[1]) ** 2;
-            
-            let distance_squared = horizontal_distance_squared + vertical_distance_squared;
-            let distance_from_previous_checkpoint_to_current = Math.sqrt(distance_squared);
+    // will store length of checkpoint to the next checkpoint
+    var checkpoint_to_checkpoint_lengths = [];
 
-            // update scale
-            scale += distance_from_previous_checkpoint_to_current;
-        }
+    for (let i = 1; i < custom_boundary.checkpoints.length; i++) {
+        // compute distance from last checkpoint to current
+        let horizontal_distance_squared = (
+            custom_boundary.checkpoints[i].coordinates[0] - 
+            custom_boundary.checkpoints[i-1].coordinates[0]) ** 2;
+        
+        let vertical_distance_squared = (
+            custom_boundary.checkpoints[i].coordinates[1] - 
+            custom_boundary.checkpoints[i-1].coordinates[1]) ** 2;
+        
+        let distance_squared = horizontal_distance_squared + vertical_distance_squared;
+        let distance_from_previous_checkpoint_to_current = Math.sqrt(distance_squared);
+
+        // store length 
+        // when storing value as i-1, value represents distance from checkpoint to next
+        // checkpoint_to_checkpoint_lengths[0] = distance from boundary.checkpoints[0] to boundary.checkpoints[1]
+        checkpoint_to_checkpoint_lengths[i-1] = distance_from_previous_checkpoint_to_current;
+
+        // update scale
+        scale += distance_from_previous_checkpoint_to_current;
     }
+
+    // add distance from spawn to checkpoint[0] to scale
+    let horizontal_distance_squared = (INITIAL_X_BOUND - custom_boundary.checkpoints[0].coordinates[0]) ** 2;
+    let vertical_distance_squared = (INITIAL_Y_BOUND - custom_boundary.checkpoints[0].coordinates[1]) ** 2;
+    let distance_squared = horizontal_distance_squared + vertical_distance_squared;
+    let distance_from_spawn_to_first_checkpoint = Math.sqrt(distance_squared);
+
+    // update scale
+    scale += distance_from_spawn_to_first_checkpoint;
 
     // add distance from final checkpoint to goal to scale
     let final_to_goal_horizontal_distance_squared = (
@@ -746,15 +723,20 @@ function setScale() {
     let final_to_goal_vertical_distance_squared = (
         custom_boundary.checkpoints[custom_boundary.checkpoints.length - 1].coordinates[1] - GOAL_Y_POS_BOUNDS) ** 2;
 
-    let distance_squared = final_to_goal_horizontal_distance_squared + final_to_goal_vertical_distance_squared;
+    let distance_squared_to_goal = final_to_goal_horizontal_distance_squared + final_to_goal_vertical_distance_squared;
 
-    var distance_from_final_checkpoint_to_goal = Math.sqrt(distance_squared);
+    var distance_from_final_checkpoint_to_goal = Math.sqrt(distance_squared_to_goal);
 
     scale += distance_from_final_checkpoint_to_goal;
-    
+
     console.log(`final scale: ${scale}`);
 
-    return scale;
+    return {
+        'scale': scale,
+        'checkpoint_lengths': checkpoint_to_checkpoint_lengths,
+        'spawn_to_checkpoint_0_length': distance_from_spawn_to_first_checkpoint,
+        'last_checkpoint_to_goal_length': distance_from_final_checkpoint_to_goal
+    }
 }
 
 function getPixel(canvas_data, index) {
@@ -1311,85 +1293,85 @@ async function runGeneration() {
 
         // ===== setScaleOld() should have been called at beginning of sim to create necessary pieces =====
 
-        // get previous, current, and next checkpoints for current generation
-        var checkpoint_data = getFarthestCheckpointReached();
-        console.log('checkpoint data (previous, current, next) :');
-        console.log(checkpoint_data['previous']);
-        console.log(checkpoint_data['current']);
-        console.log(checkpoint_data['next']);
+        // // get previous, current, and next checkpoints for current generation
+        // var checkpoint_data = getFarthestCheckpointReached();
+        // console.log('checkpoint data (previous, current, next) :');
+        // console.log(checkpoint_data['previous']);
+        // console.log(checkpoint_data['current']);
+        // console.log(checkpoint_data['next']);
 
         // calc each organisms distance to goal (set attribute) and return the closest organism to the goal (same as closest ot next checkpoint)
         // distance to goal = distance to next checkpoint + distance from next checkpoint to goal
 
         // this also updates each organisms distance_to_next_checkpoint attribute
-        var closest_organism = getShortestDistanceToNextCheckpoint(checkpoint_data['next']);
+        // var closest_organism = getShortestDistanceToNextCheckpoint(checkpoint_data['next']);
 
         // calc distance from next checkpoint to goal 
         //(this could maybe be done easier if we stored the lengths of the lines connecting checkpoints)
         
         // calculate distance of next_checkpoint_to_goal
-        var cumulative_distance = 0.00;
-        for (let index = checkpoint_data['next'] + 1; index < custom_boundary.checkpoints.length; index++) {
-            let horizontal_squared = (
-                custom_boundary.checkpoints[index].coordinates[0] - 
-                custom_boundary.checkpoints[index-1].coordinates[0]) ** 2;
+        // var cumulative_distance = 0.00;
+        // for (let index = checkpoint_data['next'] + 1; index < custom_boundary.checkpoints.length; index++) {
+        //     let horizontal_squared = (
+        //         custom_boundary.checkpoints[index].coordinates[0] - 
+        //         custom_boundary.checkpoints[index-1].coordinates[0]) ** 2;
 
-            let vertical_squared = (
-                custom_boundary.checkpoints[index].coordinates[1] -
-                custom_boundary.checkpoints[index-1].coordinates[1]) ** 2;
+        //     let vertical_squared = (
+        //         custom_boundary.checkpoints[index].coordinates[1] -
+        //         custom_boundary.checkpoints[index-1].coordinates[1]) ** 2;
 
-            let distance_squared = horizontal_squared + vertical_squared;
+        //     let distance_squared = horizontal_squared + vertical_squared;
 
-            cumulative_distance += Math.sqrt(distance_squared);
-        }
+        //     cumulative_distance += Math.sqrt(distance_squared);
+        // }
 
-        var distance_from_next_checkpoint_to_goal = cumulative_distance;
-        console.log(`distance from next checkpoint to goal = ${distance_from_next_checkpoint_to_goal}`);
+        // var distance_from_next_checkpoint_to_goal = cumulative_distance;
+        // console.log(`distance from next checkpoint to goal = ${distance_from_next_checkpoint_to_goal}`);
 
         // the last thing we need is scale, which is the sum of the lengths of the lines connecting spawn, checkpoints, and goal
         // consider recursion here? base case = i === 0
-        var scale = 0.00;
-        // iterative approach
-        for (let i = 0; i < custom_boundary.checkpoints.length; i++) {
-            // add distance from spawn to checkpoint[0] on first iteration
-            if (i === 0) {
-                // c*2 = a*2 + b^2
-                let horizontal_distance_squared = (INITIAL_X_BOUND - custom_boundary.checkpoints[i].coordinates[0]) ** 2;
-                let vertical_distance_squared = (INITIAL_Y_BOUND - custom_boundary.checkpoints[i].coordinates[1]) ** 2;
-                let distance_squared = horizontal_distance_squared + vertical_distance_squared;
-                let distance_from_spawn_to_first_checkpoint = Math.sqrt(distance_squared);
-                scale += distance_from_spawn_to_first_checkpoint;
-            }
-            else {
-                // get horizontal distance from last checkpoint to current
-                let horizontal_distance_squared = (
-                    custom_boundary.checkpoints[i].coordinates[0] - 
-                    custom_boundary.checkpoints[i-1].coordinates[0]) ** 2;
+        // var scale = 0.00;
+        // // iterative approach
+        // for (let i = 0; i < custom_boundary.checkpoints.length; i++) {
+        //     // add distance from spawn to checkpoint[0] on first iteration
+        //     if (i === 0) {
+        //         // c*2 = a*2 + b^2
+        //         let horizontal_distance_squared = (INITIAL_X_BOUND - custom_boundary.checkpoints[i].coordinates[0]) ** 2;
+        //         let vertical_distance_squared = (INITIAL_Y_BOUND - custom_boundary.checkpoints[i].coordinates[1]) ** 2;
+        //         let distance_squared = horizontal_distance_squared + vertical_distance_squared;
+        //         let distance_from_spawn_to_first_checkpoint = Math.sqrt(distance_squared);
+        //         scale += distance_from_spawn_to_first_checkpoint;
+        //     }
+        //     else {
+        //         // get horizontal distance from last checkpoint to current
+        //         let horizontal_distance_squared = (
+        //             custom_boundary.checkpoints[i].coordinates[0] - 
+        //             custom_boundary.checkpoints[i-1].coordinates[0]) ** 2;
                 
-                let vertical_distance_squared = (
-                    custom_boundary.checkpoints[i].coordinates[1] - 
-                    custom_boundary.checkpoints[i-1].coordinates[1]) ** 2;
+        //         let vertical_distance_squared = (
+        //             custom_boundary.checkpoints[i].coordinates[1] - 
+        //             custom_boundary.checkpoints[i-1].coordinates[1]) ** 2;
                 
-                let distance_squared = horizontal_distance_squared + vertical_distance_squared;
-                let distance_from_previous_checkpoint_to_current = Math.sqrt(distance_squared);
+        //         let distance_squared = horizontal_distance_squared + vertical_distance_squared;
+        //         let distance_from_previous_checkpoint_to_current = Math.sqrt(distance_squared);
 
-                // update scale
-                scale += distance_from_previous_checkpoint_to_current;
-            }
-        }
+        //         // update scale
+        //         scale += distance_from_previous_checkpoint_to_current;
+        //     }
+        // }
 
-        // add distance from final checkpoint to goal to scale
-        let final_to_goal_horizontal_distance_squared = (
-            custom_boundary.checkpoints[custom_boundary.checkpoints.length - 1].coordinates[0] - GOAL_X_POS_BOUNDS) ** 2;
-        let final_to_goal_vertical_distance_squared = (
-            custom_boundary.checkpoints[custom_boundary.checkpoints.length - 1].coordinates[1] - GOAL_Y_POS_BOUNDS) ** 2;
-        let distance_squared = final_to_goal_horizontal_distance_squared + final_to_goal_vertical_distance_squared;
+        // // add distance from final checkpoint to goal to scale
+        // let final_to_goal_horizontal_distance_squared = (
+        //     custom_boundary.checkpoints[custom_boundary.checkpoints.length - 1].coordinates[0] - GOAL_X_POS_BOUNDS) ** 2;
+        // let final_to_goal_vertical_distance_squared = (
+        //     custom_boundary.checkpoints[custom_boundary.checkpoints.length - 1].coordinates[1] - GOAL_Y_POS_BOUNDS) ** 2;
+        // let distance_squared = final_to_goal_horizontal_distance_squared + final_to_goal_vertical_distance_squared;
 
-        var distance_from_final_checkpoint_to_goal = Math.sqrt(distance_squared);
+        // var distance_from_final_checkpoint_to_goal = Math.sqrt(distance_squared);
 
-        scale += distance_from_final_checkpoint_to_goal;
+        // scale += distance_from_final_checkpoint_to_goal;
 
-        console.log(`final scale: ${scale}`);
+        // console.log(`final scale: ${scale}`);
         // all of this distance adding seems excessive.
         // maybe if we stored lengths, we could compute all distances needed after scale is first-computed?
 
@@ -1397,20 +1379,21 @@ async function runGeneration() {
         // calculate and set organisms fitness, calc average_fitness for population
         
         // == new fitness function ==
-        var normalized_distance_to_goal;
-        var boundary_total_fitness = 0.00;
+        // var normalized_distance_to_goal;
+        // var boundary_total_fitness = 0.00;
 
-        for (let i = 0; i < organisms.length; i++) {
-            normalized_distance_to_goal = (organisms[i].distance_to_next_checkpoint + distance_from_next_checkpoint_to_goal) / scale;
-            organisms[i].fitness = 1 - normalized_distance_to_goal;
-            console.log(`fitness for organism ${i}: ${organisms[i].fitness}`);
-            boundary_total_fitness += organisms[i].fitness;
-        }
+        // for (let i = 0; i < organisms.length; i++) {
+        //     normalized_distance_to_goal = (organisms[i].distance_to_next_checkpoint + distance_from_next_checkpoint_to_goal) / scale;
+        //     organisms[i].fitness = 1 - normalized_distance_to_goal;
+        //     console.log(`fitness for organism ${i}: ${organisms[i].fitness}`);
+        //     boundary_total_fitness += organisms[i].fitness;
+        // }
         
-        average_fitness = boundary_total_fitness / organisms.length;
-        console.log(`avg fitness: ${average_fitness}`);
+        // average_fitness = boundary_total_fitness / organisms.length;
+        // console.log(`avg fitness: ${average_fitness}`);
 
-        // works up to here! =====
+        //============================================================================================================
+        // REFACTORIING BELOW
         // turn the above code into own functions to clean up runGeneration()
 
         // also, since scale is based on the length of spawn to goal, it should never change.
@@ -1419,6 +1402,55 @@ async function runGeneration() {
         // that way, calculating distance_to_goal will only require adding lengths of segements
         // this makes sense. why would we compute those every generation?
         // it should be taken care of by boundary creation
+
+        // draw checkpoints for reference
+        custom_boundary.drawCheckpoints();
+
+        var scale_statistics = setScale();
+        // console.log(`scale: ${scale_statistics['scale']}`);
+        // console.log("checkpoint lengths:");
+        // console.log(scale_statistics['checkpoint_lengths']);
+
+        var scale = scale_statistics['scale'];
+        var checkpoint_to_checkpoint_lengths = scale_statistics['checkpoint_lengths'];
+        var spawn_to_checkpoint_0_length = scale_statistics['spawn_to_checkpoint_0_length'];
+        var last_checkpoint_to_goal_length = scale_statistics['last_checkpoint_to_goal_length'];
+
+        // checkpoint_to_checkpoint_lengths[0] = checkpoints[0] distance to next checkpoint
+
+        // here, let's store checkpoints[i].distance_to_goal 
+        var adjusted_scale;
+
+        for (let i = 0; i < custom_boundary.checkpoints.length; i++) {
+            if (i === 0) {
+                // distance to goal for first checkpoint = scale - distance_from_spawn_to_first_checkpoint
+                adjusted_scale = scale - spawn_to_checkpoint_0_length;
+                custom_boundary.checkpoints[i].distance_to_goal = adjusted_scale;
+            }
+            else {
+                // i-1 will give us the length of the previous checkpoint to the current
+                adjusted_scale -= checkpoint_to_checkpoint_lengths[i-1];
+                custom_boundary.checkpoints[i].distance_to_goal = adjusted_scale;
+            }
+        }
+
+        // if this works, then last checkpoints distance to goal should be equal to last checkpoint to goal length
+        // console.log("These should be the same if all working:");
+        // console.log(last_checkpoint_to_goal_length);
+        // console.log(custom_boundary.checkpoints[custom_boundary.checkpoints.length - 1].distance_to_goal);
+        // this works!!
+
+        // get previous, current, and next checkpoints for current generation
+        var checkpoint_data = getFarthestCheckpointReached();
+        console.log('checkpoint data (previous, current, next) :');
+        console.log(checkpoint_data['previous']);
+        console.log(checkpoint_data['current']);
+        console.log(checkpoint_data['next']);
+
+        // I think our new setScale() is done.
+
+        // try to pause 
+        await sleep(30000);
     }
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
