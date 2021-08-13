@@ -22,6 +22,7 @@ const GOAL_Y_POS_BOUNDS = 50;
 
 // boundary globals
 var custom_boundary;
+var scale_statistics;
 
 // flags
 var sim_type;
@@ -764,6 +765,29 @@ function getPixelXY(canvas_data, x, y) {
     return getPixel(canvas_data, index);
 }
 
+function calcDistanceToGoalCheckpoints() {
+    var scale = scale_statistics['scale'];
+    var checkpoint_to_checkpoint_lengths = scale_statistics['checkpoint_lengths'];
+    var spawn_to_checkpoint_0_length = scale_statistics['spawn_to_checkpoint_0_length'];
+    var last_checkpoint_to_goal_length = scale_statistics['last_checkpoint_to_goal_length']; // keep for comparison
+
+    var adjusted_scale;
+
+    // checkpoint_to_checkpoint_lengths[0] = checkpoints[0] distance to next checkpoint
+    for (let i = 0; i < custom_boundary.checkpoints.length; i++) {
+        if (i === 0) {
+            // distance to goal for first checkpoint = scale - distance_from_spawn_to_first_checkpoint
+            adjusted_scale = scale - spawn_to_checkpoint_0_length;
+            custom_boundary.checkpoints[i].distance_to_goal = adjusted_scale;
+        }
+        else {
+            // i-1 will give us the length of the previous checkpoint to the current
+            adjusted_scale -= checkpoint_to_checkpoint_lengths[i-1];
+            custom_boundary.checkpoints[i].distance_to_goal = adjusted_scale;
+        }
+    }
+}
+
 // needs to be updated for new class Boundary() (make class method?)
 function updateAndMoveOrganismsBounds() {
     // 'organisms' was a param but I don't think we need to pass it because it's global
@@ -953,6 +977,11 @@ function getFarthestCheckpointReached() {
         }
     }
     console.log("break successful. returning previous, current, and next checkpoints");
+    console.log('checkpoint data (previous, current, next) :');
+    console.log(previous_checkpoint);
+    console.log(current_checkpoint);
+    console.log(next_checkpoint);
+
     if (reached_checkpoint) {
         return {
             'previous': previous_checkpoint,
@@ -961,6 +990,7 @@ function getFarthestCheckpointReached() {
         }
     }
     else {
+        print("shoot. no one reached a checkpoint. returning this string.");
         return "shoot. no one reached a checkpoint. returning this string.";
     }
 }
@@ -1298,70 +1328,26 @@ async function runGeneration() {
         average_fitness = population_resolution['average_fitness'];
     }
     else if (sim_type === 'boundary') {
-
-        // ===== integrating new scale + fitness function (may combine with classic sim type if makes sense) =====
         // we will follow the logic of the 'classic' sim type 
 
         // draw checkpoints for reference
         custom_boundary.drawCheckpoints();
 
-        var scale_statistics = setScale();
-
-        var scale = scale_statistics['scale'];
-        var checkpoint_to_checkpoint_lengths = scale_statistics['checkpoint_lengths'];
-        var spawn_to_checkpoint_0_length = scale_statistics['spawn_to_checkpoint_0_length'];
-        var last_checkpoint_to_goal_length = scale_statistics['last_checkpoint_to_goal_length']; // keep for comparison
-
-        // checkpoint_to_checkpoint_lengths[0] = checkpoints[0] distance to next checkpoint
-
-        // here, let's store checkpoints[i].distance_to_goal 
-        var adjusted_scale;
-
-        for (let i = 0; i < custom_boundary.checkpoints.length; i++) {
-            if (i === 0) {
-                // distance to goal for first checkpoint = scale - distance_from_spawn_to_first_checkpoint
-                adjusted_scale = scale - spawn_to_checkpoint_0_length;
-                custom_boundary.checkpoints[i].distance_to_goal = adjusted_scale;
-            }
-            else {
-                // i-1 will give us the length of the previous checkpoint to the current
-                adjusted_scale -= checkpoint_to_checkpoint_lengths[i-1];
-                custom_boundary.checkpoints[i].distance_to_goal = adjusted_scale;
-            }
-        }
+        // here, we set checkpoints[i].distance_to_goal 
+        calcDistanceToGoalCheckpoints();
 
         // get previous, current, and next checkpoints for current generation
         var checkpoint_data = getFarthestCheckpointReached();
-        console.log('checkpoint data (previous, current, next) :');
-        console.log(checkpoint_data['previous']);
-        console.log(checkpoint_data['current']);
-        console.log(checkpoint_data['next']);
 
-        // At this point, we have scale, and we have set each checkpoint's distance_to_goal attribute
-
-        // this will also update each organism's distance_to_next_checkpoint attribute
+        // this will set each organism's distance_to_next_checkpoint attribute
         var closest_organism = getShortestDistanceToNextCheckpoint(checkpoint_data['next']);
 
         // distance_to_goal = distance_to_next_checkpoint + next_checkpoint.distance_to_goal
         // 'next' will give us the index in the checkpoints array of the checkpoint we want to measure from
         var remaining_distance = custom_boundary.checkpoints[checkpoint_data['next']].distance_to_goal;
 
-        // calc/set distance_to_goal && fitness
-        for (let i = 0; i < organisms.length; i++) {
-
-            // this also sets each organism's distance_to_goal attribute
-            organisms[i].calcDistanceToGoalBounds(remaining_distance);
-
-            // this also sets each organism's fitness attribute
-            organisms[i].calcFitnessBounds(scale);
-        }
-
-        // set total fitness and average fitness
-        // calcPopulationFitnessBounds();
-        for (let i = 0; i < organisms.length; i++) {
-            total_fitness += organisms[i].fitness;
-        }
-        average_fitness = total_fitness / organisms.length;
+        // this function also will set each organism's distance_to_goal and fitness attributes
+        average_fitness = calcPopulationFitnessBounds(remaining_distance);
 
         console.log(`Average Fitness: ${average_fitness}`);
     }
@@ -1573,6 +1559,29 @@ function calcPopulationFitness () {
     })
 }
 
+function calcPopulationFitnessBounds(remaining_distance) {
+    // scale = length of lines connecting epicenters from spawn>checkpoints>goal
+    var scale = scale_statistics['scale'];
+
+    // calc/set distance_to_goal && fitness
+    total_fitness = 0.00;
+    for (let i = 0; i < organisms.length; i++) {
+
+        // this also sets each organism's distance_to_goal attribute
+        organisms[i].calcDistanceToGoalBounds(remaining_distance);
+
+        // this also sets each organism's fitness attribute
+        organisms[i].calcFitnessBounds(scale);
+
+        total_fitness += organisms[i].fitness;
+    }
+
+    // set average fitness
+    average_fitness = total_fitness / organisms.length;
+
+    return average_fitness;
+}
+
 // 3. Selection
 async function runSelectionAnimations(closest_organism, parents) {
     console.log("Called runSelectionAnimations()");
@@ -1723,8 +1732,17 @@ function getGender() {
 }
 
 function reproduce(crossover_genes) {
+    let spawn_x = INITIAL_X;
+    let spawn_y = INITIAL_Y;
+
+    // update spawn point if boundary simulation
+    if (sim_type === 'boundary') {
+        spawn_x = INITIAL_X_BOUND;
+        spawn_y = INITIAL_Y_BOUND;
+    }
+
     offspring_gender = getGender();
-    offspring = new Organism(offspring_gender, INITIAL_X, INITIAL_Y, ctx);
+    offspring = new Organism(offspring_gender, spawn_x, spawn_y, ctx);
     offspring.genes = crossover_genes;
     // push offspring to new population
     offspring_organisms.push(offspring);
@@ -4072,6 +4090,9 @@ function enterBoundaryCreationMode() {
 
         // still using custom_boundary global, I don't like it ==!CHANGE!==
         custom_boundary = new_boundary;
+
+        // update global scale_statistics
+        scale_statistics = setScale();
 
         // return to settings
         displaySettingsForm(); //turned off while testing checkpoints
