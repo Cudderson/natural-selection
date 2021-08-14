@@ -189,7 +189,7 @@ body {
     grid-template-columns: 1fr 1fr 1fr;
 }
 
-.start-btn, .stop-btn, .settings-btn {
+.start-btn, .run-btn, .stop-btn, .settings-btn {
     /* display: block; */
     padding: .5rem 1rem;
     border: none;
@@ -211,6 +211,20 @@ body {
     transition: .5s;
 }
 
+.run-btn {
+    /* display: inline-block; */
+    display: none;
+    grid-column: 2 / 3;
+    margin: 0 auto;
+    background-color: var(--custom-green);
+}
+
+.run-btn:hover {
+    background-color: var(--darkviolet);
+    color: var(--custom-green);
+    transition: .5s;
+}
+
 .stop-btn {
     display: none;
     grid-column: 1 / 2;
@@ -225,6 +239,7 @@ body {
 }
 
 .settings-btn {
+    display: none;
     grid-column: 3 / 4;
     margin-left: auto;
     background-color: rgba(148, 0, 211, 1);

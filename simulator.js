@@ -183,7 +183,7 @@ class Boundary {
 
         // html btns
         var settings_btn = document.getElementsByClassName("settings-btn")[0];
-        var start_btn = document.getElementsByClassName("start-btn")[0];
+        var start_btn = document.getElementsByClassName("run-btn")[0];
         var stop_btn = document.getElementsByClassName("stop-btn")[0];
         var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
 
@@ -1248,7 +1248,7 @@ async function runSimulation () {
     console.log(`Dialogue: ${dialogue}`);
 
     // make start/settings buttons disappear, display stop simulation button
-    var start_btn = document.getElementsByClassName("start-btn")[0];
+    var start_btn = document.getElementsByClassName("run-btn")[0];
     var stop_btn = document.getElementsByClassName("stop-btn")[0];
     var settings_btn = document.getElementsByClassName("settings-btn")[0];
     start_btn.style.display = 'none';
@@ -1760,14 +1760,19 @@ async function playTitleScreenAnimation() {
 
         var status = await fadeInTitleAnimation(title_organisms);
 
-        if (status === "Display Settings") {
-            console.log("Displaying Settings");
-            displaySettingsForm();
+        // if (status === "Display Settings") {
+        //     console.log("Displaying Settings");
+        //     displaySettingsForm();
+        // }
+        if (status === "Display Sim Types") {
+            console.log("start button pressed. displaying sim types");
+            // call here!
         }
         else if (status === "TEST BOUNDARY MODE") {
             console.log("Entering Boundary Mode");
             enterBoundaryCreationMode();
         }
+        
     }
     while (simulation_started === false && status === "Keep Playing");
 }
@@ -1799,16 +1804,22 @@ function fadeInTitleAnimation(title_organisms) {
 
     var logo = document.getElementById("logo");
 
-    var settings_btn = document.getElementsByClassName("settings-btn")[0];
+    // var settings_btn = document.getElementsByClassName("settings-btn")[0];
+    var start_btn = document.getElementsByClassName("start-btn")[0];
 
     return new Promise(resolve => {
         function animateTitle() {
             if (!finished && !simulation_started) {
 
-                // if settings clicked, resolve animation
-                settings_btn.addEventListener("click", function() {
+                // if settings clicked, resolve animation (fix so we dont declare so many eventListeners)
+                // settings_btn.addEventListener("click", function() {
+                //     cancelAnimationFrame(frame_id);
+                //     resolve("Display Settings");
+                // });
+
+                start_btn.addEventListener("click", function() {
                     cancelAnimationFrame(frame_id);
-                    resolve("Display Settings");
+                    resolve("Display Sim Types");
                 });
 
                 ctx.fillStyle = 'black';
@@ -3576,7 +3587,7 @@ function fadeInExtinctionMessage() {
 function displaySettingsForm() {
     // ensure only settings button showing
     var settings_btn = document.getElementsByClassName("settings-btn")[0];
-    var start_btn = document.getElementsByClassName("start-btn")[0];
+    var start_btn = document.getElementsByClassName("run-btn")[0];
     var stop_btn = document.getElementsByClassName("stop-btn")[0];
     var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
 
@@ -3773,7 +3784,7 @@ function finishApplyingSettings() {
     canvas_container.style.display = 'block';
     settings_container.style.display = 'none';
 
-    var start_btn = document.getElementsByClassName("start-btn")[0];
+    var start_btn = document.getElementsByClassName("run-btn")[0];
     start_btn.style.display = 'block';
 
     return 0;
