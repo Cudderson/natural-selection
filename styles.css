@@ -15,7 +15,7 @@ body {
     border: 4px solid var(--darkviolet);
 }
 
-#logo {
+#logo, #press-start {
     display: none;
 }
 

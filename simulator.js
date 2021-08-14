@@ -1828,6 +1828,7 @@ function fadeInTitleAnimation(title_organisms) {
     var cycles = 0;
 
     var logo = document.getElementById("logo");
+    var press_start_text = document.getElementById("press-start");
 
     // var settings_btn = document.getElementsByClassName("settings-btn")[0];
     var start_btn = document.getElementsByClassName("start-btn")[0];
@@ -1880,6 +1881,10 @@ function fadeInTitleAnimation(title_organisms) {
                 // could make this class Paintbrush in the future for this and goal class methods
                 ctx.globalAlpha = opacity;
                 ctx.drawImage(logo, 105, 275);
+
+                // consider fading in/out quickly like an arcade game
+                ctx.drawImage(press_start_text, 300, 400, 400, 40);
+
                 ctx.globalAlpha = 1;
 
                 if (opacity < 1.00) {
