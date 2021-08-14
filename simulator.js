@@ -1934,22 +1934,28 @@ function fadeInTitleAnimation(title_organisms) {
     var opacity_tracker = 0.00;
     var finished = false;
     var cycles = 0;
-    var start_button_pressed = false;
+    var start_button_pressed = false; // flag to resolve animation
 
     var logo = document.getElementById("logo");
     var press_start_text = document.getElementById("press-start");
     // var settings_btn = document.getElementsByClassName("settings-btn")[0];
     var start_btn = document.getElementsByClassName("start-btn")[0];
 
-    start_btn.addEventListener("click", function() {
-        console.log("Start Button Pressed");
+    start_btn.addEventListener("click", function updateStartBtnFlagOnClick() {
+        console.log("Start Button Clicked");
         start_button_pressed = true;
+
+        // remove eventListener after flag set
+        start_btn.removeEventListener("click", updateStartBtnFlagOnClick);
     });
 
-    document.addEventListener('keydown', function(event) {
+    document.addEventListener('keydown', function updateStartBtnFlagOnEnter(event) {
         if (event.key === "Enter") {
             console.log("Start Button Pressed");
             start_button_pressed = true;
+
+            // remove eventListener after flag set
+            document.removeEventListener('keydown', updateStartBtnFlagOnEnter);
         }
     });
 
@@ -1965,6 +1971,7 @@ function fadeInTitleAnimation(title_organisms) {
 
                 // respond to event listener flag
                 if (start_button_pressed) {
+                    // cancel and resolve
                     cancelAnimationFrame(frame_id);
                     return resolve("Display Sim Types");
                 }
