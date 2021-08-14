@@ -1824,14 +1824,21 @@ function createTitleScreenOrganisms() {
 
 function fadeInTitleAnimation(title_organisms) {
     var opacity = 0.00;
+    var opacity_tracker = 0.00;
     var finished = false;
     var cycles = 0;
+    var start_button_pressed = false;
 
     var logo = document.getElementById("logo");
     var press_start_text = document.getElementById("press-start");
 
     // var settings_btn = document.getElementsByClassName("settings-btn")[0];
     var start_btn = document.getElementsByClassName("start-btn")[0];
+
+    start_btn.addEventListener("click", function() {
+        console.log("Start Button Pressed");
+        start_button_pressed = true;
+    });
 
     return new Promise(resolve => {
         function animateTitle() {
@@ -1843,10 +1850,11 @@ function fadeInTitleAnimation(title_organisms) {
                 //     resolve("Display Settings");
                 // });
 
-                start_btn.addEventListener("click", function() {
+                // respond to event listener flag
+                if (start_button_pressed) {
                     cancelAnimationFrame(frame_id);
-                    resolve("Display Sim Types");
-                });
+                    return resolve("Display Sim Types");
+                }
 
                 ctx.fillStyle = 'black';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1876,20 +1884,29 @@ function fadeInTitleAnimation(title_organisms) {
                     }
                 }
 
-                // draw image instead
                 // use globalAlpha, then reset
                 // could make this class Paintbrush in the future for this and goal class methods
                 ctx.globalAlpha = opacity;
                 ctx.drawImage(logo, 105, 275);
 
-                // consider fading in/out quickly like an arcade game
-                ctx.drawImage(press_start_text, 300, 400, 400, 40);
-
-                ctx.globalAlpha = 1;
+                ctx.globalAlpha = 0.8;
+                // blink start text 
+                if (opacity_tracker >= 0.12 && opacity_tracker <= 0.24) {
+                    // only draw image half of the time
+                    ctx.drawImage(press_start_text, 300, 400, 400, 40);
+                }
+                else if (opacity_tracker > 0.24) {
+                    // reset tracker
+                    opacity_tracker = 0.00;
+                }
+                opacity_tracker += 0.005;
 
                 if (opacity < 1.00) {
                     opacity += 0.005;
                 }
+
+                // return to 1 for organisms
+                ctx.globalAlpha = 1;
 
                 sleep(750 / FPS); // control drawing FPS for organisms
                 frame_id = requestAnimationFrame(animateTitle);
