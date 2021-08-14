@@ -1449,10 +1449,91 @@ function selectSimulationType() {
     sim_type_btn_boundary.style.display = "block";
 
     ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.font = '50px arial';
+    ctx.fillText("Select Simulation Type", 240, 80);
     ctx.font = '30px arial';
-    ctx.fillText("Select Simulation Type:", 300, 100);
-    ctx.fillText("Classic", 250, 450);
-    ctx.fillText("Boundary", 650, 450);
+    ctx.fillText("Classic", 190, 500);
+    ctx.fillText("Boundary", 690, 500);
+
+    ctx.strokeStyle = 'rgb(148, 0, 211)';
+    ctx.lineWidth = 4;
+    ctx.shadowColor = 'rgb(148, 0, 211)';
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(100, 150, 300, 300);
+    ctx.strokeRect(600, 150, 300, 300);
+
+    // allow arrow keys to highlight sim types
+    document.addEventListener('keydown', function(event) {
+        // clear rects
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'black';
+        ctx.fillRect(70, 120, 870, 450);
+
+        switch(event.key) {
+            // make own functions
+            case "ArrowLeft":
+                highlightClassicSimType();
+                break;
+
+            case "ArrowRight":
+                highlightBoundarySimType();
+                break;
+        }
+    });
+}
+
+function highlightClassicSimType() {
+    console.log("left arrow pressed");
+
+    // redraw 'classic' border highlighted
+    ctx.strokeStyle = 'rgb(155, 245, 0)';
+    ctx.shadowColor = 'rgb(155, 245, 0)';
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(100, 150, 300, 300);
+
+    // redraw 'classic' text highlighted
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.font = '30px arial';
+    ctx.fillText("Classic", 190, 500);
+
+    // redraw 'boundary' border normal
+    ctx.strokeStyle = 'rgb(148, 0, 211)';
+    ctx.shadowColor = 'rgb(148, 0, 211)';
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(600, 150, 300, 300);
+
+    // redraw boundary text normal
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("Boundary", 690, 500);
+}
+
+function highlightBoundarySimType() {
+    console.log("right arrow pressed");
+
+    // redraw 'boundary' border highlighted
+    ctx.strokeStyle = 'rgb(155, 245, 0)';
+    ctx.shadowColor = 'rgb(155, 245, 0)';
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(600, 150, 300, 300);
+
+    // redraw 'boundary' text highlighted
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.font = '30px arial';
+    ctx.fillText("Boundary", 690, 500);
+
+    // redraw 'classic' border normal
+    ctx.strokeStyle = 'rgb(148, 0, 211)';
+    ctx.shadowColor = 'rgb(148, 0, 211)';
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(100, 150, 300, 300);
+
+    // redraw 'classic' text normal
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("Classic", 190, 500);
 }
 
 // 1. Create Initial Population
