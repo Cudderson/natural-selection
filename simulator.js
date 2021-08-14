@@ -1831,13 +1831,19 @@ function fadeInTitleAnimation(title_organisms) {
 
     var logo = document.getElementById("logo");
     var press_start_text = document.getElementById("press-start");
-
     // var settings_btn = document.getElementsByClassName("settings-btn")[0];
     var start_btn = document.getElementsByClassName("start-btn")[0];
 
     start_btn.addEventListener("click", function() {
         console.log("Start Button Pressed");
         start_button_pressed = true;
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Enter") {
+            console.log("Start Button Pressed");
+            start_button_pressed = true;
+        }
     });
 
     return new Promise(resolve => {
