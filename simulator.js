@@ -3611,10 +3611,17 @@ function fadeInExtinctionMessage() {
 // *** Settings ***
 function displaySettingsForm() {
     // ensure only settings button showing
+    // hide sim-type buttons
+    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
+    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
+    sim_type_btn_classic.style.display = "none";
+    sim_type_btn_boundary.style.display = "none";
+    
     var settings_btn = document.getElementsByClassName("settings-btn")[0];
     var start_btn = document.getElementsByClassName("run-btn")[0];
     var stop_btn = document.getElementsByClassName("stop-btn")[0];
     var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
+
 
     settings_btn.style.display = 'block';
     start_btn.style.display = 'none';
