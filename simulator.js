@@ -1433,7 +1433,6 @@ function stopSimulation() {
 
 function selectSimulationType() {
     // user should be brought to a screen that displays each sim type and instructions on how to proceed
-    // this just needs to be functional for now
 
     // hide start button and clear canvas
     let start_btn = document.getElementsByClassName("start-btn")[0];
@@ -1442,12 +1441,13 @@ function selectSimulationType() {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // show sim-type buttons
+    // show sim-type buttons 
     let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
     let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
     sim_type_btn_classic.style.display = "block";
     sim_type_btn_boundary.style.display = "block";
 
+    // could turn this initial drawing into a function too
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.font = '50px arial';
     ctx.fillText("Select Simulation Type", 240, 80);
@@ -1463,27 +1463,44 @@ function selectSimulationType() {
     ctx.strokeRect(600, 150, 300, 300);
 
     // allow arrow keys to highlight sim types
-    document.addEventListener('keydown', function(event) {
-        // clear rects
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = 'black';
-        ctx.fillRect(70, 120, 870, 450);
+    document.addEventListener('keydown', handleSimTypeSelectionKeyPress);
+}
 
-        switch(event.key) {
-            // make own functions
-            case "ArrowLeft":
-                highlightClassicSimType();
-                break;
+function handleSimTypeSelectionKeyPress(event) {
+    switch(event.key) {
+        // make own functions
+        case "ArrowLeft":
+            // this creates global variable because we don't use 'let' or 'var'
+            // the solution is to sync this variable with the sim_type var that runSimulation()/checkSimType() checks
+            sim_type_selected = highlightClassicSimType();
+            break;
 
-            case "ArrowRight":
-                highlightBoundarySimType();
-                break;
-        }
-    });
+        case "ArrowRight":
+            sim_type_selected = highlightBoundarySimType();
+            break;
+        
+        case "Enter":
+            // because arrows create global var, this will throw error if arrowLeft/Right not yet pressed.
+            if (sim_type_selected != null) {
+                if (sim_type_selected === 'classic') {
+                    displaySettingsForm();
+                }
+                else if (sim_type_selected === 'boundary') {
+                    // eventually, this should bring user to boundaryCreationMode() !!! ===================
+                    displaySettingsForm();
+                }
+            }
+            break;
+    }  
 }
 
 function highlightClassicSimType() {
     console.log("left arrow pressed");
+
+    // clear rects
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'black';
+    ctx.fillRect(70, 120, 870, 450);
 
     // redraw 'classic' border highlighted
     ctx.strokeStyle = 'rgb(155, 245, 0)';
@@ -1507,10 +1524,17 @@ function highlightClassicSimType() {
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.fillText("Boundary", 690, 500);
+
+    return 'classic';
 }
 
 function highlightBoundarySimType() {
     console.log("right arrow pressed");
+
+    // clear rects
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'black';
+    ctx.fillRect(70, 120, 870, 450);
 
     // redraw 'boundary' border highlighted
     ctx.strokeStyle = 'rgb(155, 245, 0)';
@@ -1534,6 +1558,8 @@ function highlightBoundarySimType() {
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.fillText("Classic", 190, 500);
+
+    return 'boundary';
 }
 
 // 1. Create Initial Population
@@ -3719,6 +3745,10 @@ function fadeInExtinctionMessage() {
 
 // *** Settings ***
 function displaySettingsForm() {
+
+    // remove event listeners up to this point
+    document.removeEventListener('keydown', handleSimTypeSelectionKeyPress);
+
     // ensure only settings button showing
     // hide sim-type buttons
     let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
