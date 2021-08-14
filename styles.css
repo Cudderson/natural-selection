@@ -189,7 +189,7 @@ body {
     grid-template-columns: 1fr 1fr 1fr;
 }
 
-.start-btn, .run-btn, .stop-btn, .settings-btn {
+.start-btn, .sim-type-classic, .sim-type-boundary, .run-btn, .stop-btn, .settings-btn {
     /* display: block; */
     padding: .5rem 1rem;
     border: none;
@@ -209,6 +209,16 @@ body {
     background-color: var(--darkviolet);
     color: var(--custom-green);
     transition: .5s;
+}
+
+.sim-type-classic {
+    display: none;
+    grid-column: 1 / 2;
+}   
+
+.sim-type-boundary {
+    display: none;
+    grid-column: 3 / 4;
 }
 
 .run-btn {

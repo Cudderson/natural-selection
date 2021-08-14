@@ -1431,6 +1431,30 @@ function stopSimulation() {
     document.location.reload();
 }
 
+function selectSimulationType() {
+    // user should be brought to a screen that displays each sim type and instructions on how to proceed
+    // this just needs to be functional for now
+
+    // hide start button and clear canvas
+    let start_btn = document.getElementsByClassName("start-btn")[0];
+    start_btn.style.display = 'none';
+
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // show sim-type buttons
+    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
+    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
+    sim_type_btn_classic.style.display = "block";
+    sim_type_btn_boundary.style.display = "block";
+
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.font = '30px arial';
+    ctx.fillText("Select Simulation Type:", 300, 100);
+    ctx.fillText("Classic", 250, 450);
+    ctx.fillText("Boundary", 650, 450);
+}
+
 // 1. Create Initial Population
 function createOrganisms () {
     let gender;
@@ -1767,6 +1791,7 @@ async function playTitleScreenAnimation() {
         if (status === "Display Sim Types") {
             console.log("start button pressed. displaying sim types");
             // call here!
+            selectSimulationType();
         }
         else if (status === "TEST BOUNDARY MODE") {
             console.log("Entering Boundary Mode");
