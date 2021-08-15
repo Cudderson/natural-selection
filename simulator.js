@@ -1439,6 +1439,7 @@ function selectSimulationType() {
     document.addEventListener('keydown', handleSimTypeSelectionKeyPress);
 }
 
+// example images not final. consider more zoomed-in images
 function drawInitialSimSelectionScreen() {
     // let's get the dimensions of my screenshots (300x300 needed)
     let classic_example = document.getElementById("classic-example");
@@ -1477,6 +1478,7 @@ function drawInitialSimSelectionScreen() {
     ctx.drawImage(boundary_example, 600, 150, 300, 300);   
 }
 
+// currently, both buttons and 'enter' will call displaySettingsForm()
 function handleSimTypeSelectionKeyPress(event) {
     switch(event.key) {
         case "ArrowLeft":
@@ -1512,6 +1514,15 @@ function handleSimTypeSelectionKeyPress(event) {
 
 function highlightClassicSimType() {
     console.log("left arrow pressed");
+
+    // highlight classic btn, return boundary btn to normal
+    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
+    sim_type_btn_classic.style.backgroundColor = 'rgb(155, 245, 0)';
+    sim_type_btn_classic.style.color = 'black';
+
+    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
+    sim_type_btn_boundary.style.backgroundColor = 'rgb(148, 0, 211)';
+    sim_type_btn_boundary.style.color = 'rgb(155, 245, 0)';
 
     // clear rects
     ctx.shadowBlur = 0;
@@ -1552,6 +1563,15 @@ function highlightClassicSimType() {
 
 function highlightBoundarySimType() {
     console.log("right arrow pressed");
+
+    // highlight boundary button, return classic button to normal
+    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
+    sim_type_btn_boundary.style.backgroundColor = 'rgb(155, 245, 0)';
+    sim_type_btn_boundary.style.color = 'black';
+
+    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
+    sim_type_btn_classic.style.backgroundColor = 'rgb(148, 0, 211)';
+    sim_type_btn_classic.style.color = 'rgb(155, 245, 0)';
 
     // clear rects
     ctx.shadowBlur = 0;

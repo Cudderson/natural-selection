@@ -189,8 +189,8 @@ body {
     grid-template-columns: 1fr 1fr 1fr;
 }
 
-.start-btn, .sim-type-classic, .sim-type-boundary, .run-btn, .stop-btn, .settings-btn {
-    /* display: block; */
+.start-btn, .sim-type-classic, .sim-type-boundary, .run-btn, 
+.stop-btn, .settings-btn, .sim-type-classic, .sim-type-boundary {
     padding: .5rem 1rem;
     border: none;
     border-radius: 2px;
@@ -211,14 +211,24 @@ body {
     transition: .5s;
 }
 
-.sim-type-classic {
+.sim-type-classic, .sim-type-boundary {
     display: none;
+    width: 50%;
+    background-color: var(--darkviolet);
+    color: var(--custom-green);
+    transition: .25s;
+}
+
+.sim-type-classic {
     grid-column: 1 / 2;
+    margin-right: .5rem;
+    justify-self: end;
 }   
 
 .sim-type-boundary {
-    display: none;
     grid-column: 3 / 4;
+    margin-left: .5rem;
+    justify-self: start;
 }
 
 .run-btn {
