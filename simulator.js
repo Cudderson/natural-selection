@@ -1472,23 +1472,31 @@ function handleSimTypeSelectionKeyPress(event) {
         case "ArrowLeft":
             // this creates global variable because we don't use 'let' or 'var'
             // the solution is to sync this variable with the sim_type var that runSimulation()/checkSimType() checks
-            sim_type_selected = highlightClassicSimType();
+            // i'll do that now.
+            // set sim_type here
+            sim_type = highlightClassicSimType();
             break;
 
         case "ArrowRight":
-            sim_type_selected = highlightBoundarySimType();
+            sim_type = highlightBoundarySimType();
             break;
         
         case "Enter":
-            // because arrows create global var, this will throw error if arrowLeft/Right not yet pressed.
-            if (sim_type_selected != null) {
-                if (sim_type_selected === 'classic') {
+            if (sim_type != null) {
+                
+                // remove event listener
+                document.removeEventListener('keydown', handleSimTypeSelectionKeyPress);
+
+                if (sim_type === 'classic') {
                     displaySettingsForm();
                 }
-                else if (sim_type_selected === 'boundary') {
+                else if (sim_type === 'boundary') {
                     // eventually, this should bring user to boundaryCreationMode() !!! ===================
                     displaySettingsForm();
                 }
+            }
+            else {
+                console.log("sim type not selected.");
             }
             break;
     }  
@@ -3752,10 +3760,6 @@ function fadeInExtinctionMessage() {
 
 // *** Settings ***
 function displaySettingsForm() {
-
-    // remove event listeners up to this point
-    document.removeEventListener('keydown', handleSimTypeSelectionKeyPress);
-
     // ensure only settings button showing
     // hide sim-type buttons
     let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
