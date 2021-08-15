@@ -1432,7 +1432,17 @@ function stopSimulation() {
 }
 
 function selectSimulationType() {
-    // user should be brought to a screen that displays each sim type and instructions on how to proceed
+    // draw initial canvas
+    drawInitialSimSelectionScreen();
+
+    // allow arrow keys to highlight sim types, 'enter' to confirm
+    document.addEventListener('keydown', handleSimTypeSelectionKeyPress);
+}
+
+function drawInitialSimSelectionScreen() {
+    // let's get the dimensions of my screenshots (300x300 needed)
+    let classic_example = document.getElementById("classic-example");
+    let boundary_example = document.getElementById("boundary-example");
 
     // hide start button and clear canvas
     let start_btn = document.getElementsByClassName("start-btn")[0];
@@ -1462,18 +1472,16 @@ function selectSimulationType() {
     ctx.strokeRect(100, 150, 300, 300);
     ctx.strokeRect(600, 150, 300, 300);
 
-    // allow arrow keys to highlight sim types
-    document.addEventListener('keydown', handleSimTypeSelectionKeyPress);
+    // draw images scaled to 300x300
+    ctx.drawImage(classic_example, 100, 150, 300, 300);
+    ctx.drawImage(boundary_example, 600, 150, 300, 300);   
 }
 
 function handleSimTypeSelectionKeyPress(event) {
     switch(event.key) {
-        // make own functions
         case "ArrowLeft":
-            // this creates global variable because we don't use 'let' or 'var'
             // the solution is to sync this variable with the sim_type var that runSimulation()/checkSimType() checks
-            // i'll do that now.
-            // set sim_type here
+            // i'll do that now. set sim_type here
             sim_type = highlightClassicSimType();
             break;
 
@@ -1533,6 +1541,12 @@ function highlightClassicSimType() {
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.fillText("Boundary", 690, 500);
 
+    // redraw example images scaled to 300x300
+    let classic_example = document.getElementById("classic-example");
+    let boundary_example = document.getElementById("boundary-example");
+    ctx.drawImage(classic_example, 100, 150, 300, 300);
+    ctx.drawImage(boundary_example, 600, 150, 300, 300);  
+
     return 'classic';
 }
 
@@ -1566,6 +1580,12 @@ function highlightBoundarySimType() {
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.fillText("Classic", 190, 500);
+
+    // redraw example images scaled to 300x300
+    let classic_example = document.getElementById("classic-example");
+    let boundary_example = document.getElementById("boundary-example");
+    ctx.drawImage(classic_example, 100, 150, 300, 300);
+    ctx.drawImage(boundary_example, 600, 150, 300, 300); 
 
     return 'boundary';
 }

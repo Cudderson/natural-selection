@@ -15,7 +15,7 @@ body {
     border: 4px solid var(--darkviolet);
 }
 
-#logo, #press-start {
+#logo, #press-start, #classic-example, #boundary-example {
     display: none;
 }
 
