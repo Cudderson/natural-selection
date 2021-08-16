@@ -1489,14 +1489,7 @@ function handleSimTypeBtnClick() {
 
         turnOffSimTypeSelectionEventListeners();
         
-        if (sim_type === 'classic') {
-            // display settings for now
-            displaySettingsForm();
-        }
-        else if (sim_type === 'boundary') {
-            // display settings for now
-            displaySettingsForm();
-        }
+        applySimType();
     }
 }
 
@@ -1546,16 +1539,9 @@ function handleSimTypeSelectionKeyPress(event) {
         
         case "Enter":
             if (sim_type != null) {
-                
                 turnOffSimTypeSelectionEventListeners();
 
-                if (sim_type === 'classic') {
-                    displaySettingsForm();
-                }
-                else if (sim_type === 'boundary') {
-                    // eventually, this should bring user to boundaryCreationMode() !!! ===================
-                    displaySettingsForm();
-                }
+                applySimType();
             }
             else {
                 console.log("sim type not selected.");
@@ -1660,6 +1646,16 @@ function highlightBoundarySimType() {
     ctx.drawImage(boundary_example, 600, 150, 300, 300); 
 
     return 'boundary';
+}
+
+function applySimType() {
+    if (sim_type === 'classic') {
+        displaySettingsForm();
+    }
+    else if (sim_type === 'boundary') {
+        // user must create boundary before settings configuration
+        enterBoundaryCreationMode();
+    }
 }
 
 // 1. Create Initial Population
