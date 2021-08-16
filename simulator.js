@@ -170,6 +170,7 @@ class Boundary {
         this.checkpoints = []; // push dictionaries containing coordinates, halfway_point, distance_to_goal, and size
     }
 
+    // as this will just be one of many screens/canvases in the drawing process, maybe this shouldn't be a class method
     applyBoundaryModeStyles() {
         // turn off settings, turn on canvas
         var canvas_container = document.getElementsByClassName("canvas-container")[0];
@@ -1339,6 +1340,7 @@ async function runGeneration() {
         var checkpoint_data = getFarthestCheckpointReached();
 
         // this will set each organism's distance_to_next_checkpoint attribute
+        // !!! this crashes sometimes because we don't have logic to handle when 0 checkpoints are reached (getFarthestCheckpointReached() returns undefined)
         var closest_organism = getShortestDistanceToNextCheckpoint(checkpoint_data['next']);
 
         // distance_to_goal = distance_to_next_checkpoint + next_checkpoint.distance_to_goal
@@ -4087,38 +4089,31 @@ function getUserDecision() {
 
 // could make class method
 function drawBoundaryBoilerplate() {
-    // ** DRAW BOUNDARY BOILERPLATE
-
     // clear canvas
     ctx.fillStyle = 'black';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // draw start/end points of boundary (make helper function later (drawBoundaryBoilerplate()))
+    // draw start/end points of boundary
     // top
     ctx.fillStyle = 'red';
     ctx.fillRect(830, 0, 20, 50);
     ctx.fillRect(950, 150, 50, 20);
+
     // bottom
     ctx.fillStyle = 'red';
     ctx.fillRect(0, 430, 50, 20);
     ctx.fillRect(150, 550, 20, 50);
+
     // placeholder goal
     var placeholder_goal = new Goal(925, 50, 20, ctx);
     placeholder_goal.drawGoal();
 
-    // we should also highlight the areas that users cannot draw in (2 rects to create border effect)
-    ctx.fillStyle = 'rgb(148, 0, 211)';
-    // stats border rect
-    ctx.fillRect(736, 508, 272, 92);
-    // phase border rect
-    ctx.fillRect(0, 0, 252, 157);
-
-    ctx.fillStyle = 'black';
-    // stats area (will need to erase when sim starts)
-    ctx.fillRect(740, 512, 270, 90);
-    // phase area
-    ctx.fillRect(0, 0, 248, 153);
-    // ** END BOUNDARY BOILERPLATE **
+    // draw instructions zones (no-draw zones)
+    ctx.lineWidth = 4;
+    ctx.strokeWidth = 4;
+    ctx.strokeStyle = 'rgb(148, 0, 211)';
+    ctx.strokeRect(736, 445, 272, 200);
+    ctx.strokeRect(-4, -4, 252, 157);
 }
 
 // would belong to class Paintbrush, not Boundary
@@ -4147,9 +4142,7 @@ function enterBoundaryCreationMode() {
     var new_boundary = new Boundary();
 
     new_boundary.applyBoundaryModeStyles();
-
-    // here and down would be in createBoundaries() (we would define boundary_step in createBoundaries()) ************************
-
+    
     // belongs to class Painbrush, not Boundary
     function draw(event) {
         if (event.buttons !== 1 || !allowed_to_draw) {
