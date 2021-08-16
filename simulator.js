@@ -1432,11 +1432,8 @@ function stopSimulation() {
 }
 
 function selectSimulationType() {
-    // draw initial canvas
     drawInitialSimSelectionScreen();
-
-    // allow arrow keys to highlight sim types, 'enter' to confirm
-    document.addEventListener('keydown', handleSimTypeSelectionKeyPress);
+    turnOnSimTypeSelectionListeners();
 }
 
 // example images not final. consider more zoomed-in images
@@ -1453,10 +1450,8 @@ function drawInitialSimSelectionScreen() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // show sim-type buttons 
-    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
-    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
-    sim_type_btn_classic.style.display = "block";
-    sim_type_btn_boundary.style.display = "block";
+    document.getElementsByClassName("sim-type-classic")[0].style.display = "block";
+    document.getElementsByClassName("sim-type-boundary")[0].style.display = "block";
 
     // could turn this initial drawing into a function too
     ctx.fillStyle = 'rgb(148, 0, 211)';
@@ -1478,6 +1473,64 @@ function drawInitialSimSelectionScreen() {
     ctx.drawImage(boundary_example, 600, 150, 300, 300);   
 }
 
+function handleSimTypeBtnMouseover(event) {
+    console.log(event.target.className);
+    if (event.target.className === 'sim-type-classic') {
+        sim_type = highlightClassicSimType();
+    }
+    else if (event.target.className === 'sim-type-boundary') {
+        sim_type = highlightBoundarySimType();
+    }
+}
+
+function handleSimTypeBtnClick() {
+
+    if (sim_type != null) {
+
+        turnOffSimTypeSelectionEventListeners();
+        
+        if (sim_type === 'classic') {
+            // display settings for now
+            displaySettingsForm();
+        }
+        else if (sim_type === 'boundary') {
+            // display settings for now
+            displaySettingsForm();
+        }
+    }
+}
+
+function turnOnSimTypeSelectionListeners() {
+    // allow arrow keys to highlight sim types, 'enter' to confirm
+    document.addEventListener('keydown', handleSimTypeSelectionKeyPress);
+
+    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
+    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
+
+    // add event listeners to buttons (move to better place if needed)
+    sim_type_btn_classic.addEventListener('mouseover', handleSimTypeBtnMouseover);
+    sim_type_btn_boundary.addEventListener('mouseover', handleSimTypeBtnMouseover);
+
+    // when button is clicked, sim_type will be set
+    sim_type_btn_classic.addEventListener('click', handleSimTypeBtnClick);
+    sim_type_btn_boundary.addEventListener('click', handleSimTypeBtnClick);
+}
+
+
+function turnOffSimTypeSelectionEventListeners() {
+    if (sim_type != null) {
+        // turn off event listeners before displaying next canvas
+        let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
+        let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
+    
+        sim_type_btn_classic.removeEventListener('mouseover', handleSimTypeBtnMouseover);
+        sim_type_btn_classic.removeEventListener('click', handleSimTypeBtnClick);
+        sim_type_btn_boundary.removeEventListener('mouseover', handleSimTypeBtnMouseover);
+        sim_type_btn_boundary.removeEventListener('click', handleSimTypeBtnClick);
+        document.removeEventListener('keydown', handleSimTypeSelectionKeyPress);
+    }
+}
+
 // currently, both buttons and 'enter' will call displaySettingsForm()
 function handleSimTypeSelectionKeyPress(event) {
     switch(event.key) {
@@ -1494,8 +1547,7 @@ function handleSimTypeSelectionKeyPress(event) {
         case "Enter":
             if (sim_type != null) {
                 
-                // remove event listener
-                document.removeEventListener('keydown', handleSimTypeSelectionKeyPress);
+                turnOffSimTypeSelectionEventListeners();
 
                 if (sim_type === 'classic') {
                     displaySettingsForm();
