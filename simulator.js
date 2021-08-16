@@ -1485,11 +1485,7 @@ function handleSimTypeBtnMouseover(event) {
 }
 
 function handleSimTypeBtnClick() {
-
     if (sim_type != null) {
-
-        turnOffSimTypeSelectionEventListeners();
-        
         applySimType();
     }
 }
@@ -1540,8 +1536,6 @@ function handleSimTypeSelectionKeyPress(event) {
         
         case "Enter":
             if (sim_type != null) {
-                turnOffSimTypeSelectionEventListeners();
-
                 applySimType();
             }
             else {
@@ -1650,12 +1644,19 @@ function highlightBoundarySimType() {
 }
 
 function applySimType() {
+
+    // turn off listeners and hide buttons
+    turnOffSimTypeSelectionEventListeners();
+
+    document.getElementsByClassName("sim-type-classic")[0].style.display = 'none';
+    document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
+
     if (sim_type === 'classic') {
         displaySettingsForm();
     }
     else if (sim_type === 'boundary') {
         // user must create boundary before settings configuration
-        enterBoundaryCreationMode();
+        displayBoundaryCreationIntroduction();
     }
 }
 
@@ -3849,18 +3850,12 @@ function fadeInExtinctionMessage() {
 
 // *** Settings ***
 function displaySettingsForm() {
+
     // ensure only settings button showing
-    // hide sim-type buttons
-    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
-    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
-    sim_type_btn_classic.style.display = "none";
-    sim_type_btn_boundary.style.display = "none";
-    
     var settings_btn = document.getElementsByClassName("settings-btn")[0];
     var start_btn = document.getElementsByClassName("run-btn")[0];
     var stop_btn = document.getElementsByClassName("stop-btn")[0];
     var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
-
 
     settings_btn.style.display = 'block';
     start_btn.style.display = 'none';
@@ -4127,11 +4122,17 @@ function updateMousePosition(event) {
     // console.log(coordinates);
 }
 
-// this function will be refactored/cleaned once proven working
-// this code should either simply prepare the user for boundary mode, or perform all boundary drawing/validation
-// think how this will be worked into the main flow
-// could be:
-// enterBoundaryCreationMode >>> applyBoundaryModeStyles >>> createBoundaries, but it's good enough for now
+// called before enterBoundaryCreationMode()
+function displayBoundaryCreationIntroduction() {
+    // could maybe be an animation, but not now
+    console.log("boundary creation introduction called");
+
+    drawBoundaryBoilerplate();
+
+    // left off here
+} 
+
+// this function will be refactored/cleaned
 function enterBoundaryCreationMode() {
 
     // drawing flag and step tracker
@@ -4141,7 +4142,8 @@ function enterBoundaryCreationMode() {
     // create new boundary
     var new_boundary = new Boundary();
 
-    new_boundary.applyBoundaryModeStyles();
+    // either remove this as class method, or make all boundary creation screens class methods (no, at least not now)
+    // new_boundary.applyBoundaryModeStyles(); ** remember this isn't being used when commented out
     
     // belongs to class Painbrush, not Boundary
     function draw(event) {
