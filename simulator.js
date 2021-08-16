@@ -1656,7 +1656,7 @@ function applySimType() {
     }
     else if (sim_type === 'boundary') {
         // user must create boundary before settings configuration
-        displayBoundaryCreationIntroduction();
+        displayBoundaryCreationIntroductionOne();
     }
 }
 
@@ -4123,14 +4123,44 @@ function updateMousePosition(event) {
 }
 
 // called before enterBoundaryCreationMode()
-function displayBoundaryCreationIntroduction() {
+function displayBoundaryCreationIntroductionOne() {
     // could maybe be an animation, but not now
     console.log("boundary creation introduction called");
 
     drawBoundaryBoilerplate();
 
-    // left off here
+    // erase boxes
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, 300, 200);
+    ctx.fillRect(720, 420, 300, 200);
+
+    // introduction
+    ctx.font = '30px arial';
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("Introduction", 420, 300);
+    ctx.fillText("Press 'Enter' or click 'Continue", 300, 360);
+
+    // hardcode as html element if needed
+    let next_btn = document.getElementsByClassName("next-btn")[0];
+    next_btn.style.display = 'block';
+
+    document.addEventListener('keydown', function checkKeystroke(event) {
+        if (event.key === 'Enter') {
+            // destroy listeners
+            document.removeEventListener('keydown', checkKeystroke);
+
+            // go to next screen
+            displayBoundaryCreationIntroductionTwo();
+        }
+    })
 } 
+
+function displayBoundaryCreationIntroductionTwo() {
+    // hide next_btn
+    document.getElementsByClassName("next-btn")[0].style.display = 'none';
+
+    drawBoundaryBoilerplate();
+}
 
 // this function will be refactored/cleaned
 function enterBoundaryCreationMode() {

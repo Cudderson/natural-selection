@@ -190,12 +190,13 @@ body {
 }
 
 .start-btn, .sim-type-classic, .sim-type-boundary, .run-btn, 
-.stop-btn, .settings-btn, .sim-type-classic, .sim-type-boundary {
+.stop-btn, .settings-btn, .sim-type-classic, .sim-type-boundary,
+.next-btn {
     padding: .5rem 1rem;
     border: none;
     border-radius: 2px;
     font-size: 18px;
-    transition: .5s;
+    transition: .25s;
 }
 
 .start-btn {
@@ -268,6 +269,18 @@ body {
 
 .settings-btn:hover {
     color: rgba(255, 215, 0, 1);
+}
+
+.next-btn {
+    display: none;
+    grid-column: 2 / 3;
+    background-color: rgba(148, 0, 211, 1);
+    color: rgba(155, 245, 0, 1);
+}
+
+.next-btn:hover {
+    background-color: rgba(155, 245, 0, 1);
+    color: black;
 }
 
 .save-boundaries-btn {
