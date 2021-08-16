@@ -166,7 +166,6 @@ class Boundary {
         this.full_boundary = new Image();
         this.top_boundary_coordinates = [];
         this.bottom_boundary_coordinates = [];
-        // this.checkpoints = [];
         // this.checkpoints = {'coordinates': [], 'size': null};
         this.checkpoints = []; // push dictionaries containing coordinates, halfway_point, distance_to_goal, and size
     }
@@ -181,22 +180,22 @@ class Boundary {
 
         drawBoundaryBoilerplate();
 
-        // html btns
-        var settings_btn = document.getElementsByClassName("settings-btn")[0];
-        var start_btn = document.getElementsByClassName("run-btn")[0];
-        var stop_btn = document.getElementsByClassName("stop-btn")[0];
-        var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
+        // hide buttons
+        document.getElementsByClassName("settings-btn")[0].style.display = 'none';
+        document.getElementsByClassName("run-btn")[0].style.display = 'none';
+        document.getElementsByClassName("sim-type-classic")[0].style.display = 'none';
+        document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
 
-        settings_btn.style.display = 'none';
-        start_btn.style.display = 'none';
+        let stop_btn = document.getElementsByClassName("stop-btn")[0];
+        let save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
 
         // revert when leaving boundary mode
-        stop_btn.style.gridColumn = "2 / 3";
-        stop_btn.style.width = "100%";
-        stop_btn.innerHTML = "Cancel";
-        stop_btn.style.display = "block";
-
         save_bounds_btn.style.display = "block";
+
+        stop_btn.style.gridColumn = "1 / 2";
+        stop_btn.style.width = "75%";
+        stop_btn.innerHTML = "Back";
+        stop_btn.style.display = "block";
     }
 
     save(boundary_type) {
@@ -4139,7 +4138,6 @@ function updateMousePosition(event) {
 // could be:
 // enterBoundaryCreationMode >>> applyBoundaryModeStyles >>> createBoundaries, but it's good enough for now
 function enterBoundaryCreationMode() {
-
 
     // drawing flag and step tracker
     var allowed_to_draw = false; // could be method of Paintbrush

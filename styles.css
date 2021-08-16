@@ -273,7 +273,10 @@ body {
 .save-boundaries-btn {
     display: none;
     grid-column: 3 / 4;
+    width: 75%;
+    justify-self: end;
     background-color: rgba(200, 200, 200, .2);
     pointer-events: none;
+    border: none;
     font-size: 20px;
 }
