@@ -170,35 +170,6 @@ class Boundary {
         this.checkpoints = []; // push dictionaries containing coordinates, halfway_point, distance_to_goal, and size
     }
 
-    // as this will just be one of many screens/canvases in the drawing process, maybe this shouldn't be a class method
-    applyBoundaryModeStyles() {
-        // turn off settings, turn on canvas
-        var canvas_container = document.getElementsByClassName("canvas-container")[0];
-        var settings_container = document.getElementsByClassName("settings-container")[0];
-
-        canvas_container.style.display = 'block';
-        settings_container.style.display = 'none';
-
-        drawBoundaryBoilerplate();
-
-        // hide buttons
-        document.getElementsByClassName("settings-btn")[0].style.display = 'none';
-        document.getElementsByClassName("run-btn")[0].style.display = 'none';
-        document.getElementsByClassName("sim-type-classic")[0].style.display = 'none';
-        document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
-
-        let stop_btn = document.getElementsByClassName("stop-btn")[0];
-        let save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
-
-        // revert when leaving boundary mode
-        save_bounds_btn.style.display = "block";
-
-        stop_btn.style.gridColumn = "1 / 2";
-        stop_btn.style.width = "75%";
-        stop_btn.innerHTML = "Back";
-        stop_btn.style.display = "block";
-    }
-
     save(boundary_type) {
         
         var canvas = document.getElementById("main-canvas"); // do we need to declare these?
@@ -4162,8 +4133,8 @@ function displayBoundaryCreationIntroductionOne() {
 } 
 
 function displayBoundaryCreationIntroductionTwo() {
-    // hide next_btn
-    document.getElementsByClassName("next-btn")[0].style.display = 'none';
+    // change text
+    document.getElementsByClassName("next-btn")[0].innerHTML = 'Okay';
 
     drawBoundaryBoilerplate();
 
@@ -4173,6 +4144,47 @@ function displayBoundaryCreationIntroductionTwo() {
     ctx.fillText("For best results, avoid drawing over them.", 200, 330);  
     ctx.font = '24px arial'; 
     ctx.fillText("Press 'Enter' or click 'Continue'", 300, 420);
+
+    // apply new listener to same button
+    document.addEventListener('keydown', function checkKeystroke(event) {
+        if (event.key === 'Enter') {
+            // destroy listener
+            document.removeEventListener('keydown', checkKeystroke);
+
+            // go to next screen
+            
+            // just a placeholder test
+            enterBoundaryCreationMode();
+        }
+    })
+}
+
+function applyBoundaryModeStyles() {
+    // turn off settings, turn on canvas
+    var canvas_container = document.getElementsByClassName("canvas-container")[0];
+    var settings_container = document.getElementsByClassName("settings-container")[0];
+
+    canvas_container.style.display = 'block';
+    settings_container.style.display = 'none';
+
+    drawBoundaryBoilerplate();
+
+    // hide buttons
+    document.getElementsByClassName("settings-btn")[0].style.display = 'none';
+    document.getElementsByClassName("run-btn")[0].style.display = 'none';
+    document.getElementsByClassName("sim-type-classic")[0].style.display = 'none';
+    document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
+
+    let stop_btn = document.getElementsByClassName("stop-btn")[0];
+    let save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
+
+    // revert when leaving boundary mode
+    save_bounds_btn.style.display = "block";
+
+    stop_btn.style.gridColumn = "1 / 2";
+    stop_btn.style.width = "75%";
+    stop_btn.innerHTML = "Back";
+    stop_btn.style.display = "block";
 }
 
 // this function will be refactored/cleaned
@@ -4185,8 +4197,11 @@ function enterBoundaryCreationMode() {
     // create new boundary
     var new_boundary = new Boundary();
 
-    // either remove this as class method, or make all boundary creation screens class methods (no, at least not now)
-    // new_boundary.applyBoundaryModeStyles(); ** remember this isn't being used when commented out
+    // this function name doesn't fit well anymore, rename
+    applyBoundaryModeStyles();
+
+    // write here until compound function made
+    // 
     
     // belongs to class Painbrush, not Boundary
     function draw(event) {
@@ -4322,6 +4337,8 @@ function enterBoundaryCreationMode() {
                     // update step and store boundary
                     new_boundary.save('bottom');
                     boundary_step = "top-boundary";
+
+                    // draw next-step text here !!
                 }
                 else {
                     // erase bottom-boundary coords when illegal line drawn
@@ -4339,6 +4356,8 @@ function enterBoundaryCreationMode() {
                     // store top-boundary
                     new_boundary.save('top');
                     boundary_step = 'full-boundary';
+
+                    // draw next-step text here!!
                 }
                 else {
                     // reset top boundary coords when illegal line drawn
