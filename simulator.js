@@ -175,6 +175,11 @@ class Boundary {
         var canvas = document.getElementById("main-canvas"); // do we need to declare these?
         var ctx = canvas.getContext('2d');
 
+        // remove help text
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, 230, 150);
+        ctx.fillRect(760, 450, 225, 200);
+
         var boundary_to_save = canvas.toDataURL("image/png");
 
         if (boundary_type === 'bottom') {
@@ -217,7 +222,7 @@ class Boundary {
             // valid, update boundary step
             console.log("valid boundary");
 
-            // make connectors green
+            // make connectors green (maybe draw this after returns true)
             ctx.fillStyle = 'rgb(155, 245, 0)';
             ctx.fillRect(950, 150, 50, 20);
             ctx.fillRect(150, 550, 20, 50);
@@ -4184,15 +4189,11 @@ function applyBoundaryModeStyles() {
 }
 
 // this could do text & styles
-function drawBottomBoundaryDrawingText() {
-    // text doesn't need to be final, just ideas
+function drawBoundaryDrawingHelpText(step) {
 
-    // upper-left = "Step 1: draw a line connecting the red endpoints from bottom to top"
-    // bottom-right = "For best results, draw a slow, continuous, non-overlapping line"
-
-    ctx.fillStyle = 'rgb(155, 245, 0);';
+    ctx.fillStyle = 'rgb(155, 245, 0)';
     ctx.font= "24px arial";
-    ctx.fillText("Step 1", 80, 40);
+    ctx.fillText(step, 80, 40);
 
     ctx.font = '18px arial';
     ctx.fillText("Draw a line connecting", 25, 75)
@@ -4207,7 +4208,6 @@ function drawBottomBoundaryDrawingText() {
 
 // this function will be refactored/cleaned
 function enterBoundaryCreationMode() {
-    console.log('123123');
 
     // drawing flag and step tracker
     var allowed_to_draw = false; // could be method of Paintbrush
@@ -4220,7 +4220,7 @@ function enterBoundaryCreationMode() {
     applyBoundaryModeStyles();
 
     // write here until compound function made
-    drawBottomBoundaryDrawingText();
+    drawBoundaryDrawingHelpText("Step 1");
     
     // belongs to class Painbrush, not Boundary
     function draw(event) {
@@ -4356,8 +4356,7 @@ function enterBoundaryCreationMode() {
                     // update step and store boundary
                     new_boundary.save('bottom');
                     boundary_step = "top-boundary";
-
-                    // draw next-step text here !!
+                    drawBoundaryDrawingHelpText("Step 2");
                 }
                 else {
                     // erase bottom-boundary coords when illegal line drawn
@@ -4366,8 +4365,8 @@ function enterBoundaryCreationMode() {
                     // redraw boilerplate
                     drawBoundaryBoilerplate();
 
-                    // redraw bottom-step text
-                    drawBottomBoundaryDrawingText();
+                    // redraw bottom-step help text
+                    drawBoundaryDrawingHelpText("Step 1");
 
                     console.log("invalid");
                     // error message 
@@ -4388,11 +4387,13 @@ function enterBoundaryCreationMode() {
                     // reset top boundary coords when illegal line drawn
                     new_boundary.top_boundary_coordinates = [];
 
-                    // redraw boilerplate
+                    // redraw boilerplate and help text
                     drawBoundaryBoilerplate();
 
                     // draw valid bottom-boundary
                     ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
+
+                    drawBoundaryDrawingHelpText("Step 2");
 
                     // error message
                 }
