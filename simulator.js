@@ -4122,6 +4122,10 @@ function updateMousePosition(event) {
     // console.log(coordinates);
 }
 
+// ==== idea =====
+// keep original 'next_btn' event listener, have it check which phase of the creation we're on to 
+// determine the next canvas to draw / function to call
+
 // called before enterBoundaryCreationMode()
 function displayBoundaryCreationIntroductionOne() {
     // could maybe be an animation, but not now
@@ -4135,10 +4139,12 @@ function displayBoundaryCreationIntroductionOne() {
     ctx.fillRect(720, 420, 300, 200);
 
     // introduction
-    ctx.font = '30px arial';
+    ctx.font = '40px arial';
     ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("Introduction", 420, 300);
-    ctx.fillText("Press 'Enter' or click 'Continue", 300, 360);
+    ctx.fillText("Create Your Boundary", 330, 280);
+
+    ctx.font = '28px arial';
+    ctx.fillText("Press 'Enter' or click 'Continue'", 300, 360);
 
     // hardcode as html element if needed
     let next_btn = document.getElementsByClassName("next-btn")[0];
@@ -4160,6 +4166,13 @@ function displayBoundaryCreationIntroductionTwo() {
     document.getElementsByClassName("next-btn")[0].style.display = 'none';
 
     drawBoundaryBoilerplate();
+
+    ctx.font = '28px arial';
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("These areas will be used for dialogue throughout the simulation.", 100, 270);
+    ctx.fillText("For best results, avoid drawing over them.", 200, 330);  
+    ctx.font = '24px arial'; 
+    ctx.fillText("Press 'Enter' or click 'Continue'", 300, 420);
 }
 
 // this function will be refactored/cleaned
