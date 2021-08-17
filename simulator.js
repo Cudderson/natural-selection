@@ -227,8 +227,7 @@ class Boundary {
         else {
             // invalid
             console.log("Invalid boundary.");
-            // redraw boilerplate
-            drawBoundaryBoilerplate();
+
             // error message (not written yet);
             return false;
         }   
@@ -270,14 +269,8 @@ class Boundary {
         else {
             // invalid
             console.log("Invalid boundary.");
-            // redraw boilerplate
-            drawBoundaryBoilerplate();
-
-            // draw valid bottom-boundary
-            ctx.drawImage(this.bottom_boundary, 0, 0, canvas.width, canvas.height);
 
             // error message (not written yet)
-
             return false;
         }
     }
@@ -4151,6 +4144,9 @@ function displayBoundaryCreationIntroductionTwo() {
             // destroy listener
             document.removeEventListener('keydown', checkKeystroke);
 
+            // hide next_btn
+            document.getElementsByClassName("next-btn")[0].style.display = 'none';
+
             // go to next screen
             
             // just a placeholder test
@@ -4187,8 +4183,31 @@ function applyBoundaryModeStyles() {
     stop_btn.style.display = "block";
 }
 
+// this could do text & styles
+function drawBottomBoundaryDrawingText() {
+    // text doesn't need to be final, just ideas
+
+    // upper-left = "Step 1: draw a line connecting the red endpoints from bottom to top"
+    // bottom-right = "For best results, draw a slow, continuous, non-overlapping line"
+
+    ctx.fillStyle = 'rgb(155, 245, 0);';
+    ctx.font= "24px arial";
+    ctx.fillText("Step 1", 80, 40);
+
+    ctx.font = '18px arial';
+    ctx.fillText("Draw a line connecting", 25, 75)
+    ctx.fillText("the red endpoints from", 25, 95);
+    ctx.fillText("bottom to top", 25, 115);
+
+    ctx.font = '20px arial';
+    ctx.fillText("For best results, draw", 770, 505);
+    ctx.fillText("a slow, continuous,", 770, 530);
+    ctx.fillText("non-overlapping line", 770, 555);
+}
+
 // this function will be refactored/cleaned
 function enterBoundaryCreationMode() {
+    console.log('123123');
 
     // drawing flag and step tracker
     var allowed_to_draw = false; // could be method of Paintbrush
@@ -4201,7 +4220,7 @@ function enterBoundaryCreationMode() {
     applyBoundaryModeStyles();
 
     // write here until compound function made
-    // 
+    drawBottomBoundaryDrawingText();
     
     // belongs to class Painbrush, not Boundary
     function draw(event) {
@@ -4344,6 +4363,12 @@ function enterBoundaryCreationMode() {
                     // erase bottom-boundary coords when illegal line drawn
                     new_boundary.bottom_boundary_coordinates = [];
 
+                    // redraw boilerplate
+                    drawBoundaryBoilerplate();
+
+                    // redraw bottom-step text
+                    drawBottomBoundaryDrawingText();
+
                     console.log("invalid");
                     // error message 
                 }
@@ -4362,6 +4387,12 @@ function enterBoundaryCreationMode() {
                 else {
                     // reset top boundary coords when illegal line drawn
                     new_boundary.top_boundary_coordinates = [];
+
+                    // redraw boilerplate
+                    drawBoundaryBoilerplate();
+
+                    // draw valid bottom-boundary
+                    ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
 
                     // error message
                 }
