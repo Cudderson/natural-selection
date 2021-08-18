@@ -4119,6 +4119,14 @@ function displayBoundaryCreationIntroductionOne() {
     let next_btn = document.getElementsByClassName("next-btn")[0];
     next_btn.style.display = 'block';
 
+    next_btn.addEventListener('click', function continueIntroduction() {
+        // remove listener
+        next_btn.removeEventListener('click', continueIntroduction);
+
+        // go to next screen
+        displayBoundaryCreationIntroductionTwo();
+    })
+
     document.addEventListener('keydown', function checkKeystroke(event) {
         if (event.key === 'Enter') {
             // destroy listeners
@@ -4131,8 +4139,6 @@ function displayBoundaryCreationIntroductionOne() {
 } 
 
 function displayBoundaryCreationIntroductionTwo() {
-    // change text
-    document.getElementsByClassName("next-btn")[0].innerHTML = 'Okay';
 
     drawBoundaryBoilerplate();
 
@@ -4143,17 +4149,29 @@ function displayBoundaryCreationIntroductionTwo() {
     ctx.font = '24px arial'; 
     ctx.fillText("Press 'Enter' or click 'Continue'", 300, 420);
 
-    // apply new listener to same button
+    // change text
+    let next_btn = document.getElementsByClassName("next-btn")[0];
+    next_btn.innerHTML = 'Okay';
+
+    next_btn.addEventListener('click', function finishBoundaryIntroduction() {
+        // remove listener
+        next_btn.removeEventListener('click', finishBoundaryIntroduction);
+
+        next_btn.style.display = 'none';
+
+        // go to next screen
+        enterBoundaryCreationMode();
+    })    
+
     document.addEventListener('keydown', function checkKeystroke(event) {
         if (event.key === 'Enter') {
-            // destroy listener
+            // remove listener
             document.removeEventListener('keydown', checkKeystroke);
 
             // hide next_btn
-            document.getElementsByClassName("next-btn")[0].style.display = 'none';
+            next_btn.style.display = 'none';
 
             // go to next screen
-            
             // just a placeholder test
             enterBoundaryCreationMode();
         }
