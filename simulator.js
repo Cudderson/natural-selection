@@ -4091,10 +4091,6 @@ function updateMousePosition(event) {
     // console.log(coordinates);
 }
 
-// ==== idea =====
-// keep original 'next_btn' event listener, have it check which phase of the creation we're on to 
-// determine the next canvas to draw / function to call
-
 // called before enterBoundaryCreationMode()
 function displayBoundaryCreationIntroductionOne() {
     // could maybe be an animation, but not now
@@ -4222,6 +4218,28 @@ function drawBoundaryDrawingHelpText(step) {
     ctx.fillText("For best results, draw", 770, 505);
     ctx.fillText("a slow, continuous,", 770, 530);
     ctx.fillText("non-overlapping line", 770, 555);
+}
+
+function drawBoundaryValidationHelpText() {
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.font= "24px arial";
+    ctx.fillText("Validation", 70, 40);
+
+    ctx.font = '18px arial';
+    ctx.fillText("To verify that the goal", 25, 70)
+    ctx.fillText("is reachable, draw a line", 25, 90);
+    ctx.fillText("connecting the white dot", 25, 110);
+    ctx.fillText("to the goal", 25, 130);
+
+    // no bottom black square on this one
+    ctx.fillStyle = 'black';
+    ctx.fillRect(730, 440, 280, 220);
+
+    // not using, keep just in case
+    // ctx.font = '20px arial';
+    // ctx.fillText("For best results, draw", 770, 505);
+    // ctx.fillText("a slow, continuous,", 770, 530);
+    // ctx.fillText("non-overlapping line", 770, 555);
 }
 
 // this function will be refactored/cleaned
@@ -4399,7 +4417,8 @@ function enterBoundaryCreationMode() {
                     new_boundary.save('top');
                     boundary_step = 'full-boundary';
 
-                    // draw next-step text here!!
+                    // draw next-step text 
+                    drawBoundaryValidationHelpText();
                 }
                 else {
                     // reset top boundary coords when illegal line drawn
@@ -4432,6 +4451,9 @@ function enterBoundaryCreationMode() {
                     // this is where the Apply/Save/Confirm button should become available
                     save_bounds_btn.style.backgroundColor = "var(--custom-green)";
                     save_bounds_btn.style.pointerEvents = 'auto';
+
+                    // should display help text on bottom-left area
+                    // drawBoundaryCompletionText();
                 }
                 else {
                     // error message
