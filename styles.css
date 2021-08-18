@@ -191,7 +191,7 @@ body {
 
 .start-btn, .sim-type-classic, .sim-type-boundary, .run-btn, 
 .stop-btn, .settings-btn, .sim-type-classic, .sim-type-boundary,
-.next-btn {
+.next-btn, .save-boundaries-btn {
     padding: .5rem 1rem;
     border: none;
     border-radius: 2px;
@@ -285,11 +285,17 @@ body {
 
 .save-boundaries-btn {
     display: none;
-    grid-column: 3 / 4;
-    width: 75%;
-    justify-self: end;
-    background-color: rgba(200, 200, 200, .2);
-    pointer-events: none;
+    grid-column: 2 / 3;
+    /* width: 75%; */
+    background-color: var(--custom-green);
     border: none;
     font-size: 20px;
+    transition: .25s;
+}
+
+/* combine these hover effects at end */
+.save-boundaries-btn:hover {
+    background-color: var(--darkviolet);
+    color: var(--custom-green);
+    transition: .25s;
 }

@@ -4191,10 +4191,6 @@ function applyBoundaryModeStyles() {
     document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
 
     let stop_btn = document.getElementsByClassName("stop-btn")[0];
-    let save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
-
-    // revert when leaving boundary mode
-    save_bounds_btn.style.display = "block";
 
     stop_btn.style.gridColumn = "1 / 2";
     stop_btn.style.width = "75%";
@@ -4242,6 +4238,28 @@ function drawBoundaryValidationHelpText() {
     // ctx.fillText("non-overlapping line", 770, 555);
 }
 
+function drawBoundaryCompletionHelpText() {
+    // remove upper-left text area
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, 300, 200);
+
+    // redraw bottom-left text area
+    ctx.lineWidth = 4;
+    ctx.strokeWidth = 4;
+    ctx.strokeStyle = 'rgb(148, 0, 211)';
+    ctx.strokeRect(736, 445, 272, 200);
+
+    ctx.font = '24px arial';
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.fillText("Complete!", 805, 490);
+    // still determining what to say at this point
+
+    // ctx.fillText("For best results, draw", 770, 505);
+    ctx.font = '20px arial';
+    ctx.fillText("[ need text here ]", 770, 530);
+    // ctx.fillText("non-overlapping line", 770, 555);
+}
+
 // this function will be refactored/cleaned
 function enterBoundaryCreationMode() {
 
@@ -4286,6 +4304,7 @@ function enterBoundaryCreationMode() {
                 drawBoundaryBoilerplate();
                 ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
                 ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
+                drawBoundaryValidationHelpText();
 
                 // draw white dot
                 ctx.fillStyle = 'white';
@@ -4448,12 +4467,12 @@ function enterBoundaryCreationMode() {
                     ctx.fillStyle = 'white';
                     ctx.fillRect(925, 50, 20, 20);
 
-                    // this is where the Apply/Save/Confirm button should become available
-                    save_bounds_btn.style.backgroundColor = "var(--custom-green)";
-                    save_bounds_btn.style.pointerEvents = 'auto';
-
                     // should display help text on bottom-left area
-                    // drawBoundaryCompletionText();
+                    drawBoundaryCompletionHelpText();
+
+                    // display button to proceed, hide 'back' btn
+                    document.getElementsByClassName("save-boundaries-btn")[0].style.display = 'block';
+                    document.getElementsByClassName("stop-btn")[0].style.display = 'none';
                 }
                 else {
                     // error message
@@ -4462,6 +4481,7 @@ function enterBoundaryCreationMode() {
                     // draw boilerplate and top&bottom boundaries
                     drawBoundaryBoilerplate();
                     ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
+                    drawBoundaryValidationHelpText();
                 }
             }
         }
@@ -4503,6 +4523,8 @@ function enterBoundaryCreationMode() {
         scale_statistics = setScale();
 
         // return to settings
+
+        // ===== this should display boundary version of settings form =====
         displaySettingsForm(); //turned off while testing checkpoints
     });
 }
