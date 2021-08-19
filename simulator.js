@@ -1193,6 +1193,18 @@ async function testBoundarySim() {
     // ===== code integrated up to here =====
 }
 // END CUSTOM BOUNDARY SIM TEST
+function prepareToRunSimulation() {
+    // clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    document.getElementsByClassName("settings-btn")[0].style.display = 'none';
+
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.font = '50px arial';
+    ctx.fillText("Simulation Ready", 300, 270);
+    ctx.font = '28px arial'
+    ctx.fillText("Press 'Run Simulation'", 350, 400);
+}
 
 async function runSimulation () {
 
@@ -2005,7 +2017,6 @@ function fadeInTitleAnimation(title_organisms) {
 
     var logo = document.getElementById("logo");
     var press_start_text = document.getElementById("press-start");
-    // var settings_btn = document.getElementsByClassName("settings-btn")[0];
     var start_btn = document.getElementsByClassName("start-btn")[0];
 
     start_btn.addEventListener("click", function updateStartBtnFlagOnClick() {
@@ -2029,12 +2040,6 @@ function fadeInTitleAnimation(title_organisms) {
     return new Promise(resolve => {
         function animateTitle() {
             if (!finished && !simulation_started) {
-
-                // if settings clicked, resolve animation (fix so we dont declare so many eventListeners)
-                // settings_btn.addEventListener("click", function() {
-                //     cancelAnimationFrame(frame_id);
-                //     resolve("Display Settings");
-                // });
 
                 // respond to event listener flag
                 if (start_button_pressed) {
@@ -3933,8 +3938,12 @@ function validateSettingsForm() {
     // returns to title screen
     finishApplyingSettings();
 
-    // restart animation
-    playTitleScreenAnimation();
+    // restart animation ===
+    // here, we should instead bring user to a screen that tells them their simulation is
+    // ready to run, and present a button/cue to begin simulation
+
+    // playTitleScreenAnimation();
+    prepareToRunSimulation();
 
     // don't submit the form
     return false;
