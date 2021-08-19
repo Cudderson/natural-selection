@@ -22,7 +22,7 @@ const GOAL_Y_POS_BOUNDS = 50;
 
 // boundary globals
 var custom_boundary;
-var scale_statistics;
+var scale_statistics; // this is/should be only computed once (boundary doesn't change)
 
 // flags
 var sim_type;
@@ -3839,19 +3839,30 @@ function displaySettingsForm() {
     settings_container.style.display = 'block';
 
     // boundaries
+    // ===== this shouldn't exist anymore (sim type decided on previous screen)=====
     // listen for boundary checkbox to trigger enterBoundaryCreationMode()
-    var boundary_setting = document.getElementById("boundary-checkbox");
-    boundary_setting.addEventListener("change", function() {
-        if (this.checked) {
-            enterBoundaryCreationMode();
-        }
-        else {
-            console.log("Checkbox: unchecked");
 
-            // should remove custom_boundary so sim doesn't think there is one
-            custom_boundary = null;
-        }
-    });
+    // var boundary_setting = document.getElementById("boundary-checkbox");
+    // boundary_setting.addEventListener("change", function() {
+    //     if (this.checked) {
+    //         enterBoundaryCreationMode();
+    //     }
+    //     else {
+    //         console.log("Checkbox: unchecked");
+
+    //         // should remove custom_boundary so sim doesn't think there is one
+    //         custom_boundary = null;
+    //     }
+    // });
+
+    // ========== we should display proper settings depending on sim type chosen ==========
+    // sim_type set in selectSimulationType()
+    // With GENE_COUNT undecided (might be dynamically set), the only differences between the sim types
+    // are the custom boundary and the death feature (either on/off or dynamic)
+
+    // start with each label hidden, and display each depending on sim type
+    
+
 
     // movement setting helper (move/abstract)
     var movement_speed_setting = document.getElementById("move-speed");

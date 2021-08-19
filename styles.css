@@ -56,14 +56,27 @@ body {
 .movement-setting-label,
 .gene-setting-label,
 .mutation-setting-label {
+    display: none;
     grid-column: 1 / 2;
     font-size: 40px;
     color: var(--custom-green);
 }
 
+#total-organisms, #move-speed,
+#gene-count, #mutation-rate {
+    display: none;
+}
+
 .dialogue-setting-span {
+    display: none;
     font-size: 40px;
     color: var(--custom-green);
+}
+
+.dialogue-container {
+    display: none;
+    grid-column: 2 / 3;
+    margin-left: 40px;
 }
 
 .setting-input {
@@ -94,11 +107,6 @@ body {
     background-color: var(--custom-green);
     color: black;
     transition: .25s;
-}
-
-.dialogue-container {
-    grid-column: 2 / 3;
-    margin-left: 40px;
 }
 
 .error-container {
