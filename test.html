@@ -11,6 +11,9 @@
 
 <body>
   <img id="logo" src="natural_selection_sim_logo.png">
+  <img id="press-start" src="press_start_text.png">
+  <img id="classic-example" src="classic_example.png">
+  <img id="boundary-example" src="boundary_example.png">
   <div class="canvas-container">
     <canvas id="main-canvas" width="1000" height="600"></canvas>
   </div>
@@ -34,6 +37,15 @@
           <label class="mutation-setting-label" for="mutation-rate">Mutation Rate (%)</label>
           <input class="setting-input" id="mutation-rate" type="text" value="3" autocomplete="off" maxlength="2">
 
+          <!-- checkbox option now, will have to change to make dynamic -->
+          <span class="death-setting-span">Death</span>
+          <div class="death-container">
+            <label class="dialogue-setting-label">
+              <input id="death-checkbox" type="checkbox" checked="checked">
+              <span class="checkmark"></span>
+            </label>
+          </div>          
+
           <span class="dialogue-setting-span">Dialogue</span>
           <div class="dialogue-container">
             <label class="dialogue-setting-label">
@@ -42,13 +54,14 @@
             </label>
           </div>
           <!--boundary setting (uses dialogue class styling)-->
-          <span class="dialogue-setting-span">Custom Boundaries</span>
+          <!-- hiding for now -->
+          <!-- <span class="dialogue-setting-span">Custom Boundaries</span>
           <div class="dialogue-container">
             <label class="dialogue-setting-label">
               <input id="boundary-checkbox" type="checkbox">
               <span class="checkmark"></span>
             </label>
-          </div>
+          </div> -->
         </div>
         <!-- these are beneath the grid -->
         <input class="setting-submit" type="submit" value="Apply">
@@ -59,8 +72,16 @@
     </div>
   </div>
   <div class="btn-container">
-    <button class="save-boundaries-btn">Apply Boundaries</button>
-    <button class="start-btn" onclick="checkSimType()">Run Simulation</button>
+    <!--title screen-->
+    <button class="start-btn">Start</button> 
+    <!--sim type selection screen-->
+    <button class="sim-type-classic">Select Classic</button>
+    <button class="sim-type-boundary">Select Boundary</button>
+    <!--boundary creation-->
+    <button class='next-btn'>Continue</button>
+    <button class="save-boundaries-btn">Apply Boundary</button>
+    <!--run/stop sim, settings-->
+    <button class="run-btn" onclick="checkSimType()">Run Simulation</button>
     <button class="settings-btn">Settings</button>
     <button class="stop-btn" onclick="stopSimulation()">Stop Simulation</button>
   </div>

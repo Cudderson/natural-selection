@@ -22,7 +22,7 @@ const GOAL_Y_POS_BOUNDS = 50;
 
 // boundary globals
 var custom_boundary;
-var scale_statistics;
+var scale_statistics; // this is/should be only computed once (boundary doesn't change)
 
 // flags
 var sim_type;
@@ -166,43 +166,19 @@ class Boundary {
         this.full_boundary = new Image();
         this.top_boundary_coordinates = [];
         this.bottom_boundary_coordinates = [];
-        // this.checkpoints = [];
         // this.checkpoints = {'coordinates': [], 'size': null};
         this.checkpoints = []; // push dictionaries containing coordinates, halfway_point, distance_to_goal, and size
-    }
-
-    applyBoundaryModeStyles() {
-        // turn off settings, turn on canvas
-        var canvas_container = document.getElementsByClassName("canvas-container")[0];
-        var settings_container = document.getElementsByClassName("settings-container")[0];
-
-        canvas_container.style.display = 'block';
-        settings_container.style.display = 'none';
-
-        drawBoundaryBoilerplate();
-
-        // html btns
-        var settings_btn = document.getElementsByClassName("settings-btn")[0];
-        var start_btn = document.getElementsByClassName("start-btn")[0];
-        var stop_btn = document.getElementsByClassName("stop-btn")[0];
-        var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
-
-        settings_btn.style.display = 'none';
-        start_btn.style.display = 'none';
-
-        // revert when leaving boundary mode
-        stop_btn.style.gridColumn = "2 / 3";
-        stop_btn.style.width = "100%";
-        stop_btn.innerHTML = "Cancel";
-        stop_btn.style.display = "block";
-
-        save_bounds_btn.style.display = "block";
     }
 
     save(boundary_type) {
         
         var canvas = document.getElementById("main-canvas"); // do we need to declare these?
         var ctx = canvas.getContext('2d');
+
+        // remove help text
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, 230, 150);
+        ctx.fillRect(760, 450, 225, 200);
 
         var boundary_to_save = canvas.toDataURL("image/png");
 
@@ -246,7 +222,7 @@ class Boundary {
             // valid, update boundary step
             console.log("valid boundary");
 
-            // make connectors green
+            // make connectors green (maybe draw this after returns true)
             ctx.fillStyle = 'rgb(155, 245, 0)';
             ctx.fillRect(950, 150, 50, 20);
             ctx.fillRect(150, 550, 20, 50);
@@ -256,8 +232,7 @@ class Boundary {
         else {
             // invalid
             console.log("Invalid boundary.");
-            // redraw boilerplate
-            drawBoundaryBoilerplate();
+
             // error message (not written yet);
             return false;
         }   
@@ -299,14 +274,8 @@ class Boundary {
         else {
             // invalid
             console.log("Invalid boundary.");
-            // redraw boilerplate
-            drawBoundaryBoilerplate();
-
-            // draw valid bottom-boundary
-            ctx.drawImage(this.bottom_boundary, 0, 0, canvas.width, canvas.height);
 
             // error message (not written yet)
-
             return false;
         }
     }
@@ -828,7 +797,6 @@ function updateAndMoveOrganismsBounds() {
                     //     ctx.closePath();
                     // }
 
-                    // do it with 10 organisms
                     for (var j = 0; j < organisms.length; j++) {
 
                         // update index
@@ -841,9 +809,41 @@ function updateAndMoveOrganismsBounds() {
                         // console.log(`Current Position Pixel for Organism ${j}: ` + position_rgba);
 
                         // --custom-green: rgba(155, 245, 0, 1);
-                        // highlight organism red if he leaves safe area (dies)
+                        // this is where the hit detection takes place, automatically killing organisms that touch the boundary
+                        // instead, we should give organisms a %chance to survive
+
+                        // example scenario pseudocode:
+                        // organism touches wall
+                        // determine if organism died
+                        // if dead: turn red, update is_alive attribute 
+                        // else if still alive: override next gene to be the inverse of the gene that caused organism to touch boundary,
+                        //                          - this will give the appearance of the organism 'bouncing' off the wall
+
+                        // how could this work here, where organism is drawn after it's survival is decided?
+
+                        // ===== IDEA 1 =====
+                        // idea: if organism decided dead, do normal steps
+                        //       else if organisms decided alive, draw organism purple and make next gene inverse of current
+                        // ==================
+
+                        // this idea sucks because organisms touch boundary often, meaning we will be rewriting/overriding genes often, which will
+                        // probably ruin the magic of the genetic algorithm
+
+                        // ===== IDEA 2 =====
+                        // instead, it would be better to implement in a way where organisms are drawn before their survival is decided.
+                        // this way, an organism could move to a new location, then on the next iteration, determined dead or alive, and then either
+                        // color red and 'die', or make next organism movement the inverse of its last, but don't overwrite the gene
+                        // ==================
+
+                        // on the other hand, maybe overwriting the gene is good, because it's like the organism learning where a boundary is?
+                        // ehh, the algorithm technically still should help organism 'learn' where boundary is, because the species should reach
+                        // the goal at some point.
+
+                        // therefore, overwriting genes is bad, and we should implement idea #2.
+
                         if (position_rgba[0] === 155 && position_rgba[1] === 245 || organisms[j].is_alive === 'false') {
                             organisms[j].is_alive = false;
+                             // could have .move() check if alive or dead before choosing color, then .move() could be called either way
                             organisms[j].ctx.fillStyle = 'red';
                             organisms[j].ctx.beginPath();
                             organisms[j].ctx.arc(organisms[j].x, organisms[j].y, organisms[j].radius, 0, Math.PI*2, false);
@@ -1224,19 +1224,22 @@ async function testBoundarySim() {
     // ===== code integrated up to here =====
 }
 // END CUSTOM BOUNDARY SIM TEST
+function prepareToRunSimulation() {
+    // clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    document.getElementsByClassName("settings-btn")[0].style.display = 'none';
+
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.font = '50px arial';
+    ctx.fillText("Simulation Ready", 300, 270);
+    ctx.font = '28px arial'
+    ctx.fillText("Press 'Run Simulation'", 350, 400);
+}
 
 async function runSimulation () {
 
     // ===== integrating boundary code into core simulation =====
-
-    // ** for now, our flag will be the existence of a created boundary **
-    // this flag will be global to start. if we want to make it more local, we'll need to pass sim_type to functions. undecided.
-    if (custom_boundary) {
-        sim_type = 'boundary';
-    }
-    else {
-        sim_type = 'classic';
-    }
 
     simulation_started = true;
 
@@ -1248,7 +1251,7 @@ async function runSimulation () {
     console.log(`Dialogue: ${dialogue}`);
 
     // make start/settings buttons disappear, display stop simulation button
-    var start_btn = document.getElementsByClassName("start-btn")[0];
+    var start_btn = document.getElementsByClassName("run-btn")[0];
     var stop_btn = document.getElementsByClassName("stop-btn")[0];
     var settings_btn = document.getElementsByClassName("settings-btn")[0];
     start_btn.style.display = 'none';
@@ -1340,6 +1343,7 @@ async function runGeneration() {
         var checkpoint_data = getFarthestCheckpointReached();
 
         // this will set each organism's distance_to_next_checkpoint attribute
+        // !!! this crashes sometimes because we don't have logic to handle when 0 checkpoints are reached (getFarthestCheckpointReached() returns undefined)
         var closest_organism = getShortestDistanceToNextCheckpoint(checkpoint_data['next']);
 
         // distance_to_goal = distance_to_next_checkpoint + next_checkpoint.distance_to_goal
@@ -1429,6 +1433,234 @@ async function runGeneration() {
 function stopSimulation() {
     // reloads the page
     document.location.reload();
+}
+
+function selectSimulationType() {
+    drawInitialSimSelectionScreen();
+    turnOnSimTypeSelectionListeners();
+}
+
+// example images not final. consider more zoomed-in images
+function drawInitialSimSelectionScreen() {
+    // let's get the dimensions of my screenshots (300x300 needed)
+    let classic_example = document.getElementById("classic-example");
+    let boundary_example = document.getElementById("boundary-example");
+
+    // hide start button and clear canvas
+    let start_btn = document.getElementsByClassName("start-btn")[0];
+    start_btn.style.display = 'none';
+
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // show sim-type buttons 
+    document.getElementsByClassName("sim-type-classic")[0].style.display = "block";
+    document.getElementsByClassName("sim-type-boundary")[0].style.display = "block";
+
+    // could turn this initial drawing into a function too
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.font = '50px arial';
+    ctx.fillText("Select Simulation Type", 240, 80);
+    ctx.font = '30px arial';
+    ctx.fillText("Classic", 190, 500);
+    ctx.fillText("Boundary", 690, 500);
+
+    ctx.strokeStyle = 'rgb(148, 0, 211)';
+    ctx.lineWidth = 4;
+    ctx.shadowColor = 'rgb(148, 0, 211)';
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(100, 150, 300, 300);
+    ctx.strokeRect(600, 150, 300, 300);
+
+    // draw images scaled to 300x300
+    ctx.drawImage(classic_example, 100, 150, 300, 300);
+    ctx.drawImage(boundary_example, 600, 150, 300, 300);   
+}
+
+function handleSimTypeBtnMouseover(event) {
+    console.log(event.target.className);
+    if (event.target.className === 'sim-type-classic') {
+        sim_type = highlightClassicSimType();
+    }
+    else if (event.target.className === 'sim-type-boundary') {
+        sim_type = highlightBoundarySimType();
+    }
+}
+
+function handleSimTypeBtnClick() {
+    if (sim_type != null) {
+        applySimType();
+    }
+}
+
+function turnOnSimTypeSelectionListeners() {
+    // allow arrow keys to highlight sim types, 'enter' to confirm
+    document.addEventListener('keydown', handleSimTypeSelectionKeyPress);
+
+    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
+    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
+
+    // add event listeners to buttons (move to better place if needed)
+    sim_type_btn_classic.addEventListener('mouseover', handleSimTypeBtnMouseover);
+    sim_type_btn_boundary.addEventListener('mouseover', handleSimTypeBtnMouseover);
+
+    // when button is clicked, sim_type will be set
+    sim_type_btn_classic.addEventListener('click', handleSimTypeBtnClick);
+    sim_type_btn_boundary.addEventListener('click', handleSimTypeBtnClick);
+}
+
+
+function turnOffSimTypeSelectionEventListeners() {
+    if (sim_type != null) {
+        // turn off event listeners before displaying next canvas
+        let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
+        let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
+    
+        sim_type_btn_classic.removeEventListener('mouseover', handleSimTypeBtnMouseover);
+        sim_type_btn_classic.removeEventListener('click', handleSimTypeBtnClick);
+        sim_type_btn_boundary.removeEventListener('mouseover', handleSimTypeBtnMouseover);
+        sim_type_btn_boundary.removeEventListener('click', handleSimTypeBtnClick);
+        document.removeEventListener('keydown', handleSimTypeSelectionKeyPress);
+    }
+}
+
+// currently, both buttons and 'enter' will call displaySettingsForm()
+function handleSimTypeSelectionKeyPress(event) {
+    switch(event.key) {
+        case "ArrowLeft":
+            // the solution is to sync this variable with the sim_type var that runSimulation()/checkSimType() checks
+            // i'll do that now. set sim_type here
+            sim_type = highlightClassicSimType();
+            break;
+
+        case "ArrowRight":
+            sim_type = highlightBoundarySimType();
+            break;
+        
+        case "Enter":
+            if (sim_type != null) {
+                applySimType();
+            }
+            else {
+                console.log("sim type not selected.");
+            }
+            break;
+    }  
+}
+
+function highlightClassicSimType() {
+    console.log("left arrow pressed");
+
+    // highlight classic btn, return boundary btn to normal
+    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
+    sim_type_btn_classic.style.backgroundColor = 'rgb(155, 245, 0)';
+    sim_type_btn_classic.style.color = 'black';
+
+    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
+    sim_type_btn_boundary.style.backgroundColor = 'rgb(148, 0, 211)';
+    sim_type_btn_boundary.style.color = 'rgb(155, 245, 0)';
+
+    // clear rects
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'black';
+    ctx.fillRect(70, 120, 870, 450);
+
+    // redraw 'classic' border highlighted
+    ctx.strokeStyle = 'rgb(155, 245, 0)';
+    ctx.shadowColor = 'rgb(155, 245, 0)';
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(100, 150, 300, 300);
+
+    // redraw 'classic' text highlighted
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.font = '30px arial';
+    ctx.fillText("Classic", 190, 500);
+
+    // redraw 'boundary' border normal
+    ctx.strokeStyle = 'rgb(148, 0, 211)';
+    ctx.shadowColor = 'rgb(148, 0, 211)';
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(600, 150, 300, 300);
+
+    // redraw boundary text normal
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("Boundary", 690, 500);
+
+    // redraw example images scaled to 300x300
+    let classic_example = document.getElementById("classic-example");
+    let boundary_example = document.getElementById("boundary-example");
+    ctx.drawImage(classic_example, 100, 150, 300, 300);
+    ctx.drawImage(boundary_example, 600, 150, 300, 300);  
+
+    return 'classic';
+}
+
+function highlightBoundarySimType() {
+    console.log("right arrow pressed");
+
+    // highlight boundary button, return classic button to normal
+    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
+    sim_type_btn_boundary.style.backgroundColor = 'rgb(155, 245, 0)';
+    sim_type_btn_boundary.style.color = 'black';
+
+    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
+    sim_type_btn_classic.style.backgroundColor = 'rgb(148, 0, 211)';
+    sim_type_btn_classic.style.color = 'rgb(155, 245, 0)';
+
+    // clear rects
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'black';
+    ctx.fillRect(70, 120, 870, 450);
+
+    // redraw 'boundary' border highlighted
+    ctx.strokeStyle = 'rgb(155, 245, 0)';
+    ctx.shadowColor = 'rgb(155, 245, 0)';
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(600, 150, 300, 300);
+
+    // redraw 'boundary' text highlighted
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.font = '30px arial';
+    ctx.fillText("Boundary", 690, 500);
+
+    // redraw 'classic' border normal
+    ctx.strokeStyle = 'rgb(148, 0, 211)';
+    ctx.shadowColor = 'rgb(148, 0, 211)';
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(100, 150, 300, 300);
+
+    // redraw 'classic' text normal
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("Classic", 190, 500);
+
+    // redraw example images scaled to 300x300
+    let classic_example = document.getElementById("classic-example");
+    let boundary_example = document.getElementById("boundary-example");
+    ctx.drawImage(classic_example, 100, 150, 300, 300);
+    ctx.drawImage(boundary_example, 600, 150, 300, 300); 
+
+    return 'boundary';
+}
+
+function applySimType() {
+
+    // turn off listeners and hide buttons
+    turnOffSimTypeSelectionEventListeners();
+
+    document.getElementsByClassName("sim-type-classic")[0].style.display = 'none';
+    document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
+
+    if (sim_type === 'classic') {
+        displaySettingsForm();
+    }
+    else if (sim_type === 'boundary') {
+        // user must create boundary before settings configuration
+        displayBoundaryCreationIntroductionOne();
+    }
 }
 
 // 1. Create Initial Population
@@ -1760,14 +1992,20 @@ async function playTitleScreenAnimation() {
 
         var status = await fadeInTitleAnimation(title_organisms);
 
-        if (status === "Display Settings") {
-            console.log("Displaying Settings");
-            displaySettingsForm();
+        // if (status === "Display Settings") {
+        //     console.log("Displaying Settings");
+        //     displaySettingsForm();
+        // }
+        if (status === "Display Sim Types") {
+            console.log("start button pressed. displaying sim types");
+            // call here!
+            selectSimulationType();
         }
         else if (status === "TEST BOUNDARY MODE") {
             console.log("Entering Boundary Mode");
             enterBoundaryCreationMode();
         }
+        
     }
     while (simulation_started === false && status === "Keep Playing");
 }
@@ -1794,22 +2032,43 @@ function createTitleScreenOrganisms() {
 
 function fadeInTitleAnimation(title_organisms) {
     var opacity = 0.00;
+    var opacity_tracker = 0.00;
     var finished = false;
     var cycles = 0;
+    var start_button_pressed = false; // flag to resolve animation
 
     var logo = document.getElementById("logo");
+    var press_start_text = document.getElementById("press-start");
+    var start_btn = document.getElementsByClassName("start-btn")[0];
 
-    var settings_btn = document.getElementsByClassName("settings-btn")[0];
+    start_btn.addEventListener("click", function updateStartBtnFlagOnClick() {
+        console.log("Start Button Clicked");
+        start_button_pressed = true;
+
+        // remove eventListener after flag set
+        start_btn.removeEventListener("click", updateStartBtnFlagOnClick);
+    });
+
+    document.addEventListener('keydown', function updateStartBtnFlagOnEnter(event) {
+        if (event.key === "Enter") {
+            console.log("Start Button Pressed");
+            start_button_pressed = true;
+
+            // remove eventListener after flag set
+            document.removeEventListener('keydown', updateStartBtnFlagOnEnter);
+        }
+    });
 
     return new Promise(resolve => {
         function animateTitle() {
             if (!finished && !simulation_started) {
 
-                // if settings clicked, resolve animation
-                settings_btn.addEventListener("click", function() {
+                // respond to event listener flag
+                if (start_button_pressed) {
+                    // cancel and resolve
                     cancelAnimationFrame(frame_id);
-                    resolve("Display Settings");
-                });
+                    return resolve("Display Sim Types");
+                }
 
                 ctx.fillStyle = 'black';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1839,16 +2098,29 @@ function fadeInTitleAnimation(title_organisms) {
                     }
                 }
 
-                // draw image instead
                 // use globalAlpha, then reset
                 // could make this class Paintbrush in the future for this and goal class methods
                 ctx.globalAlpha = opacity;
                 ctx.drawImage(logo, 105, 275);
-                ctx.globalAlpha = 1;
+
+                ctx.globalAlpha = 0.8;
+                // blink start text 
+                if (opacity_tracker >= 0.12 && opacity_tracker <= 0.24) {
+                    // only draw image half of the time
+                    ctx.drawImage(press_start_text, 300, 400, 400, 40);
+                }
+                else if (opacity_tracker > 0.24) {
+                    // reset tracker
+                    opacity_tracker = 0.00;
+                }
+                opacity_tracker += 0.005;
 
                 if (opacity < 1.00) {
                     opacity += 0.005;
                 }
+
+                // return to 1 for organisms
+                ctx.globalAlpha = 1;
 
                 sleep(750 / FPS); // control drawing FPS for organisms
                 frame_id = requestAnimationFrame(animateTitle);
@@ -3574,9 +3846,10 @@ function fadeInExtinctionMessage() {
 
 // *** Settings ***
 function displaySettingsForm() {
+
     // ensure only settings button showing
     var settings_btn = document.getElementsByClassName("settings-btn")[0];
-    var start_btn = document.getElementsByClassName("start-btn")[0];
+    var start_btn = document.getElementsByClassName("run-btn")[0];
     var stop_btn = document.getElementsByClassName("stop-btn")[0];
     var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
 
@@ -3593,19 +3866,39 @@ function displaySettingsForm() {
     settings_container.style.display = 'block';
 
     // boundaries
+    // ===== this shouldn't exist anymore (sim type decided on previous screen)=====
     // listen for boundary checkbox to trigger enterBoundaryCreationMode()
-    var boundary_setting = document.getElementById("boundary-checkbox");
-    boundary_setting.addEventListener("change", function() {
-        if (this.checked) {
-            enterBoundaryCreationMode();
-        }
-        else {
-            console.log("Checkbox: unchecked");
 
-            // should remove custom_boundary so sim doesn't think there is one
-            custom_boundary = null;
-        }
-    });
+    // var boundary_setting = document.getElementById("boundary-checkbox");
+    // boundary_setting.addEventListener("change", function() {
+    //     if (this.checked) {
+    //         enterBoundaryCreationMode();
+    //     }
+    //     else {
+    //         console.log("Checkbox: unchecked");
+
+    //         // should remove custom_boundary so sim doesn't think there is one
+    //         custom_boundary = null;
+    //     }
+    // });
+
+    // ========== we should display proper settings depending on sim type chosen ==========
+    // sim_type set in selectSimulationType()
+    // With GENE_COUNT undecided (might be dynamically set), the only differences between the sim types
+    // are the custom boundary and the death feature (either on/off or dynamic)
+
+    // start with each label hidden, and display each depending on sim type
+    // in the polishing phase, we'll add descriptions under each setting?
+
+    if (sim_type === 'classic') {
+        // display classic settings (no death)
+        document.getElementsByClassName("death-setting-span")[0].style.display = 'none';
+        document.getElementsByClassName("death-container")[0].style.display = 'none';
+    }
+    // else if (sim_type === 'boundary') {
+    //     // display boundary settings
+    //     // could have "Boundary: created/valid" setting here? (not yet)
+    // }
 
     // movement setting helper (move/abstract)
     var movement_speed_setting = document.getElementById("move-speed");
@@ -3667,8 +3960,12 @@ function validateSettingsForm() {
     // returns to title screen
     finishApplyingSettings();
 
-    // restart animation
-    playTitleScreenAnimation();
+    // restart animation ===
+    // here, we should instead bring user to a screen that tells them their simulation is
+    // ready to run, and present a button/cue to begin simulation
+
+    // playTitleScreenAnimation();
+    prepareToRunSimulation();
 
     // don't submit the form
     return false;
@@ -3773,7 +4070,7 @@ function finishApplyingSettings() {
     canvas_container.style.display = 'block';
     settings_container.style.display = 'none';
 
-    var start_btn = document.getElementsByClassName("start-btn")[0];
+    var start_btn = document.getElementsByClassName("run-btn")[0];
     start_btn.style.display = 'block';
 
     return 0;
@@ -3807,38 +4104,31 @@ function getUserDecision() {
 
 // could make class method
 function drawBoundaryBoilerplate() {
-    // ** DRAW BOUNDARY BOILERPLATE
-
     // clear canvas
     ctx.fillStyle = 'black';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // draw start/end points of boundary (make helper function later (drawBoundaryBoilerplate()))
+    // draw start/end points of boundary
     // top
     ctx.fillStyle = 'red';
     ctx.fillRect(830, 0, 20, 50);
     ctx.fillRect(950, 150, 50, 20);
+
     // bottom
     ctx.fillStyle = 'red';
     ctx.fillRect(0, 430, 50, 20);
     ctx.fillRect(150, 550, 20, 50);
+
     // placeholder goal
     var placeholder_goal = new Goal(925, 50, 20, ctx);
     placeholder_goal.drawGoal();
 
-    // we should also highlight the areas that users cannot draw in (2 rects to create border effect)
-    ctx.fillStyle = 'rgb(148, 0, 211)';
-    // stats border rect
-    ctx.fillRect(736, 508, 272, 92);
-    // phase border rect
-    ctx.fillRect(0, 0, 252, 157);
-
-    ctx.fillStyle = 'black';
-    // stats area (will need to erase when sim starts)
-    ctx.fillRect(740, 512, 270, 90);
-    // phase area
-    ctx.fillRect(0, 0, 248, 153);
-    // ** END BOUNDARY BOILERPLATE **
+    // draw instructions zones (no-draw zones)
+    ctx.lineWidth = 4;
+    ctx.strokeWidth = 4;
+    ctx.strokeStyle = 'rgb(148, 0, 211)';
+    ctx.strokeRect(736, 445, 272, 200);
+    ctx.strokeRect(-4, -4, 252, 157);
 }
 
 // would belong to class Paintbrush, not Boundary
@@ -3852,13 +4142,177 @@ function updateMousePosition(event) {
     // console.log(coordinates);
 }
 
-// this function will be refactored/cleaned once proven working
-// this code should either simply prepare the user for boundary mode, or perform all boundary drawing/validation
-// think how this will be worked into the main flow
-// could be:
-// enterBoundaryCreationMode >>> applyBoundaryModeStyles >>> createBoundaries, but it's good enough for now
-function enterBoundaryCreationMode() {
+// called before enterBoundaryCreationMode()
+function displayBoundaryCreationIntroductionOne() {
+    // could maybe be an animation, but not now
+    console.log("boundary creation introduction called");
 
+    drawBoundaryBoilerplate();
+
+    // erase boxes
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, 300, 200);
+    ctx.fillRect(720, 420, 300, 200);
+
+    // introduction
+    ctx.font = '40px arial';
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("Create Your Boundary", 330, 280);
+
+    ctx.font = '28px arial';
+    ctx.fillText("Press 'Enter' or click 'Continue'", 300, 360);
+
+    // hardcode as html element if needed
+    let next_btn = document.getElementsByClassName("next-btn")[0];
+    next_btn.style.display = 'block';
+
+    next_btn.addEventListener('click', function continueIntroduction() {
+        // remove listener
+        next_btn.removeEventListener('click', continueIntroduction);
+
+        // go to next screen
+        displayBoundaryCreationIntroductionTwo();
+    })
+
+    document.addEventListener('keydown', function checkKeystroke(event) {
+        if (event.key === 'Enter') {
+            // destroy listeners
+            document.removeEventListener('keydown', checkKeystroke);
+
+            // go to next screen
+            displayBoundaryCreationIntroductionTwo();
+        }
+    })
+} 
+
+function displayBoundaryCreationIntroductionTwo() {
+
+    drawBoundaryBoilerplate();
+
+    ctx.font = '28px arial';
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("These areas will be used for dialogue throughout the simulation.", 100, 270);
+    ctx.fillText("For best results, avoid drawing over them.", 200, 330);  
+    ctx.font = '24px arial'; 
+    ctx.fillText("Press 'Enter' or click 'Continue'", 300, 420);
+
+    // change text
+    let next_btn = document.getElementsByClassName("next-btn")[0];
+    next_btn.innerHTML = 'Okay';
+
+    next_btn.addEventListener('click', function finishBoundaryIntroduction() {
+        // remove listener
+        next_btn.removeEventListener('click', finishBoundaryIntroduction);
+
+        next_btn.style.display = 'none';
+
+        // go to next screen
+        enterBoundaryCreationMode();
+    })    
+
+    document.addEventListener('keydown', function checkKeystroke(event) {
+        if (event.key === 'Enter') {
+            // remove listener
+            document.removeEventListener('keydown', checkKeystroke);
+
+            // hide next_btn
+            next_btn.style.display = 'none';
+
+            // go to next screen
+            // just a placeholder test
+            enterBoundaryCreationMode();
+        }
+    })
+}
+
+function applyBoundaryModeStyles() {
+    // turn off settings, turn on canvas
+    var canvas_container = document.getElementsByClassName("canvas-container")[0];
+    var settings_container = document.getElementsByClassName("settings-container")[0];
+
+    canvas_container.style.display = 'block';
+    settings_container.style.display = 'none';
+
+    drawBoundaryBoilerplate();
+
+    // hide buttons
+    document.getElementsByClassName("settings-btn")[0].style.display = 'none';
+    document.getElementsByClassName("run-btn")[0].style.display = 'none';
+    document.getElementsByClassName("sim-type-classic")[0].style.display = 'none';
+    document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
+
+    let stop_btn = document.getElementsByClassName("stop-btn")[0];
+
+    stop_btn.style.gridColumn = "1 / 2";
+    stop_btn.style.width = "75%";
+    stop_btn.innerHTML = "Back";
+    stop_btn.style.display = "block";
+}
+
+// this could do text & styles
+function drawBoundaryDrawingHelpText(step) {
+
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.font= "24px arial";
+    ctx.fillText(step, 80, 40);
+
+    ctx.font = '18px arial';
+    ctx.fillText("Draw a line connecting", 25, 75)
+    ctx.fillText("the red endpoints from", 25, 95);
+    ctx.fillText("bottom to top", 25, 115);
+
+    ctx.font = '20px arial';
+    ctx.fillText("For best results, draw", 770, 505);
+    ctx.fillText("a slow, continuous,", 770, 530);
+    ctx.fillText("non-overlapping line", 770, 555);
+}
+
+function drawBoundaryValidationHelpText() {
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.font= "24px arial";
+    ctx.fillText("Validation", 70, 40);
+
+    ctx.font = '18px arial';
+    ctx.fillText("To verify that the goal", 25, 70)
+    ctx.fillText("is reachable, draw a line", 25, 90);
+    ctx.fillText("connecting the white dot", 25, 110);
+    ctx.fillText("to the goal", 25, 130);
+
+    // no bottom black square on this one
+    ctx.fillStyle = 'black';
+    ctx.fillRect(730, 440, 280, 220);
+
+    // not using, keep just in case
+    // ctx.font = '20px arial';
+    // ctx.fillText("For best results, draw", 770, 505);
+    // ctx.fillText("a slow, continuous,", 770, 530);
+    // ctx.fillText("non-overlapping line", 770, 555);
+}
+
+function drawBoundaryCompletionHelpText() {
+    // remove upper-left text area
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, 300, 200);
+
+    // redraw bottom-left text area
+    ctx.lineWidth = 4;
+    ctx.strokeWidth = 4;
+    ctx.strokeStyle = 'rgb(148, 0, 211)';
+    ctx.strokeRect(736, 445, 272, 200);
+
+    ctx.font = '24px arial';
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.fillText("Complete!", 805, 490);
+    // still determining what to say at this point
+
+    // ctx.fillText("For best results, draw", 770, 505);
+    ctx.font = '20px arial';
+    ctx.fillText("[ need text here ]", 770, 530);
+    // ctx.fillText("non-overlapping line", 770, 555);
+}
+
+// this function will be refactored/cleaned
+function enterBoundaryCreationMode() {
 
     // drawing flag and step tracker
     var allowed_to_draw = false; // could be method of Paintbrush
@@ -3867,10 +4321,12 @@ function enterBoundaryCreationMode() {
     // create new boundary
     var new_boundary = new Boundary();
 
-    new_boundary.applyBoundaryModeStyles();
+    // this function name doesn't fit well anymore, rename
+    applyBoundaryModeStyles();
 
-    // here and down would be in createBoundaries() (we would define boundary_step in createBoundaries()) ************************
-
+    // write here until compound function made
+    drawBoundaryDrawingHelpText("Step 1");
+    
     // belongs to class Painbrush, not Boundary
     function draw(event) {
         if (event.buttons !== 1 || !allowed_to_draw) {
@@ -3899,6 +4355,7 @@ function enterBoundaryCreationMode() {
                 drawBoundaryBoilerplate();
                 ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
                 ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
+                drawBoundaryValidationHelpText();
 
                 // draw white dot
                 ctx.fillStyle = 'white';
@@ -4005,10 +4462,17 @@ function enterBoundaryCreationMode() {
                     // update step and store boundary
                     new_boundary.save('bottom');
                     boundary_step = "top-boundary";
+                    drawBoundaryDrawingHelpText("Step 2");
                 }
                 else {
                     // erase bottom-boundary coords when illegal line drawn
                     new_boundary.bottom_boundary_coordinates = [];
+
+                    // redraw boilerplate
+                    drawBoundaryBoilerplate();
+
+                    // redraw bottom-step help text
+                    drawBoundaryDrawingHelpText("Step 1");
 
                     console.log("invalid");
                     // error message 
@@ -4022,10 +4486,21 @@ function enterBoundaryCreationMode() {
                     // store top-boundary
                     new_boundary.save('top');
                     boundary_step = 'full-boundary';
+
+                    // draw next-step text 
+                    drawBoundaryValidationHelpText();
                 }
                 else {
                     // reset top boundary coords when illegal line drawn
                     new_boundary.top_boundary_coordinates = [];
+
+                    // redraw boilerplate and help text
+                    drawBoundaryBoilerplate();
+
+                    // draw valid bottom-boundary
+                    ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
+
+                    drawBoundaryDrawingHelpText("Step 2");
 
                     // error message
                 }
@@ -4043,9 +4518,12 @@ function enterBoundaryCreationMode() {
                     ctx.fillStyle = 'white';
                     ctx.fillRect(925, 50, 20, 20);
 
-                    // this is where the Apply/Save/Confirm button should become available
-                    save_bounds_btn.style.backgroundColor = "var(--custom-green)";
-                    save_bounds_btn.style.pointerEvents = 'auto';
+                    // should display help text on bottom-left area
+                    drawBoundaryCompletionHelpText();
+
+                    // display button to proceed, hide 'back' btn
+                    document.getElementsByClassName("save-boundaries-btn")[0].style.display = 'block';
+                    document.getElementsByClassName("stop-btn")[0].style.display = 'none';
                 }
                 else {
                     // error message
@@ -4054,6 +4532,7 @@ function enterBoundaryCreationMode() {
                     // draw boilerplate and top&bottom boundaries
                     drawBoundaryBoilerplate();
                     ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
+                    drawBoundaryValidationHelpText();
                 }
             }
         }
@@ -4095,6 +4574,8 @@ function enterBoundaryCreationMode() {
         scale_statistics = setScale();
 
         // return to settings
+
+        // ===== this should display boundary version of settings form =====
         displaySettingsForm(); //turned off while testing checkpoints
     });
 }
