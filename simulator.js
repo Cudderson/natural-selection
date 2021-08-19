@@ -3861,8 +3861,17 @@ function displaySettingsForm() {
     // are the custom boundary and the death feature (either on/off or dynamic)
 
     // start with each label hidden, and display each depending on sim type
-    
+    // in the polishing phase, we'll add descriptions under each setting?
 
+    if (sim_type === 'classic') {
+        // display classic settings (no death)
+        document.getElementsByClassName("death-setting-span")[0].style.display = 'none';
+        document.getElementsByClassName("death-container")[0].style.display = 'none';
+    }
+    // else if (sim_type === 'boundary') {
+    //     // display boundary settings
+    //     // could have "Boundary: created/valid" setting here? (not yet)
+    // }
 
     // movement setting helper (move/abstract)
     var movement_speed_setting = document.getElementById("move-speed");
