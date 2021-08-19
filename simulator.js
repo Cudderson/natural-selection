@@ -13,6 +13,7 @@ var MUTATION_RATE = 0.03;
 var MIN_GENE = -5;
 var MAX_GENE = 5;
 var dialogue = false;
+var DEATH_RATE = 0.05;
 
 // boundary simulations start organisms/goal at different location
 const INITIAL_X_BOUND = 50;
@@ -776,7 +777,6 @@ function updateAndMoveOrganismsBounds() {
         function animateOrganisms() {
 
             if (!finished) {
-                // this condition will change when more organisms added
                 if (total_moves >= GENE_COUNT * organisms.length) {
                     finished = true;
                 }
@@ -797,25 +797,6 @@ function updateAndMoveOrganismsBounds() {
                     //     ctx.closePath();
                     // }
 
-                    // desired flow =====================
-                    // check if alive
-                    // - if alive:
-                    //      check if touching boundary
-                    //          - if touching boundary:
-                    //              determine if survived
-                    //                  if survived:
-                    //                      instead of update() + move(), make next movement inverse of
-                    //                      gene that caused wall touch (don't overwrite gene!) (still increase organism.index!!)
-                    //                  else if died:
-                    //                      don't update, set is_alive=false and draw red on current location
-                    //          - else if not touching boundary:
-                    //              update()
-                    //              move()
-                    // - else: pass
-                    // =================================
-
-                    // first goal: prove boundary 'bouncing' works by not allowing organisms to die [x]
-
                     for (let i = 0; i < organisms.length; i++) {
                         if (organisms[i].is_alive) {
 
@@ -823,10 +804,11 @@ function updateAndMoveOrganismsBounds() {
 
                             if (position_rgba[0] === 155 && position_rgba[1] === 245) { // consider only checking one value for performance
                                 // determine if survived
+                                let survived = Math.random() > DEATH_RATE;
 
-                                // to prove it's working, we'll say all organisms will survive
-                                if (true) {
+                                if (survived) {
                                     // instead of update and move, move organism to inverse of last movement, update index
+                                    
                                     // get inverse of last gene
                                     let inverse_x_gene = (organisms[i].genes[organisms[i].index - 1][0]) * -1;
                                     let inverse_y_gene = (organisms[i].genes[organisms[i].index - 1][1]) * -1;
@@ -841,11 +823,25 @@ function updateAndMoveOrganismsBounds() {
                                     // move
                                     organisms[i].move();
                                 }
+                                else {
+                                    organisms[i].is_alive = false;
+                                    organisms[i].ctx.fillStyle = 'red';
+                                    organisms[i].ctx.beginPath();
+                                    organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+                                    organisms[i].ctx.fill();
+                                }
                             }
                             else {
                                 organisms[i].update();
                                 organisms[i].move();
                             }
+                        }
+                        else {
+                            // draw deceased organism
+                            organisms[i].ctx.fillStyle = 'red';
+                            organisms[i].ctx.beginPath();
+                            organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+                            organisms[i].ctx.fill();
                         }
                         total_moves++;
                     }
