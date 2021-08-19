@@ -797,63 +797,59 @@ function updateAndMoveOrganismsBounds() {
                     //     ctx.closePath();
                     // }
 
-                    for (var j = 0; j < organisms.length; j++) {
+                    // desired flow =====================
+                    // check if alive
+                    // - if alive:
+                    //      check if touching boundary
+                    //          - if touching boundary:
+                    //              determine if survived
+                    //                  if survived:
+                    //                      instead of update() + move(), make next movement inverse of
+                    //                      gene that caused wall touch (don't overwrite gene!) (still increase organism.index!!)
+                    //                  else if died:
+                    //                      don't update, set is_alive=false and draw red on current location
+                    //          - else if not touching boundary:
+                    //              update()
+                    //              move()
+                    // - else: pass
+                    // =================================
 
-                        // update index
-                        if (organisms[j].is_alive) {
-                            organisms[j].update();
-                        }
+                    // first goal: prove boundary 'bouncing' works by not allowing organisms to die [x]
 
-                        position_rgba = getPixelXY(canvas_data, organisms[j].x, organisms[j].y);
-                        
-                        // console.log(`Current Position Pixel for Organism ${j}: ` + position_rgba);
+                    for (let i = 0; i < organisms.length; i++) {
+                        if (organisms[i].is_alive) {
 
-                        // --custom-green: rgba(155, 245, 0, 1);
-                        // this is where the hit detection takes place, automatically killing organisms that touch the boundary
-                        // instead, we should give organisms a %chance to survive
+                            position_rgba = getPixelXY(canvas_data, organisms[i].x, organisms[i].y);
 
-                        // example scenario pseudocode:
-                        // organism touches wall
-                        // determine if organism died
-                        // if dead: turn red, update is_alive attribute 
-                        // else if still alive: override next gene to be the inverse of the gene that caused organism to touch boundary,
-                        //                          - this will give the appearance of the organism 'bouncing' off the wall
+                            if (position_rgba[0] === 155 && position_rgba[1] === 245) { // consider only checking one value for performance
+                                // determine if survived
 
-                        // how could this work here, where organism is drawn after it's survival is decided?
+                                // to prove it's working, we'll say all organisms will survive
+                                if (true) {
+                                    // instead of update and move, move organism to inverse of last movement, update index
+                                    // get inverse of last gene
+                                    let inverse_x_gene = (organisms[i].genes[organisms[i].index - 1][0]) * -1;
+                                    let inverse_y_gene = (organisms[i].genes[organisms[i].index - 1][1]) * -1;
 
-                        // ===== IDEA 1 =====
-                        // idea: if organism decided dead, do normal steps
-                        //       else if organisms decided alive, draw organism purple and make next gene inverse of current
-                        // ==================
+                                    // update
+                                    organisms[i].x += inverse_x_gene;
+                                    organisms[i].y += inverse_y_gene;
 
-                        // this idea sucks because organisms touch boundary often, meaning we will be rewriting/overriding genes often, which will
-                        // probably ruin the magic of the genetic algorithm
+                                    // increase index
+                                    organisms[i].index++;
 
-                        // ===== IDEA 2 =====
-                        // instead, it would be better to implement in a way where organisms are drawn before their survival is decided.
-                        // this way, an organism could move to a new location, then on the next iteration, determined dead or alive, and then either
-                        // color red and 'die', or make next organism movement the inverse of its last, but don't overwrite the gene
-                        // ==================
-
-                        // on the other hand, maybe overwriting the gene is good, because it's like the organism learning where a boundary is?
-                        // ehh, the algorithm technically still should help organism 'learn' where boundary is, because the species should reach
-                        // the goal at some point.
-
-                        // therefore, overwriting genes is bad, and we should implement idea #2.
-
-                        if (position_rgba[0] === 155 && position_rgba[1] === 245 || organisms[j].is_alive === 'false') {
-                            organisms[j].is_alive = false;
-                             // could have .move() check if alive or dead before choosing color, then .move() could be called either way
-                            organisms[j].ctx.fillStyle = 'red';
-                            organisms[j].ctx.beginPath();
-                            organisms[j].ctx.arc(organisms[j].x, organisms[j].y, organisms[j].radius, 0, Math.PI*2, false);
-                            organisms[j].ctx.fill();
-                        }
-                        else {
-                            organisms[j].move();
+                                    // move
+                                    organisms[i].move();
+                                }
+                            }
+                            else {
+                                organisms[i].update();
+                                organisms[i].move();
+                            }
                         }
                         total_moves++;
                     }
+
                 }
                 sleep(1000 / FPS); // looks smoother without fps
                 frame_id = requestAnimationFrame(animateOrganisms);
