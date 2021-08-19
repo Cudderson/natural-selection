@@ -808,7 +808,7 @@ function updateAndMoveOrganismsBounds() {
 
                                 if (survived) {
                                     // instead of update and move, move organism to inverse of last movement, update index
-                                    
+
                                     // get inverse of last gene
                                     let inverse_x_gene = (organisms[i].genes[organisms[i].index - 1][0]) * -1;
                                     let inverse_y_gene = (organisms[i].genes[organisms[i].index - 1][1]) * -1;
@@ -1329,6 +1329,7 @@ async function runGeneration() {
         custom_boundary.drawCheckpoints();
 
         // here, we set checkpoints[i].distance_to_goal 
+        // should this only be done on iteration #1???
         calcDistanceToGoalCheckpoints();
 
         // get previous, current, and next checkpoints for current generation
@@ -1829,18 +1830,23 @@ function beginSelectionProcess() {
             organisms[i].fitness = 0.01;
         }
 
-        // I'm going to try this implementation >> (organism.fitness * 100) ** 1.25
-        console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
-        console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * 100) ** 2)} times.`);
-
-        for (var j = 0; j < Math.ceil((organisms[i].fitness * 100) ** 2); j++) {
-            if (organisms[i].gender === 'female') {
-                potential_mothers.push(organisms[i]);
+        if (organisms[i].is_alive) {
+            // I'm going to try this implementation >> (organism.fitness * 100) ** 1.25
+            for (var j = 0; j < Math.ceil((organisms[i].fitness * 100) ** 2); j++) {
+                if (organisms[i].gender === 'female') {
+                    potential_mothers.push(organisms[i]);
+                }
+                else if (organisms[i].gender === 'male') {
+                    potential_fathers.push(organisms[i]);
+                }
             }
-            else if (organisms[i].gender === 'male') {
-                potential_fathers.push(organisms[i]);
-            }
+            console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
+            console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * 100) ** 2)} times.`);
         }
+        else {
+            console.log(`Organism ${i} is deceased and cannot reproduce.`);
+        }
+
     }
 
     var potential_parents = {
