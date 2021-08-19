@@ -797,7 +797,6 @@ function updateAndMoveOrganismsBounds() {
                     //     ctx.closePath();
                     // }
 
-                    // do it with 10 organisms
                     for (var j = 0; j < organisms.length; j++) {
 
                         // update index
@@ -810,9 +809,41 @@ function updateAndMoveOrganismsBounds() {
                         // console.log(`Current Position Pixel for Organism ${j}: ` + position_rgba);
 
                         // --custom-green: rgba(155, 245, 0, 1);
-                        // highlight organism red if he leaves safe area (dies)
+                        // this is where the hit detection takes place, automatically killing organisms that touch the boundary
+                        // instead, we should give organisms a %chance to survive
+
+                        // example scenario pseudocode:
+                        // organism touches wall
+                        // determine if organism died
+                        // if dead: turn red, update is_alive attribute 
+                        // else if still alive: override next gene to be the inverse of the gene that caused organism to touch boundary,
+                        //                          - this will give the appearance of the organism 'bouncing' off the wall
+
+                        // how could this work here, where organism is drawn after it's survival is decided?
+
+                        // ===== IDEA 1 =====
+                        // idea: if organism decided dead, do normal steps
+                        //       else if organisms decided alive, draw organism purple and make next gene inverse of current
+                        // ==================
+
+                        // this idea sucks because organisms touch boundary often, meaning we will be rewriting/overriding genes often, which will
+                        // probably ruin the magic of the genetic algorithm
+
+                        // ===== IDEA 2 =====
+                        // instead, it would be better to implement in a way where organisms are drawn before their survival is decided.
+                        // this way, an organism could move to a new location, then on the next iteration, determined dead or alive, and then either
+                        // color red and 'die', or make next organism movement the inverse of its last, but don't overwrite the gene
+                        // ==================
+
+                        // on the other hand, maybe overwriting the gene is good, because it's like the organism learning where a boundary is?
+                        // ehh, the algorithm technically still should help organism 'learn' where boundary is, because the species should reach
+                        // the goal at some point.
+
+                        // therefore, overwriting genes is bad, and we should implement idea #2.
+
                         if (position_rgba[0] === 155 && position_rgba[1] === 245 || organisms[j].is_alive === 'false') {
                             organisms[j].is_alive = false;
+                             // could have .move() check if alive or dead before choosing color, then .move() could be called either way
                             organisms[j].ctx.fillStyle = 'red';
                             organisms[j].ctx.beginPath();
                             organisms[j].ctx.arc(organisms[j].x, organisms[j].y, organisms[j].radius, 0, Math.PI*2, false);
@@ -1209,15 +1240,6 @@ function prepareToRunSimulation() {
 async function runSimulation () {
 
     // ===== integrating boundary code into core simulation =====
-
-    // ** for now, our flag will be the existence of a created boundary **
-    // this flag will be global to start. if we want to make it more local, we'll need to pass sim_type to functions. undecided.
-    if (custom_boundary) {
-        sim_type = 'boundary';
-    }
-    else {
-        sim_type = 'classic';
-    }
 
     simulation_started = true;
 
