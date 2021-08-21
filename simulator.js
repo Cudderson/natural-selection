@@ -812,7 +812,11 @@ function updateAndMoveOrganismsBounds() {
                                 // refctoring death
                                 // here, we should determined if the organism has survived based on
                                 // a random value compared to its resilience. 
-                                let survived = Math.random() > organisms[i].resilience;
+                                let survived = true;
+
+                                if (death) {
+                                    survived = Math.random() > organisms[i].resilience;
+                                }
 
                                 if (survived) {
                                     // instead of update and move, move organism to inverse of last movement, update index
