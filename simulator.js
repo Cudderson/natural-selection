@@ -13,6 +13,10 @@ var MUTATION_RATE = 0.03;
 var MIN_GENE = -5;
 var MAX_GENE = 5;
 var dialogue = false;
+var DEATH_RATE = 0.05; // deprecated
+var death = false; // using while setting not created
+// for boundary sims
+var RESILIENCE = 1.00; // starts at perfect resilience
 
 // boundary simulations start organisms/goal at different location
 const INITIAL_X_BOUND = 50;
@@ -58,8 +62,8 @@ class Organism {
         this.gender = gender;
         this.x = x;
         this.y = y;
-        this.ctx = ctx;
-        this.radius = 5;
+        this.ctx = ctx; // not sure if needed (could be much faster with one ctx?)
+        this.radius = 5; // always the same
         this.index = 0;
         this.genes = [];
         this.distance_to_goal; // for normal and boundary sim types
@@ -776,7 +780,6 @@ function updateAndMoveOrganismsBounds() {
         function animateOrganisms() {
 
             if (!finished) {
-                // this condition will change when more organisms added
                 if (total_moves >= GENE_COUNT * organisms.length) {
                     finished = true;
                 }
@@ -797,63 +800,55 @@ function updateAndMoveOrganismsBounds() {
                     //     ctx.closePath();
                     // }
 
-                    for (var j = 0; j < organisms.length; j++) {
+                    for (let i = 0; i < organisms.length; i++) {
+                        if (organisms[i].is_alive) {
 
-                        // update index
-                        if (organisms[j].is_alive) {
-                            organisms[j].update();
-                        }
+                            position_rgba = getPixelXY(canvas_data, organisms[i].x, organisms[i].y);
 
-                        position_rgba = getPixelXY(canvas_data, organisms[j].x, organisms[j].y);
-                        
-                        // console.log(`Current Position Pixel for Organism ${j}: ` + position_rgba);
+                            if (position_rgba[0] === 155 && position_rgba[1] === 245) { // consider only checking one value for performance
 
-                        // --custom-green: rgba(155, 245, 0, 1);
-                        // this is where the hit detection takes place, automatically killing organisms that touch the boundary
-                        // instead, we should give organisms a %chance to survive
+                                let survived = Math.random() < RESILIENCE;
 
-                        // example scenario pseudocode:
-                        // organism touches wall
-                        // determine if organism died
-                        // if dead: turn red, update is_alive attribute 
-                        // else if still alive: override next gene to be the inverse of the gene that caused organism to touch boundary,
-                        //                          - this will give the appearance of the organism 'bouncing' off the wall
+                                if (survived) {
+                                    // instead of update and move, move organism to inverse of last movement, update index
 
-                        // how could this work here, where organism is drawn after it's survival is decided?
+                                    // get inverse of last gene
+                                    let inverse_x_gene = (organisms[i].genes[organisms[i].index - 1][0]) * -1;
+                                    let inverse_y_gene = (organisms[i].genes[organisms[i].index - 1][1]) * -1;
 
-                        // ===== IDEA 1 =====
-                        // idea: if organism decided dead, do normal steps
-                        //       else if organisms decided alive, draw organism purple and make next gene inverse of current
-                        // ==================
+                                    // update
+                                    organisms[i].x += inverse_x_gene;
+                                    organisms[i].y += inverse_y_gene;
 
-                        // this idea sucks because organisms touch boundary often, meaning we will be rewriting/overriding genes often, which will
-                        // probably ruin the magic of the genetic algorithm
+                                    // increase index
+                                    organisms[i].index++;
 
-                        // ===== IDEA 2 =====
-                        // instead, it would be better to implement in a way where organisms are drawn before their survival is decided.
-                        // this way, an organism could move to a new location, then on the next iteration, determined dead or alive, and then either
-                        // color red and 'die', or make next organism movement the inverse of its last, but don't overwrite the gene
-                        // ==================
-
-                        // on the other hand, maybe overwriting the gene is good, because it's like the organism learning where a boundary is?
-                        // ehh, the algorithm technically still should help organism 'learn' where boundary is, because the species should reach
-                        // the goal at some point.
-
-                        // therefore, overwriting genes is bad, and we should implement idea #2.
-
-                        if (position_rgba[0] === 155 && position_rgba[1] === 245 || organisms[j].is_alive === 'false') {
-                            organisms[j].is_alive = false;
-                             // could have .move() check if alive or dead before choosing color, then .move() could be called either way
-                            organisms[j].ctx.fillStyle = 'red';
-                            organisms[j].ctx.beginPath();
-                            organisms[j].ctx.arc(organisms[j].x, organisms[j].y, organisms[j].radius, 0, Math.PI*2, false);
-                            organisms[j].ctx.fill();
+                                    // move
+                                    organisms[i].move();
+                                }
+                                else {
+                                    organisms[i].is_alive = false;
+                                    organisms[i].ctx.fillStyle = 'red';
+                                    organisms[i].ctx.beginPath();
+                                    organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+                                    organisms[i].ctx.fill();
+                                }
+                            }
+                            else {
+                                organisms[i].update();
+                                organisms[i].move();
+                            }
                         }
                         else {
-                            organisms[j].move();
+                            // draw deceased organism
+                            organisms[i].ctx.fillStyle = 'red';
+                            organisms[i].ctx.beginPath();
+                            organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+                            organisms[i].ctx.fill();
                         }
                         total_moves++;
                     }
+
                 }
                 sleep(1000 / FPS); // looks smoother without fps
                 frame_id = requestAnimationFrame(animateOrganisms);
@@ -917,6 +912,8 @@ function updateAndMoveOrganisms(goal) {
 }
 
 function getFarthestCheckpointReached() {
+    // !!!!! consider passing the previous gen's farthest checkpoint reached as a minimum-value !!!!!
+
     // **NOTE: this function doesn't handle when 0 checkpoints are reached yet !!**
 
     // we should loop over checkpoints, check all organisms, rather than loop over all organisms, check every checkpoint
@@ -976,22 +973,24 @@ function getFarthestCheckpointReached() {
             }
         }
     }
+
+    if (!reached_checkpoint) {
+        // set first checkpoint as next checkpoint if none reached
+        previous_checkpoint = null;
+        current_checkpoint = 'spawn';
+        next_checkpoint = 0;
+    }
+
     console.log("break successful. returning previous, current, and next checkpoints");
     console.log('checkpoint data (previous, current, next) :');
     console.log(previous_checkpoint);
     console.log(current_checkpoint);
     console.log(next_checkpoint);
 
-    if (reached_checkpoint) {
-        return {
-            'previous': previous_checkpoint,
-            'current': current_checkpoint,
-            'next': next_checkpoint
-        }
-    }
-    else {
-        print("shoot. no one reached a checkpoint. returning this string.");
-        return "shoot. no one reached a checkpoint. returning this string.";
+    return {
+        'previous': previous_checkpoint,
+        'current': current_checkpoint,
+        'next': next_checkpoint
     }
 }
 
@@ -1223,6 +1222,12 @@ async function testBoundarySim() {
     // we now have a fitness score for each organism. This will allow us to move into the selection phase
     // ===== code integrated up to here =====
 }
+
+function checkPulse(organism) {
+    console.log(`alive?: ${organism.is_alive}`);
+    return organism.is_alive;
+}
+
 // END CUSTOM BOUNDARY SIM TEST
 function prepareToRunSimulation() {
     // clear canvas
@@ -1249,6 +1254,7 @@ async function runSimulation () {
     console.log(`Mutation Rate: ${MUTATION_RATE}`);
     console.log(`Min/Max Gene: [${MIN_GENE}, ${MAX_GENE}]`);
     console.log(`Dialogue: ${dialogue}`);
+    console.log(`Death: ${death}`);
 
     // make start/settings buttons disappear, display stop simulation button
     var start_btn = document.getElementsByClassName("run-btn")[0];
@@ -1325,6 +1331,9 @@ async function runGeneration() {
         await sleep(1000);
     }
 
+    // store length of organisms array before deceased organisms filtered out for reproduction (boundary sims)
+    var next_gen_target_length = organisms.length;
+
     if (sim_type === 'classic') {
         const population_resolution = await evaluatePopulation(); // maybe don't await here
         var closest_organism = population_resolution['closest_organism'];
@@ -1333,17 +1342,22 @@ async function runGeneration() {
     else if (sim_type === 'boundary') {
         // we will follow the logic of the 'classic' sim type 
 
+        // remove deceased organisms from array (organisms array is evaluated multiple times and deceased organisms aren't used)
+        console.log(`before checkPulse(): ${organisms.length}`);
+        organisms = organisms.filter(checkPulse);
+        console.log(`after checkPulse(): ${organisms.length}`);
+
         // draw checkpoints for reference
         custom_boundary.drawCheckpoints();
 
         // here, we set checkpoints[i].distance_to_goal 
+        // should this only be done on iteration #1???
         calcDistanceToGoalCheckpoints();
 
         // get previous, current, and next checkpoints for current generation
         var checkpoint_data = getFarthestCheckpointReached();
 
         // this will set each organism's distance_to_next_checkpoint attribute
-        // !!! this crashes sometimes because we don't have logic to handle when 0 checkpoints are reached (getFarthestCheckpointReached() returns undefined)
         var closest_organism = getShortestDistanceToNextCheckpoint(checkpoint_data['next']);
 
         // distance_to_goal = distance_to_next_checkpoint + next_checkpoint.distance_to_goal
@@ -1351,6 +1365,7 @@ async function runGeneration() {
         var remaining_distance = custom_boundary.checkpoints[checkpoint_data['next']].distance_to_goal;
 
         // this function also will set each organism's distance_to_goal and fitness attributes
+        // [] make sure this doesn't include deceased organisms (unless on purpose)
         average_fitness = calcPopulationFitnessBounds(remaining_distance);
 
         console.log(`Average Fitness: ${average_fitness}`);
@@ -1382,7 +1397,7 @@ async function runGeneration() {
         stopSimulation();
     }
 
-    var parents = selectParentsForReproduction(potential_mothers, potential_fathers);
+    var parents = selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length);
     
     if (dialogue) {
         await sleep(1000);
@@ -1687,7 +1702,9 @@ function createOrganisms () {
             gender = 'female';
             female_count++;
         }
-        var organism = new Organism(gender, spawn_x, spawn_y, ctx);
+
+        let organism = new Organism(gender, spawn_x, spawn_y, ctx);
+
         organism.setRandomGenes();
         organisms.push(organism);
     }
@@ -1758,7 +1775,7 @@ function getShortestDistanceToNextCheckpoint(next_checkpoint) {
 
     // calculate distance to closest checkpoint not yet reached
     for (let n = 0; n < organisms.length; n++) {
-        // in future, make sure organism is alive before calculating its distance
+        // in future, make sure organism is alive before calculating its distance !!!!!!! (or remove deceased organisms from array)
         // distance^2 = a^2 + b^2
         let horizontal_distance_squared = (organisms[n].x - custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2;
         let vertical_distance_squared = (organisms[n].y - custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2;
@@ -1838,9 +1855,6 @@ function beginSelectionProcess() {
         }
 
         // I'm going to try this implementation >> (organism.fitness * 100) ** 1.25
-        console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
-        console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * 100) ** 2)} times.`);
-
         for (var j = 0; j < Math.ceil((organisms[i].fitness * 100) ** 2); j++) {
             if (organisms[i].gender === 'female') {
                 potential_mothers.push(organisms[i]);
@@ -1849,6 +1863,8 @@ function beginSelectionProcess() {
                 potential_fathers.push(organisms[i]);
             }
         }
+        console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
+        console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * 100) ** 2)} times.`);
     }
 
     var potential_parents = {
@@ -1861,7 +1877,7 @@ function beginSelectionProcess() {
     })
 }
 
-function selectParentsForReproduction(potential_mothers, potential_fathers) {
+function selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length) {
 
     // example
     // var parents = [
@@ -1871,10 +1887,18 @@ function selectParentsForReproduction(potential_mothers, potential_fathers) {
     //     [mother9, father9]
     // ]
 
+    console.log(`organisms.length: ${organisms.length}`);
+    console.log(`target length: ${next_gen_target_length}`);
+
     var parents = [];
     // goal: pair together males and females 
     // create parents == TOTAL_ORGANISMS / 2 (each couple reproduces roughly 2 offspring)
-    for (var i = 0; i < (organisms.length / 2); i++) {
+
+    // classic target length = organisms.length
+    // boundary target length = organisms.length + num_of_deceased_organisms
+    // this way, our species will try to reproduce the same amount of organisms it started the generation with, rather than
+    // organisms.length, which would always decline as organisms die
+    for (var i = 0; i < (next_gen_target_length / 2); i++) {
         mother_index = Math.floor(Math.random() * potential_mothers.length);
         father_index = Math.floor(Math.random() * potential_fathers.length);
 
@@ -1893,7 +1917,7 @@ function reproduceNewGeneration(parents) {
         var offspring_count = determineOffspringCount();
 
         for (var j = 0; j < offspring_count; j++) {
-            var crossover_genes = crossover(parents[i]);
+            let crossover_genes = crossover(parents[i]); // returns dict
             reproduce(crossover_genes);
         }
     }
@@ -1918,9 +1942,6 @@ function crossover(parents_to_crossover) {
     var father = parents_to_crossover[1];
 
     // create offspring's genes
-    var mother_gene_counter = 0;
-    var father_gene_counter = 0;
-    var mutated_gene_counter = 0;
     var crossover_genes = [];
 
     for (var j = 0; j < GENE_COUNT; j++) {
@@ -1933,21 +1954,19 @@ function crossover(parents_to_crossover) {
         if (random_bool < (MUTATION_RATE / 2) || random_bool > 1 - (MUTATION_RATE / 2)) {
             mutated_gene = getRandomGene(MIN_GENE, MAX_GENE);
             crossover_genes.push(mutated_gene);
-            mutated_gene_counter++;
         }
         // mother gene chosen
         else if (random_bool < 0.5) {
             mother_gene = mother.genes[j];
             crossover_genes.push(mother_gene);
-            mother_gene_counter++;
         }
         // father gene chosen
         else {
             father_gene = father.genes[j];
             crossover_genes.push(father_gene);
-            father_gene_counter++;
         }
     }
+
     return crossover_genes;
 }
 
@@ -1976,6 +1995,7 @@ function reproduce(crossover_genes) {
     offspring_gender = getGender();
     offspring = new Organism(offspring_gender, spawn_x, spawn_y, ctx);
     offspring.genes = crossover_genes;
+
     // push offspring to new population
     offspring_organisms.push(offspring);
 }
@@ -2164,12 +2184,22 @@ function fadeInSimulationSettings() {
                 ctx.fillText(`${GENE_COUNT}`, 600, 290);
                 ctx.fillText(`${MAX_GENE}`, 600, 330);
                 ctx.fillText(`${MUTATION_RATE}`, 600, 370);
+
+                // don't need to show this if there's a dynamic option
                 if (dialogue === false) {
                     ctx.fillText(`Disabled`, 600, 410);
                 }
                 else {
                     ctx.fillText(`Enabled`, 600, 410);
                 }
+
+                // redo as resilience
+                // if (death) {
+                //     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                //     ctx.fillText('Death:', 300, 450);
+                //     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                //     ctx.fillText('Enabled', 600, 450);
+                // }
                 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -2223,6 +2253,13 @@ function fadeOutSimulationSettings() {
                     ctx.fillText(`Enabled`, 600, 410);
                 }
 
+                // redo as resilience
+                // if (death) {
+                //     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                //     ctx.fillText('Death:', 300, 450);
+                //     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                //     ctx.fillText('Enabled', 600, 450);
+                // }
 
                 if (opacity <= 0.00) {
                     finished = true;
@@ -3865,40 +3902,11 @@ function displaySettingsForm() {
     canvas_container.style.display = 'none';
     settings_container.style.display = 'block';
 
-    // boundaries
-    // ===== this shouldn't exist anymore (sim type decided on previous screen)=====
-    // listen for boundary checkbox to trigger enterBoundaryCreationMode()
-
-    // var boundary_setting = document.getElementById("boundary-checkbox");
-    // boundary_setting.addEventListener("change", function() {
-    //     if (this.checked) {
-    //         enterBoundaryCreationMode();
-    //     }
-    //     else {
-    //         console.log("Checkbox: unchecked");
-
-    //         // should remove custom_boundary so sim doesn't think there is one
-    //         custom_boundary = null;
-    //     }
-    // });
-
-    // ========== we should display proper settings depending on sim type chosen ==========
-    // sim_type set in selectSimulationType()
-    // With GENE_COUNT undecided (might be dynamically set), the only differences between the sim types
-    // are the custom boundary and the death feature (either on/off or dynamic)
-
-    // start with each label hidden, and display each depending on sim type
-    // in the polishing phase, we'll add descriptions under each setting?
-
     if (sim_type === 'classic') {
-        // display classic settings (no death)
-        document.getElementsByClassName("death-setting-span")[0].style.display = 'none';
-        document.getElementsByClassName("death-container")[0].style.display = 'none';
+        // display classic settings (no death/resilience)
+        document.getElementsByClassName("resilience-setting-label")[0].style.display = 'none';
+        document.getElementsByClassName("resilience-input")[0].style.display = 'none';
     }
-    // else if (sim_type === 'boundary') {
-    //     // display boundary settings
-    //     // could have "Boundary: created/valid" setting here? (not yet)
-    // }
 
     // movement setting helper (move/abstract)
     var movement_speed_setting = document.getElementById("move-speed");
@@ -3939,6 +3947,7 @@ function validateSettingsForm() {
     settings_manager['movement_setting'] = validateMovementSetting();
     settings_manager['gene_setting'] = validateGeneCountSetting();
     settings_manager['mutation_setting'] = validateMutationRateSetting();
+    settings_manager['resilience_setting'] = validateResilienceSetting();
 
     // should make value red too, and change to green on keystroke
     for (let message in settings_manager) {
@@ -4060,6 +4069,22 @@ function validateMovementSetting() {
         movement_speed_setting.style.borderBottom = '2px solid var(--mother-pink)';
         return "Invalid movement speed. Please input a positive number between 1 - 7.";
     }   
+}
+
+function validateResilienceSetting() {
+    // we want to only allow numbers from 0 - 100 inclusive
+
+    let resilience_setting = document.getElementById("resilience");
+
+    if (parseInt(resilience_setting.value) >= 0 && parseInt(resilience_setting.value) <= 100 && typeof parseInt(resilience_setting.value) === 'number') {
+        RESILIENCE = parseInt(resilience_setting.value) / 100;
+        resilience_setting.style.borderBottom = "2px solid var(--custom-green)";
+        return "valid";
+    } 
+    else {
+        resilience_setting.style.borderBottom = '2px solid var(--mother-pink)';
+        return "Invalid resilience value. Please input a positive number between 0 - 100";
+    } 
 }
 
 function finishApplyingSettings() {

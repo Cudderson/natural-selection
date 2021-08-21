@@ -55,7 +55,8 @@ body {
 .organisms-setting-label,
 .movement-setting-label,
 .gene-setting-label,
-.mutation-setting-label {
+.mutation-setting-label,
+.resilience-setting-label {
     grid-column: 1 / 2;
     font-size: 40px;
     color: var(--custom-green);
@@ -66,12 +67,12 @@ body {
     display: none;
 } */
 
-.dialogue-setting-span, .death-setting-span {
+.dialogue-setting-span {
     font-size: 40px;
     color: var(--custom-green);
 }
 
-.dialogue-container, .death-container {
+.dialogue-container {
     grid-column: 2 / 3;
     margin-left: 40px;
 }
