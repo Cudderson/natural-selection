@@ -69,6 +69,8 @@ class Organism {
         this.reached_goal = false;
         // for boundary animations
         this.is_alive = true;
+        // testing resilience (% chance of survival when touching boundary)
+        this.resilience;
     }
 
     setRandomGenes() {
