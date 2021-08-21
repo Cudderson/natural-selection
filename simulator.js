@@ -13,8 +13,8 @@ var MUTATION_RATE = 0.03;
 var MIN_GENE = -5;
 var MAX_GENE = 5;
 var dialogue = false;
-var DEATH_RATE = 0.05; // will be deprecated
-var death = true; // using while setting not created
+var DEATH_RATE = 0.05; // deprecated
+var death = false; // using while setting not created
 
 // boundary simulations start organisms/goal at different location
 const INITIAL_X_BOUND = 50;
@@ -1249,6 +1249,7 @@ async function runSimulation () {
     console.log(`Mutation Rate: ${MUTATION_RATE}`);
     console.log(`Min/Max Gene: [${MIN_GENE}, ${MAX_GENE}]`);
     console.log(`Dialogue: ${dialogue}`);
+    console.log(`Death: ${death}`);
 
     // make start/settings buttons disappear, display stop simulation button
     var start_btn = document.getElementsByClassName("run-btn")[0];
@@ -2206,11 +2207,20 @@ function fadeInSimulationSettings() {
                 ctx.fillText(`${GENE_COUNT}`, 600, 290);
                 ctx.fillText(`${MAX_GENE}`, 600, 330);
                 ctx.fillText(`${MUTATION_RATE}`, 600, 370);
+
+                // don't need to show this if there's a dynamic option
                 if (dialogue === false) {
                     ctx.fillText(`Disabled`, 600, 410);
                 }
                 else {
                     ctx.fillText(`Enabled`, 600, 410);
+                }
+
+                if (death) {
+                    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                    ctx.fillText('Death:', 300, 450);
+                    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                    ctx.fillText('Enabled', 600, 450);
                 }
                 
                 if (opacity >= 1.00) {
@@ -2265,6 +2275,12 @@ function fadeOutSimulationSettings() {
                     ctx.fillText(`Enabled`, 600, 410);
                 }
 
+                if (death) {
+                    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                    ctx.fillText('Death:', 300, 450);
+                    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                    ctx.fillText('Enabled', 600, 450);
+                }
 
                 if (opacity <= 0.00) {
                     finished = true;
@@ -3997,6 +4013,11 @@ function validateSettingsForm() {
     }
     else {
         dialogue = false;
+    }
+
+    // death
+    if (document.getElementById("death-checkbox").checked) {
+        death = true;
     }
 
     // returns to title screen
