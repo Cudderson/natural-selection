@@ -15,6 +15,8 @@ var MAX_GENE = 5;
 var dialogue = false;
 var DEATH_RATE = 0.05; // deprecated
 var death = false; // using while setting not created
+// for boundary sims
+var RESILIENCE = 1.00; // starts at perfect resilience
 
 // boundary simulations start organisms/goal at different location
 const INITIAL_X_BOUND = 50;
@@ -804,19 +806,8 @@ function updateAndMoveOrganismsBounds() {
                             position_rgba = getPixelXY(canvas_data, organisms[i].x, organisms[i].y);
 
                             if (position_rgba[0] === 155 && position_rgba[1] === 245) { // consider only checking one value for performance
-                                // determine if survived (remove after all working)
-                                // let survived = Math.random() > DEATH_RATE;
 
-                                // refctoring death
-                                // here, we should determined if the organism has survived based on
-                                // a random value compared to its resilience. 
-                                let survived = true;
-
-                                // ** need to update for new resilience model
-
-                                // if (death) {
-                                //     survived = Math.random() > organisms[i].resilience;
-                                // }
+                                let survived = Math.random() < RESILIENCE;
 
                                 if (survived) {
                                     // instead of update and move, move organism to inverse of last movement, update index
@@ -3895,40 +3886,11 @@ function displaySettingsForm() {
     canvas_container.style.display = 'none';
     settings_container.style.display = 'block';
 
-    // boundaries
-    // ===== this shouldn't exist anymore (sim type decided on previous screen)=====
-    // listen for boundary checkbox to trigger enterBoundaryCreationMode()
-
-    // var boundary_setting = document.getElementById("boundary-checkbox");
-    // boundary_setting.addEventListener("change", function() {
-    //     if (this.checked) {
-    //         enterBoundaryCreationMode();
-    //     }
-    //     else {
-    //         console.log("Checkbox: unchecked");
-
-    //         // should remove custom_boundary so sim doesn't think there is one
-    //         custom_boundary = null;
-    //     }
-    // });
-
-    // ========== we should display proper settings depending on sim type chosen ==========
-    // sim_type set in selectSimulationType()
-    // With GENE_COUNT undecided (might be dynamically set), the only differences between the sim types
-    // are the custom boundary and the death feature (either on/off or dynamic)
-
-    // start with each label hidden, and display each depending on sim type
-    // in the polishing phase, we'll add descriptions under each setting?
-
     if (sim_type === 'classic') {
-        // display classic settings (no death)
-        document.getElementsByClassName("death-setting-span")[0].style.display = 'none';
-        document.getElementsByClassName("death-container")[0].style.display = 'none';
+        // display classic settings (no death/resilience)
+        document.getElementsByClassName("resilience-setting-label")[0].style.display = 'none';
+        document.getElementsByClassName("resilience-input")[0].style.display = 'none';
     }
-    // else if (sim_type === 'boundary') {
-    //     // display boundary settings
-    //     // could have "Boundary: created/valid" setting here? (not yet)
-    // }
 
     // movement setting helper (move/abstract)
     var movement_speed_setting = document.getElementById("move-speed");
@@ -3969,6 +3931,7 @@ function validateSettingsForm() {
     settings_manager['movement_setting'] = validateMovementSetting();
     settings_manager['gene_setting'] = validateGeneCountSetting();
     settings_manager['mutation_setting'] = validateMutationRateSetting();
+    settings_manager['resilience_setting'] = validateResilienceSetting();
 
     // should make value red too, and change to green on keystroke
     for (let message in settings_manager) {
@@ -3985,11 +3948,6 @@ function validateSettingsForm() {
     }
     else {
         dialogue = false;
-    }
-
-    // death
-    if (document.getElementById("death-checkbox").checked) {
-        death = true;
     }
 
     // returns to title screen
@@ -4095,6 +4053,22 @@ function validateMovementSetting() {
         movement_speed_setting.style.borderBottom = '2px solid var(--mother-pink)';
         return "Invalid movement speed. Please input a positive number between 1 - 7.";
     }   
+}
+
+function validateResilienceSetting() {
+    // we want to only allow numbers from 0 - 100 inclusive
+
+    let resilience_setting = document.getElementById("resilience");
+
+    if (parseInt(resilience_setting.value) >= 0 && parseInt(resilience_setting.value) <= 100 && typeof parseInt(resilience_setting.value) === 'number') {
+        RESILIENCE = parseInt(resilience_setting.value) / 100;
+        resilience_setting.style.borderBottom = "2px solid var(--custom-green)";
+        return "valid";
+    } 
+    else {
+        resilience_setting.style.borderBottom = '2px solid var(--mother-pink)';
+        return "Invalid resilience value. Please input a positive number between 0 - 100";
+    } 
 }
 
 function finishApplyingSettings() {
