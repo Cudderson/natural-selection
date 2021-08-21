@@ -70,8 +70,6 @@ class Organism {
         this.reached_goal = false;
         // for boundary animations
         this.is_alive = true;
-        // testing resilience (% chance of survival when touching boundary)
-        this.resilience;
     }
 
     setRandomGenes() {
@@ -814,9 +812,11 @@ function updateAndMoveOrganismsBounds() {
                                 // a random value compared to its resilience. 
                                 let survived = true;
 
-                                if (death) {
-                                    survived = Math.random() > organisms[i].resilience;
-                                }
+                                // ** need to update for new resilience model
+
+                                // if (death) {
+                                //     survived = Math.random() > organisms[i].resilience;
+                                // }
 
                                 if (survived) {
                                     // instead of update and move, move organism to inverse of last movement, update index
@@ -1700,12 +1700,6 @@ function createOrganisms () {
 
         let organism = new Organism(gender, spawn_x, spawn_y, ctx);
 
-        if (death) {
-            // generate random resilience value between 0-1
-            let random_resilience = Math.random();
-            organism.resilience = random_resilience;
-        }
-
         organism.setRandomGenes();
         organisms.push(organism);
     }
@@ -1916,18 +1910,13 @@ function reproduceNewGeneration(parents) {
         var offspring_count = determineOffspringCount();
 
         for (var j = 0; j < offspring_count; j++) {
-            let crossover_data = crossover(parents[i]); // returns dict
-            reproduce(crossover_data);
+            let crossover_genes = crossover(parents[i]); // returns dict
+            reproduce(crossover_genes);
         }
     }
     // set offspring_organisms as next generation of organisms
     organisms = offspring_organisms;
     offspring_organisms = [];
-
-    // just to prove it worked, show the new generation's resilience
-    for (let i = 0; i < organisms.length; i++) {
-        console.log(`organism ${i} resilience: ${organisms[i].resilience}`);
-    }
 }
 
 function determineOffspringCount() {
@@ -1971,23 +1960,7 @@ function crossover(parents_to_crossover) {
         }
     }
 
-    // determine resilience (change flag)
-    let offspring_resilience;
-    if (death) {
-
-        // resilience = average of parents
-        offspring_resilience = (mother.resilience + father.resilience) / 2;
-
-        if (Math.random() < MUTATION_RATE) {
-            // mutate resilience
-            offspring_resilience = Math.random();
-        }
-    }
-
-    return {
-        'crossover_genes': crossover_genes,
-        'offspring_resilience': offspring_resilience
-    }
+    return crossover_genes;
 }
 
 function getGender() {
@@ -2002,7 +1975,7 @@ function getGender() {
     return gender;
 }
 
-function reproduce(crossover_data) {
+function reproduce(crossover_genes) {
     let spawn_x = INITIAL_X;
     let spawn_y = INITIAL_Y;
 
@@ -2012,16 +1985,9 @@ function reproduce(crossover_data) {
         spawn_y = INITIAL_Y_BOUND;
     }
 
-    let crossover_genes = crossover_data['crossover_genes'];
-
     offspring_gender = getGender();
     offspring = new Organism(offspring_gender, spawn_x, spawn_y, ctx);
     offspring.genes = crossover_genes;
-
-    if (death) {
-        let crossover_resilience = crossover_data['offspring_resilience'];
-        offspring.resilience = crossover_resilience;
-    }
 
     // push offspring to new population
     offspring_organisms.push(offspring);
@@ -2220,12 +2186,13 @@ function fadeInSimulationSettings() {
                     ctx.fillText(`Enabled`, 600, 410);
                 }
 
-                if (death) {
-                    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                    ctx.fillText('Death:', 300, 450);
-                    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                    ctx.fillText('Enabled', 600, 450);
-                }
+                // redo as resilience
+                // if (death) {
+                //     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                //     ctx.fillText('Death:', 300, 450);
+                //     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                //     ctx.fillText('Enabled', 600, 450);
+                // }
                 
                 if (opacity >= 1.00) {
                     finished = true;
@@ -2279,12 +2246,13 @@ function fadeOutSimulationSettings() {
                     ctx.fillText(`Enabled`, 600, 410);
                 }
 
-                if (death) {
-                    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                    ctx.fillText('Death:', 300, 450);
-                    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                    ctx.fillText('Enabled', 600, 450);
-                }
+                // redo as resilience
+                // if (death) {
+                //     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+                //     ctx.fillText('Death:', 300, 450);
+                //     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+                //     ctx.fillText('Enabled', 600, 450);
+                // }
 
                 if (opacity <= 0.00) {
                     finished = true;
