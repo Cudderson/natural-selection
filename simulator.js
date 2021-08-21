@@ -912,6 +912,8 @@ function updateAndMoveOrganisms(goal) {
 }
 
 function getFarthestCheckpointReached() {
+    // !!!!! consider passing the previous gen's farthest checkpoint reached as a minimum-value !!!!!
+
     // **NOTE: this function doesn't handle when 0 checkpoints are reached yet !!**
 
     // we should loop over checkpoints, check all organisms, rather than loop over all organisms, check every checkpoint
@@ -971,22 +973,24 @@ function getFarthestCheckpointReached() {
             }
         }
     }
+
+    if (!reached_checkpoint) {
+        // set first checkpoint as next checkpoint if none reached
+        previous_checkpoint = null;
+        current_checkpoint = 'spawn';
+        next_checkpoint = 0;
+    }
+
     console.log("break successful. returning previous, current, and next checkpoints");
     console.log('checkpoint data (previous, current, next) :');
     console.log(previous_checkpoint);
     console.log(current_checkpoint);
     console.log(next_checkpoint);
 
-    if (reached_checkpoint) {
-        return {
-            'previous': previous_checkpoint,
-            'current': current_checkpoint,
-            'next': next_checkpoint
-        }
-    }
-    else {
-        print("shoot. no one reached a checkpoint. returning this string.");
-        return "shoot. no one reached a checkpoint. returning this string.";
+    return {
+        'previous': previous_checkpoint,
+        'current': current_checkpoint,
+        'next': next_checkpoint
     }
 }
 
@@ -1761,7 +1765,7 @@ function getShortestDistanceToNextCheckpoint(next_checkpoint) {
 
     // calculate distance to closest checkpoint not yet reached
     for (let n = 0; n < organisms.length; n++) {
-        // in future, make sure organism is alive before calculating its distance
+        // in future, make sure organism is alive before calculating its distance !!!!!!! (or remove deceased organisms from array)
         // distance^2 = a^2 + b^2
         let horizontal_distance_squared = (organisms[n].x - custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2;
         let vertical_distance_squared = (organisms[n].y - custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2;
