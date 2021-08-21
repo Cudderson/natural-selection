@@ -1222,6 +1222,12 @@ async function testBoundarySim() {
     // we now have a fitness score for each organism. This will allow us to move into the selection phase
     // ===== code integrated up to here =====
 }
+
+function checkPulse(organism) {
+    console.log(`alive?: ${organism.is_alive}`);
+    return organism.is_alive;
+}
+
 // END CUSTOM BOUNDARY SIM TEST
 function prepareToRunSimulation() {
     // clear canvas
@@ -1333,6 +1339,11 @@ async function runGeneration() {
     else if (sim_type === 'boundary') {
         // we will follow the logic of the 'classic' sim type 
 
+        // remove deceased organisms from array (organisms array is evaluated multiple times and deceased organisms aren't used)
+        console.log(`before checkPulse(): ${organisms.length}`);
+        organisms = organisms.filter(checkPulse);
+        console.log(`after checkPulse(): ${organisms.length}`);
+
         // draw checkpoints for reference
         custom_boundary.drawCheckpoints();
 
@@ -1341,12 +1352,9 @@ async function runGeneration() {
         calcDistanceToGoalCheckpoints();
 
         // get previous, current, and next checkpoints for current generation
-        // [] make sure this doesn't include deceased organisms
         var checkpoint_data = getFarthestCheckpointReached();
 
         // this will set each organism's distance_to_next_checkpoint attribute
-        // !!! this crashes sometimes because we don't have logic to handle when 0 checkpoints are reached (getFarthestCheckpointReached() returns undefined)
-        // [] make sure this doesn't include deceased organisms
         var closest_organism = getShortestDistanceToNextCheckpoint(checkpoint_data['next']);
 
         // distance_to_goal = distance_to_next_checkpoint + next_checkpoint.distance_to_goal
@@ -1366,7 +1374,6 @@ async function runGeneration() {
     }
 
     // this phase includes: beginSelectionProcess(), selectParentsForReproduction()
-    // [] make sure this doesn't include deceased organisms
     const potential_parents = await beginSelectionProcess(); // maybe don't await here
 
     var potential_mothers = potential_parents['potential_mothers'];
@@ -1844,23 +1851,17 @@ function beginSelectionProcess() {
             organisms[i].fitness = 0.01;
         }
 
-        if (organisms[i].is_alive) {
-            // I'm going to try this implementation >> (organism.fitness * 100) ** 1.25
-            for (var j = 0; j < Math.ceil((organisms[i].fitness * 100) ** 2); j++) {
-                if (organisms[i].gender === 'female') {
-                    potential_mothers.push(organisms[i]);
-                }
-                else if (organisms[i].gender === 'male') {
-                    potential_fathers.push(organisms[i]);
-                }
+        // I'm going to try this implementation >> (organism.fitness * 100) ** 1.25
+        for (var j = 0; j < Math.ceil((organisms[i].fitness * 100) ** 2); j++) {
+            if (organisms[i].gender === 'female') {
+                potential_mothers.push(organisms[i]);
             }
-            console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
-            console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * 100) ** 2)} times.`);
+            else if (organisms[i].gender === 'male') {
+                potential_fathers.push(organisms[i]);
+            }
         }
-        else {
-            console.log(`Organism ${i} is deceased and cannot reproduce.`);
-        }
-
+        console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
+        console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * 100) ** 2)} times.`);
     }
 
     var potential_parents = {
