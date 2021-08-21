@@ -1331,6 +1331,9 @@ async function runGeneration() {
         await sleep(1000);
     }
 
+    // store length of organisms array before deceased organisms filtered out for reproduction (boundary sims)
+    var next_gen_target_length = organisms.length;
+
     if (sim_type === 'classic') {
         const population_resolution = await evaluatePopulation(); // maybe don't await here
         var closest_organism = population_resolution['closest_organism'];
@@ -1394,7 +1397,7 @@ async function runGeneration() {
         stopSimulation();
     }
 
-    var parents = selectParentsForReproduction(potential_mothers, potential_fathers);
+    var parents = selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length);
     
     if (dialogue) {
         await sleep(1000);
@@ -1874,7 +1877,7 @@ function beginSelectionProcess() {
     })
 }
 
-function selectParentsForReproduction(potential_mothers, potential_fathers) {
+function selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length) {
 
     // example
     // var parents = [
@@ -1884,10 +1887,18 @@ function selectParentsForReproduction(potential_mothers, potential_fathers) {
     //     [mother9, father9]
     // ]
 
+    console.log(`organisms.length: ${organisms.length}`);
+    console.log(`target length: ${next_gen_target_length}`);
+
     var parents = [];
     // goal: pair together males and females 
     // create parents == TOTAL_ORGANISMS / 2 (each couple reproduces roughly 2 offspring)
-    for (var i = 0; i < (organisms.length / 2); i++) {
+
+    // classic target length = organisms.length
+    // boundary target length = organisms.length + num_of_deceased_organisms
+    // this way, our species will try to reproduce the same amount of organisms it started the generation with, rather than
+    // organisms.length, which would always decline as organisms die
+    for (var i = 0; i < (next_gen_target_length / 2); i++) {
         mother_index = Math.floor(Math.random() * potential_mothers.length);
         father_index = Math.floor(Math.random() * potential_fathers.length);
 
