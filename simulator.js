@@ -59,6 +59,9 @@ const FPS = 30;
 // Stores the position of the cursor
 let coordinates = {'x':0 , 'y':0};
 
+// testing class Paintrush as global for now
+var paintbrush;
+
 class Organism {
     constructor (gender, x, y, ctx) {
         this.gender = gender;
@@ -560,7 +563,51 @@ class Boundary {
     }
 }
 
-// class Paintbrush() {}
+// testing Paintbrush class
+class Paintbrush {
+    constructor(canvas, ctx) {
+        this.color;
+        this.opacity;
+        this.font;
+    }
+
+    // since fade animations are very similar, and we have a lot of them, let's start there.
+    // make a general-purpose fade-in text method (fadeInSimulationSettings(), for example)
+    fadeInText(drawings, step) {
+        return new Promise(resolve => {
+            let finished = false;
+            let opacity = 0.00;
+            function drawFrame() {
+                if (!finished) {
+                    // animate
+
+                    // draw text
+                    // let's just call different draw() methods
+                    // start with fadeInSimulationSettings()
+                    for (let i = 0; i < drawings.length; i++) {
+                        drawings[i](opacity);
+                    }
+                    
+                    if (opacity >= 1.00) {
+                        finished = true;
+                    }
+                    else {
+                        opacity += step;
+                    }
+
+                    frame_id = requestAnimationFrame(drawFrame);
+                }
+                else {
+                    // resolve
+                    cancelAnimationFrame(frame_id);
+                    resolve();
+                }
+            }
+            requestAnimationFrame(drawFrame);
+        })
+        
+    }
+}
 
 // Main Drivers
 async function runPreSimAnimations() {
@@ -568,7 +615,8 @@ async function runPreSimAnimations() {
     // *** pre-sim animations will vary slightly (death, boundary), depending on sim type ***
 
     // (only with dialogue on!)
-    await fadeInSimulationSettings();
+    // await fadeInSimulationSettings();
+    await paintbrush.fadeInText([drawSimulationSettings], .01);
     await sleep(2000);
     await fadeOutSimulationSettings();
     await fadeInSimulationIntro();
@@ -2008,6 +2056,9 @@ async function playTitleScreenAnimation() {
     console.log("Simulation Ready!");
 
     var title_organisms = createTitleScreenOrganisms();
+
+    // testing Paintbrush (this is the initial object declaration)
+    paintbrush = new Paintbrush();
     
     do {
         console.log("Starting Title Animation");
@@ -2159,65 +2210,101 @@ function fadeInTitleAnimation(title_organisms) {
 }
 
 // Simulation Introduction
+
+// keep for example of animation converted to paintbrush
 function fadeInSimulationSettings() {
     // this will be called by runPreSimAnimations(), and run before the first generation
-    var opacity = 0.00;
-    var finished = false;
-    return new Promise(resolve => {
-        function simSettingsFadeIn() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // var opacity = 0.00;
+    // var finished = false;
+    // return new Promise(resolve => {
+    //     function simSettingsFadeIn() {
+    //         if (!finished) {
+    //             ctx.fillStyle = 'black';
+    //             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.font = "30px arial";
-                ctx.fillText("Simulation Settings", 300, 195);
-                ctx.fillRect(300, 197, 260, 1);
+    //             ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    //             ctx.font = "30px arial";
+    //             ctx.fillText("Simulation Settings", 300, 195);
+    //             ctx.fillRect(300, 197, 260, 1);
 
-                ctx.font = "24px arial";
-                ctx.fillText(`Initial Population:`, 300, 250);
-                ctx.fillText(`Gene Count:`, 300, 290);
-                ctx.fillText(`Movement Speed:`, 300, 330);
-                ctx.fillText(`Mutation Rate:`, 300, 370);
-                ctx.fillText(`Dialogue:`, 300, 410);
+    //             ctx.font = "24px arial";
+    //             ctx.fillText(`Initial Population:`, 300, 250);
+    //             ctx.fillText(`Gene Count:`, 300, 290);
+    //             ctx.fillText(`Movement Speed:`, 300, 330);
+    //             ctx.fillText(`Mutation Rate:`, 300, 370);
+    //             ctx.fillText(`Dialogue:`, 300, 410);
                 
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText(`${TOTAL_ORGANISMS}`, 600, 250);
-                ctx.fillText(`${GENE_COUNT}`, 600, 290);
-                ctx.fillText(`${MAX_GENE}`, 600, 330);
-                ctx.fillText(`${MUTATION_RATE}`, 600, 370);
+    //             ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    //             ctx.fillText(`${TOTAL_ORGANISMS}`, 600, 250);
+    //             ctx.fillText(`${GENE_COUNT}`, 600, 290);
+    //             ctx.fillText(`${MAX_GENE}`, 600, 330);
+    //             ctx.fillText(`${MUTATION_RATE}`, 600, 370);
 
-                // don't need to show this if there's a dynamic option
-                if (dialogue === false) {
-                    ctx.fillText(`Disabled`, 600, 410);
-                }
-                else {
-                    ctx.fillText(`Enabled`, 600, 410);
-                }
+    //             // don't need to show this if there's a dynamic option
+    //             if (dialogue === false) {
+    //                 ctx.fillText(`Disabled`, 600, 410);
+    //             }
+    //             else {
+    //                 ctx.fillText(`Enabled`, 600, 410);
+    //             }
 
-                // redo as resilience
-                // if (death) {
-                //     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                //     ctx.fillText('Death:', 300, 450);
-                //     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                //     ctx.fillText('Enabled', 600, 450);
-                // }
+    //             // redo as resilience
+    //             // if (death) {
+    //             //     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    //             //     ctx.fillText('Death:', 300, 450);
+    //             //     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    //             //     ctx.fillText('Enabled', 600, 450);
+    //             // }
                 
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.01;
-                }
-                frame_id = requestAnimationFrame(simSettingsFadeIn);
-            }
-            else {
-                cancelAnimationFrame(frame_id);
-                resolve();
-            }
-        }
-        start_settings_fadein = requestAnimationFrame(simSettingsFadeIn);
-    })
+    //             if (opacity >= 1.00) {
+    //                 finished = true;
+    //             }
+    //             else {
+    //                 opacity += 0.01;
+    //             }
+    //             frame_id = requestAnimationFrame(simSettingsFadeIn);
+    //         }
+    //         else {
+    //             cancelAnimationFrame(frame_id);
+    //             resolve();
+    //         }
+    //     }
+    //     start_settings_fadein = requestAnimationFrame(simSettingsFadeIn);
+    // })
+    // paintbrush.fadeInText([drawSimulationSettings], .02);
+}
+
+function drawSimulationSettings(opacity) {
+
+    console.log('caaled drawSimulationSettings()');
+
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.font = "30px arial";
+    ctx.fillText("Simulation Settings", 300, 195);
+    ctx.fillRect(300, 197, 260, 1);
+
+    ctx.font = "24px arial";
+    ctx.fillText(`Initial Population:`, 300, 250);
+    ctx.fillText(`Gene Count:`, 300, 290);
+    ctx.fillText(`Movement Speed:`, 300, 330);
+    ctx.fillText(`Mutation Rate:`, 300, 370);
+    ctx.fillText(`Dialogue:`, 300, 410);
+    
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText(`${TOTAL_ORGANISMS}`, 600, 250);
+    ctx.fillText(`${GENE_COUNT}`, 600, 290);
+    ctx.fillText(`${MAX_GENE}`, 600, 330);
+    ctx.fillText(`${MUTATION_RATE}`, 600, 370);
+
+    if (dialogue === false) {
+        ctx.fillText(`Disabled`, 600, 410);
+    }
+    else {
+        ctx.fillText(`Enabled`, 600, 410);
+    }
 }
 
 function fadeOutSimulationSettings() {
