@@ -567,6 +567,8 @@ class Paintbrush {
         // even these may not be needed
         this.canvas = canvas;
         this.ctx = ctx;
+        // subject or context for the paintbrush to draw (can basically be anything)
+        this.subject = null; 
     }
 
     fadeIn(drawing_function, step) {
@@ -1955,10 +1957,13 @@ function calcPopulationFitnessBounds(remaining_distance) {
 }
 
 // 3. Selection
+// ===== Left Off Here ===== !!!!!
 async function runSelectionAnimations(closest_organism, parents) {
     console.log("Called runSelectionAnimations()");
     // maybe model other phases after this one
-    await highlightClosestOrganism(closest_organism);
+    await runClosestOrganismAnimations(closest_organism); // finished
+
+    // left-off here
     await highlightChosenParents(parents);
 
     return new Promise(resolve => {
@@ -2284,6 +2289,8 @@ function fadeInTitleAnimation(title_organisms) {
 
 // Simulation Introduction
 
+// checking for applicable animations to convert from here down ===========
+
 function drawSimulationSettings(opacity) {
 
     console.log('caaled drawSimulationSettings()');
@@ -2512,151 +2519,55 @@ function drawSelectionPhaseEntryText(opacity, old_opacity) {
     ctx.fillText("Select Most-Fit Individuals", 10, 90);
 }
 
-async function highlightClosestOrganism (closest_organism) {
-    console.log('highlightClosestOrganism() called');
-    await fadeInClosestOrganismText();
-    const x = await fadeInClosestOrganism(closest_organism);
-    console.log(x);
-    await fadeClosestToOriginal(closest_organism);
-    await fadeInClosestOrganism(closest_organism);
-    await fadeClosestToOriginal(closest_organism);
-    await fadeInClosestOrganism(closest_organism);
+async function runClosestOrganismAnimations (closest_organism) {
+    console.log('runClosestOrganismAnimations() called');
+
+    await paintbrush.fadeIn(drawClosestOrganismText, .02);
+
+    // give paintbrush a subject to draw
+    paintbrush.subject = closest_organism;
+
+    // highlight most-fit organism 
+    await paintbrush.fadeIn(drawClosestOrganismHighlighted, .04);
+    await paintbrush.fadeIn(drawClosestOrganismNatural, .04);
+    await paintbrush.fadeIn(drawClosestOrganismHighlighted, .04);
+    await paintbrush.fadeIn(drawClosestOrganismNatural, .04);
+    await paintbrush.fadeIn(drawClosestOrganismHighlighted, .04);
     await sleep(1000);
-    await fadeToBlackTextClosestOrganism();
-    await fadeClosestToOriginal(closest_organism);
+
+    // fade out text, return organism to natural color
+    await paintbrush.fadeOut(drawClosestOrganismText, .02);
+    await paintbrush.fadeIn(drawClosestOrganismNatural, .04);
+
+    // done drawing closet organism
+    paintbrush.subject = null;
+
     return new Promise(resolve => {
         resolve("Highlight Closest Organism Complete");
     })
 }
 
-function fadeInClosestOrganismText() {
-    console.log("fadeInClosestOrganismText() called");
-    var finished = false;
-    var opacity = 0.00;
-    return new Promise(resolve => {
-        function fadeInClosestText() {
-            console.log('animate called');
-            if (!finished) {
-                // prevent over-saturation
-                ctx.fillStyle = 'black';
-                ctx.fillRect(750, 450, 275, 20);
+function drawClosestOrganismText(opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(750, 450, 275, 20);
 
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
-                ctx.fillText("Most-Fit Individual", 800, 470);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.02;
-                }
-                frame_id = requestAnimationFrame(fadeInClosestText);
-            }
-            else {
-                // resolve
-                console.log('resolving');
-                cancelAnimationFrame(frame_id);
-                resolve("FADE IN CLOSEST ORGANISM TEXT COMPLETE");
-            }
-        }
-        start_closest_text_fadein = requestAnimationFrame(fadeInClosestText);
-    })
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
+    ctx.fillText("Most-Fit Individual", 800, 470);   
 }
 
-function fadeInClosestOrganism(closest_organism) {
-    console.log('fadeInClosestOrganism() called');
-    var finished = false;
-    var opacity = 0.00;
-    return new Promise(resolve => {
-        function fadeInClosest() {
-            if (!finished) {
-
-                closest_organism.ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
-                closest_organism.ctx.beginPath();
-                closest_organism.ctx.arc(closest_organism.x, closest_organism.y, closest_organism.radius, 0, Math.PI*2, false);
-                closest_organism.ctx.fill();
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.04;
-                    console.log(opacity);
-                }
-                frame_id = requestAnimationFrame(fadeInClosest);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE IN CLOSEST ORGANISM COMPLETE");
-            }
-        }
-        start_closest_fadein = requestAnimationFrame(fadeInClosest);
-    })
+function drawClosestOrganismHighlighted(opacity) {
+    ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
+    ctx.beginPath();
+    ctx.arc(paintbrush.subject.x, paintbrush.subject.y, paintbrush.subject.radius, 0, Math.PI*2, false);
+    ctx.fill();
 }
 
-function fadeClosestToOriginal(closest_organism) {
-    console.log("fadeClosestToOriginal() called");
-    var finished = false;
-    var opacity = 0.00;
-    return new Promise(resolve => {
-        function fadeToOriginalClosest() {
-            if (!finished) {
-                closest_organism.ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                closest_organism.ctx.beginPath();
-                closest_organism.ctx.arc(closest_organism.x, closest_organism.y, closest_organism.radius, 0, Math.PI*2, false);
-                closest_organism.ctx.fill();
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.04;
-                }
-                frame_id = requestAnimationFrame(fadeToOriginalClosest);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE CLOSEST TO ORIGINAL COMPLETE");
-            }
-        }
-        start_closest_fade_to_original = requestAnimationFrame(fadeToOriginalClosest);
-    })
-}
-
-function fadeToBlackTextClosestOrganism() {
-    var finished = false;
-    var opacity = 1.00;
-    return new Promise(resolve => {
-        function fadeBlackClosest() {
-            if (!finished) {
-                // animate
-                // 'clear' text
-                ctx.fillStyle = 'black';
-                ctx.fillRect(750, 450, 275, 20);
-
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
-                ctx.fillText("Most-Fit Individual", 800, 470);
-
-                if (opacity <= 0.01) {
-                    finished = true;
-                }
-                else {
-                    opacity -= 0.02;
-                }
-                frame_id =  requestAnimationFrame(fadeBlackClosest);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE TO BLACK TEXT COMPLETE");
-            }
-        }
-        start_fade_black_closest = requestAnimationFrame(fadeBlackClosest);
-    })
+function drawClosestOrganismNatural(opacity) {
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.beginPath();
+    ctx.arc(paintbrush.subject.x, paintbrush.subject.y, paintbrush.subject.radius, 0, Math.PI*2, false);
+    ctx.fill();
 }
 
 async function highlightChosenParents(parents) {
