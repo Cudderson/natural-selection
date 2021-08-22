@@ -568,7 +568,7 @@ class Paintbrush {
         this.ctx = ctx;
     }
 
-    fadeInText(drawing_function, step) {
+    fadeIn(drawing_function, step) {
         return new Promise(resolve => {
             let finished = false;
             let opacity = 0.00;
@@ -598,7 +598,7 @@ class Paintbrush {
         }) 
     }
 
-    fadeOutText(drawing_function, step) {
+    fadeOut(drawing_function, step) {
         return new Promise(resolve => {
             let finished = false;
             let opacity = 1.00;
@@ -633,28 +633,23 @@ async function runPreSimAnimations() {
 
     // *** pre-sim animations will vary slightly (death, boundary), depending on sim type ***
 
-    // ** remove old functions once proven working **
-    // [x] fade in animations converted
-    // [x] fade out animations converted
-    // [x] old fade functions destroyed 
-
     // (only with dialogue on!)
-    await paintbrush.fadeInText(drawSimulationSettings, .01);
+    await paintbrush.fadeIn(drawSimulationSettings, .01);
     await sleep(2000);
 
-    await paintbrush.fadeOutText(drawSimulationSettings, .02);
-    await paintbrush.fadeInText(drawSimulationIntro, .01);
+    await paintbrush.fadeOut(drawSimulationSettings, .02);
+    await paintbrush.fadeIn(drawSimulationIntro, .01);
     await sleep(2000);
 
-    await paintbrush.fadeInText(drawFakeGoal, .01); // *** this will need to be changed for boundary sims
-    await paintbrush.fadeOutText(drawSimulationIntro, .02);
-    await paintbrush.fadeInText(drawSimulationExplanation, .01);
+    await paintbrush.fadeIn(drawFakeGoal, .01); // *** this will need to be changed for boundary sims
+    await paintbrush.fadeOut(drawSimulationIntro, .02);
+    await paintbrush.fadeIn(drawSimulationExplanation, .01);
     await sleep(4000);
 
-    await paintbrush.fadeOutText(drawExplanationAndGoal, .02);
+    await paintbrush.fadeOut(drawExplanationAndGoal, .02);
     await sleep(1000);
 
-    await paintbrush.fadeInText(drawStats, .01);
+    await paintbrush.fadeIn(drawStats, .01);
     await sleep(1000);
 
     return new Promise(resolve => {
@@ -1354,9 +1349,11 @@ async function runSimulation () {
     } while (generation_count < 1000);
 }
 
+// maybe async ruins this functions performance?
 async function runGeneration() {
 
     if (dialogue) {
+        // skipping this one for now (name conflict and double-fade) *****
         await fadeInEvaluationPhaseText();
     }
     
@@ -1377,7 +1374,8 @@ async function runGeneration() {
 
             // give user time to see their win
             await sleep(1500);
-            await fadeInSuccessMessage();
+            // await fadeInSuccessMessage();
+            await paintbrush.fadeIn(drawSuccessMessage, .01);
 
             do {
                 var key_pressed = await getUserDecision();
@@ -1387,7 +1385,9 @@ async function runGeneration() {
 
             console.log("Key Accepted: " + key_pressed);
 
-            await fadeOutSuccessMessage();
+            // await fadeOutSuccessMessage();
+            await paintbrush.fadeOut(drawSuccessMessage, .05);
+            redrawOrganisms(); // not tested yet (could try using rAF for one frame to ensure user sees?)
 
             if (key_pressed === 'Enter') {
                 console.log("Continuing Simulation.");
@@ -1395,7 +1395,9 @@ async function runGeneration() {
             }
             else if (key_pressed === 'q') {
                 console.log("Quitting Simulation.");
-                await fadeToBlack(organisms);
+
+                await paintbrush.fadeOut(drawOrganisms, .05);
+
                 // possibly fade stats to black here too?
                 stopSimulation();
             }
@@ -1403,8 +1405,9 @@ async function runGeneration() {
     }
 
     if (dialogue) {
+        // skipping this one for now (same reason as fadeInEvaluationPhaseText())
         await fadeOutEvaluationPhaseText();
-        await fadeOutStats(); // put here to fade out stats before average fitness updated
+        await paintbrush.fadeOut(drawStats, .02); // put here to fade out stats before average fitness updated
         await sleep(1000);
     }
 
@@ -1447,6 +1450,8 @@ async function runGeneration() {
 
         console.log(`Average Fitness: ${average_fitness}`);
     }
+
+    // stopped here =============================================
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     if (dialogue) {
@@ -2404,6 +2409,8 @@ function fadeInEvaluationPhaseText() {
 
 async function runEvaluationAnimation() {
 
+    // ** not doing updateAndMove(), only fades for now
+
     // need to draw goal at location depending on sim type
     if (sim_type === 'classic') {
         var goal = new Goal(GOAL_X_POS, GOAL_Y_POS, 20, ctx);
@@ -2427,6 +2434,7 @@ async function runEvaluationAnimation() {
     })
 }
 
+// needs name change
 function drawEvaluationPhaseText() {
     ctx.font = "20px arial";
 
@@ -2728,7 +2736,7 @@ function fadeInMothersText() {
         var opacity = 0.00;
         var finished = false;
 
-        function fadeInTextMother() {
+        function fadeInMother() {
             if (!finished) {
 
                 ctx.fillStyle = 'black';
@@ -2744,7 +2752,7 @@ function fadeInMothersText() {
                 else {
                     opacity += 0.02;
                 }
-                frame_id = requestAnimationFrame(fadeInTextMother);
+                frame_id = requestAnimationFrame(fadeInMother);
             }
             else {
                 // resolve
@@ -2752,7 +2760,7 @@ function fadeInMothersText() {
                 resolve("FADE IN MOTHERS TEXT COMPLETE");
             }
         }
-        start_mother_text_fadein = requestAnimationFrame(fadeInTextMother);
+        start_mother_text_fadein = requestAnimationFrame(fadeInMother);
     })
 }
 
@@ -2760,7 +2768,7 @@ function fadeInFathersText() {
     return new Promise(resolve => {
         var opacity = 0.00;
         var finished = false;
-        function fadeInTextFather() {
+        function fadeInFather() {
             if (!finished) {
                 ctx.fillStyle = 'black';
                 ctx.fillRect(750, 510, 275, 20);
@@ -2775,7 +2783,7 @@ function fadeInFathersText() {
                 else {
                     opacity += 0.02;
                 }
-                frame_id = requestAnimationFrame(fadeInTextFather);
+                frame_id = requestAnimationFrame(fadeInFather);
             }
             else {
                 // resolve
@@ -2783,7 +2791,7 @@ function fadeInFathersText() {
                 resolve("FATHERS TEXT FADE-IN COMPLETE");
             }
         }
-        start_father_text_fadein = requestAnimationFrame(fadeInTextFather);
+        start_father_text_fadein = requestAnimationFrame(fadeInFather);
     })
 }
 
@@ -2975,6 +2983,9 @@ function fadeToBlackText() {
     })
 }
 
+// can be converted
+// does 'organisms' need to be passed?
+// deprecated (drawOrganisms)
 function fadeToBlack(organisms) {
     console.log("fadeToBlack(organisms) called!");
     var finished = false;
@@ -3017,6 +3028,19 @@ function fadeToBlack(organisms) {
         }
         start_organism_fade_to_black = requestAnimationFrame(fadeToBlackOrganisms);
     })
+}
+
+// similar to redrawOrganisms(), but this function accepts an opacity value to allow fading
+function drawOrganisms(opacity) {
+    organisms[i].ctx.fillStyle = 'black';
+    organisms[i].ctx.beginPath();
+    organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+    organisms[i].ctx.fill();
+
+    organisms[i].ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+    organisms[i].ctx.beginPath();
+    organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+    organisms[i].ctx.fill();
 }
 
 function fadeOutSelectionPhaseText() {
@@ -3533,6 +3557,8 @@ function fadeOutCreateNewGenPhaseText() {
 }
 
 // Success/Fail
+
+// deprecated
 function fadeInSuccessMessage() {
     var opacity = 0.00;
     var finished = false;
@@ -3581,6 +3607,36 @@ function fadeInSuccessMessage() {
     })
 }
 
+function drawSuccessMessage(opacity) {
+    // if this looks bad, it's because it doesn't have a clearRect()
+
+    ctx.font = '44px arial';
+    ctx.fillStyle = 'black';
+    ctx.fillText("Your Simulation Succeeded!", 235, 275);
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText("Your Simulation Succeeded!", 235, 275);
+
+    ctx.font = '30px arial';
+    ctx.fillStyle = 'black';
+    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
+
+    ctx.font = '26px arial';
+    ctx.fillStyle = 'black';
+    ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
+    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+    ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
+
+    ctx.font = '26px arial';
+    ctx.fillStyle = 'black';
+    ctx.fillText("Press 'Q' to Quit", 420, 450);
+    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+    ctx.fillText("Press 'Q' to Quit", 420, 450);
+
+}
+
+// deprecated
 function fadeOutSuccessMessage() {
     var finished = false;
     var opacity = 1.00;
@@ -3636,6 +3692,17 @@ function fadeOutSuccessMessage() {
         }
         start_success_fadeout = requestAnimationFrame(successFadeOut);
     })
+}
+
+// clears text area and redraws organisms where they were
+function redrawOrganisms() {
+    ctx.fillStyle = 'black';
+    ctx.clearRect(235, 231, 550, 235);
+
+    // redraw organisms
+    for (var i = 0; i < organisms.length; i++) {
+        organisms[i].move();
+    }
 }
 
 function fadeInExtinctionMessage() {
