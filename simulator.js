@@ -1451,10 +1451,9 @@ async function runGeneration() {
         console.log(`Average Fitness: ${average_fitness}`);
     }
 
-    // stopped here =============================================
-
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     if (dialogue) {
+        // skippping (double opacity)
         await fadeInSelectionPhaseText();
     }
 
@@ -1468,7 +1467,10 @@ async function runGeneration() {
     // this could happen if a population produced all males, then potential_mothers would never get filled, and program fails
     // check extinction
     if (potential_mothers.length === 0 || potential_fathers.length === 0) {
-        await fadeInExtinctionMessage();
+
+        // await fadeInExtinctionMessage();
+        await paintbrush.fadeIn(drawExtinctionMessage, .05); // untested
+
         await sleep(2000);
         do {
             var exit_key = await getUserDecision();
@@ -1483,9 +1485,15 @@ async function runGeneration() {
     
     if (dialogue) {
         await sleep(1000);
+
+        // skipping (double opacity)
         await runSelectionAnimations(closest_organism, parents);
+
+        // skipping (double opacity)
         await fadeOutSelectionPhaseText(); 
     }
+
+    // stopped here =============================================
 
     // PHASE: CROSSOVER / MUTATE / REPRODUCE
 
@@ -2508,6 +2516,7 @@ function fadeOutEvaluationPhaseText() {
 }
 
 // Selection Phase
+// not converted ( double opacity )
 function fadeInSelectionPhaseText() {
     var finished = false;
     var opacity = 0.00;
@@ -3043,6 +3052,7 @@ function drawOrganisms(opacity) {
     organisms[i].ctx.fill();
 }
 
+// not converted ( double opacity )
 function fadeOutSelectionPhaseText() {
     // could improve by only clearing area where Evaluate Individuals text is
     var finished = false;
@@ -3705,6 +3715,7 @@ function redrawOrganisms() {
     }
 }
 
+// deprecated
 function fadeInExtinctionMessage() {
     var finished = false;
     var opacity = 0.00;
@@ -3750,6 +3761,33 @@ function fadeInExtinctionMessage() {
         }
         start_extinction_fadein = requestAnimationFrame(extinctMessageFadeIn);
     })
+}
+
+// untested
+function drawExtinctionMessage() {
+    // clears
+    ctx.fillStyle = 'black';
+
+    ctx.font = '50px arial';
+    ctx.fillText("Simulation Failed", 310, 250);
+
+    ctx.font = "30px arial";
+    ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
+
+    ctx.font = '22px arial';
+    ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
+
+    // animations
+    ctx.font = '50px arial';
+    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+    ctx.fillText("Simulation Failed", 310, 250);
+
+    ctx.font = "22px arial";
+    ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
+
+    ctx.font = "30px arial";
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
 }
 
 // *** Settings ***
