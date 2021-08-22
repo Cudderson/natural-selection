@@ -1409,8 +1409,7 @@ async function runGeneration() {
 
             // give user time to see their win
             await sleep(1500);
-            // await fadeInSuccessMessage();
-            await paintbrush.fadeIn(drawSuccessMessage, .01);
+            await paintbrush.fadeIn(drawSuccessMessage, .02); // untested
 
             do {
                 var key_pressed = await getUserDecision();
@@ -1536,29 +1535,28 @@ async function runGeneration() {
         // consider combing to make function
         reproduceNewGeneration(parents);
 
-        await fadeInCrossoverPhaseText(); // skipping (double opacity)
+        await paintbrush.fadeToNewColor(drawCrossoverPhaseEntryText, .02);
         await paintbrush.fadeIn(drawCrossoverDescriptionText, .025);
         await sleep(2000);
-        await paintbrush.fadeOut(drawCrossoverDescriptionText, .05);
+        await paintbrush.fadeOut(drawCrossoverDescriptionText, .025);
+        await paintbrush.fadeToNewColor(drawCrossoverPhaseExitText, .02);
 
-        await fadeOutCrossoverPhaseText(); // skipping (double opacity)
-    
-        await fadeInMutationPhaseText(); // skipping (double opacity)
+        await paintbrush.fadeToNewColor(drawMutationPhaseEntryText, .02);
         await paintbrush.fadeIn(drawMutationDescriptionText, .025);
         await sleep(2000);
-        await paintbrush.fadeOut(drawMutationDescriptionText, .025)
-        await fadeOutMutationPhaseText(); // skipping (double opacity)
-    
-        await fadeInCreateNewGenPhaseText(); // skipping (double opacity)
+        await paintbrush.fadeOut(drawMutationDescriptionText, .025);
+        await paintbrush.fadeToNewColor(drawMutationPhaseExitText, .02);
+
+        await paintbrush.fadeToNewColor(drawCreateNewGenPhaseEntryText, .02);
         await paintbrush.fadeIn(drawGenerationSummaryText, .025);
         await sleep(2000);
         await paintbrush.fadeOut(drawGenerationSummaryText, .025);
-        await fadeOutCreateNewGenPhaseText(); // skipping (double opacity)
+        await paintbrush.fadeToNewColor(drawCreateNewGenPhaseExitText, .02);
     }
     else {
         // without dialogue, we need to fade the organisms to black before reproduceNewGeneration() forgets old population
         await sleep(1000);
-        // await fadeToBlack(organisms);
+        // await fadeToBlack(organisms); // keep just in case
         await paintbrush.fadeOut(drawOrganisms, .05); // untested
         await sleep(1000);
         reproduceNewGeneration(parents);
@@ -3032,43 +3030,19 @@ function drawSelectionPhaseExitText(opacity, old_opacity) {
     }
 }
 
-// Crossover Phase ===================
-// skipping (double opacity)
-function fadeInCrossoverPhaseText() {
-    var finished = false;
-    var opacity = 0.00;
-    var old_opacity = 1.00;
-    return new Promise(resolve => {
-        function fadeInCrossoverText() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(10, 100, 200, 20);
+// Crossover Phase =======================================
 
-                ctx.font = "20px arial";
+function drawCrossoverPhaseEntryText(opacity, old_opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 100, 200, 20);
 
-                ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
-                ctx.fillText("Crossover", 10, 120);
+    ctx.font = "20px arial";
 
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText("Crossover", 10, 120);
+    ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+    ctx.fillText("Crossover", 10, 120);
 
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.02;
-                    old_opacity -= 0.02;
-                }
-                frame_id = requestAnimationFrame(fadeInCrossoverText);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("Highlight Crossover Text Complete.");
-            }
-        }
-        start_crossover_text_fadein = requestAnimationFrame(fadeInCrossoverText);
-    })
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText("Crossover", 10, 120);
 }
 
 function drawCrossoverDescriptionText(opacity) {
@@ -3082,84 +3056,40 @@ function drawCrossoverDescriptionText(opacity) {
     ctx.fillText(description, 200, 300);
 }
 
-// skipping (double opacity)
-function fadeOutCrossoverPhaseText() {
-    var finished = false;
-    var opacity = 0.00;
-    var old_opacity = 1.00;
-    return new Promise(resolve => {
-        function fadeOutCrossoverText() {
-            if (!finished) {
-                //animate
-                ctx.fillStyle = 'black';
-                ctx.fillRect(10, 100, 100, 20);
+function drawCrossoverPhaseExitText(opacity, old_opacity) {
+    //animate
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 100, 100, 20);
 
-                ctx.font = "20px arial";
+    ctx.font = "20px arial";
 
-                ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
-                ctx.fillText("Crossover", 10, 120);
+    ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
+    ctx.fillText("Crossover", 10, 120);
 
-                ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-                ctx.fillText("Crossover", 10, 120);
+    ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx.fillText("Crossover", 10, 120);
 
-                if (opacity >= 1.00) {
-                    finished = true;
-                    ctx.fillStyle = 'black';
-                    ctx.fillRect(10, 10, 275, 200);
-                    drawPhases();
-                }
-                else {
-                    opacity += 0.02;
-                    old_opacity -= 0.02;
-                }
-                frame_id = requestAnimationFrame(fadeOutCrossoverText);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE OUT CROSSOVER PHASE TEXT DONE");
-            }
-        }
-        start_crossover_text_fadeout = requestAnimationFrame(fadeOutCrossoverText);
-    })
+    // is this necessary?
+    if (opacity >= 1.00) {
+        finished = true;
+        ctx.fillStyle = 'black';
+        ctx.fillRect(10, 10, 275, 200);
+        drawPhases();
+    }    
 }
 
 // Mutation Phase
-// skipping (double opacity)
-function fadeInMutationPhaseText() {
-    var finished = false;
-    var opacity = 0.00;
-    var old_opacity = 1.00;
-    return new Promise(resolve => {
-        function fadeInMutationText() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(10, 130, 200, 20);
+function drawMutationPhaseEntryText(opacity, old_opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 130, 200, 20);
 
-                ctx.font = "20px arial";
+    ctx.font = "20px arial";
 
-                ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
-                ctx.fillText("Mutate", 10, 150);
+    ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+    ctx.fillText("Mutate", 10, 150);
 
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText("Mutate", 10, 150);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.02;
-                    old_opacity -= 0.02;
-                }
-                frame_id = requestAnimationFrame(fadeInMutationText);
-            }
-            else {
-                cancelAnimationFrame(frame_id);
-                resolve("Highlight Mutation Phase Text Complete.");
-            }
-        }
-        start_mutation_text_fadein = requestAnimationFrame(fadeInMutationText);
-    })
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText("Mutate", 10, 150);
 }
 
 function drawMutationDescriptionText(opacity) {
@@ -3178,87 +3108,41 @@ function drawMutationDescriptionText(opacity) {
     ctx.fillText(mutation_rate_text, 420, 350);
 }
 
-// skipping (double opacity)
-function fadeOutMutationPhaseText() {
-    var finished = false;
-    var opacity = 0.00;
-    var old_opacity = 1.00;
-    return new Promise(resolve => {
-        function fadeOutMutationText() {
-            if (!finished) {
-                //animate
-                ctx.fillStyle = 'black';
-                ctx.fillRect(10, 130, 100, 20);
-                ctx.font = "20px arial";
+function drawMutationPhaseExitText(opacity, old_opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 130, 100, 20);
+    ctx.font = "20px arial";
 
-                ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
-                ctx.fillText("Mutate", 10, 150);
+    ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
+    ctx.fillText("Mutate", 10, 150);
 
-                ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-                ctx.fillText("Mutate", 10, 150);
+    ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx.fillText("Mutate", 10, 150);
 
-                if (opacity >= 1.00) {
-                    finished = true;
-                    ctx.fillStyle = 'black';
-                    ctx.fillRect(10, 10, 275, 200);
-                    drawPhases();
-                }
-                else {
-                    opacity += 0.02;
-                    old_opacity -= 0.02;
-                }
-                frame_id = requestAnimationFrame(fadeOutMutationText);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE OUT MUTATION PHASE TEXT DONE");
-            }
-        }
-        start_mutation_text_fadeout = requestAnimationFrame(fadeOutMutationText);
-    })
+    // is this necessary?
+    if (opacity >= 1.00) {
+        finished = true;
+        ctx.fillStyle = 'black';
+        ctx.fillRect(10, 10, 275, 200);
+        drawPhases();
+    }
 }
 
 // Generation Summary & Create New Generation
-// skipping (double opacity)
-function fadeInCreateNewGenPhaseText() {
-    var finished = false;
-    var opacity = 0.00;
-    var old_opacity = 1.00;
-    return new Promise(resolve => {
-        function fadeInNewGenText() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(10, 10, 250, 20);
+function drawCreateNewGenPhaseEntryText(opacity, old_opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 10, 250, 20);
 
-                ctx.font = "20px arial";
+    ctx.font = "20px arial";
 
-                ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
-                ctx.fillText("Create New Generation", 10, 30);
+    ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+    ctx.fillText("Create New Generation", 10, 30);
 
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText("Create New Generation", 10, 30);
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText("Create New Generation", 10, 30);
+} 
 
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.02;
-                    old_opacity -= 0.02;
-                }
-                frame_id = requestAnimationFrame(fadeInNewGenText);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("Highlight New Gen Phase Text Complete.");
-            }
-        }
-        start_new_gen_text_fadein = requestAnimationFrame(fadeInNewGenText);
-    })
-}
-
-function drawGenerationSummaryText() {
+function drawGenerationSummaryText(opacity) {
     let generation_summary_text = `Generation ${generation_count} Summary:`;
     let generation_average_fitness_preface = 'Average Fitness:';
     let generation_offspring_reproduced_preface = 'Offspring Reproduced:';
@@ -3284,45 +3168,25 @@ function drawGenerationSummaryText() {
     ctx.fillText(organisms.length.toString(), 600, 355);
 }
 
-// skipping (double opacity)
-function fadeOutCreateNewGenPhaseText() {
-    var finished = false;
-    var opacity = 0.00;
-    var old_opacity = 1.00;
-    return new Promise(resolve => {
-        function fadeOutNewGenText() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(10, 10, 215, 20);
+function drawCreateNewGenPhaseExitText(opacity, old_opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 10, 215, 20);
 
-                ctx.font = "20px arial";
+    ctx.font = "20px arial";
 
-                ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
-                ctx.fillText("Create New Generation", 10, 30);
+    ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
+    ctx.fillText("Create New Generation", 10, 30);
 
-                ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-                ctx.fillText("Create New Generation", 10, 30);
+    ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx.fillText("Create New Generation", 10, 30);
 
-                if (opacity >= 1.00) {
-                    finished = true;
-                    ctx.fillStyle = 'black';
-                    ctx.fillRect(10, 10, 275, 200);
-                    drawPhases();
-                }
-                else {
-                    opacity += 0.02;
-                    old_opacity -= 0.02;
-                }
-                frame_id = requestAnimationFrame(fadeOutNewGenText);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE OUT CREATE NEW GEN PHASE TEXT DONE");
-            }
-        }
-        start_new_gen_text_fadeout = requestAnimationFrame(fadeOutNewGenText);
-    })
+    // is this necessary?
+    if (opacity >= 1.00) {
+        finished = true;
+        ctx.fillStyle = 'black';
+        ctx.fillRect(10, 10, 275, 200);
+        drawPhases();
+    }
 }
 
 // Success/Fail
