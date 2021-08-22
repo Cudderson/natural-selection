@@ -1493,38 +1493,39 @@ async function runGeneration() {
         await fadeOutSelectionPhaseText(); 
     }
 
-    // stopped here =============================================
-
     // PHASE: CROSSOVER / MUTATE / REPRODUCE
 
     // follow same naming convention for these animations!
     if (dialogue) {
         // this function handles crossover, mutation and reproduction
         // this function pushes new gen organisms to offspring_organisms[]
+        // consider combing to make function
         reproduceNewGeneration(parents);
 
-        await fadeInCrossoverPhaseText();
-        await fadeInCrossoverDescriptionText();
+        await fadeInCrossoverPhaseText(); // skipping (double opacity)
+        await paintbrush.fadeIn(drawCrossoverDescriptionText, .025);
         await sleep(2000);
-        await fadeOutCrossoverDescriptionText();
-        await fadeOutCrossoverPhaseText();
+        await paintbrush.fadeOut(drawCrossoverDescriptionText, .05);
+
+        await fadeOutCrossoverPhaseText(); // skipping (double opacity)
     
-        await fadeInMutationPhaseText();
-        await fadeInMutationDescriptionText();
+        await fadeInMutationPhaseText(); // skipping (double opacity)
+        await paintbrush.fadeIn(drawMutationDescriptionText, .025);
         await sleep(2000);
-        await fadeOutMutationDescriptionText();
-        await fadeOutMutationPhaseText();
+        await paintbrush.fadeOut(drawMutationDescriptionText, .025)
+        await fadeOutMutationPhaseText(); // skipping (double opacity)
     
-        await fadeInCreateNewGenPhaseText();
-        await fadeInGenerationSummaryText();
+        await fadeInCreateNewGenPhaseText(); // skipping (double opacity)
+        await paintbrush.fadeIn(drawGenerationSummaryText, .025);
         await sleep(2000);
-        await fadeOutGenerationSummaryText();
-        await fadeOutCreateNewGenPhaseText();
+        await paintbrush.fadeOut(drawGenerationSummaryText, .025);
+        await fadeOutCreateNewGenPhaseText(); // skipping (double opacity)
     }
     else {
         // without dialogue, we need to fade the organisms to black before reproduceNewGeneration() forgets old population
         await sleep(1000);
-        await fadeToBlack(organisms);
+        // await fadeToBlack(organisms);
+        await paintbrush.fadeOut(drawOrganisms, .05); // untested
         await sleep(1000);
         reproduceNewGeneration(parents);
     }
@@ -2994,7 +2995,7 @@ function fadeToBlackText() {
 
 // can be converted
 // does 'organisms' need to be passed?
-// deprecated (drawOrganisms)
+// deprecated (drawOrganisms) (keeping for now)
 function fadeToBlack(organisms) {
     console.log("fadeToBlack(organisms) called!");
     var finished = false;
@@ -3096,6 +3097,7 @@ function fadeOutSelectionPhaseText() {
 }
 
 // Crossover Phase
+// skipping (double opacity)
 function fadeInCrossoverPhaseText() {
     var finished = false;
     var opacity = 0.00;
@@ -3133,72 +3135,18 @@ function fadeInCrossoverPhaseText() {
     })
 }
 
-function fadeInCrossoverDescriptionText() {
-    var finished = false;
-    var opacity = 0.00;
-    return new Promise(resolve => {
-        function fadeInCrossoverDescription() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(75, 275, 950, 150);
+function drawCrossoverDescriptionText(opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(75, 275, 950, 150);
 
-                var description = "Genes of the selected parent couples are combined to create new offspring.";
+    var description = "Genes of the selected parent couples are combined to create new offspring.";
 
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.fillText(description, 200, 300);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.025;
-                }
-                frame_id = requestAnimationFrame(fadeInCrossoverDescription);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("Fade In Crossover Description Complete.");
-            }
-        }
-        start_crossover_description_fadein = requestAnimationFrame(fadeInCrossoverDescription);
-    })
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.fillText(description, 200, 300);
 }
 
-function fadeOutCrossoverDescriptionText() {
-    var finished = false;
-    var opacity = 1.00;
-    return new Promise(resolve => {
-        function fadeOutCrossoverDescription() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(75, 275, 950, 150);
-
-                var description = "Genes of the selected parent couples are combined to create new offspring.";
-
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.fillText(description, 200, 300);
-
-                if (opacity <= 0.01) {
-                    finished = true;
-                }
-                else {
-                    opacity -= 0.025;
-                }
-                frame_id = requestAnimationFrame(fadeOutCrossoverDescription);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve();
-            }
-        }
-        start_crossover_description_fadeout = requestAnimationFrame(fadeOutCrossoverDescription);
-    })
-}
-
+// skipping (double opacity)
 function fadeOutCrossoverPhaseText() {
     var finished = false;
     var opacity = 0.00;
@@ -3241,6 +3189,7 @@ function fadeOutCrossoverPhaseText() {
 }
 
 // Mutation Phase
+// skipping (double opacity)
 function fadeInMutationPhaseText() {
     var finished = false;
     var opacity = 0.00;
@@ -3277,81 +3226,23 @@ function fadeInMutationPhaseText() {
     })
 }
 
-function fadeInMutationDescriptionText() {
-    var finished = false;
-    var opacity = 0.00;
-    return new Promise(resolve => {
-        function fadeInMutationDescription() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(100, 275, 800, 150);
+function drawMutationDescriptionText(opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(100, 275, 800, 150);
 
-                var description = "To maintain genetic diversity, a small percentage of random genes are mutated";
-                var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100).toFixed(2)}%`.toString();
+    var description = "To maintain genetic diversity, a small percentage of random genes are mutated";
+    var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100).toFixed(2)}%`.toString();
 
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.fillText(description, 190, 300);
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.fillText(description, 190, 300);
 
-                ctx.font = "22px arial";
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText(mutation_rate_text, 420, 350);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.025;
-                }
-                frame_id = requestAnimationFrame(fadeInMutationDescription);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("Fade In Mutation Description Complete.");
-            }
-        }
-        start_mutation_description_fadein = requestAnimationFrame(fadeInMutationDescription);
-    })
+    ctx.font = "22px arial";
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText(mutation_rate_text, 420, 350);
 }
 
-function fadeOutMutationDescriptionText() {
-    var finished = false;
-    var opacity = 1.00;
-    return new Promise(resolve => {
-        function fadeOutMutationDescription() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(100, 275, 800, 150);
-
-                var description = "To maintain genetic diversity, a small percentage of random genes are mutated";
-                var mutation_rate_text = `Mutation Rate: ${(MUTATION_RATE * 100).toFixed(2)}%`.toString();
-
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.fillText(description, 190, 300);
-
-                ctx.font = "22px arial";
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText(mutation_rate_text, 420, 350);
-
-                if (opacity <= 0.01) {
-                    finished = true;
-                }
-                else {
-                    opacity -= 0.025;
-                }
-                frame_id = requestAnimationFrame(fadeOutMutationDescription);
-            }
-            else {
-                cancelAnimationFrame(frame_id);
-                resolve();
-            }
-        }
-        start_mutation_description_fadeout = requestAnimationFrame(fadeOutMutationDescription);
-    })
-}
-
+// skipping (double opacity)
 function fadeOutMutationPhaseText() {
     var finished = false;
     var opacity = 0.00;
@@ -3393,6 +3284,7 @@ function fadeOutMutationPhaseText() {
 }
 
 // Generation Summary & Create New Generation
+// skipping (double opacity)
 function fadeInCreateNewGenPhaseText() {
     var finished = false;
     var opacity = 0.00;
@@ -3430,102 +3322,33 @@ function fadeInCreateNewGenPhaseText() {
     })
 }
 
-function fadeInGenerationSummaryText() {
-    var finished = false;
-    var opacity = 0.00;
-    return new Promise(resolve => {
-        function fadeInGenSummary() {
-            if (!finished) {
-                var generation_summary_text = `Generation ${generation_count} Summary:`;
-                var generation_average_fitness_preface = 'Average Fitness:';
-                var generation_offspring_reproduced_preface = 'Offspring Reproduced:';
+function drawGenerationSummaryText() {
+    let generation_summary_text = `Generation ${generation_count} Summary:`;
+    let generation_average_fitness_preface = 'Average Fitness:';
+    let generation_offspring_reproduced_preface = 'Offspring Reproduced:';
 
-                ctx.fillStyle = 'black';
-                ctx.fillRect(100, 250, 800, 200);
+    ctx.fillStyle = 'black';
+    ctx.fillRect(100, 250, 800, 200);
 
-                ctx.font = "22px arial";
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.fillText(generation_summary_text, 380, 280);
+    ctx.font = "22px arial";
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.fillText(generation_summary_text, 380, 280);
 
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.fillText(generation_average_fitness_preface, 380, 330);
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.fillText(generation_average_fitness_preface, 380, 330);
 
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText(average_fitness.toFixed(2).toString(), 600, 330);
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText(average_fitness.toFixed(2).toString(), 600, 330);
 
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.fillText(generation_offspring_reproduced_preface, 380, 355);
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.fillText(generation_offspring_reproduced_preface, 380, 355);
 
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText(organisms.length.toString(), 600, 355);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.025;
-                }
-                frame_id = requestAnimationFrame(fadeInGenSummary);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("Fade In Summary Complete.");
-            }
-        }
-        start_gen_summary_fadein = requestAnimationFrame(fadeInGenSummary);
-    })
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText(organisms.length.toString(), 600, 355);
 }
 
-function fadeOutGenerationSummaryText() {
-    var finished = false;
-    var opacity = 1.00;
-    return new Promise(resolve => {
-        function fadeOutGenSummary() {
-            if (!finished) {
-                var generation_summary_text = `Generation ${generation_count} Summary:`;
-                var generation_average_fitness_preface = 'Average Fitness:';
-                var generation_offspring_reproduced_preface = 'Offspring Reproduced:';
-
-                ctx.fillStyle = 'black';
-                ctx.fillRect(100, 250, 800, 200);
-
-                ctx.font = "22px arial";
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.fillText(generation_summary_text, 380, 280);
-
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.fillText(generation_average_fitness_preface, 380, 330);
-
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText(average_fitness.toFixed(2).toString(), 600, 330);
-
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.fillText(generation_offspring_reproduced_preface, 380, 355);
-
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText(organisms.length.toString(), 600, 355);
-
-                if (opacity <= 0.01) {
-                    finished = true;
-                }
-                else {
-                    opacity -= 0.025;
-                }
-                frame_id = requestAnimationFrame(fadeOutGenSummary);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("Fade Out Summary Complete.");
-            }
-        }
-        start_gen_summary_fadeout = requestAnimationFrame(fadeOutGenSummary);
-    })
-}
-
+// skipping (double opacity)
 function fadeOutCreateNewGenPhaseText() {
     var finished = false;
     var opacity = 0.00;
@@ -3567,56 +3390,6 @@ function fadeOutCreateNewGenPhaseText() {
 }
 
 // Success/Fail
-
-// deprecated
-function fadeInSuccessMessage() {
-    var opacity = 0.00;
-    var finished = false;
-    return new Promise(resolve => {
-        function successFadeIn() {
-            if (!finished) {
-                ctx.font = '44px arial';
-                ctx.fillStyle = 'black';
-                ctx.fillText("Your Simulation Succeeded!", 235, 275);
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText("Your Simulation Succeeded!", 235, 275);
-
-                ctx.font = '30px arial';
-                ctx.fillStyle = 'black';
-                ctx.fillText(`Generations: ${generation_count}`, 420, 340);
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText(`Generations: ${generation_count}`, 420, 340);
-
-                ctx.font = '26px arial';
-                ctx.fillStyle = 'black';
-                ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
-                ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-                ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
-
-                ctx.font = '26px arial';
-                ctx.fillStyle = 'black';
-                ctx.fillText("Press 'Q' to Quit", 420, 450);
-                ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-                ctx.fillText("Press 'Q' to Quit", 420, 450);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.05;
-                }
-                frame_id_success_in = requestAnimationFrame(successFadeIn);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id_success_in);
-                resolve();
-            }
-        }
-        start_success_fadein = requestAnimationFrame(successFadeIn);
-    })
-}
-
 function drawSuccessMessage(opacity) {
     // if this looks bad, it's because it doesn't have a clearRect()
 
@@ -3646,64 +3419,6 @@ function drawSuccessMessage(opacity) {
 
 }
 
-// deprecated
-function fadeOutSuccessMessage() {
-    var finished = false;
-    var opacity = 1.00;
-    return new Promise(resolve => {
-        function successFadeOut() {
-            if (!finished) {
-                ctx.font = '44px arial';
-                ctx.fillStyle = 'black';
-                ctx.fillText("Your Simulation Succeeded!", 235, 275);
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText("Your Simulation Succeeded!", 235, 275);
-
-                ctx.font = '30px arial';
-                ctx.fillStyle = 'black';
-                ctx.fillText(`Generations: ${generation_count}`, 420, 340);
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText(`Generations: ${generation_count}`, 420, 340);
-
-                ctx.font = '26px arial';
-                ctx.fillStyle = 'black';
-                ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
-                ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-                ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
-
-                ctx.font = '26px arial';
-                ctx.fillStyle = 'black';
-                ctx.fillText("Press 'Q' to Quit", 420, 450);
-                ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-                ctx.fillText("Press 'Q' to Quit", 420, 450);
-
-                if (opacity <= 0.00) {
-                    finished = true;
-                    // draw black box over text
-                    ctx.fillStyle = 'black';
-                    ctx.fillRect(235, 231, 550, 235);
-
-                    // redraw organisms
-                    for (var i = 0; i < organisms.length; i++) {
-                        organisms[i].move();
-                    }
-                }
-                else {
-                    opacity -= 0.05;
-                    console.log(opacity);
-                }
-                frame_id_success_out = requestAnimationFrame(successFadeOut);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id_success_out);
-                resolve();
-            }
-        }
-        start_success_fadeout = requestAnimationFrame(successFadeOut);
-    })
-}
-
 // clears text area and redraws organisms where they were
 function redrawOrganisms() {
     ctx.fillStyle = 'black';
@@ -3713,54 +3428,6 @@ function redrawOrganisms() {
     for (var i = 0; i < organisms.length; i++) {
         organisms[i].move();
     }
-}
-
-// deprecated
-function fadeInExtinctionMessage() {
-    var finished = false;
-    var opacity = 0.00;
-    return new Promise(resolve => {
-        function extinctMessageFadeIn() {
-            if (!finished) {
-                // clears
-                ctx.fillStyle = 'black';
-
-                ctx.font = '50px arial';
-                ctx.fillText("Simulation Failed", 310, 250);
-
-                ctx.font = "30px arial";
-                ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
-
-                ctx.font = '22px arial';
-                ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
-
-                // animations
-                ctx.font = '50px arial';
-                ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-                ctx.fillText("Simulation Failed", 310, 250);
-
-                ctx.font = "22px arial";
-                ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
-
-                ctx.font = "30px arial";
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.05;
-                }
-                frame_id = requestAnimationFrame(extinctMessageFadeIn);
-            }
-            else {
-                cancelAnimationFrame(frame_id);
-                resolve();
-            }
-        }
-        start_extinction_fadein = requestAnimationFrame(extinctMessageFadeIn);
-    })
 }
 
 // untested
