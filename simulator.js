@@ -1,7 +1,5 @@
 document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
-// ===== begin polishing phase =====
-
 // starting coordinates for organisms and goal
 const INITIAL_X = 500; 
 const INITIAL_Y = 500;
@@ -14,11 +12,9 @@ var GENE_COUNT = 250;
 var MUTATION_RATE = 0.03;
 var MIN_GENE = -5;
 var MAX_GENE = 5;
-var dialogue = false;
-var DEATH_RATE = 0.05; // deprecated
-var death = false; // using while setting not created
 // for boundary sims
 var RESILIENCE = 1.00; // starts at perfect resilience
+var dialogue = false;
 
 // boundary simulations start organisms/goal at different location
 const INITIAL_X_BOUND = 50;
@@ -47,6 +43,7 @@ var organisms = [];
 var offspring_organisms = [];
 
 // canvas & drawing context
+// reconsider how these are used
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
 
@@ -59,7 +56,7 @@ const FPS = 30;
 // Stores the position of the cursor
 let coordinates = {'x':0 , 'y':0};
 
-// testing class Paintrush as global for now
+// testing class Paintbrush as global for now
 var paintbrush;
 
 class Organism {
@@ -563,18 +560,15 @@ class Boundary {
     }
 }
 
-// testing Paintbrush class
+// rename to FadingTool ?
 class Paintbrush {
     constructor(canvas, ctx) {
-        this.color;
-        this.opacity;
-        this.font;
+        // even these may not be needed
+        this.canvas = canvas;
+        this.ctx = ctx;
     }
 
-    // since fade animations are very similar, and we have a lot of them, let's start there.
-    // make a general-purpose fade-in text method (fadeInSimulationSettings(), for example)
-    // *** change to only accept one drawing (drawings run async)
-    fadeInText(drawings, step) {
+    fadeInText(drawing_function, step) {
         return new Promise(resolve => {
             let finished = false;
             let opacity = 0.00;
@@ -582,12 +576,8 @@ class Paintbrush {
                 if (!finished) {
                     // animate
 
-                    // draw text
-                    // let's just call different draw() methods
-                    // start with fadeInSimulationSettings()
-                    for (let i = 0; i < drawings.length; i++) {
-                        drawings[i](opacity);
-                    }
+                    // think of better name than drawing_function
+                    drawing_function(opacity);
                     
                     if (opacity >= 1.00) {
                         finished = true;
@@ -605,8 +595,36 @@ class Paintbrush {
                 }
             }
             requestAnimationFrame(drawFrame);
+        }) 
+    }
+
+    fadeOutText(drawing_function, step) {
+        return new Promise(resolve => {
+            let finished = false;
+            let opacity = 1.00;
+            function drawFrame() {
+                if (!finished) {
+                    // animate
+
+                    // think of better name than drawing_function
+                    drawing_function(opacity);
+                    
+                    if (opacity <= 0.00) {
+                        finished = true;
+                    }
+                    else {
+                        opacity -= step;
+                    }
+                    frame_id = requestAnimationFrame(drawFrame);
+                }
+                else {
+                    // resolve
+                    cancelAnimationFrame(frame_id);
+                    resolve();
+                }
+            }
+            requestAnimationFrame(drawFrame);
         })
-        
     }
 }
 
@@ -617,30 +635,30 @@ async function runPreSimAnimations() {
 
     // ** remove old functions once proven working **
     // [x] fade in animations converted
-    // [] fade out animations converted
+    // [x] fade out animations converted
+    // [x] old fade functions destroyed 
 
     // (only with dialogue on!)
-    // await fadeInSimulationSettings();
-    await paintbrush.fadeInText([drawSimulationSettings], .01);
+    await paintbrush.fadeInText(drawSimulationSettings, .01);
     await sleep(2000);
-    await fadeOutSimulationSettings();
-    // await fadeInSimulationIntro();
-    await paintbrush.fadeInText([drawSimulationIntro], .01);
+
+    await paintbrush.fadeOutText(drawSimulationSettings, .02);
+    await paintbrush.fadeInText(drawSimulationIntro, .01);
     await sleep(2000);
-    // await fadeInFakeGoal(); // *** this will need to be changed for boundary sims
-    await paintbrush.fadeInText([drawFakeGoal], .01); // *** this will need to be changed for boundary sims
-    await fadeOutSimulationIntro();
-    // await fadeInSimulationExplanation();
-    await paintbrush.fadeInText([drawSimulationExplanation], .01);
+
+    await paintbrush.fadeInText(drawFakeGoal, .01); // *** this will need to be changed for boundary sims
+    await paintbrush.fadeOutText(drawSimulationIntro, .02);
+    await paintbrush.fadeInText(drawSimulationExplanation, .01);
     await sleep(4000);
-    await fadeOutExplanationAndGoal();
+
+    await paintbrush.fadeOutText(drawExplanationAndGoal, .02);
     await sleep(1000);
-    // await fadeInStats(); 
-    await paintbrush.fadeInText([drawStats], .01);
+
+    await paintbrush.fadeInText(drawStats, .01);
     await sleep(1000);
 
     return new Promise(resolve => {
-        resolve("pre sim complete!");
+        resolve("pre-sim animations complete!");
     })
 }
 
@@ -2220,69 +2238,6 @@ function fadeInTitleAnimation(title_organisms) {
 
 // Simulation Introduction
 
-// keep for example of animation converted to paintbrush
-function fadeInSimulationSettings() {
-    // this will be called by runPreSimAnimations(), and run before the first generation
-    // var opacity = 0.00;
-    // var finished = false;
-    // return new Promise(resolve => {
-    //     function simSettingsFadeIn() {
-    //         if (!finished) {
-    //             ctx.fillStyle = 'black';
-    //             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    //             ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    //             ctx.font = "30px arial";
-    //             ctx.fillText("Simulation Settings", 300, 195);
-    //             ctx.fillRect(300, 197, 260, 1);
-
-    //             ctx.font = "24px arial";
-    //             ctx.fillText(`Initial Population:`, 300, 250);
-    //             ctx.fillText(`Gene Count:`, 300, 290);
-    //             ctx.fillText(`Movement Speed:`, 300, 330);
-    //             ctx.fillText(`Mutation Rate:`, 300, 370);
-    //             ctx.fillText(`Dialogue:`, 300, 410);
-                
-    //             ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    //             ctx.fillText(`${TOTAL_ORGANISMS}`, 600, 250);
-    //             ctx.fillText(`${GENE_COUNT}`, 600, 290);
-    //             ctx.fillText(`${MAX_GENE}`, 600, 330);
-    //             ctx.fillText(`${MUTATION_RATE}`, 600, 370);
-
-    //             // don't need to show this if there's a dynamic option
-    //             if (dialogue === false) {
-    //                 ctx.fillText(`Disabled`, 600, 410);
-    //             }
-    //             else {
-    //                 ctx.fillText(`Enabled`, 600, 410);
-    //             }
-
-    //             // redo as resilience
-    //             // if (death) {
-    //             //     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    //             //     ctx.fillText('Death:', 300, 450);
-    //             //     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    //             //     ctx.fillText('Enabled', 600, 450);
-    //             // }
-                
-    //             if (opacity >= 1.00) {
-    //                 finished = true;
-    //             }
-    //             else {
-    //                 opacity += 0.01;
-    //             }
-    //             frame_id = requestAnimationFrame(simSettingsFadeIn);
-    //         }
-    //         else {
-    //             cancelAnimationFrame(frame_id);
-    //             resolve();
-    //         }
-    //     }
-    //     start_settings_fadein = requestAnimationFrame(simSettingsFadeIn);
-    // })
-    // paintbrush.fadeInText([drawSimulationSettings], .02);
-}
-
 function drawSimulationSettings(opacity) {
 
     console.log('caaled drawSimulationSettings()');
@@ -2316,69 +2271,9 @@ function drawSimulationSettings(opacity) {
     }
 }
 
-function fadeOutSimulationSettings() {
-    var finished = false;
-    var opacity = 1.00;
-    return new Promise(resolve => {
-        function simSettingsFadeOut() {
-            if (!finished) {
-                //animate
-                ctx.fillStyle = 'black';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.font = "30px arial";
-                ctx.fillText("Simulation Settings", 300, 195);
-                ctx.fillRect(300, 197, 260, 1);
-
-                ctx.font = "24px arial";
-                ctx.fillText(`Initial Population:`, 300, 250);
-                ctx.fillText(`Gene Count:`, 300, 290);
-                ctx.fillText(`Movement Speed:`, 300, 330);
-                ctx.fillText(`Mutation Rate:`, 300, 370);
-                ctx.fillText(`Dialogue:`, 300, 410);
-                
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText(`${TOTAL_ORGANISMS}`, 600, 250);
-                ctx.fillText(`${GENE_COUNT}`, 600, 290);
-                ctx.fillText(`${MAX_GENE}`, 600, 330);
-                ctx.fillText(`${MUTATION_RATE}`, 600, 370);
-
-                if (dialogue === false) {
-                    ctx.fillText(`Disabled`, 600, 410);
-                }
-                else {
-                    ctx.fillText(`Enabled`, 600, 410);
-                }
-
-                // redo as resilience
-                // if (death) {
-                //     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                //     ctx.fillText('Death:', 300, 450);
-                //     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                //     ctx.fillText('Enabled', 600, 450);
-                // }
-
-                if (opacity <= 0.00) {
-                    finished = true;
-                }
-                else {
-                    opacity -= 0.02;
-                }
-                frame_id = requestAnimationFrame(simSettingsFadeOut);
-            }
-            else {
-                cancelAnimationFrame(frame_id);
-                resolve();
-            }
-        }
-        start_sim_settings_fadeout = requestAnimationFrame(simSettingsFadeOut);
-    })
-}
-
 function drawSimulationIntro(opacity) {
     ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 75, canvas.width, 500);
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.font = '28px arial';
@@ -2389,155 +2284,12 @@ function drawSimulationIntro(opacity) {
     ctx.fillText("This society of organisms needs to reach the goal if it wants to survive.", 150, 330);
 }
 
-// deprecated
-function fadeInSimulationIntro() {
-//     var opacity = 0.00;
-//     var finished = false;
-//     return new Promise(resolve => {
-//         function simIntroFadeIn() {
-//             if (!finished) {
-//                 // "100" organisms were created with completely random genes.
-//                 // This society of organisms needs to reach the goal if it wants to survive. (draw goal?)
-
-//                 // animation
-//                 // clear rect []
-//                 ctx.fillStyle = 'black';
-//                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-//                 ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-//                 ctx.font = '28px arial';
-//                 ctx.fillText(`${TOTAL_ORGANISMS} organisms were created with completely random genes.`, 125, 290);
-
-//                 ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-//                 ctx.font = '22px arial';
-//                 ctx.fillText("This society of organisms needs to reach the goal if it wants to survive.", 150, 330);
-
-//                 if (opacity >= 1.00) {
-//                     finished = true;
-//                 }
-//                 else {
-//                     opacity += 0.01;
-//                 }
-//                 frame_id = requestAnimationFrame(simIntroFadeIn);
-//             }
-//             else {
-//                 //resolve
-//                 cancelAnimationFrame(frame_id);
-//                 resolve();
-//             }
-//         }
-//         start_sim_intro_fadein = requestAnimationFrame(simIntroFadeIn);
-//     })
-}
-
-// deprecated
-function fadeInFakeGoal() {
-    // used in intro animation
-    var finished = false;
-    var opacity = 0.00;
-    return new Promise(resolve => {
-        function fakeGoalFadeIn() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(500, 50, 20, 20);
-                
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillRect(500, 50, 20, 20);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.01;
-                }
-                frame_id = requestAnimationFrame(fakeGoalFadeIn);
-            }
-            else {
-                cancelAnimationFrame(frame_id);
-                resolve();
-            }
-        }
-        start_fake_goal_fadein = requestAnimationFrame(fakeGoalFadeIn);
-    })
-}
-
 function drawFakeGoal(opacity) {
     ctx.fillStyle = 'black';
     ctx.fillRect(500, 50, 20, 20);
     
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
     ctx.fillRect(500, 50, 20, 20);
-}
-
-function fadeOutSimulationIntro() {
-    var finished = false;
-    var opacity = 1.00;
-    return new Promise(resolve => {
-        function simIntroFadeOut() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(0, 200, canvas.width, canvas.height);
-
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.font = '28px arial';
-                ctx.fillText(`${TOTAL_ORGANISMS} organisms were created with completely random genes.`, 125, 290);
-
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.font = '22px arial';
-                ctx.fillText("This society of organisms needs to reach the goal if it wants to survive.", 150, 330);
-
-                if (opacity <= 0.00) {
-                    finished = true;
-                }
-                else {
-                    opacity -= 0.02;
-                }
-                frame_id = requestAnimationFrame(simIntroFadeOut);
-            }
-            else {
-                cancelAnimationFrame(frame_id);
-                resolve();
-            }
-        }
-        start_sim_intro_fadeout = requestAnimationFrame(simIntroFadeOut);
-    })
-}
-
-// depreacted
-function fadeInSimulationExplanation() {
-    var finished = false;
-    var opacity = 0.00;
-    return new Promise(resolve => {
-        function simExplanationFadeIn() {
-            if (!finished) {
-                // Using a genetic algorithm based on natural selection, these organisms will undergo generations of
-                // reproduction, evaluation, selection, gene crossover and mutation, until they either succeed or fail to survive.
-
-                ctx.fillStyle = 'black';
-                ctx.fillRect(0, 100, canvas.width, canvas.height);
-
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.font = '22px arial';
-                ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
-                ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
-                ctx.fillText("until they succeed or fail to survive.", 350, 350);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.01;
-                }
-                frame_id = requestAnimationFrame(simExplanationFadeIn);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve();
-            }
-        }
-        start_sim_explanation_fadein = requestAnimationFrame(simExplanationFadeIn);
-    })
 }
 
 function drawSimulationExplanation(opacity) {
@@ -2551,79 +2303,19 @@ function drawSimulationExplanation(opacity) {
     ctx.fillText("until they succeed or fail to survive.", 350, 350);
 }
 
-function fadeOutExplanationAndGoal() {
-    var finished = false;
-    var opacity = 1.00;
-    return new Promise(resolve => {
-        function explanationAndGoalFadeOut() {
-            if (!finished) {
-                //animate
-                ctx.fillStyle = 'black';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+function drawExplanationAndGoal(opacity) {
+    ctx.fillStyle = 'black';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.font = '22px arial';
-                ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
-                ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
-                ctx.fillText("until they succeed or fail to survive.", 350, 350);
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.font = '22px arial';
+    ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
+    ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
+    ctx.fillText("until they succeed or fail to survive.", 350, 350);
 
-                // fake goal
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillRect(500, 50, 20, 20);
-
-                if (opacity <= 0.00) {
-                    finished = true;
-                }
-                else {
-                    opacity -= 0.02;
-                }
-                frame_id = requestAnimationFrame(explanationAndGoalFadeOut);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve();
-            }
-        }
-        start_explanation_fadeout = requestAnimationFrame(explanationAndGoalFadeOut);
-    })
-}
-
-// deprecated
-function fadeInStats() {
-    var finished = false;
-    var opacity = 0.00;
-    average_fitness = Math.abs(Number(average_fitness)).toFixed(2);
-    return new Promise(resolve => {
-        function animate() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(738, 510, 250, 90);
-            
-                this.ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                this.ctx.font = "22px arial";
-                this.ctx.fillText('Generation:', 740, 535);
-                this.ctx.fillText(generation_count.toString(), 940, 535);
-                this.ctx.fillText('Population Size:', 740, 560);
-                this.ctx.fillText(TOTAL_ORGANISMS.toString(), 940, 560);
-                this.ctx.fillText('Average Fitness:', 740, 585);
-                this.ctx.fillText(average_fitness.toString(), 940, 585);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.02;
-                }
-                frame_id = requestAnimationFrame(animate);
-            }
-            else {
-                cancelAnimationFrame(frame_id);
-                resolve();
-            }
-        }
-        start_stats_fadein = requestAnimationFrame(animate);
-    })
+    // fake goal
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillRect(500, 50, 20, 20);
 }
 
 // may need to be updated for resilience
@@ -2639,43 +2331,6 @@ function drawStats(opacity) {
     ctx.fillText(TOTAL_ORGANISMS.toString(), 940, 560);
     ctx.fillText('Average Fitness:', 740, 585);
     ctx.fillText(average_fitness.toString(), 940, 585);
-}
-
-// stats won't fade out on non-dialogue sims (reminder)
-function fadeOutStats() {
-    var finished = false;
-    var opacity = 1.00;
-    average_fitness = Math.abs(Number(average_fitness)).toFixed(2);
-    return new Promise(resolve => {
-        function animate() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(738, 510, 250, 90);
-            
-                this.ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                this.ctx.font = "22px arial";
-                this.ctx.fillText('Generation:', 740, 535);
-                this.ctx.fillText(generation_count.toString(), 940, 535);
-                this.ctx.fillText('Population Size:', 740, 560);
-                this.ctx.fillText(TOTAL_ORGANISMS.toString(), 940, 560);
-                this.ctx.fillText('Average Fitness:', 740, 585);
-                this.ctx.fillText(average_fitness.toString(), 940, 585);
-
-                if (opacity <= 0.00) {
-                    finished = true;
-                }
-                else {
-                    opacity -= 0.02;
-                }
-                frame_id = requestAnimationFrame(animate);
-            }
-            else {
-                cancelAnimationFrame(frame_id);
-                resolve();
-            }
-        }
-        start_stats_fadeout = requestAnimationFrame(animate);
-    })
 }
 
 function drawPhases() {
