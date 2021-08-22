@@ -561,6 +561,7 @@ class Boundary {
 }
 
 // rename to FadingTool ?
+// accepts drawing functions and uses opacity to create fade effects
 class Paintbrush {
     constructor(canvas, ctx) {
         // even these may not be needed
@@ -626,6 +627,40 @@ class Paintbrush {
             requestAnimationFrame(drawFrame);
         })
     }
+
+    // accepts a drawing_function with 2 opacities (old color & new color)
+    fadeToNewColor(drawing_function, step) {
+        return new Promise(resolve => {
+            let finished = false;
+            let opacity = 0.00;
+            let old_opacity = 1.00;
+
+            function drawFrame() {
+                if (!finished) {
+                    // animate
+
+                    // think of better name than drawing_function
+                    drawing_function(opacity, old_opacity);
+                    
+                    if (opacity >= 1.00) {
+                        finished = true;
+                    }
+                    else {
+                        opacity += step;
+                        old_opacity -= step;
+                    }
+
+                    frame_id = requestAnimationFrame(drawFrame);
+                }
+                else {
+                    // resolve
+                    cancelAnimationFrame(frame_id);
+                    resolve();
+                }
+            }
+            requestAnimationFrame(drawFrame);
+        }) 
+    }
 }
 
 // Main Drivers
@@ -650,7 +685,7 @@ async function runPreSimAnimations() {
     await sleep(1000);
 
     await paintbrush.fadeIn(drawStats, .01);
-    await sleep(1000);
+    await sleep(200);
 
     return new Promise(resolve => {
         resolve("pre-sim animations complete!");
@@ -951,7 +986,7 @@ function updateAndMoveOrganisms(goal) {
                 goal.showStatistics();
 
                 if (dialogue) {
-                    drawEvaluationPhaseText();
+                    drawStaticEvaluationPhaseText();
                 }
 
                 for (var i = 0; i < organisms.length; i++) {
@@ -1323,10 +1358,10 @@ async function runSimulation () {
     console.log("Running Simulation with these settings:");
     console.log(`Total Organisms: ${TOTAL_ORGANISMS}`);
     console.log(`Gene Count: ${GENE_COUNT}`);
+    console.log(`Resilience: ${RESILIENCE}`);
     console.log(`Mutation Rate: ${MUTATION_RATE}`);
     console.log(`Min/Max Gene: [${MIN_GENE}, ${MAX_GENE}]`);
     console.log(`Dialogue: ${dialogue}`);
-    console.log(`Death: ${death}`);
 
     // make start/settings buttons disappear, display stop simulation button
     var start_btn = document.getElementsByClassName("run-btn")[0];
@@ -1353,8 +1388,8 @@ async function runSimulation () {
 async function runGeneration() {
 
     if (dialogue) {
-        // skipping this one for now (name conflict and double-fade) *****
-        await fadeInEvaluationPhaseText();
+        // looks weird for now (opacity doesn't start at 0) (fix when polishing)
+        await paintbrush.fadeToNewColor(drawEvaluationPhaseEntryText, .02);
     }
     
     // Phase: Evaluate Individuals
@@ -1385,7 +1420,6 @@ async function runGeneration() {
 
             console.log("Key Accepted: " + key_pressed);
 
-            // await fadeOutSuccessMessage();
             await paintbrush.fadeOut(drawSuccessMessage, .05);
             redrawOrganisms(); // not tested yet (could try using rAF for one frame to ensure user sees?)
 
@@ -1405,8 +1439,8 @@ async function runGeneration() {
     }
 
     if (dialogue) {
-        // skipping this one for now (same reason as fadeInEvaluationPhaseText())
-        await fadeOutEvaluationPhaseText();
+        await paintbrush.fadeToNewColor(drawEvaluationPhaseExitText, .02);
+
         await paintbrush.fadeOut(drawStats, .02); // put here to fade out stats before average fitness updated
         await sleep(1000);
     }
@@ -1424,6 +1458,8 @@ async function runGeneration() {
 
         // remove deceased organisms from array (organisms array is evaluated multiple times and deceased organisms aren't used)
         console.log(`before checkPulse(): ${organisms.length}`);
+
+        // reassign (.filter() does not change array)
         organisms = organisms.filter(checkPulse);
         console.log(`after checkPulse(): ${organisms.length}`);
 
@@ -1453,8 +1489,7 @@ async function runGeneration() {
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     if (dialogue) {
-        // skippping (double opacity)
-        await fadeInSelectionPhaseText();
+        await paintbrush.fadeToNewColor(drawSelectionPhaseEntryText, .02);
     }
 
     // this phase includes: beginSelectionProcess(), selectParentsForReproduction()
@@ -1489,8 +1524,7 @@ async function runGeneration() {
         // skipping (double opacity)
         await runSelectionAnimations(closest_organism, parents);
 
-        // skipping (double opacity)
-        await fadeOutSelectionPhaseText(); 
+        await paintbrush.fadeToNewColor(drawSelectionPhaseExitText, .02);
     }
 
     // PHASE: CROSSOVER / MUTATE / REPRODUCE
@@ -2367,53 +2401,49 @@ function drawPhases() {
 }
 
 // Evaluation Phase
-function fadeInEvaluationPhaseText() {
-    var finished = false;
-    var opacity = 0.00;
-    var old_opacity = 1.00
-    return new Promise(resolve => {
-        function fadeInEvalText() {
-            if (!finished) {
-                ctx.clearRect(10, 10, 275, 200);
+function drawEvaluationPhaseEntryText(opacity, old_opacity) {
+    // would be better to only clear evaluate-phase area
+    ctx.clearRect(10, 10, 275, 200);
 
-                ctx.font = "20px arial";
+    ctx.font = "20px arial";
 
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Create New Generation", 10, 30);
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Create New Generation", 10, 30);
 
-                ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
-                ctx.fillText("Evaluate Individuals", 10, 60);
+    ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+    ctx.fillText("Evaluate Individuals", 10, 60);
 
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText("Evaluate Individuals", 10, 60);
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText("Evaluate Individuals", 10, 60);
 
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Select Most-Fit Individuals", 10, 90);
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Crossover", 10, 120);
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Crossover", 10, 120);
 
-                ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-                ctx.fillText("Mutate", 10, 150);
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Mutate", 10, 150);
+}
 
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    // testing decreasing opacity difference to increase animation duration
-                    opacity += 0.02;
-                    old_opacity -= 0.02;
-                }
-                var frame_id = requestAnimationFrame(fadeInEvalText);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("Highlight Evaluation Text Complete.");
-            }
-        }
-        start_eval_fade_in = requestAnimationFrame(fadeInEvalText);
-    })
+function drawEvaluationPhaseExitText(opacity, old_opacity) {
+    // each frame, draw the same text with less gold and then more gray
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 40, 180, 20);
+
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
+    ctx.fillText("Evaluate Individuals", 10, 60);
+
+    ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx.fillText("Evaluate Individuals", 10, 60);
+
+    if (opacity >= 0.99) {
+        finished = true;
+        ctx.fillStyle = 'black';
+        ctx.fillRect(10, 10, 275, 200);
+        drawPhases();
+    }
 }
 
 async function runEvaluationAnimation() {
@@ -2443,8 +2473,8 @@ async function runEvaluationAnimation() {
     })
 }
 
-// needs name change
-function drawEvaluationPhaseText() {
+// for evaluation animation during updateAndMove()
+function drawStaticEvaluationPhaseText() {
     ctx.font = "20px arial";
 
     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
@@ -2470,90 +2500,18 @@ function updateSuccessfulOrganism(organism) {
     organism.ctx.fill();
 }
 
-function fadeOutEvaluationPhaseText() {
-    console.log("called");
-    return new Promise(resolve => {
-        var finished = false;
-        var opacity = 0.00;
-        var old_opacity = 1.00;
-
-        function fadeOutEvalText() {
-            if (!finished) {
-                // solution to over-saturation:
-                // each frame, draw the same text with less gold and then more gray
-                ctx.fillStyle = 'black';
-                ctx.fillRect(10, 40, 180, 20);
-
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
-                ctx.fillText("Evaluate Individuals", 10, 60);
-
-                ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-                ctx.fillText("Evaluate Individuals", 10, 60);
-
-                if (opacity >= 0.99) {
-                    finished = true;
-                    ctx.fillStyle = 'black';
-                    ctx.fillRect(10, 10, 275, 200);
-                    drawPhases();
-                }
-                else {
-                    opacity += 0.02;
-                    old_opacity -= 0.02;
-                }
-                console.log("requesting another frame ok");
-                // for some reason changing the var name makes animation work
-                frame_id_eval_fadeout = requestAnimationFrame(fadeOutEvalText);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE OUT EVALUATE INDIVIDUALS DONE");
-            }
-        }
-        console.log("starting!");
-        start_eval_text_fadeout = requestAnimationFrame(fadeOutEvalText);
-    })
-}
-
 // Selection Phase
-// not converted ( double opacity )
-function fadeInSelectionPhaseText() {
-    var finished = false;
-    var opacity = 0.00;
-    var old_opacity = 1.00;
-    return new Promise(resolve => {
-        function fadeInSelectionText() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(10, 70, 250, 20);
+function drawSelectionPhaseEntryText(opacity, old_opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 70, 250, 20);
 
-                ctx.font = "20px arial";
+    ctx.font = "20px arial";
 
-                ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
-                ctx.fillText("Select Most-Fit Individuals", 10, 90);
+    ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+    ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
-                ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-                ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-                if (opacity >= 0.99) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.02;
-                    old_opacity -= 0.02;
-                }
-                frame_id = requestAnimationFrame(fadeInSelectionText);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("Highlight Evaluation Text Complete.");
-            }
-        }
-        console.log('startingg');
-        start_selection_text_fadein = requestAnimationFrame(fadeInSelectionText);
-    })
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText("Select Most-Fit Individuals", 10, 90);
 }
 
 async function highlightClosestOrganism (closest_organism) {
@@ -3053,50 +3011,28 @@ function drawOrganisms(opacity) {
     organisms[i].ctx.fill();
 }
 
-// not converted ( double opacity )
-function fadeOutSelectionPhaseText() {
-    // could improve by only clearing area where Evaluate Individuals text is
-    var finished = false;
-    var opacity = 0.00;
-    var old_opacity = 1.00
-    return new Promise(resolve => {
-        function selectionTextFadeOut() {
-            if (!finished) {
-                //animate
-                ctx.fillStyle = 'black';
-                ctx.fillRect(10, 70, 240, 20);
+function drawSelectionPhaseExitText(opacity, old_opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 70, 240, 20);
 
-                ctx.font = "20px arial";
+    ctx.font = "20px arial";
 
-                ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
-                ctx.fillText("Select Most-Fit Individuals", 10, 90);
+    ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
+    ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
-                ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-                ctx.fillText("Select Most-Fit Individuals", 10, 90);
+    ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
-                if (opacity >= 1.00) {
-                    finished = true;
-                    ctx.fillStyle = 'black';
-                    ctx.fillRect(10, 10, 275, 200);
-                    drawPhases();
-                }
-                else {
-                    opacity += 0.02;
-                    old_opacity -= 0.02;
-                }
-                frame_id = requestAnimationFrame(selectionTextFadeOut);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE OUT SELECTION PHASE TEXT DONE");
-            }
-        }
-        start_selection_text_fadeout = requestAnimationFrame(selectionTextFadeOut);
-    })
+    // is this necessary?
+    if (opacity >= 1.00) {
+        finished = true;
+        ctx.fillStyle = 'black';
+        ctx.fillRect(10, 10, 275, 200);
+        drawPhases();
+    }
 }
 
-// Crossover Phase
+// Crossover Phase ===================
 // skipping (double opacity)
 function fadeInCrossoverPhaseText() {
     var finished = false;
