@@ -20,7 +20,12 @@ document.getElementById("apply-form").addEventListener('submit', function submit
 // turn off this listener in runSimulation()
 document.getElementsByClassName("run-btn")[0].addEventListener("click", runSimulation);
 
-// ===== so far, I have converted some html function calls to js event listeners, =====
+// convert stopSimulation() to be called from js vs html
+document.getElementsByClassName("stop-btn")[0].addEventListener('click', function stopSim() {
+    stopSimulation();
+});
+
+// ===== so far, I have converted html function calls to js event listeners, ==========
 // ===== and reworked how rAF is being used. Basically, I don't keep track of the =====
 // ===== frame_id anymore, I just resolve() when animation ends. idk if this is good. =
 //
@@ -29,7 +34,7 @@ document.getElementsByClassName("run-btn")[0].addEventListener("click", runSimul
 // ===== I should probably try that before my current method of removing frame_id =====
 
 // ** Okay, so declaring var frame_id outside of the looping function seems to work.
-// I don;t understand how the original way doesn't work once converting to module, but perhaps I'm
+// I don't understand how the original way doesn't work once converting to module, but perhaps I'm
 // learning a better practice.
 
 // Ultimately, I need to decide if I will use/not use frame_id for my animations. It seems like a better practice to do that,
@@ -613,7 +618,7 @@ class Paintbrush {
         return new Promise(resolve => {
             let finished = false;
             let opacity = 0.00;
-            var frame_id;
+            let frame_id;
             function drawFrame() {
                 if (!finished) {
                     // animate
