@@ -1,7 +1,42 @@
 document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
 // ===== begin module testing =====
-import { testModule } from "./modules/drawings";
+import { testModule, yoo } from "./modules/drawings.js";
+
+// convert html function calls to eventlisteners in js
+
+// [] turn off listener in validateSettingsForm() 
+document.getElementById("apply-form").addEventListener('submit', function submitForm(event) {
+    // don't submit form
+    event.preventDefault();
+
+    validateSettingsForm();
+
+    // destroy listener
+    document.getElementById("apply-form").removeEventListener('submit', submitForm);
+});
+
+// allow run_btn to simply run the simulation
+// turn off this listener in runSimulation()
+document.getElementsByClassName("run-btn")[0].addEventListener("click", runSimulation);
+
+// ===== so far, I have converted some html function calls to js event listeners, =====
+// ===== and reworked how rAF is being used. Basically, I don't keep track of the =====
+// ===== frame_id anymore, I just resolve() when animation ends. idk if this is good. =
+//
+// ===== Alternatively, I could try declaring frame_id at a different point outside ===
+// ===== of function and see if rAF can keep track of it that way.                =====
+// ===== I should probably try that before my current method of removing frame_id =====
+
+// ** Okay, so declaring var frame_id outside of the looping function seems to work.
+// I don;t understand how the original way doesn't work once converting to module, but perhaps I'm
+// learning a better practice.
+
+// Ultimately, I need to decide if I will use/not use frame_id for my animations. It seems like a better practice to do that,
+// so I'll try that first.
+
+// ===== End Module Test/Refactor =====
+
 
 // starting coordinates for organisms and goal
 const INITIAL_X = 500; 
@@ -578,6 +613,7 @@ class Paintbrush {
         return new Promise(resolve => {
             let finished = false;
             let opacity = 0.00;
+            var frame_id;
             function drawFrame() {
                 if (!finished) {
                     // animate
@@ -621,11 +657,11 @@ class Paintbrush {
                     else {
                         opacity -= step;
                     }
-                    frame_id = requestAnimationFrame(drawFrame);
+                    requestAnimationFrame(drawFrame);
                 }
                 else {
                     // resolve
-                    cancelAnimationFrame(frame_id);
+                    // cancelAnimationFrame(frame_id);
                     resolve();
                 }
             }
@@ -655,11 +691,11 @@ class Paintbrush {
                         old_opacity -= step;
                     }
 
-                    frame_id = requestAnimationFrame(drawFrame);
+                    requestAnimationFrame(drawFrame);
                 }
                 else {
                     // resolve
-                    cancelAnimationFrame(frame_id);
+                    // cancelAnimationFrame(frame_id);
                     resolve();
                 }
             }
@@ -698,6 +734,7 @@ async function runPreSimAnimations() {
 }
 
 // this function will be deleted after integration, can just call runSimulation() directly
+// deprecated
 function checkSimType() {
     // eventually, both sims will be the same, this is for testing
     if (custom_boundary) {
@@ -1582,7 +1619,8 @@ function selectSimulationType() {
     drawInitialSimSelectionScreen();
     turnOnSimTypeSelectionListeners();
 
-    console.log(testModules('Hello everybody!'));
+    testModule('Hello everybody!');
+    console.log(yoo);
 }
 
 // example images not final. consider more zoomed-in images
@@ -2276,7 +2314,7 @@ function fadeInTitleAnimation(title_organisms) {
                 ctx.globalAlpha = 1;
 
                 sleep(750 / FPS); // control drawing FPS for organisms
-                frame_id = requestAnimationFrame(animateTitle);
+                var frame_id = requestAnimationFrame(animateTitle);
             }
             else {
                 // resolves every n cycles to prevent overflow
@@ -2284,7 +2322,7 @@ function fadeInTitleAnimation(title_organisms) {
                 resolve("Keep Playing");
             }
         }
-        start_title_fadein = requestAnimationFrame(animateTitle);
+        requestAnimationFrame(animateTitle);
     })
 
 }
@@ -3454,7 +3492,7 @@ function enterBoundaryCreationMode() {
         if (boundary_step === 'full-boundary') {
 
             // get pixel color before drawing, reject if green
-            pixel_data = getPixelXY(canvas_data_bad_practice, coordinates['x'], coordinates['y']);
+            let pixel_data = getPixelXY(canvas_data_bad_practice, coordinates['x'], coordinates['y']);
 
             if (pixel_data[0] == 155) {
                 // green touched, reject

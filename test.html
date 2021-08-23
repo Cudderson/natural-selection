@@ -19,7 +19,7 @@
   </div>
   <div class="settings-container">
     <div class="settings-form"> 
-      <form id="apply-form" onsubmit="return validateSettingsForm()">
+      <form id="apply-form">
 
         <div class="settings-grid">
           <span class="settings-header">Simulation Settings</span>
@@ -84,11 +84,12 @@
     <button class='next-btn'>Continue</button>
     <button class="save-boundaries-btn">Apply Boundary</button>
     <!--run/stop sim, settings-->
-    <button class="run-btn" onclick="checkSimType()">Run Simulation</button>
+    <button class="run-btn">Run Simulation</button>
     <button class="settings-btn">Settings</button>
     <button class="stop-btn" onclick="stopSimulation()">Stop Simulation</button>
   </div>
-    <script type="text/javascript" src="simulator.js"></script>
+    <script type="module" src="modules/drawings.js"></script>
+    <script type="module" src="simulator.js"></script>
 </body>
 
 </html>
