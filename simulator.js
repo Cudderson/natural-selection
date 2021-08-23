@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
+// ===== begin module testing =====
+
 // starting coordinates for organisms and goal
 const INITIAL_X = 500; 
 const INITIAL_Y = 500;
