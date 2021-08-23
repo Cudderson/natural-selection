@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
+// ===== begin module testing =====
+
 // starting coordinates for organisms and goal
 const INITIAL_X = 500; 
 const INITIAL_Y = 500;
@@ -567,6 +569,8 @@ class Paintbrush {
         // even these may not be needed
         this.canvas = canvas;
         this.ctx = ctx;
+        // subject or context for the paintbrush to draw (can basically be anything)
+        this.subject = null; 
     }
 
     fadeIn(drawing_function, step) {
@@ -1958,7 +1962,7 @@ function calcPopulationFitnessBounds(remaining_distance) {
 async function runSelectionAnimations(closest_organism, parents) {
     console.log("Called runSelectionAnimations()");
     // maybe model other phases after this one
-    await highlightClosestOrganism(closest_organism);
+    await runClosestOrganismAnimations(closest_organism); // finished
     await highlightChosenParents(parents);
 
     return new Promise(resolve => {
@@ -2284,6 +2288,8 @@ function fadeInTitleAnimation(title_organisms) {
 
 // Simulation Introduction
 
+// checking for applicable animations to convert from here down ===========
+
 function drawSimulationSettings(opacity) {
 
     console.log('caaled drawSimulationSettings()');
@@ -2512,501 +2518,203 @@ function drawSelectionPhaseEntryText(opacity, old_opacity) {
     ctx.fillText("Select Most-Fit Individuals", 10, 90);
 }
 
-async function highlightClosestOrganism (closest_organism) {
-    console.log('highlightClosestOrganism() called');
-    await fadeInClosestOrganismText();
-    const x = await fadeInClosestOrganism(closest_organism);
-    console.log(x);
-    await fadeClosestToOriginal(closest_organism);
-    await fadeInClosestOrganism(closest_organism);
-    await fadeClosestToOriginal(closest_organism);
-    await fadeInClosestOrganism(closest_organism);
+async function runClosestOrganismAnimations (closest_organism) {
+
+    await paintbrush.fadeIn(drawClosestOrganismText, .02);
+
+    // give paintbrush a subject to draw
+    paintbrush.subject = closest_organism;
+
+    // highlight most-fit organism 
+    for (let i = 0; i <= 2; i++) {
+        await paintbrush.fadeIn(drawClosestOrganismNatural, .04);
+        await paintbrush.fadeIn(drawClosestOrganismHighlighted, .04);
+    }
     await sleep(1000);
-    await fadeToBlackTextClosestOrganism();
-    await fadeClosestToOriginal(closest_organism);
+
+    // fade out text, return organism to natural color
+    await paintbrush.fadeOut(drawClosestOrganismText, .02);
+    await paintbrush.fadeIn(drawClosestOrganismNatural, .04);
+
+    // done drawing closet organism
+    paintbrush.subject = null;
+
     return new Promise(resolve => {
-        resolve("Highlight Closest Organism Complete");
+        resolve();
     })
 }
 
-function fadeInClosestOrganismText() {
-    console.log("fadeInClosestOrganismText() called");
-    var finished = false;
-    var opacity = 0.00;
-    return new Promise(resolve => {
-        function fadeInClosestText() {
-            console.log('animate called');
-            if (!finished) {
-                // prevent over-saturation
-                ctx.fillStyle = 'black';
-                ctx.fillRect(750, 450, 275, 20);
+function drawClosestOrganismText(opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(750, 450, 275, 20);
 
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
-                ctx.fillText("Most-Fit Individual", 800, 470);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.02;
-                }
-                frame_id = requestAnimationFrame(fadeInClosestText);
-            }
-            else {
-                // resolve
-                console.log('resolving');
-                cancelAnimationFrame(frame_id);
-                resolve("FADE IN CLOSEST ORGANISM TEXT COMPLETE");
-            }
-        }
-        start_closest_text_fadein = requestAnimationFrame(fadeInClosestText);
-    })
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
+    ctx.fillText("Most-Fit Individual", 800, 470);   
 }
 
-function fadeInClosestOrganism(closest_organism) {
-    console.log('fadeInClosestOrganism() called');
-    var finished = false;
-    var opacity = 0.00;
-    return new Promise(resolve => {
-        function fadeInClosest() {
-            if (!finished) {
-
-                closest_organism.ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
-                closest_organism.ctx.beginPath();
-                closest_organism.ctx.arc(closest_organism.x, closest_organism.y, closest_organism.radius, 0, Math.PI*2, false);
-                closest_organism.ctx.fill();
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.04;
-                    console.log(opacity);
-                }
-                frame_id = requestAnimationFrame(fadeInClosest);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE IN CLOSEST ORGANISM COMPLETE");
-            }
-        }
-        start_closest_fadein = requestAnimationFrame(fadeInClosest);
-    })
+function drawClosestOrganismHighlighted(opacity) {
+    ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
+    ctx.beginPath();
+    ctx.arc(paintbrush.subject.x, paintbrush.subject.y, paintbrush.subject.radius, 0, Math.PI*2, false);
+    ctx.fill();
 }
 
-function fadeClosestToOriginal(closest_organism) {
-    console.log("fadeClosestToOriginal() called");
-    var finished = false;
-    var opacity = 0.00;
-    return new Promise(resolve => {
-        function fadeToOriginalClosest() {
-            if (!finished) {
-                closest_organism.ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                closest_organism.ctx.beginPath();
-                closest_organism.ctx.arc(closest_organism.x, closest_organism.y, closest_organism.radius, 0, Math.PI*2, false);
-                closest_organism.ctx.fill();
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.04;
-                }
-                frame_id = requestAnimationFrame(fadeToOriginalClosest);
-            }
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE CLOSEST TO ORIGINAL COMPLETE");
-            }
-        }
-        start_closest_fade_to_original = requestAnimationFrame(fadeToOriginalClosest);
-    })
-}
-
-function fadeToBlackTextClosestOrganism() {
-    var finished = false;
-    var opacity = 1.00;
-    return new Promise(resolve => {
-        function fadeBlackClosest() {
-            if (!finished) {
-                // animate
-                // 'clear' text
-                ctx.fillStyle = 'black';
-                ctx.fillRect(750, 450, 275, 20);
-
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
-                ctx.fillText("Most-Fit Individual", 800, 470);
-
-                if (opacity <= 0.01) {
-                    finished = true;
-                }
-                else {
-                    opacity -= 0.02;
-                }
-                frame_id =  requestAnimationFrame(fadeBlackClosest);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE TO BLACK TEXT COMPLETE");
-            }
-        }
-        start_fade_black_closest = requestAnimationFrame(fadeBlackClosest);
-    })
+function drawClosestOrganismNatural(opacity) {
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.beginPath();
+    ctx.arc(paintbrush.subject.x, paintbrush.subject.y, paintbrush.subject.radius, 0, Math.PI*2, false);
+    ctx.fill();
 }
 
 async function highlightChosenParents(parents) {
 
+    // set subject for paintbrush
+    paintbrush.subject = parents;
+
     // highlight mothers
-    await fadeInMothersText();
-    await fadeInMothers(parents);
-    await fadeToOriginal(parents, 'female');
-    await fadeInMothers(parents);
-    await fadeToOriginal(parents, 'female');
-    await fadeInMothers(parents);
-    await fadeToOriginal(parents, 'female');
+    await paintbrush.fadeIn(drawMothersText, .02);
+
+    for (let i = 0; i <= 2; i++) {
+        await paintbrush.fadeIn(drawMothersHighlighted, .03);
+        await paintbrush.fadeIn(drawMothersNatural, .03);
+    }
 
     // highlight fathers
-    await fadeInFathersText();
-    await fadeInFathers(parents);
-    await fadeToOriginal(parents, 'male');
-    await fadeInFathers(parents);
-    await fadeToOriginal(parents, 'male');
-    await fadeInFathers(parents);
-    await fadeToOriginal(parents, 'male');
+    // !!! change fathers color to a lighter blue
+    await paintbrush.fadeIn(drawFathersText, .02);
+
+    for (let i = 0; i <= 2; i++) {
+        await paintbrush.fadeIn(drawFathersHighlighted, .03);
+        await paintbrush.fadeIn(drawFathersNatural, .03);
+    }
     await sleep(1000);
 
     // highlight all
-    await fadeInMothers(parents);
-    await fadeInFathers(parents);
-    await fadeInNotChosen();
+    await paintbrush.fadeIn(drawMothersHighlighted, .03);
+    await paintbrush.fadeIn(drawFathersHighlighted, .03);
+    await paintbrush.fadeIn(drawNotChosenText, .02);
     await sleep(1000); 
 
     // fade out all
-    await fadeToBlackText();
-    await fadeToOriginal(parents, 'both');
-    await fadeToBlack(organisms);
+    await paintbrush.fadeOut(drawAllSelectedOrganismsText, .02);
+    await paintbrush.fadeIn(drawBothParentTypesNatural, .02);
+    await paintbrush.fadeOut(drawOrganisms, .05);
     await sleep(1000);
+
+    // done with parents
+    paintbrush.subject = null;
 
     return new Promise(resolve => {
         resolve("Highlight Chosen Parents Animation Complete");
     })
 }
 
-function fadeInMothersText() {
-    return new Promise(resolve => {
-        var opacity = 0.00;
-        var finished = false;
-
-        function fadeInMother() {
-            if (!finished) {
-
-                ctx.fillStyle = 'black';
-                ctx.fillRect(750, 480, 275, 20);
-                
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-                ctx.fillText("Females Selected", 800, 500);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.02;
-                }
-                frame_id = requestAnimationFrame(fadeInMother);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE IN MOTHERS TEXT COMPLETE");
-            }
-        }
-        start_mother_text_fadein = requestAnimationFrame(fadeInMother);
-    })
+function drawMothersText(opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(750, 480, 275, 20);
+    
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+    ctx.fillText("Females Selected", 800, 500);
 }
 
-function fadeInFathersText() {
-    return new Promise(resolve => {
-        var opacity = 0.00;
-        var finished = false;
-        function fadeInFather() {
-            if (!finished) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(750, 510, 275, 20);
+function drawFathersText(opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(750, 510, 275, 20);
 
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
-                ctx.fillText("Males Selected", 800, 530);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.02;
-                }
-                frame_id = requestAnimationFrame(fadeInFather);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FATHERS TEXT FADE-IN COMPLETE");
-            }
-        }
-        start_father_text_fadein = requestAnimationFrame(fadeInFather);
-    })
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
+    ctx.fillText("Males Selected", 800, 530);
 }
 
-function fadeInMothers(parents) {
-    return new Promise(resolve => {
-        var opacity = 0.00;
-        var finished = false;
-
-        function motherFadeIn() {
-            if (!finished) {
-
-                for (var i = 0; i < parents.length; i++) {
-                    parents[i][0].ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-                    parents[i][0].ctx.beginPath();
-                    parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
-                    parents[i][0].ctx.fill();
-                }
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.03;
-                }
-                frame_id = requestAnimationFrame(motherFadeIn);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE IN MOTHERS COMPLETE");
-            }
-        }
-        start_mother_fade_in = requestAnimationFrame(motherFadeIn);
-    })
+function drawMothersHighlighted(opacity) {
+    for (let i = 0; i < paintbrush.subject.length; i++) {
+        ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(paintbrush.subject[i][0].x, paintbrush.subject[i][0].y, paintbrush.subject[i][0].radius, 0, Math.PI*2, false);
+        ctx.fill();
+    }
 }
 
-function fadeInFathers(parents) {
-    return new Promise(resolve => {
-        var opacity = 0.00;
-        var finished = false;
-        function fatherFadeIn() {
-            if (!finished) {
-                for (var i = 0; i < parents.length; i++) {
-                    parents[i][1].ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
-                    parents[i][1].ctx.beginPath();
-                    parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
-                    parents[i][1].ctx.fill();
-                }
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.03;
-                }
-                frame_id = requestAnimationFrame(fatherFadeIn);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FATHERS FADE-IN COMPLETE");
-            }
-        }
-        start_father_fadein = requestAnimationFrame(fatherFadeIn);
-    })
+function drawMothersNatural(opacity) {
+    for (var i = 0; i < paintbrush.subject.length; i++) {
+        ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(paintbrush.subject[i][0].x, paintbrush.subject[i][0].y, paintbrush.subject[i][0].radius, 0, Math.PI*2, false);
+        ctx.fill();
+    }
 }
 
-function fadeToOriginal(parents, gender) {
-    // use opacity to redraw original color over highlighted color for mothers and fathers
-    var opacity = 0.00;
-    var finished = false;
-
-    return new Promise(resolve => {
-        function fadeParentsToOriginal() {
-            if (!finished) {
-                // animate
-                if (gender === 'female') {
-                    for (var i = 0; i < parents.length; i++) {
-                        parents[i][0].ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                        parents[i][0].ctx.beginPath();
-                        parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
-                        parents[i][0].ctx.fill();
-                    }
-                }
-                else if (gender === 'male') {
-                    for (var i = 0; i < parents.length; i++) {
-                        parents[i][1].ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                        parents[i][1].ctx.beginPath();
-                        parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
-                        parents[i][1].ctx.fill();
-                    }
-                }
-                else if (gender === 'both') {
-                    for (var i = 0; i < parents.length; i++) {
-                        parents[i][0].ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                        parents[i][0].ctx.beginPath();
-                        parents[i][0].ctx.arc(parents[i][0].x, parents[i][0].y, parents[i][0].radius, 0, Math.PI*2, false);
-                        parents[i][0].ctx.fill();
-
-                        parents[i][1].ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                        parents[i][1].ctx.beginPath();
-                        parents[i][1].ctx.arc(parents[i][1].x, parents[i][1].y, parents[i][1].radius, 0, Math.PI*2, false);
-                        parents[i][1].ctx.fill();
-                    }
-                }
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.03;
-                }
-                frame_id = requestAnimationFrame(fadeParentsToOriginal);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE TO ORIGINAL COMPLETE");
-            }
-        }
-        start_parents_fade_to_original = requestAnimationFrame(fadeParentsToOriginal);
-    })
+function drawFathersHighlighted(opacity) {
+    for (var i = 0; i < paintbrush.subject.length; i++) {
+        ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(paintbrush.subject[i][1].x, paintbrush.subject[i][1].y, paintbrush.subject[i][1].radius, 0, Math.PI*2, false);
+        ctx.fill();
+    }
 }
 
-function fadeInNotChosen() {
-    return new Promise(resolve => {
-        var opacity = 0.00;
-        var finished = false;
-        function notChosenFadeIn() {
-            if (!finished) {
-                // animate
-                ctx.fillStyle = 'black';
-                ctx.fillRect(750, 540, 275, 20);
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.fillText("Not Selected", 800, 560);
-
-                if (opacity >= 1.00) {
-                    finished = true;
-                }
-                else {
-                    opacity += 0.02;
-                }
-                frame_id = requestAnimationFrame(notChosenFadeIn);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve("NOT CHOSEN TEXT ANIMATION COMPLETE");
-            }
-        }
-        start_not_chosen_fadein = requestAnimationFrame(notChosenFadeIn);
-    })
+function drawFathersNatural(opacity) {
+    for (var i = 0; i < paintbrush.subject.length; i++) {
+        ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(paintbrush.subject[i][1].x, paintbrush.subject[i][1].y, paintbrush.subject[i][1].radius, 0, Math.PI*2, false);
+        ctx.fill();
+    }
 }
 
-function fadeToBlackText() {
-    var finished = false;
-    var opacity = 1.00;
-    return new Promise(resolve => {
-        function textFadeToBlack() {
-            if (!finished) {
-                // animate
-                // 'clear' text
-                ctx.fillStyle = 'black';
-                ctx.fillRect(750, 480, 275, 100);
+function drawBothParentTypesNatural(opacity) {
+    for (let i = 0; i < paintbrush.subject.length; i++) {
+        ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(paintbrush.subject[i][0].x, paintbrush.subject[i][0].y, paintbrush.subject[i][0].radius, 0, Math.PI*2, false);
+        ctx.fill();
 
-                ctx.font = "20px arial";
-                ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-                ctx.fillText("Females Selected", 800, 500);
-
-                ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
-                ctx.fillText("Males Selected", 800, 530);
-
-                ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-                ctx.fillText("Not Selected", 800, 560);
-
-                if (opacity <= 0.01) {
-                    finished = true;
-                }
-                else {
-                    opacity -= 0.02;
-                }
-                frame_id =  requestAnimationFrame(textFadeToBlack);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve("FADE TO BLACK TEXT COMPLETE");
-            }
-        }
-        start_text_fade_to_black = requestAnimationFrame(textFadeToBlack);
-    })
+        ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(paintbrush.subject[i][1].x, paintbrush.subject[i][1].y, paintbrush.subject[i][1].radius, 0, Math.PI*2, false);
+        ctx.fill();
+    }
 }
 
-// can be converted
-// does 'organisms' need to be passed?
-// deprecated (drawOrganisms) (keeping for now)
-function fadeToBlack(organisms) {
-    console.log("fadeToBlack(organisms) called!");
-    var finished = false;
-    var opacity = 1.00;
-    var executions = 0;
-    return new Promise(resolve => {
-        function fadeToBlackOrganisms() {
-            if (!finished) {
-                // animate
-                for (var i = 0; i < organisms.length; i++) {
-                    // 'clear' organism from canvas
-                    organisms[i].ctx.fillStyle = 'black';
-                    organisms[i].ctx.beginPath();
-                    organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-                    organisms[i].ctx.fill();
+function drawNotChosenText(opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(750, 540, 275, 20);
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.fillText("Not Selected", 800, 560);
+}
 
-                    organisms[i].ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
-                    organisms[i].ctx.beginPath();
-                    organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-                    organisms[i].ctx.fill();
-                    executions++;
-                }
+function drawAllSelectedOrganismsText(opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(750, 480, 275, 100);
 
-                if (opacity <= 0.01) {
-                    finished = true;
-                }
-                else {
-                    console.log(opacity);
-                    opacity -= 0.05;
-                }
-                frame_id = requestAnimationFrame(fadeToBlackOrganisms);
-            }
-            else {
-                // resolve
-                console.log(`Expected Executions: ${organisms.length * 21}`);
-                console.log(`Executions: ${executions}`);
-                cancelAnimationFrame(frame_id);
-                resolve("FADE TO BLACK COMPLETE");
-            }
-        }
-        start_organism_fade_to_black = requestAnimationFrame(fadeToBlackOrganisms);
-    })
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+    ctx.fillText("Females Selected", 800, 500);
+
+    ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
+    ctx.fillText("Males Selected", 800, 530);
+
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.fillText("Not Selected", 800, 560);
 }
 
 // similar to redrawOrganisms(), but this function accepts an opacity value to allow fading
+// used in multiple places
 function drawOrganisms(opacity) {
-    organisms[i].ctx.fillStyle = 'black';
-    organisms[i].ctx.beginPath();
-    organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-    organisms[i].ctx.fill();
+    for (let i = 0; i < organisms.length; i++) {
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+        ctx.fill();
 
-    organisms[i].ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
-    organisms[i].ctx.beginPath();
-    organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-    organisms[i].ctx.fill();
+        ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+        ctx.fill();
+    }
 }
 
 function drawSelectionPhaseExitText(opacity, old_opacity) {
