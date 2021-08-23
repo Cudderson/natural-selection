@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
 // ===== begin module testing =====
+import { testModule } from "./modules/drawings";
 
 // starting coordinates for organisms and goal
 const INITIAL_X = 500; 
@@ -1580,6 +1581,8 @@ function stopSimulation() {
 function selectSimulationType() {
     drawInitialSimSelectionScreen();
     turnOnSimTypeSelectionListeners();
+
+    console.log(testModules('Hello everybody!'));
 }
 
 // example images not final. consider more zoomed-in images
