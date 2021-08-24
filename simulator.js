@@ -1,11 +1,13 @@
 document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
 // ===== begin module testing =====
-import { testModule, yoo } from "./modules/drawings.js";
+import * as Module from "./modules/drawings.js";
+
+Module.testModule('Hello everybody!');
+console.log(Module.yoo);
 
 // convert html function calls to eventlisteners in js
 
-// [] turn off listener in validateSettingsForm() 
 document.getElementById("apply-form").addEventListener('submit', function submitForm(event) {
     // don't submit form
     event.preventDefault();
@@ -17,7 +19,7 @@ document.getElementById("apply-form").addEventListener('submit', function submit
 });
 
 // allow run_btn to simply run the simulation
-// turn off this listener in runSimulation()
+// [x] turn off this listener in runSimulation()
 document.getElementsByClassName("run-btn")[0].addEventListener("click", runSimulation);
 
 // convert stopSimulation() to be called from js vs html
@@ -25,21 +27,21 @@ document.getElementsByClassName("stop-btn")[0].addEventListener('click', functio
     stopSimulation();
 });
 
-// ===== so far, I have converted html function calls to js event listeners, ==========
-// ===== and reworked how rAF is being used. Basically, I don't keep track of the =====
-// ===== frame_id anymore, I just resolve() when animation ends. idk if this is good. =
-//
-// ===== Alternatively, I could try declaring frame_id at a different point outside ===
-// ===== of function and see if rAF can keep track of it that way.                =====
-// ===== I should probably try that before my current method of removing frame_id =====
-
-// ** Okay, so declaring var frame_id outside of the looping function seems to work.
-// I don't understand how the original way doesn't work once converting to module, but perhaps I'm
-// learning a better practice.
-
-// Ultimately, I need to decide if I will use/not use frame_id for my animations. It seems like a better practice to do that,
-// so I'll try that first.
 // recommended: let frame_id; (outside animation function)
+
+// ===== HERE =====
+// I think a good animation to try could be drawSimulationSettings()
+
+// steps:
+// [x] copy drawSimulationSettings() into drawings.js
+// [x] comment out drawSimulationSettings() in this file
+// [x] import/export statements
+// [!] it works
+//      - module function can't access variables defined in simulator.js
+
+// how to fix?
+
+// ================
 
 // ===== End Module Test/Refactor =====
 
@@ -718,10 +720,13 @@ async function runPreSimAnimations() {
     // *** pre-sim animations will vary slightly (death, boundary), depending on sim type ***
 
     // (only with dialogue on!)
-    await paintbrush.fadeIn(drawSimulationSettings, .01);
+
+    // ===== TESTING MODULES (drawSimulationSettings()) =====
+    await paintbrush.fadeIn(Module.drawSimulationSettings, .01);
     await sleep(2000);
 
-    await paintbrush.fadeOut(drawSimulationSettings, .02);
+    await paintbrush.fadeOut(Module.drawSimulationSettings, .02);
+    // ===== END MODULE TEST (drawSimulationSettings()) =====
     await paintbrush.fadeIn(drawSimulationIntro, .01);
     await sleep(2000);
 
@@ -1153,6 +1158,7 @@ function getFarthestCheckpointReached() {
     }
 }
 
+// deprecated || make sure no code in here needs to be used before deletion
 async function testBoundarySim() {
     // update flag to resolve playTitleScreenAnimation()
     simulation_started = true;
@@ -1403,7 +1409,8 @@ function prepareToRunSimulation() {
 
 async function runSimulation () {
 
-    // ===== integrating boundary code into core simulation =====
+    // remove run-btn listener
+    document.getElementsByClassName("run-btn")[0].removeEventListener('click', runSimulation);
 
     simulation_started = true;
 
@@ -1628,9 +1635,6 @@ function stopSimulation() {
 function selectSimulationType() {
     drawInitialSimSelectionScreen();
     turnOnSimTypeSelectionListeners();
-
-    testModule('Hello everybody!');
-    console.log(yoo);
 }
 
 // example images not final. consider more zoomed-in images
@@ -2339,40 +2343,41 @@ function fadeInTitleAnimation(title_organisms) {
 
 // Simulation Introduction
 
-// checking for applicable animations to convert from here down ===========
+// ===== TESTING MODULES, DON'T CHANGE THIS FUNCTION =====
 
-function drawSimulationSettings(opacity) {
+// function drawSimulationSettings(opacity) {
+//     console.log("dsfasdvlka;erlgma;sdlvm;alsvem;alemv;alsdmv;almsg");
 
-    console.log('caaled drawSimulationSettings()');
+//     console.log('caaled drawSimulationSettings()');
 
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+//     ctx.fillStyle = 'black';
+//     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.font = "30px arial";
-    ctx.fillText("Simulation Settings", 300, 195);
-    ctx.fillRect(300, 197, 260, 1);
+//     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+//     ctx.font = "30px arial";
+//     ctx.fillText("Simulation Settings", 300, 195);
+//     ctx.fillRect(300, 197, 260, 1);
 
-    ctx.font = "24px arial";
-    ctx.fillText(`Initial Population:`, 300, 250);
-    ctx.fillText(`Gene Count:`, 300, 290);
-    ctx.fillText(`Movement Speed:`, 300, 330);
-    ctx.fillText(`Mutation Rate:`, 300, 370);
-    ctx.fillText(`Dialogue:`, 300, 410);
+//     ctx.font = "24px arial";
+//     ctx.fillText(`Initial Population:`, 300, 250);
+//     ctx.fillText(`Gene Count:`, 300, 290);
+//     ctx.fillText(`Movement Speed:`, 300, 330);
+//     ctx.fillText(`Mutation Rate:`, 300, 370);
+//     ctx.fillText(`Dialogue:`, 300, 410);
     
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(`${TOTAL_ORGANISMS}`, 600, 250);
-    ctx.fillText(`${GENE_COUNT}`, 600, 290);
-    ctx.fillText(`${MAX_GENE}`, 600, 330);
-    ctx.fillText(`${MUTATION_RATE}`, 600, 370);
+//     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+//     ctx.fillText(`${TOTAL_ORGANISMS}`, 600, 250);
+//     ctx.fillText(`${GENE_COUNT}`, 600, 290);
+//     ctx.fillText(`${MAX_GENE}`, 600, 330);
+//     ctx.fillText(`${MUTATION_RATE}`, 600, 370);
 
-    if (dialogue === false) {
-        ctx.fillText(`Disabled`, 600, 410);
-    }
-    else {
-        ctx.fillText(`Enabled`, 600, 410);
-    }
-}
+//     if (dialogue === false) {
+//         ctx.fillText(`Disabled`, 600, 410);
+//     }
+//     else {
+//         ctx.fillText(`Enabled`, 600, 410);
+//     }
+// }
 
 function drawSimulationIntro(opacity) {
     ctx.fillStyle = 'black';
