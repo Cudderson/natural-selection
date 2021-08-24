@@ -39,6 +39,7 @@ document.getElementsByClassName("stop-btn")[0].addEventListener('click', functio
 
 // Ultimately, I need to decide if I will use/not use frame_id for my animations. It seems like a better practice to do that,
 // so I'll try that first.
+// recommended: let frame_id; (outside animation function)
 
 // ===== End Module Test/Refactor =====
 
@@ -649,6 +650,7 @@ class Paintbrush {
         return new Promise(resolve => {
             let finished = false;
             let opacity = 1.00;
+            let frame_id;
             function drawFrame() {
                 if (!finished) {
                     // animate
@@ -662,11 +664,11 @@ class Paintbrush {
                     else {
                         opacity -= step;
                     }
-                    requestAnimationFrame(drawFrame);
+                    frame_id = requestAnimationFrame(drawFrame);
                 }
                 else {
                     // resolve
-                    // cancelAnimationFrame(frame_id);
+                    cancelAnimationFrame(frame_id);
                     resolve();
                 }
             }
@@ -680,6 +682,7 @@ class Paintbrush {
             let finished = false;
             let opacity = 0.00;
             let old_opacity = 1.00;
+            let frame_id;
 
             function drawFrame() {
                 if (!finished) {
@@ -696,11 +699,11 @@ class Paintbrush {
                         old_opacity -= step;
                     }
 
-                    requestAnimationFrame(drawFrame);
+                    frame_id = requestAnimationFrame(drawFrame);
                 }
                 else {
                     // resolve
-                    // cancelAnimationFrame(frame_id);
+                    cancelAnimationFrame(frame_id);
                     resolve();
                 }
             }
@@ -1022,9 +1025,11 @@ function updateAndMoveOrganismsBounds() {
 // moved here for integration from evaluation phase section
 function updateAndMoveOrganisms(goal) {
     return new Promise(resolve => {
-        var total_moves = 0;
-        var finished = false;
-        var success_flag = false;
+        let total_moves = 0;
+        let finished = false;
+        let success_flag = false;
+        let frame_id;
+
         // why is this async?
         async function animateOrganisms() {
             if (!finished) {
@@ -1061,7 +1066,7 @@ function updateAndMoveOrganisms(goal) {
                 resolve(success_flag);
             }
         }
-        start_animate_organisms = requestAnimationFrame(animateOrganisms);
+        requestAnimationFrame(animateOrganisms);
     })
 }
 
@@ -2072,13 +2077,13 @@ function selectParentsForReproduction(potential_mothers, potential_fathers, next
     // this way, our species will try to reproduce the same amount of organisms it started the generation with, rather than
     // organisms.length, which would always decline as organisms die
     for (var i = 0; i < (next_gen_target_length / 2); i++) {
-        mother_index = Math.floor(Math.random() * potential_mothers.length);
-        father_index = Math.floor(Math.random() * potential_fathers.length);
+        let mother_index = Math.floor(Math.random() * potential_mothers.length);
+        let father_index = Math.floor(Math.random() * potential_fathers.length);
 
-        var mother = potential_mothers[mother_index];
-        var father = potential_fathers[father_index];
+        let mother = potential_mothers[mother_index];
+        let father = potential_fathers[father_index];
 
-        new_parents = [mother, father];
+        let new_parents = [mother, father];
 
         parents.push(new_parents);
     }
@@ -2100,22 +2105,22 @@ function reproduceNewGeneration(parents) {
 }
 
 function determineOffspringCount() {
-    possible_offspring_counts = [0, 0, 1, 1, 2, 2, 2, 3, 4, 5]; // sum = 20, 20/10items = 2avg
-    var offspring_count_index = Math.floor(Math.random() * possible_offspring_counts.length);
-    // all_indicies.push(offspring_count_index);
-    var offspring_count = possible_offspring_counts[offspring_count_index];
-    // all_offspring_counts.push(offspring_count);
+    // this shouldn't be declared every call.. (fix)
+    let possible_offspring_counts = [0, 0, 1, 1, 2, 2, 2, 3, 4, 5]; // sum = 20, 20/10items = 2avg
+
+    let offspring_count_index = Math.floor(Math.random() * possible_offspring_counts.length);
+    let offspring_count = possible_offspring_counts[offspring_count_index];
     return offspring_count;
 }
 
 // 4 & 5. Crossover & Mutate (Mutation handled on gene inheritance)
 function crossover(parents_to_crossover) {
 
-    var mother = parents_to_crossover[0];
-    var father = parents_to_crossover[1];
+    let mother = parents_to_crossover[0];
+    let father = parents_to_crossover[1];
 
     // create offspring's genes
-    var crossover_genes = [];
+    let crossover_genes = [];
 
     for (var j = 0; j < GENE_COUNT; j++) {
         // select if mother or father gene will be used (50% probability)
@@ -2125,17 +2130,17 @@ function crossover(parents_to_crossover) {
         // set upper and lower bound for gene mutation using MUTATION_RATE / 2
         // this way, mother and father genes retain an equal chance of being chosen
         if (random_bool < (MUTATION_RATE / 2) || random_bool > 1 - (MUTATION_RATE / 2)) {
-            mutated_gene = getRandomGene(MIN_GENE, MAX_GENE);
+            let mutated_gene = getRandomGene(MIN_GENE, MAX_GENE);
             crossover_genes.push(mutated_gene);
         }
         // mother gene chosen
         else if (random_bool < 0.5) {
-            mother_gene = mother.genes[j];
+            let mother_gene = mother.genes[j];
             crossover_genes.push(mother_gene);
         }
         // father gene chosen
         else {
-            father_gene = father.genes[j];
+            let father_gene = father.genes[j];
             crossover_genes.push(father_gene);
         }
     }
@@ -2144,8 +2149,8 @@ function crossover(parents_to_crossover) {
 }
 
 function getGender() {
-    var gender_indicator = Math.random();
-    var gender;
+    let gender_indicator = Math.random();
+    let gender;
     if (gender_indicator < 0.5) {
         gender = 'female';
     }
@@ -2165,8 +2170,8 @@ function reproduce(crossover_genes) {
         spawn_y = INITIAL_Y_BOUND;
     }
 
-    offspring_gender = getGender();
-    offspring = new Organism(offspring_gender, spawn_x, spawn_y, ctx);
+    let offspring_gender = getGender();
+    let offspring = new Organism(offspring_gender, spawn_x, spawn_y, ctx);
     offspring.genes = crossover_genes;
 
     // push offspring to new population
@@ -2227,15 +2232,15 @@ function createTitleScreenOrganisms() {
 }
 
 function fadeInTitleAnimation(title_organisms) {
-    var opacity = 0.00;
-    var opacity_tracker = 0.00;
-    var finished = false;
-    var cycles = 0;
-    var start_button_pressed = false; // flag to resolve animation
+    let opacity = 0.00;
+    let opacity_tracker = 0.00;
+    let finished = false;
+    let cycles = 0;
+    let start_button_pressed = false; // flag to resolve animation
 
-    var logo = document.getElementById("logo");
-    var press_start_text = document.getElementById("press-start");
-    var start_btn = document.getElementsByClassName("start-btn")[0];
+    let logo = document.getElementById("logo");
+    let press_start_text = document.getElementById("press-start");
+    let start_btn = document.getElementsByClassName("start-btn")[0];
 
     start_btn.addEventListener("click", function updateStartBtnFlagOnClick() {
         console.log("Start Button Clicked");
@@ -2270,7 +2275,7 @@ function fadeInTitleAnimation(title_organisms) {
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             
                 // move organisms forever (works)
-                for (var i = 0; i < 100; i++) {
+                for (let i = 0; i < 100; i++) {
                     if (title_organisms[0].index < 250) {
                         // update and move
                         if (title_organisms[i].index < 250) {
@@ -2284,7 +2289,7 @@ function fadeInTitleAnimation(title_organisms) {
                         cycles++;
                         console.log("Resetting Gene Index");
 
-                        for (var j = 0; j < 100; j++) {
+                        for (let j = 0; j < 100; j++) {
                             title_organisms[j].index = 0;
                         }
 
@@ -2489,7 +2494,6 @@ function drawEvaluationPhaseExitText(opacity, old_opacity) {
     ctx.fillText("Evaluate Individuals", 10, 60);
 
     if (opacity >= 0.99) {
-        finished = true;
         ctx.fillStyle = 'black';
         ctx.fillRect(10, 10, 275, 200);
         drawPhases();
@@ -2777,7 +2781,6 @@ function drawSelectionPhaseExitText(opacity, old_opacity) {
 
     // is this necessary?
     if (opacity >= 1.00) {
-        finished = true;
         ctx.fillStyle = 'black';
         ctx.fillRect(10, 10, 275, 200);
         drawPhases();
@@ -2825,7 +2828,6 @@ function drawCrossoverPhaseExitText(opacity, old_opacity) {
 
     // is this necessary?
     if (opacity >= 1.00) {
-        finished = true;
         ctx.fillStyle = 'black';
         ctx.fillRect(10, 10, 275, 200);
         drawPhases();
@@ -2875,7 +2877,6 @@ function drawMutationPhaseExitText(opacity, old_opacity) {
 
     // is this necessary?
     if (opacity >= 1.00) {
-        finished = true;
         ctx.fillStyle = 'black';
         ctx.fillRect(10, 10, 275, 200);
         drawPhases();
@@ -2936,7 +2937,6 @@ function drawCreateNewGenPhaseExitText(opacity, old_opacity) {
 
     // is this necessary?
     if (opacity >= 1.00) {
-        finished = true;
         ctx.fillStyle = 'black';
         ctx.fillRect(10, 10, 275, 200);
         drawPhases();
