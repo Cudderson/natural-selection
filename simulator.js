@@ -195,9 +195,10 @@ simGlobals.FPS = 30;
 // Stores the position of the cursor
 simGlobals.coordinates = {'x':0 , 'y':0};
 
-// testing class Paintbrush as global for now
-// consider making a direct window object attribute
-simGlobals.paintbrush;
+// [x] consider making a direct window object attribute
+function createPaintbrush() {
+    window.paintbrush = new Paintbrush();
+}
 // ===== END GLOBALIZE =====
 
 class Organism {
@@ -817,11 +818,15 @@ async function runPreSimAnimations() {
     // (only with dialogue on!)
 
     // ===== TESTING MODULES (drawSimulationSettings()) =====
-    await paintbrush.fadeIn(window.drawSimulationSettings, .01);
+    await paintbrush.fadeIn(Drawings.drawSimulationSettings, .01);
     await sleep(2000);
 
-    await paintbrush.fadeOut(window.drawSimulationSettings, .02);
+    await paintbrush.fadeOut(Drawings.drawSimulationSettings, .02);
+
+    // It all works using my current method
+
     // ===== END MODULE TEST (drawSimulationSettings()) =====
+
     await paintbrush.fadeIn(drawSimulationIntro, .01);
     await sleep(2000);
 
@@ -1507,15 +1512,15 @@ async function runSimulation () {
     // remove run-btn listener
     document.getElementsByClassName("run-btn")[0].removeEventListener('click', runSimulation);
 
-    simulation_started = true;
+    simGlobals.simulation_started = true;
 
     console.log("Running Simulation with these settings:");
-    console.log(`Total Organisms: ${TOTAL_ORGANISMS}`);
-    console.log(`Gene Count: ${GENE_COUNT}`);
-    console.log(`Resilience: ${RESILIENCE}`);
-    console.log(`Mutation Rate: ${MUTATION_RATE}`);
-    console.log(`Min/Max Gene: [${MIN_GENE}, ${MAX_GENE}]`);
-    console.log(`Dialogue: ${dialogue}`);
+    console.log(`Total Organisms: ${simGlobals.TOTAL_ORGANISMS}`);
+    console.log(`Gene Count: ${simGlobals.GENE_COUNT}`);
+    console.log(`Resilience: ${simGlobals.RESILIENCE}`);
+    console.log(`Mutation Rate: ${simGlobals.MUTATION_RATE}`);
+    console.log(`Min/Max Gene: [${simGlobals.MIN_GENE}, ${simGlobals.MAX_GENE}]`);
+    console.log(`Dialogue: ${simGlobals.dialogue}`);
 
     // make start/settings buttons disappear, display stop simulation button
     var start_btn = document.getElementsByClassName("run-btn")[0];
@@ -1772,15 +1777,15 @@ function drawInitialSimSelectionScreen() {
 function handleSimTypeBtnMouseover(event) {
     console.log(event.target.className);
     if (event.target.className === 'sim-type-classic') {
-        sim_type = highlightClassicSimType();
+        simGlobals.sim_type = highlightClassicSimType();
     }
     else if (event.target.className === 'sim-type-boundary') {
-        sim_type = highlightBoundarySimType();
+        simGlobals.sim_type = highlightBoundarySimType();
     }
 }
 
 function handleSimTypeBtnClick() {
-    if (sim_type != null) {
+    if (simGlobals.sim_type != null) {
         applySimType();
     }
 }
@@ -1803,7 +1808,7 @@ function turnOnSimTypeSelectionListeners() {
 
 
 function turnOffSimTypeSelectionEventListeners() {
-    if (sim_type != null) {
+    if (simGlobals.sim_type != null) {
         // turn off event listeners before displaying next canvas
         let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
         let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
@@ -1822,15 +1827,15 @@ function handleSimTypeSelectionKeyPress(event) {
         case "ArrowLeft":
             // the solution is to sync this variable with the sim_type var that runSimulation()/checkSimType() checks
             // i'll do that now. set sim_type here
-            sim_type = highlightClassicSimType();
+            simGlobals.sim_type = highlightClassicSimType();
             break;
 
         case "ArrowRight":
-            sim_type = highlightBoundarySimType();
+            simGlobals.sim_type = highlightBoundarySimType();
             break;
         
         case "Enter":
-            if (sim_type != null) {
+            if (simGlobals.sim_type != null) {
                 applySimType();
             }
             else {
@@ -1946,10 +1951,10 @@ function applySimType() {
     document.getElementsByClassName("sim-type-classic")[0].style.display = 'none';
     document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
 
-    if (sim_type === 'classic') {
+    if (simGlobals.sim_type === 'classic') {
         displaySettingsForm();
     }
-    else if (sim_type === 'boundary') {
+    else if (simGlobals.sim_type === 'boundary') {
         // user must create boundary before settings configuration
         displayBoundaryCreationIntroductionOne();
     }
@@ -2279,13 +2284,16 @@ function reproduce(crossover_genes) {
 
 // *** Animations ***
 // Title Screen
+// convert to 'let'
 async function playTitleScreenAnimation() {
     console.log("Simulation Ready!");
 
     var title_organisms = createTitleScreenOrganisms();
 
-    // testing Paintbrush (this is the initial object declaration)
-    simGlobals.paintbrush = new Paintbrush();
+    let simulation_started = false;
+
+    // create paintbrush as window object
+    createPaintbrush();
     
     do {
         console.log("Starting Title Animation");
@@ -3136,7 +3144,7 @@ function displaySettingsForm() {
     canvas_container.style.display = 'none';
     settings_container.style.display = 'block';
 
-    if (sim_type === 'classic') {
+    if (simGlobals.sim_type === 'classic') {
         // display classic settings (no death/resilience)
         document.getElementsByClassName("resilience-setting-label")[0].style.display = 'none';
         document.getElementsByClassName("resilience-input")[0].style.display = 'none';
@@ -3194,10 +3202,10 @@ function validateSettingsForm() {
     // dialogue
     var dialogue_setting = document.getElementById("dialogue-checkbox");
     if (dialogue_setting.checked) {
-        dialogue = true;
+        simGlobals.dialogue = true;
     }
     else {
-        dialogue = false;
+        simGlobals.dialogue = false;
     }
 
     // returns to title screen
@@ -3219,10 +3227,10 @@ function validateTotalOrganismsSetting() {
 
     if (typeof parseInt(total_organisms_setting.value) === 'number' && parseInt(total_organisms_setting.value) > 0) {
         if (parseInt(total_organisms_setting.value > 9999)) {
-            TOTAL_ORGANISMS = 9999;
+            simGlobals.TOTAL_ORGANISMS = 9999;
         }
         else {
-            TOTAL_ORGANISMS = Math.abs(parseInt(total_organisms_setting.value));
+            simGlobals.TOTAL_ORGANISMS = Math.abs(parseInt(total_organisms_setting.value));
         }
         total_organisms_setting.style.borderBottom = '2px solid var(--custom-green)';
         return 'valid';
@@ -3238,10 +3246,10 @@ function validateGeneCountSetting() {
 
     if (typeof parseInt(gene_count_setting.value) === 'number' && parseInt(gene_count_setting.value) > 0) {
         if (parseInt(gene_count_setting.value) > 1000) {
-            GENE_COUNT = 1000;
+            simGlobals.GENE_COUNT = 1000;
         }
         else {
-            GENE_COUNT = Math.abs(parseInt(gene_count_setting.value));
+            simGlobals.GENE_COUNT = Math.abs(parseInt(gene_count_setting.value));
         }
         gene_count_setting.style.borderBottom = '2px solid var(--custom-green)';
         return "valid";
@@ -3258,11 +3266,10 @@ function validateMutationRateSetting() {
     // consider allowing float here
     if (typeof parseInt(mutation_rate_setting.value) === 'number' && parseInt(mutation_rate_setting.value) > 0) {
         if (parseInt(mutation_rate_setting.value) > 100) {
-            MUTATION_RATE = 1;
+            simGlobals.MUTATION_RATE = 1;
         }
         else {
-            MUTATION_RATE = parseInt(mutation_rate_setting.value) / 100;
-            console.log("MUT RATE: " + MUTATION_RATE);
+            simGlobals.MUTATION_RATE = parseInt(mutation_rate_setting.value) / 100;
         }
         mutation_rate_setting.style.borderBottom = '2px solid var(--custom-green)';
         return "valid";
@@ -3294,8 +3301,8 @@ function validateMovementSetting() {
     // create max and min genes from movement speed
     // pre-validated in preValidateMovementSetting();
     if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 7) {
-        MIN_GENE = parseInt(movement_speed_setting.value) * -1;
-        MAX_GENE = parseInt(movement_speed_setting.value);
+        simGlobals.MIN_GENE = parseInt(movement_speed_setting.value) * -1;
+        simGlobals.MAX_GENE = parseInt(movement_speed_setting.value);
         movement_speed_setting.style.borderBottom = "2px solid var(--custom-green)";
         return "valid";
     } 
@@ -3311,7 +3318,7 @@ function validateResilienceSetting() {
     let resilience_setting = document.getElementById("resilience");
 
     if (parseInt(resilience_setting.value) >= 0 && parseInt(resilience_setting.value) <= 100 && typeof parseInt(resilience_setting.value) === 'number') {
-        RESILIENCE = parseInt(resilience_setting.value) / 100;
+        simGlobals.RESILIENCE = parseInt(resilience_setting.value) / 100;
         resilience_setting.style.borderBottom = "2px solid var(--custom-green)";
         return "valid";
     } 
