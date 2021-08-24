@@ -101,9 +101,35 @@ function drawStats(opacity) {
     ctx.fillText(simGlobals.average_fitness.toString(), 940, 585);
 }
 
+function drawEvaluationPhaseEntryText(opacity, old_opacity) {
+    // would be better to only clear evaluate-phase area
+    ctx.clearRect(10, 10, 275, 200);
+
+    ctx.font = "20px arial";
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Create New Generation", 10, 30);
+
+    ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+    ctx.fillText("Evaluate Individuals", 10, 60);
+
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText("Evaluate Individuals", 10, 60);
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Select Most-Fit Individuals", 10, 90);
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Crossover", 10, 120);
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Mutate", 10, 150);
+}
+
 export {
     testModule, findSammy,
     drawSimulationSettings, drawSimulationIntro,
     drawFakeGoal, drawSimulationExplanation,
     drawExplanationAndGoal, drawStats,
+    drawEvaluationPhaseEntryText,
 }

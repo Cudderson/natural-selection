@@ -171,10 +171,10 @@ simGlobals.simulation_started = false; // []
 simGlobals.simulation_succeeded = false; // []
 
 // track total generations
-simGlobals.generation_count = 0; // []
+simGlobals.generation_count = 0; // [x]
 
 // generation statistics
-simGlobals.average_fitness = 0.00; // []
+simGlobals.average_fitness = 0.00; // [x]
 simGlobals.total_fitness = 0.00; // []
 
 // containers holding organisms and next-generation organisms
@@ -219,26 +219,27 @@ class Organism {
     }
 
     setRandomGenes() {
-        for (var i = 0; i < GENE_COUNT; i++) {
-            var random_gene = getRandomGene(MIN_GENE, MAX_GENE);
+        for (var i = 0; i < simGlobals.GENE_COUNT; i++) {
+            var random_gene = getRandomGene(simGlobals.MIN_GENE, simGlobals.MAX_GENE);
             this.genes.push(random_gene);
         }
     }
 
     showGenes() {
-        for (var i = 0; i < GENE_COUNT; i++) {
+        for (var i = 0; i < simGlobals.GENE_COUNT; i++) {
             console.log(this.genes[i]);
         }
     }
 
     update() {
-        if (this.index < GENE_COUNT) {
+        if (this.index < simGlobals.GENE_COUNT) {
             this.x += this.genes[this.index][0];
             this.y += this.genes[this.index][1];
             this.index++;
         }
     }
 
+    // remove personal ctx declarations from class
     move() {
         this.ctx.fillStyle = 'rgba(148, 0, 211, 1)'; // darkviolet
         this.ctx.beginPath();
@@ -248,11 +249,11 @@ class Organism {
 
     calcDistanceToGoal() {
         // c**2 = a**2 + b**2
-        var horizontal_distance_squared = (Math.abs(this.x - GOAL_X_POS)) ** 2;
-        var vertical_distance_squared = (Math.abs(this.y - GOAL_Y_POS)) ** 2;
+        let horizontal_distance_squared = (Math.abs(this.x - simGlobals.GOAL_X_POS)) ** 2;
+        let vertical_distance_squared = (Math.abs(this.y - simGlobals.GOAL_Y_POS)) ** 2;
 
-        var distance_to_goal_squared = vertical_distance_squared + horizontal_distance_squared;
-        var distance_to_goal = Math.sqrt(distance_to_goal_squared);
+        let distance_to_goal_squared = vertical_distance_squared + horizontal_distance_squared;
+        let distance_to_goal = Math.sqrt(distance_to_goal_squared);
 
         this.distance_to_goal = distance_to_goal;
 
@@ -266,15 +267,15 @@ class Organism {
     // should combine fitness functions when available
     calcFitness() {
         // height = distance between starting location(y) and goal.y
-        var height = INITIAL_Y - GOAL_Y_POS;
+        let height = simGlobals.INITIAL_Y - simGlobals.GOAL_Y_POS;
 
-        var normalized_distance_to_goal = this.distance_to_goal / height;
+        let normalized_distance_to_goal = this.distance_to_goal / height;
         this.fitness = 1 - normalized_distance_to_goal;
     }
 
     calcFitnessBounds(scale) {
         // ideally don't have to pass in scale here
-        var normalized_distance_to_goal = this.distance_to_goal / scale;
+        let normalized_distance_to_goal = this.distance_to_goal / scale;
         this.fitness = 1 - normalized_distance_to_goal;
     }
 }
@@ -811,23 +812,15 @@ class Paintbrush {
 }
 
 // Main Drivers
+// all drawings for this function moved to drawings.js
 async function runPreSimAnimations() {
 
     // *** pre-sim animations will vary slightly (death, boundary), depending on sim type ***
 
     // (only with dialogue on!)
-
-    // ===== TESTING MODULES (drawSimulationSettings()) =====
     await paintbrush.fadeIn(Drawings.drawSimulationSettings, .01);
     await sleep(2000);
-
     await paintbrush.fadeOut(Drawings.drawSimulationSettings, .02);
-
-    // It all works using my current method
-
-    // ===== END MODULE TEST (drawSimulationSettings()) =====
-
-    // ===== Continuing converting drawing animations to drawings.js =====
 
     await paintbrush.fadeIn(Drawings.drawSimulationIntro, .01);
     await sleep(2000);
@@ -1525,19 +1518,16 @@ async function runSimulation () {
     console.log(`Dialogue: ${simGlobals.dialogue}`);
 
     // make start/settings buttons disappear, display stop simulation button
-    var start_btn = document.getElementsByClassName("run-btn")[0];
-    var stop_btn = document.getElementsByClassName("stop-btn")[0];
-    var settings_btn = document.getElementsByClassName("settings-btn")[0];
-    start_btn.style.display = 'none';
-    settings_btn.style.display = 'none';
-    stop_btn.style.display = 'block';
+    document.getElementsByClassName("run-btn")[0].style.display = 'none';
+    document.getElementsByClassName("settings-btn")[0].style.display = 'none';
+    document.getElementsByClassName("stop-btn")[0].style.display = 'block';
 
     // pre-sim animations *****
     await runPreSimAnimations();
 
     /// PHASE: CREATE NEW GENERATION/POPULATION
     createOrganisms();
-    console.log("Amount of organisms created = " + organisms.length);
+    console.log("Amount of organisms created = " + simGlobals.organisms.length);
 
     do {
         const result = await runGeneration();
@@ -1548,10 +1538,14 @@ async function runSimulation () {
 // maybe async ruins this functions performance?
 async function runGeneration() {
 
-    if (dialogue) {
+    if (simGlobals.dialogue) {
         // looks weird for now (opacity doesn't start at 0) (fix when polishing)
-        await paintbrush.fadeToNewColor(drawEvaluationPhaseEntryText, .02);
+        await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .02);
     }
+
+
+    // ===== sim working up to here with all drawings coming from module (haven't tested boundary mode yet)=====
+
     
     // Phase: Evaluate Individuals
     // this is where statistics are redrawn (goal.showStatistics())
@@ -1967,17 +1961,17 @@ function createOrganisms () {
     let gender;
     let male_count = 0;
     let female_count = 0;
-    let spawn_x = INITIAL_X;
-    let spawn_y = INITIAL_Y;
+    let spawn_x = simGlobals.INITIAL_X;
+    let spawn_y = simGlobals.INITIAL_Y;
 
     // update spawn point if boundary simulation
-    if (sim_type === 'boundary') {
-        spawn_x = INITIAL_X_BOUND;
-        spawn_y = INITIAL_Y_BOUND;
+    if (simGlobals.sim_type === 'boundary') {
+        spawn_x = simGlobals.INITIAL_X_BOUND;
+        spawn_y = simGlobals.INITIAL_Y_BOUND;
     }
 
     // create equal number of males and females
-    for (var i = 0; i < TOTAL_ORGANISMS; i++) {
+    for (var i = 0; i < simGlobals.TOTAL_ORGANISMS; i++) {
         if (i % 2) {
             gender = 'male';
             male_count++;
@@ -1990,7 +1984,7 @@ function createOrganisms () {
         let organism = new Organism(gender, spawn_x, spawn_y, ctx);
 
         organism.setRandomGenes();
-        organisms.push(organism);
+        simGlobals.organisms.push(organism);
     }
     console.log(`FEMALES CREATED: ${female_count}, MALES CREATED: ${male_count}`);
 
@@ -2292,8 +2286,6 @@ async function playTitleScreenAnimation() {
 
     var title_organisms = createTitleScreenOrganisms();
 
-    let simulation_started = false;
-
     // create paintbrush as window object
     createPaintbrush();
     
@@ -2317,7 +2309,7 @@ async function playTitleScreenAnimation() {
         }
         
     }
-    while (simulation_started === false && status === "Keep Playing");
+    while (simGlobals.simulation_started === false && status === "Keep Playing");
 }
 
 // uses var, should be using let
@@ -2347,7 +2339,6 @@ function fadeInTitleAnimation(title_organisms) {
     let finished = false;
     let cycles = 0;
     let start_button_pressed = false; // flag to resolve animation
-    let simulation_started = false;
 
     let logo = document.getElementById("logo");
     let press_start_text = document.getElementById("press-start");
@@ -2373,7 +2364,7 @@ function fadeInTitleAnimation(title_organisms) {
 
     return new Promise(resolve => {
         function animateTitle() {
-            if (!finished && !simulation_started) {
+            if (!finished && !simGlobals.simulation_started) {
 
                 // respond to event listener flag
                 if (start_button_pressed) {
@@ -2452,109 +2443,7 @@ function fadeInTitleAnimation(title_organisms) {
 
 // Simulation Introduction
 
-// ===== TESTING MODULES, DON'T CHANGE THIS FUNCTION =====
-
-// function drawSimulationSettings(opacity) {
-//     console.log("dsfasdvlka;erlgma;sdlvm;alsvem;alemv;alsdmv;almsg");
-
-//     console.log('caaled drawSimulationSettings()');
-
-//     ctx.fillStyle = 'black';
-//     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-//     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-//     ctx.font = "30px arial";
-//     ctx.fillText("Simulation Settings", 300, 195);
-//     ctx.fillRect(300, 197, 260, 1);
-
-//     ctx.font = "24px arial";
-//     ctx.fillText(`Initial Population:`, 300, 250);
-//     ctx.fillText(`Gene Count:`, 300, 290);
-//     ctx.fillText(`Movement Speed:`, 300, 330);
-//     ctx.fillText(`Mutation Rate:`, 300, 370);
-//     ctx.fillText(`Dialogue:`, 300, 410);
-    
-//     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-//     ctx.fillText(`${TOTAL_ORGANISMS}`, 600, 250);
-//     ctx.fillText(`${GENE_COUNT}`, 600, 290);
-//     ctx.fillText(`${MAX_GENE}`, 600, 330);
-//     ctx.fillText(`${MUTATION_RATE}`, 600, 370);
-
-//     if (dialogue === false) {
-//         ctx.fillText(`Disabled`, 600, 410);
-//     }
-//     else {
-//         ctx.fillText(`Enabled`, 600, 410);
-//     }
-// }
-
-
-// moved to drawings.js
-// function drawSimulationIntro(opacity) {
-//     ctx.fillStyle = 'black';
-//     ctx.clearRect(0, 75, canvas.width, 500);
-
-//     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-//     ctx.font = '28px arial';
-//     ctx.fillText(`${TOTAL_ORGANISMS} organisms were created with completely random genes.`, 125, 290);
-
-//     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-//     ctx.font = '22px arial';
-//     ctx.fillText("This society of organisms needs to reach the goal if it wants to survive.", 150, 330);
-// }
-
-// moved to drawings.js
-// function drawFakeGoal(opacity) {
-//     ctx.fillStyle = 'black';
-//     ctx.fillRect(500, 50, 20, 20);
-    
-//     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-//     ctx.fillRect(500, 50, 20, 20);
-// }
-
-// moved to drawings.js
-// function drawSimulationExplanation(opacity) {
-//     ctx.fillStyle = 'black';
-//     ctx.fillRect(0, 100, canvas.width, canvas.height);
-
-//     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-//     ctx.font = '22px arial';
-//     ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
-//     ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
-//     ctx.fillText("until they succeed or fail to survive.", 350, 350);
-// }
-
-// moved to drawings.js
-// function drawExplanationAndGoal(opacity) {
-//     ctx.fillStyle = 'black';
-//     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-//     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-//     ctx.font = '22px arial';
-//     ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
-//     ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
-//     ctx.fillText("until they succeed or fail to survive.", 350, 350);
-
-//     // fake goal
-//     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-//     ctx.fillRect(500, 50, 20, 20);
-// }
-
-// // may need to be updated for resilience
-// moved to drawings.js
-// function drawStats(opacity) {
-//     ctx.fillStyle = 'black';
-//     ctx.fillRect(738, 510, 250, 90);
-
-//     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-//     ctx.font = "22px arial";
-//     ctx.fillText('Generation:', 740, 535);
-//     ctx.fillText(generation_count.toString(), 940, 535);
-//     ctx.fillText('Population Size:', 740, 560);
-//     ctx.fillText(TOTAL_ORGANISMS.toString(), 940, 560);
-//     ctx.fillText('Average Fitness:', 740, 585);
-//     ctx.fillText(average_fitness.toString(), 940, 585);
-// }
+// * all drawings for runPreSimAnimations() were moved to drawings.js (working)
 
 function drawPhases() {
     ctx.font = "20px arial";
@@ -2576,30 +2465,31 @@ function drawPhases() {
 }
 
 // Evaluation Phase
-function drawEvaluationPhaseEntryText(opacity, old_opacity) {
-    // would be better to only clear evaluate-phase area
-    ctx.clearRect(10, 10, 275, 200);
+// moved to drawings.js
+// function drawEvaluationPhaseEntryText(opacity, old_opacity) {
+//     // would be better to only clear evaluate-phase area
+//     ctx.clearRect(10, 10, 275, 200);
 
-    ctx.font = "20px arial";
+//     ctx.font = "20px arial";
 
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Create New Generation", 10, 30);
+//     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+//     ctx.fillText("Create New Generation", 10, 30);
 
-    ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
-    ctx.fillText("Evaluate Individuals", 10, 60);
+//     ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+//     ctx.fillText("Evaluate Individuals", 10, 60);
 
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText("Evaluate Individuals", 10, 60);
+//     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+//     ctx.fillText("Evaluate Individuals", 10, 60);
 
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Select Most-Fit Individuals", 10, 90);
+//     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+//     ctx.fillText("Select Most-Fit Individuals", 10, 90);
 
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Crossover", 10, 120);
+//     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+//     ctx.fillText("Crossover", 10, 120);
 
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Mutate", 10, 150);
-}
+//     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+//     ctx.fillText("Mutate", 10, 150);
+// }
 
 function drawEvaluationPhaseExitText(opacity, old_opacity) {
     // each frame, draw the same text with less gold and then more gray
