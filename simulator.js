@@ -4,9 +4,8 @@ document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 import * as Module from "./modules/drawings.js";
 
 Module.testModule('Hello everybody!');
-console.log(Module.yoo);
 
-// convert html function calls to eventlisteners in js
+// convert html function calls to eventlisteners in js (place in appropriate functions)
 
 document.getElementById("apply-form").addEventListener('submit', function submitForm(event) {
     // don't submit form
@@ -27,19 +26,30 @@ document.getElementsByClassName("stop-btn")[0].addEventListener('click', functio
     stopSimulation();
 });
 
-// recommended: let frame_id; (outside animation function)
-
 // ===== HERE =====
-// I think a good animation to try could be drawSimulationSettings()
+// * Because I have created two modules, my 'global' variables aren't actually global anymore.
+// * To use a global variable now, I need to bind it to the window object.
+// * (understand reason why more in-depth)
+// * - What I don't currently understand is why the imported functions don't get access to the variables defined in the namespace
+//     that they were imported into
+//         - I think it's because modules have their own scope, so even though I'm importing a function into this scope, I can't reference
+//           variables initialized in this scope because they don't exist in the imported function's scope (i think)
 
-// steps:
-// [x] copy drawSimulationSettings() into drawings.js
-// [x] comment out drawSimulationSettings() in this file
-// [x] import/export statements
-// [!] it works
-//      - module function can't access variables defined in simulator.js
+// - Probable solution: bind the 'global' variables in this file to window, giving both modules access to them
 
-// how to fix?
+// FINAL PLAN:
+// 1. [] For the meantime, bind the global vars in simulator.js to window (global)
+//          - Would be good idea to create one global object to protect namespace (simGlobals{}?)
+//          - (window._____ creates a new attribute for the window object, so make sure to not declare twice)
+// 2. [] Import the drawings from drawings.js as a single module to keep namespace protected
+// 3. [] Over time, determine where variables can live without being global, reducing the amount of window attributes created
+
+// * * * remember: var is hoisted, const&let are not * * *
+
+// Why I'm doing this:
+// - The imported functions need access to variables defined in simulator.js top-level. Before it was a module, the vars in this
+//   file were global, and I'm just making them global again.
+// - Over time, I will slowly convert vars from global to more-local once I identify where they are/are not needed
 
 // ================
 
@@ -47,10 +57,15 @@ document.getElementsByClassName("stop-btn")[0].addEventListener('click', functio
 
 
 // starting coordinates for organisms and goal
-const INITIAL_X = 500; 
+const INITIAL_X = 500;
 const INITIAL_Y = 500;
 const GOAL_X_POS = 500;
 const GOAL_Y_POS = 50;
+
+window.INITIAL_X = INITIAL_X; // *** This creates a separate window object attribute!
+
+Module.findX(); // works (needs be declared after Temporal Dead Zone for const, let, class)
+// but are they the same? (no, window._____ creates a new attribute for the window object)
 
 // organism global default settings
 var TOTAL_ORGANISMS = 100;
@@ -722,10 +737,10 @@ async function runPreSimAnimations() {
     // (only with dialogue on!)
 
     // ===== TESTING MODULES (drawSimulationSettings()) =====
-    await paintbrush.fadeIn(Module.drawSimulationSettings, .01);
+    await paintbrush.fadeIn(window.drawSimulationSettings, .01);
     await sleep(2000);
 
-    await paintbrush.fadeOut(Module.drawSimulationSettings, .02);
+    await paintbrush.fadeOut(window.drawSimulationSettings, .02);
     // ===== END MODULE TEST (drawSimulationSettings()) =====
     await paintbrush.fadeIn(drawSimulationIntro, .01);
     await sleep(2000);
