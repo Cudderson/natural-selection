@@ -126,6 +126,10 @@ document.getElementsByClassName("stop-btn")[0].addEventListener('click', functio
 
 // ** NOTE: We really only need to globalize vars that will be used in our modules. The vars used in this file should be fine and not globalized
 // [] check when above statement is taken care of
+
+// [] Also, maybe canvas and ctx shouldn't be in simGlobals, but just attached to window on their own?
+// I'm only saying this because otherwise we'll need to write simGlobals.ctx 100000 times
+// maybe simGlobals will become simVars over time, and only be a few values
 window.simGlobals = {};
 
 // works
@@ -179,11 +183,11 @@ simGlobals.offspring_organisms = [];
 
 // canvas & drawing context
 // reconsider how these are used
-simGlobals.canvas = document.getElementById("main-canvas");
-simGlobals.ctx = simGlobals.canvas.getContext("2d");
+window.canvas = document.getElementById("main-canvas");
+window.ctx = canvas.getContext("2d");
 
 // ********** name conflicts with canvas_data in updateAndMoveOrganismsBounds, need to fix
-simGlobals.canvas_data_bad_practice = simGlobals.ctx.getImageData(0, 0, simGlobals.canvas.width, simGlobals.canvas.height);
+simGlobals.canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
 // frame rate
 simGlobals.FPS = 30;
@@ -192,6 +196,7 @@ simGlobals.FPS = 30;
 simGlobals.coordinates = {'x':0 , 'y':0};
 
 // testing class Paintbrush as global for now
+// consider making a direct window object attribute
 simGlobals.paintbrush;
 // ===== END GLOBALIZE =====
 
@@ -2310,10 +2315,10 @@ function createTitleScreenOrganisms() {
     let title_organisms = [];
     for (let i = 0; i < 100; i++) {
         // we need a random x&y value to start the organism at 
-        let random_x = Math.floor(Math.random() * simGlobals.canvas.width);
-        let random_y = Math.floor(Math.random() * simGlobals.canvas.height);
+        let random_x = Math.floor(Math.random() * canvas.width);
+        let random_y = Math.floor(Math.random() * canvas.height);
 
-        let new_organism = new Organism('female', random_x, random_y, simGlobals.ctx);
+        let new_organism = new Organism('female', random_x, random_y, ctx);
 
         // ** NEED TO ALTER fadeInTitleAnimation() IF ANYTHING HERE CHANGES
         for (let j = 0; j < 250; j++) {
@@ -2367,8 +2372,8 @@ function fadeInTitleAnimation(title_organisms) {
                     return resolve("Display Sim Types");
                 }
 
-                simGlobals.ctx.fillStyle = 'black';
-                simGlobals.ctx.fillRect(0, 0, simGlobals.canvas.width, simGlobals.canvas.height);
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
             
                 // move organisms forever (works)
                 for (let i = 0; i < 100; i++) {
@@ -2397,14 +2402,14 @@ function fadeInTitleAnimation(title_organisms) {
 
                 // use globalAlpha, then reset
                 // could make this class Paintbrush in the future for this and goal class methods
-                simGlobals.ctx.globalAlpha = opacity;
-                simGlobals.ctx.drawImage(logo, 105, 275);
+                ctx.globalAlpha = opacity;
+                ctx.drawImage(logo, 105, 275);
 
-                simGlobals.ctx.globalAlpha = 0.8;
+                ctx.globalAlpha = 0.8;
                 // blink start text 
                 if (opacity_tracker >= 0.12 && opacity_tracker <= 0.24) {
                     // only draw image half of the time
-                    simGlobals.ctx.drawImage(press_start_text, 300, 400, 400, 40);
+                    ctx.drawImage(press_start_text, 300, 400, 400, 40);
                 }
                 else if (opacity_tracker > 0.24) {
                     // reset tracker
@@ -2417,9 +2422,9 @@ function fadeInTitleAnimation(title_organisms) {
                 }
 
                 // return to 1 for organisms
-                simGlobals.ctx.globalAlpha = 1;
+                ctx.globalAlpha = 1;
 
-                // FPS is an example of a variable that doesn't need to be global
+                // FPS is an example of a variable that doesn't need to be global ( in window )
                 sleep(750 / simGlobals.FPS); // control drawing FPS for organisms
                 // var????? why
                 var frame_id = requestAnimationFrame(animateTitle);
