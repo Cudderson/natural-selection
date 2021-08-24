@@ -1,9 +1,9 @@
 document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
 // ===== begin module testing =====
-import * as Module from "./modules/drawings.js";
+import * as Drawings from "./modules/drawings.js";
 
-Module.testModule('Hello everybody!');
+Drawings.testModule('Hello everybody!');
 
 // convert html function calls to eventlisteners in js (place in appropriate functions)
 
@@ -38,7 +38,7 @@ document.getElementsByClassName("stop-btn")[0].addEventListener('click', functio
 // - Probable solution: bind the 'global' variables in this file to window, giving both modules access to them
 
 // FINAL PLAN:
-// 1. [] For the meantime, bind the global vars in simulator.js to window (global)
+// 1. [x] For the meantime, bind the global vars in simulator.js to window (global)
 //          - Would be good idea to create one global object to protect namespace (simGlobals{}?)
 //          - (window._____ creates a new attribute for the window object, so make sure to not declare twice)
 // 2. [] Import the drawings from drawings.js as a single module to keep namespace protected
@@ -49,76 +49,151 @@ document.getElementsByClassName("stop-btn")[0].addEventListener('click', functio
 // Why I'm doing this:
 // - The imported functions need access to variables defined in simulator.js top-level. Before it was a module, the vars in this
 //   file were global, and I'm just making them global again.
+// - The imported functions are only drawing functions, they do not alter variables whatsoever
 // - Over time, I will slowly convert vars from global to more-local once I identify where they are/are not needed
 
 // ================
 
 // ===== End Module Test/Refactor =====
 
-
+// ===== GLOBALIZE =====
 // starting coordinates for organisms and goal
-const INITIAL_X = 500;
-const INITIAL_Y = 500;
-const GOAL_X_POS = 500;
-const GOAL_Y_POS = 50;
+// const INITIAL_X = 500;
+// const INITIAL_Y = 500;
+// const GOAL_X_POS = 500;
+// const GOAL_Y_POS = 50;
 
-window.INITIAL_X = INITIAL_X; // *** This creates a separate window object attribute!
+// window.INITIAL_X = INITIAL_X; // *** This creates a separate window object attribute!
 
-Module.findX(); // works (needs be declared after Temporal Dead Zone for const, let, class)
+// Module.findX(); // works (needs be declared after Temporal Dead Zone for const, let, class)
 // but are they the same? (no, window._____ creates a new attribute for the window object)
 
 // organism global default settings
-var TOTAL_ORGANISMS = 100;
-var GENE_COUNT = 250;
-var MUTATION_RATE = 0.03;
-var MIN_GENE = -5;
-var MAX_GENE = 5;
-// for boundary sims
-var RESILIENCE = 1.00; // starts at perfect resilience
-var dialogue = false;
+// var TOTAL_ORGANISMS = 100;
+// var GENE_COUNT = 250;
+// var MUTATION_RATE = 0.03;
+// var MIN_GENE = -5;
+// var MAX_GENE = 5;
+// // for boundary sims
+// var RESILIENCE = 1.00; // starts at perfect resilience
+// var dialogue = false;
 
 // boundary simulations start organisms/goal at different location
-const INITIAL_X_BOUND = 50;
-const INITIAL_Y_BOUND = 550;
-const GOAL_X_POS_BOUNDS = 925;
-const GOAL_Y_POS_BOUNDS = 50;
+// const INITIAL_X_BOUND = 50;
+// const INITIAL_Y_BOUND = 550;
+// const GOAL_X_POS_BOUNDS = 925;
+// const GOAL_Y_POS_BOUNDS = 50;
 
 // boundary globals
-var custom_boundary;
-var scale_statistics; // this is/should be only computed once (boundary doesn't change)
+// var custom_boundary;
+// var scale_statistics; // this is/should be only computed once (boundary doesn't change)
 
 // flags
-var sim_type;
-var simulation_started = false;
-var simulation_succeeded = false;
+// var sim_type;
+// var simulation_started = false;
+// var simulation_succeeded = false;
 
 // track total generations
-var generation_count = 0;
+// var generation_count = 0;
 
 // generation statistics
-var average_fitness = 0.00;
-var total_fitness = 0.00;
+// var average_fitness = 0.00;
+// var total_fitness = 0.00;
 
 // containers holding organisms and next-generation organisms
-var organisms = [];
-var offspring_organisms = [];
+// var organisms = [];
+// var offspring_organisms = [];
 
 // canvas & drawing context
 // reconsider how these are used
-var canvas = document.getElementById("main-canvas");
-var ctx = canvas.getContext("2d");
+// var canvas = document.getElementById("main-canvas");
+// var ctx = canvas.getContext("2d");
 
 // ********** name conflicts with canvas_data in updateAndMoveOrganismsBounds, need to fix
-var canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
+// var canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
 // frame rate
-const FPS = 30;
+// const FPS = 30;
 
 // Stores the position of the cursor
-let coordinates = {'x':0 , 'y':0};
+// let coordinates = {'x':0 , 'y':0};
 
 // testing class Paintbrush as global for now
-var paintbrush;
+// var paintbrush;
+
+// ===== OLD VARS ABOVE =============================================================================
+// ===== NEW VARS BELOW =============================================================================
+
+// ** NOTE: We really only need to globalize vars that will be used in our modules. The vars used in this file should be fine and not globalized
+// [] check when above statement is taken care of
+window.simGlobals = {};
+
+// works
+simGlobals.sammy = 'sammy';
+Drawings.findSammy();
+
+console.log(window.simGlobals);
+console.log(simGlobals);
+
+// starting coordinates for organisms and goal
+simGlobals.INITIAL_X = 500;
+simGlobals.INITIAL_Y = 500;
+simGlobals.GOAL_X_POS = 500;
+simGlobals.GOAL_Y_POS = 50;
+
+// organism global default settings
+simGlobals.TOTAL_ORGANISMS = 100;
+simGlobals.GENE_COUNT = 250;
+simGlobals.MUTATION_RATE = 0.03;
+simGlobals.MIN_GENE = -5;
+simGlobals.MAX_GENE = 5;
+// for boundary sims
+simGlobals.RESILIENCE = 1.00; // starts at perfect resilience
+simGlobals.dialogue = false;
+
+// boundary simulations start organisms/goal at different location
+simGlobals.INITIAL_X_BOUND = 50;
+simGlobals.INITIAL_Y_BOUND = 550;
+simGlobals.GOAL_X_POS_BOUNDS = 925;
+simGlobals.GOAL_Y_POS_BOUNDS = 50;
+
+// boundary globals
+simGlobals.custom_boundary;
+simGlobals.scale_statistics; // this is/should be only computed once (boundary doesn't change)
+
+// flags
+simGlobals.sim_type;
+simGlobals.simulation_started = false;
+simGlobals.simulation_succeeded = false;
+
+// track total generations
+simGlobals.generation_count = 0;
+
+// generation statistics
+simGlobals.average_fitness = 0.00;
+simGlobals.total_fitness = 0.00;
+
+// containers holding organisms and next-generation organisms
+simGlobals.organisms = [];
+simGlobals.offspring_organisms = [];
+
+// canvas & drawing context
+// reconsider how these are used
+simGlobals.canvas = document.getElementById("main-canvas");
+simGlobals.ctx = simGlobals.canvas.getContext("2d");
+
+// ********** name conflicts with canvas_data in updateAndMoveOrganismsBounds, need to fix
+simGlobals.canvas_data_bad_practice = simGlobals.ctx.getImageData(0, 0, simGlobals.canvas.width, simGlobals.canvas.height);
+
+// frame rate
+simGlobals.FPS = 30;
+
+// Stores the position of the cursor
+simGlobals.coordinates = {'x':0 , 'y':0};
+
+// testing class Paintbrush as global for now
+simGlobals.paintbrush;
+// ===== END GLOBALIZE =====
 
 class Organism {
     constructor (gender, x, y, ctx) {
@@ -2205,7 +2280,7 @@ async function playTitleScreenAnimation() {
     var title_organisms = createTitleScreenOrganisms();
 
     // testing Paintbrush (this is the initial object declaration)
-    paintbrush = new Paintbrush();
+    simGlobals.paintbrush = new Paintbrush();
     
     do {
         console.log("Starting Title Animation");
@@ -2230,18 +2305,19 @@ async function playTitleScreenAnimation() {
     while (simulation_started === false && status === "Keep Playing");
 }
 
+// uses var, should be using let
 function createTitleScreenOrganisms() {
-    var title_organisms = [];
-    for (var i = 0; i < 100; i++) {
+    let title_organisms = [];
+    for (let i = 0; i < 100; i++) {
         // we need a random x&y value to start the organism at 
-        var random_x = Math.floor(Math.random() * canvas.width);
-        var random_y = Math.floor(Math.random() * canvas.height);
+        let random_x = Math.floor(Math.random() * simGlobals.canvas.width);
+        let random_y = Math.floor(Math.random() * simGlobals.canvas.height);
 
-        var new_organism = new Organism('female', random_x, random_y, ctx);
+        let new_organism = new Organism('female', random_x, random_y, simGlobals.ctx);
 
         // ** NEED TO ALTER fadeInTitleAnimation() IF ANYTHING HERE CHANGES
-        for (var j = 0; j < 250; j++) {
-            var random_gene = getRandomGene(-5, 5);
+        for (let j = 0; j < 250; j++) {
+            let random_gene = getRandomGene(-5, 5);
             new_organism.genes.push(random_gene);
         }
 
@@ -2256,6 +2332,7 @@ function fadeInTitleAnimation(title_organisms) {
     let finished = false;
     let cycles = 0;
     let start_button_pressed = false; // flag to resolve animation
+    let simulation_started = false;
 
     let logo = document.getElementById("logo");
     let press_start_text = document.getElementById("press-start");
@@ -2290,8 +2367,8 @@ function fadeInTitleAnimation(title_organisms) {
                     return resolve("Display Sim Types");
                 }
 
-                ctx.fillStyle = 'black';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                simGlobals.ctx.fillStyle = 'black';
+                simGlobals.ctx.fillRect(0, 0, simGlobals.canvas.width, simGlobals.canvas.height);
             
                 // move organisms forever (works)
                 for (let i = 0; i < 100; i++) {
@@ -2320,14 +2397,14 @@ function fadeInTitleAnimation(title_organisms) {
 
                 // use globalAlpha, then reset
                 // could make this class Paintbrush in the future for this and goal class methods
-                ctx.globalAlpha = opacity;
-                ctx.drawImage(logo, 105, 275);
+                simGlobals.ctx.globalAlpha = opacity;
+                simGlobals.ctx.drawImage(logo, 105, 275);
 
-                ctx.globalAlpha = 0.8;
+                simGlobals.ctx.globalAlpha = 0.8;
                 // blink start text 
                 if (opacity_tracker >= 0.12 && opacity_tracker <= 0.24) {
                     // only draw image half of the time
-                    ctx.drawImage(press_start_text, 300, 400, 400, 40);
+                    simGlobals.ctx.drawImage(press_start_text, 300, 400, 400, 40);
                 }
                 else if (opacity_tracker > 0.24) {
                     // reset tracker
@@ -2340,9 +2417,11 @@ function fadeInTitleAnimation(title_organisms) {
                 }
 
                 // return to 1 for organisms
-                ctx.globalAlpha = 1;
+                simGlobals.ctx.globalAlpha = 1;
 
-                sleep(750 / FPS); // control drawing FPS for organisms
+                // FPS is an example of a variable that doesn't need to be global
+                sleep(750 / simGlobals.FPS); // control drawing FPS for organisms
+                // var????? why
                 var frame_id = requestAnimationFrame(animateTitle);
             }
             else {

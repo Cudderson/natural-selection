@@ -7,4 +7,8 @@ function findX() {
     console.log(INITIAL_X);
 }
 
-export { testModule, findX }
+function findSammy() {
+    console.log(simGlobals.sammy);
+}
+
+export { testModule, findX, findSammy }
