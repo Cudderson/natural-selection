@@ -124,62 +124,62 @@ document.getElementsByClassName("stop-btn")[0].addEventListener('click', functio
 // ===== OLD VARS ABOVE =============================================================================
 // ===== NEW VARS BELOW =============================================================================
 
-// ** NOTE: We really only need to globalize vars that will be used in our modules. The vars used in this file should be fine and not globalized
-// [] check when above statement is taken care of
-
-// [] Also, maybe canvas and ctx shouldn't be in simGlobals, but just attached to window on their own?
-// I'm only saying this because otherwise we'll need to write simGlobals.ctx 100000 times
-// maybe simGlobals will become simVars over time, and only be a few values
 window.simGlobals = {};
 
-// works
+// working test
 simGlobals.sammy = 'sammy';
 Drawings.findSammy();
 
 console.log(window.simGlobals);
 console.log(simGlobals);
 
+// ** NOTE: We really only need to globalize vars that will be used in our modules. 
+// The vars used in this file should be fine and not globalized
+
+// *** Check box of variable when it is used by drawings.js
+
 // starting coordinates for organisms and goal
-simGlobals.INITIAL_X = 500;
-simGlobals.INITIAL_Y = 500;
-simGlobals.GOAL_X_POS = 500;
-simGlobals.GOAL_Y_POS = 50;
+simGlobals.INITIAL_X = 500; // [] 
+simGlobals.INITIAL_Y = 500; // []
+simGlobals.GOAL_X_POS = 500; // []
+simGlobals.GOAL_Y_POS = 50; // []
 
 // organism global default settings
-simGlobals.TOTAL_ORGANISMS = 100;
-simGlobals.GENE_COUNT = 250;
-simGlobals.MUTATION_RATE = 0.03;
-simGlobals.MIN_GENE = -5;
-simGlobals.MAX_GENE = 5;
+simGlobals.TOTAL_ORGANISMS = 100; // [x]
+simGlobals.GENE_COUNT = 250; // [x]
+simGlobals.MUTATION_RATE = 0.03; // [x]
+simGlobals.MIN_GENE = -5; // []
+simGlobals.MAX_GENE = 5; // []
 // for boundary sims
-simGlobals.RESILIENCE = 1.00; // starts at perfect resilience
-simGlobals.dialogue = false;
+simGlobals.RESILIENCE = 1.00; // [x]
+// starts at perfect resilience
+simGlobals.dialogue = false; // [x]
 
 // boundary simulations start organisms/goal at different location
-simGlobals.INITIAL_X_BOUND = 50;
-simGlobals.INITIAL_Y_BOUND = 550;
-simGlobals.GOAL_X_POS_BOUNDS = 925;
-simGlobals.GOAL_Y_POS_BOUNDS = 50;
+simGlobals.INITIAL_X_BOUND = 50; // []
+simGlobals.INITIAL_Y_BOUND = 550; // []
+simGlobals.GOAL_X_POS_BOUNDS = 925; // []
+simGlobals.GOAL_Y_POS_BOUNDS = 50; // []
 
 // boundary globals
-simGlobals.custom_boundary;
-simGlobals.scale_statistics; // this is/should be only computed once (boundary doesn't change)
+simGlobals.custom_boundary; // []
+simGlobals.scale_statistics; // [] // this is/should be only computed once (boundary doesn't change)
 
 // flags
-simGlobals.sim_type;
-simGlobals.simulation_started = false;
-simGlobals.simulation_succeeded = false;
+simGlobals.sim_type; // []
+simGlobals.simulation_started = false; // []
+simGlobals.simulation_succeeded = false; // []
 
 // track total generations
-simGlobals.generation_count = 0;
+simGlobals.generation_count = 0; // []
 
 // generation statistics
-simGlobals.average_fitness = 0.00;
-simGlobals.total_fitness = 0.00;
+simGlobals.average_fitness = 0.00; // []
+simGlobals.total_fitness = 0.00; // []
 
 // containers holding organisms and next-generation organisms
-simGlobals.organisms = [];
-simGlobals.offspring_organisms = [];
+simGlobals.organisms = []; // []
+simGlobals.offspring_organisms = []; // []
 
 // canvas & drawing context
 // reconsider how these are used
@@ -187,13 +187,13 @@ window.canvas = document.getElementById("main-canvas");
 window.ctx = canvas.getContext("2d");
 
 // ********** name conflicts with canvas_data in updateAndMoveOrganismsBounds, need to fix
-simGlobals.canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
+simGlobals.canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height); // []
 
 // frame rate
-simGlobals.FPS = 30;
+simGlobals.FPS = 30; // []
 
 // Stores the position of the cursor
-simGlobals.coordinates = {'x':0 , 'y':0};
+simGlobals.coordinates = {'x':0 , 'y':0}; // []
 
 // [x] consider making a direct window object attribute
 function createPaintbrush() {
@@ -827,18 +827,20 @@ async function runPreSimAnimations() {
 
     // ===== END MODULE TEST (drawSimulationSettings()) =====
 
-    await paintbrush.fadeIn(drawSimulationIntro, .01);
+    // ===== Continuing converting drawing animations to drawings.js =====
+
+    await paintbrush.fadeIn(Drawings.drawSimulationIntro, .01);
     await sleep(2000);
 
-    await paintbrush.fadeIn(drawFakeGoal, .01); // *** this will need to be changed for boundary sims
-    await paintbrush.fadeOut(drawSimulationIntro, .02);
-    await paintbrush.fadeIn(drawSimulationExplanation, .01);
+    await paintbrush.fadeIn(Drawings.drawFakeGoal, .01); // *** this will need to be changed for boundary sims
+    await paintbrush.fadeOut(Drawings.drawSimulationIntro, .02);
+    await paintbrush.fadeIn(Drawings.drawSimulationExplanation, .01);
     await sleep(4000);
 
-    await paintbrush.fadeOut(drawExplanationAndGoal, .02);
+    await paintbrush.fadeOut(Drawings.drawExplanationAndGoal, .02);
     await sleep(1000);
 
-    await paintbrush.fadeIn(drawStats, .01);
+    await paintbrush.fadeIn(Drawings.drawStats, .01);
     await sleep(200);
 
     return new Promise(resolve => {
@@ -2486,67 +2488,73 @@ function fadeInTitleAnimation(title_organisms) {
 //     }
 // }
 
-function drawSimulationIntro(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.clearRect(0, 75, canvas.width, 500);
 
-    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.font = '28px arial';
-    ctx.fillText(`${TOTAL_ORGANISMS} organisms were created with completely random genes.`, 125, 290);
+// moved to drawings.js
+// function drawSimulationIntro(opacity) {
+//     ctx.fillStyle = 'black';
+//     ctx.clearRect(0, 75, canvas.width, 500);
 
-    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.font = '22px arial';
-    ctx.fillText("This society of organisms needs to reach the goal if it wants to survive.", 150, 330);
-}
+//     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+//     ctx.font = '28px arial';
+//     ctx.fillText(`${TOTAL_ORGANISMS} organisms were created with completely random genes.`, 125, 290);
 
-function drawFakeGoal(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(500, 50, 20, 20);
+//     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+//     ctx.font = '22px arial';
+//     ctx.fillText("This society of organisms needs to reach the goal if it wants to survive.", 150, 330);
+// }
+
+// moved to drawings.js
+// function drawFakeGoal(opacity) {
+//     ctx.fillStyle = 'black';
+//     ctx.fillRect(500, 50, 20, 20);
     
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillRect(500, 50, 20, 20);
-}
+//     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+//     ctx.fillRect(500, 50, 20, 20);
+// }
 
-function drawSimulationExplanation(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 100, canvas.width, canvas.height);
+// moved to drawings.js
+// function drawSimulationExplanation(opacity) {
+//     ctx.fillStyle = 'black';
+//     ctx.fillRect(0, 100, canvas.width, canvas.height);
 
-    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.font = '22px arial';
-    ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
-    ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
-    ctx.fillText("until they succeed or fail to survive.", 350, 350);
-}
+//     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+//     ctx.font = '22px arial';
+//     ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
+//     ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
+//     ctx.fillText("until they succeed or fail to survive.", 350, 350);
+// }
 
-function drawExplanationAndGoal(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+// moved to drawings.js
+// function drawExplanationAndGoal(opacity) {
+//     ctx.fillStyle = 'black';
+//     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.font = '22px arial';
-    ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
-    ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
-    ctx.fillText("until they succeed or fail to survive.", 350, 350);
+//     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+//     ctx.font = '22px arial';
+//     ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
+//     ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
+//     ctx.fillText("until they succeed or fail to survive.", 350, 350);
 
-    // fake goal
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillRect(500, 50, 20, 20);
-}
+//     // fake goal
+//     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+//     ctx.fillRect(500, 50, 20, 20);
+// }
 
-// may need to be updated for resilience
-function drawStats(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(738, 510, 250, 90);
+// // may need to be updated for resilience
+// moved to drawings.js
+// function drawStats(opacity) {
+//     ctx.fillStyle = 'black';
+//     ctx.fillRect(738, 510, 250, 90);
 
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.font = "22px arial";
-    ctx.fillText('Generation:', 740, 535);
-    ctx.fillText(generation_count.toString(), 940, 535);
-    ctx.fillText('Population Size:', 740, 560);
-    ctx.fillText(TOTAL_ORGANISMS.toString(), 940, 560);
-    ctx.fillText('Average Fitness:', 740, 585);
-    ctx.fillText(average_fitness.toString(), 940, 585);
-}
+//     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+//     ctx.font = "22px arial";
+//     ctx.fillText('Generation:', 740, 535);
+//     ctx.fillText(generation_count.toString(), 940, 535);
+//     ctx.fillText('Population Size:', 740, 560);
+//     ctx.fillText(TOTAL_ORGANISMS.toString(), 940, 560);
+//     ctx.fillText('Average Fitness:', 740, 585);
+//     ctx.fillText(average_fitness.toString(), 940, 585);
+// }
 
 function drawPhases() {
     ctx.font = "20px arial";
