@@ -175,6 +175,7 @@ simGlobals.generation_count = 0; // [x]
 
 // generation statistics
 simGlobals.average_fitness = 0.00; // [x]
+// does this really need to be global?
 simGlobals.total_fitness = 0.00; // []
 
 // containers holding organisms and next-generation organisms
@@ -1607,16 +1608,13 @@ async function runGeneration() {
         await sleep(1000);
     }
 
-    // [x] sim works up to here
-    // =============== Starting ===============
-
     // store length of organisms array before deceased organisms filtered out for reproduction (boundary sims)
-    var next_gen_target_length = organisms.length;
+    var next_gen_target_length = simGlobals.organisms.length;
 
-    if (sim_type === 'classic') {
+    if (simGlobals.sim_type === 'classic') {
         const population_resolution = await evaluatePopulation(); // maybe don't await here
         var closest_organism = population_resolution['closest_organism'];
-        average_fitness = population_resolution['average_fitness'];
+        simGlobals.average_fitness = population_resolution['average_fitness'];
     }
     else if (sim_type === 'boundary') {
         // we will follow the logic of the 'classic' sim type 
@@ -1651,6 +1649,9 @@ async function runGeneration() {
 
         console.log(`Average Fitness: ${average_fitness}`);
     }
+
+    // [x] sim works up to here
+    // =============== Starting (classic sim type only)===============
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     if (dialogue) {
@@ -2027,11 +2028,12 @@ function hasReachedGoal(organism, goal) {
 async function evaluatePopulation() {
     // to do
     const shortest_distance_resolution = await getShortestDistanceToGoal();
-    const average_fitness = await calcPopulationFitness();
+    simGlobals.average_fitness = await calcPopulationFitness();
 
+    // also redundant, fix
     var population_resolution = {
         'closest_organism': shortest_distance_resolution,
-        'average_fitness': average_fitness
+        'average_fitness': simGlobals.average_fitness
     }
 
     return new Promise(resolve => {
@@ -2045,15 +2047,15 @@ function getShortestDistanceToGoal() {
     var closest_organism_index;
 
     // though this loop identifies closest organism, it ALSO updates organism's distance_to_goal attribute
-    for (var i = 0; i < organisms.length; i++) {
-        var distance_to_goal = organisms[i].calcDistanceToGoal();
+    for (var i = 0; i < simGlobals.organisms.length; i++) {
+        var distance_to_goal = simGlobals.organisms[i].calcDistanceToGoal();
         if (distance_to_goal < shortest_distance) {
             shortest_distance = distance_to_goal;
             closest_organism_index = i;
         }
     }
 
-    var closest_organism = organisms[closest_organism_index];
+    var closest_organism = simGlobals.organisms[closest_organism_index];
 
     return closest_organism;
 }
@@ -2086,14 +2088,15 @@ function getShortestDistanceToNextCheckpoint(next_checkpoint) {
 function calcPopulationFitness () {
     return new Promise(resolve => {
         // reset total_fitness before calculation
-        total_fitness = 0;
-        for (var i = 0; i < organisms.length; i++) {
-            organisms[i].calcFitness();
-            total_fitness += organisms[i].fitness;
+        simGlobals.total_fitness = 0;
+        for (var i = 0; i < simGlobals.organisms.length; i++) {
+            simGlobals.organisms[i].calcFitness();
+            simGlobals.total_fitness += simGlobals.organisms[i].fitness;
         }
 
-        var average_fitness = total_fitness / organisms.length;
-        resolve(average_fitness);
+        // redundant, fix
+        simGlobals.average_fitness = simGlobals.total_fitness / simGlobals.organisms.length;
+        resolve(simGlobals.average_fitness);
     })
 }
 
