@@ -126,10 +126,30 @@ function drawEvaluationPhaseEntryText(opacity, old_opacity) {
     ctx.fillText("Mutate", 10, 150);
 }
 
+function drawEvaluationPhaseExitText(opacity, old_opacity) {
+    // each frame, draw the same text with less gold and then more gray
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 40, 180, 20);
+
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
+    ctx.fillText("Evaluate Individuals", 10, 60);
+
+    ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx.fillText("Evaluate Individuals", 10, 60);
+
+    // I don't think I need this?
+    // if (opacity >= 0.99) {
+    //     ctx.fillStyle = 'black';
+    //     ctx.fillRect(10, 10, 275, 200);
+    //     drawPhases();
+    // }
+}
+
 export {
     testModule, findSammy,
     drawSimulationSettings, drawSimulationIntro,
     drawFakeGoal, drawSimulationExplanation,
     drawExplanationAndGoal, drawStats,
-    drawEvaluationPhaseEntryText,
+    drawEvaluationPhaseEntryText, drawEvaluationPhaseExitText,
 }

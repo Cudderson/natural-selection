@@ -280,6 +280,7 @@ class Organism {
     }
 }
 
+// doesn't need own ctx
 class Goal {
     constructor(x, y, size, ctx) {
         this.x = x;
@@ -294,17 +295,19 @@ class Goal {
         this.ctx.fillRect(this.x, this.y, this.size, this.size);
     }
 
+    // convert to drawings.js? why is the goal performing this?
+    // this function is not good
     showStatistics() {
-        average_fitness = Number(average_fitness).toFixed(2);
-        var population_size = organisms.length;
+        simGlobals.average_fitness = Number(simGlobals.average_fitness).toFixed(2);
+        var population_size = simGlobals.organisms.length;
         this.ctx.fillStyle = 'rgba(155, 245, 0, 1)';
         this.ctx.font = "22px arial";
         this.ctx.fillText('Generation:', 740, 535);
-        this.ctx.fillText(generation_count.toString(), 940, 535);
+        this.ctx.fillText(simGlobals.generation_count.toString(), 940, 535);
         this.ctx.fillText('Population Size:', 740, 560);
         this.ctx.fillText(population_size.toString(), 940, 560);
         this.ctx.fillText('Average Fitness:', 740, 585);
-        this.ctx.fillText(average_fitness.toString(), 940, 585);
+        this.ctx.fillText(simGlobals.average_fitness.toString(), 940, 585);
     }
 }
 
@@ -1137,27 +1140,27 @@ function updateAndMoveOrganisms(goal) {
                 goal.drawGoal();
                 goal.showStatistics();
 
-                if (dialogue) {
+                if (simGlobals.dialogue) {
                     drawStaticEvaluationPhaseText();
                 }
 
-                for (var i = 0; i < organisms.length; i++) {
-                    if (organisms[i].reached_goal == false) {
-                        organisms[i].update();
-                        organisms[i].move();
-                        hasReachedGoal(organisms[i], goal);
+                for (var i = 0; i < simGlobals.organisms.length; i++) {
+                    if (simGlobals.organisms[i].reached_goal == false) {
+                        simGlobals.organisms[i].update();
+                        simGlobals.organisms[i].move();
+                        hasReachedGoal(simGlobals.organisms[i], goal);
                     }
                     else {
-                        updateSuccessfulOrganism(organisms[i]);
+                        updateSuccessfulOrganism(simGlobals.organisms[i]);
                         success_flag = true;
                     }
                     total_moves++;
                 }
-                if (total_moves == (organisms.length * GENE_COUNT)) {
+                if (total_moves == (simGlobals.organisms.length * simGlobals.GENE_COUNT)) {
                     finished = true;
                 }
 
-                sleep(1000 / FPS); // control drawing FPS for organisms
+                sleep(1000 / simGlobals.FPS); // control drawing FPS for organisms
                 frame_id = requestAnimationFrame(animateOrganisms);
             }
             else {
@@ -1543,21 +1546,23 @@ async function runGeneration() {
         await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .02);
     }
 
-
-    // ===== sim working up to here with all drawings coming from module (haven't tested boundary mode yet)=====
-
-    
     // Phase: Evaluate Individuals
     // this is where statistics are redrawn (goal.showStatistics())
-    if (simulation_succeeded) {
+    if (simGlobals.simulation_succeeded) {
+
+
+        // skipping this (updateAndMove() not converted yet)
         await runEvaluationAnimation();
+
+
     }
     else {
         // check if simulation succeeded 
-        var success_flag = await runEvaluationAnimation();
+        let success_flag = await runEvaluationAnimation();
         console.log(`Success Flag: ${success_flag}`);
 
         // here, if success flag is true, we can await the success animation
+        // ***** skipping for now (want to get core animation converted before win scenario) *****
         if (success_flag) {
             // update flag
             simulation_succeeded = true;
@@ -1592,12 +1597,18 @@ async function runGeneration() {
         }
     }
 
-    if (dialogue) {
-        await paintbrush.fadeToNewColor(drawEvaluationPhaseExitText, .02);
+    if (simGlobals.dialogue) {
+        // await paintbrush.fadeToNewColor(drawEvaluationPhaseExitText, .02);
+        await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseExitText, .02);
 
-        await paintbrush.fadeOut(drawStats, .02); // put here to fade out stats before average fitness updated
+        // await paintbrush.fadeOut(drawStats, .02); // put here to fade out stats before average fitness updated
+        await paintbrush.fadeOut(Drawings.drawStats, .02); // put here to fade out stats before average fitness updated
+
         await sleep(1000);
     }
+
+    // [x] sim works up to here
+    // =============== Starting ===============
 
     // store length of organisms array before deceased organisms filtered out for reproduction (boundary sims)
     var next_gen_target_length = organisms.length;
@@ -2465,58 +2476,14 @@ function drawPhases() {
 }
 
 // Evaluation Phase
-// moved to drawings.js
-// function drawEvaluationPhaseEntryText(opacity, old_opacity) {
-//     // would be better to only clear evaluate-phase area
-//     ctx.clearRect(10, 10, 275, 200);
-
-//     ctx.font = "20px arial";
-
-//     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-//     ctx.fillText("Create New Generation", 10, 30);
-
-//     ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
-//     ctx.fillText("Evaluate Individuals", 10, 60);
-
-//     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-//     ctx.fillText("Evaluate Individuals", 10, 60);
-
-//     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-//     ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-//     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-//     ctx.fillText("Crossover", 10, 120);
-
-//     ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-//     ctx.fillText("Mutate", 10, 150);
-// }
-
-function drawEvaluationPhaseExitText(opacity, old_opacity) {
-    // each frame, draw the same text with less gold and then more gray
-    ctx.fillStyle = 'black';
-    ctx.fillRect(10, 40, 180, 20);
-
-    ctx.font = "20px arial";
-    ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
-    ctx.fillText("Evaluate Individuals", 10, 60);
-
-    ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-    ctx.fillText("Evaluate Individuals", 10, 60);
-
-    if (opacity >= 0.99) {
-        ctx.fillStyle = 'black';
-        ctx.fillRect(10, 10, 275, 200);
-        drawPhases();
-    }
-}
-
+// not ready to convert yet
 async function runEvaluationAnimation() {
 
     // ** not doing updateAndMove(), only fades for now
 
     // need to draw goal at location depending on sim type
-    if (sim_type === 'classic') {
-        var goal = new Goal(GOAL_X_POS, GOAL_Y_POS, 20, ctx);
+    if (simGlobals.sim_type === 'classic') {
+        var goal = new Goal(simGlobals.GOAL_X_POS, simGlobals.GOAL_Y_POS, 20, ctx);
         var success_flag = await updateAndMoveOrganisms(goal); // ideally don't pass in goal here
     }
     else {
