@@ -146,10 +146,181 @@ function drawEvaluationPhaseExitText(opacity, old_opacity) {
     // }
 }
 
+function drawSelectionPhaseEntryText(opacity, old_opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 70, 250, 20);
+
+    ctx.font = "20px arial";
+
+    ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+    ctx.fillText("Select Most-Fit Individuals", 10, 90);
+
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText("Select Most-Fit Individuals", 10, 90);
+}
+
+function drawClosestOrganismText(opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(750, 450, 275, 20);
+
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
+    ctx.fillText("Most-Fit Individual", 800, 470);   
+}
+
+function drawClosestOrganismHighlighted(opacity) {
+    ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
+    ctx.beginPath();
+    ctx.arc(paintbrush.subject.x, paintbrush.subject.y, paintbrush.subject.radius, 0, Math.PI*2, false);
+    ctx.fill();
+}
+
+function drawClosestOrganismNatural(opacity) {
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.beginPath();
+    ctx.arc(paintbrush.subject.x, paintbrush.subject.y, paintbrush.subject.radius, 0, Math.PI*2, false);
+    ctx.fill();
+}
+
+function drawMothersText(opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(750, 480, 275, 20);
+    
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+    ctx.fillText("Females Selected", 800, 500);
+}
+
+function drawFathersText(opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(750, 510, 275, 20);
+
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
+    ctx.fillText("Males Selected", 800, 530);
+}
+
+function drawMothersHighlighted(opacity) {
+    for (let i = 0; i < paintbrush.subject.length; i++) {
+        ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(paintbrush.subject[i][0].x, paintbrush.subject[i][0].y, paintbrush.subject[i][0].radius, 0, Math.PI*2, false);
+        ctx.fill();
+    }
+}
+
+function drawMothersNatural(opacity) {
+    for (var i = 0; i < paintbrush.subject.length; i++) {
+        ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(paintbrush.subject[i][0].x, paintbrush.subject[i][0].y, paintbrush.subject[i][0].radius, 0, Math.PI*2, false);
+        ctx.fill();
+    }
+}
+
+function drawFathersHighlighted(opacity) {
+    for (var i = 0; i < paintbrush.subject.length; i++) {
+        ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(paintbrush.subject[i][1].x, paintbrush.subject[i][1].y, paintbrush.subject[i][1].radius, 0, Math.PI*2, false);
+        ctx.fill();
+    }
+}
+
+function drawFathersNatural(opacity) {
+    for (var i = 0; i < paintbrush.subject.length; i++) {
+        ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(paintbrush.subject[i][1].x, paintbrush.subject[i][1].y, paintbrush.subject[i][1].radius, 0, Math.PI*2, false);
+        ctx.fill();
+    }
+}
+
+function drawNotChosenText(opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(750, 540, 275, 20);
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.fillText("Not Selected", 800, 560);
+}
+
+function drawAllSelectedOrganismsText(opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(750, 480, 275, 100);
+
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+    ctx.fillText("Females Selected", 800, 500);
+
+    ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
+    ctx.fillText("Males Selected", 800, 530);
+
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.fillText("Not Selected", 800, 560);
+}
+
+function drawBothParentTypesNatural(opacity) {
+    for (let i = 0; i < paintbrush.subject.length; i++) {
+        ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(paintbrush.subject[i][0].x, paintbrush.subject[i][0].y, paintbrush.subject[i][0].radius, 0, Math.PI*2, false);
+        ctx.fill();
+
+        ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(paintbrush.subject[i][1].x, paintbrush.subject[i][1].y, paintbrush.subject[i][1].radius, 0, Math.PI*2, false);
+        ctx.fill();
+    }
+}
+
+// similar to redrawOrganisms(), but this function accepts an opacity value to allow fading
+// used in multiple places
+function drawOrganisms(opacity) {
+    for (let i = 0; i < simGlobals.organisms.length; i++) {
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(simGlobals.organisms[i].x, simGlobals.organisms[i].y, simGlobals.organisms[i].radius, 0, Math.PI*2, false);
+        ctx.fill();
+
+        ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(simGlobals.organisms[i].x, simGlobals.organisms[i].y, simGlobals.organisms[i].radius, 0, Math.PI*2, false);
+        ctx.fill();
+    }
+}
+
+function drawSelectionPhaseExitText(opacity, old_opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 70, 240, 20);
+
+    ctx.font = "20px arial";
+
+    ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
+    ctx.fillText("Select Most-Fit Individuals", 10, 90);
+
+    ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx.fillText("Select Most-Fit Individuals", 10, 90);
+
+    // is this necessary? save just in case
+    // if (opacity >= 1.00) {
+    //     ctx.fillStyle = 'black';
+    //     ctx.fillRect(10, 10, 275, 200);
+    //     drawPhases();
+    // }
+}
+
 export {
     testModule, findSammy,
     drawSimulationSettings, drawSimulationIntro,
     drawFakeGoal, drawSimulationExplanation,
     drawExplanationAndGoal, drawStats,
     drawEvaluationPhaseEntryText, drawEvaluationPhaseExitText,
+    drawSelectionPhaseEntryText, drawClosestOrganismText,
+    drawClosestOrganismHighlighted, drawClosestOrganismNatural,
+    drawMothersText, drawFathersText,
+    drawMothersHighlighted, drawMothersNatural,
+    drawFathersHighlighted, drawFathersNatural,
+    drawNotChosenText, drawAllSelectedOrganismsText,
+    drawBothParentTypesNatural, drawOrganisms,
+    drawSelectionPhaseExitText,
 }

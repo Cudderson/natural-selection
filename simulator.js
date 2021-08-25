@@ -1654,8 +1654,8 @@ async function runGeneration() {
     // =============== Starting (classic sim type only)===============
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
-    if (dialogue) {
-        await paintbrush.fadeToNewColor(drawSelectionPhaseEntryText, .02);
+    if (simGlobals.dialogue) {
+        await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseEntryText, .02);
     }
 
     // this phase includes: beginSelectionProcess(), selectParentsForReproduction()
@@ -1669,6 +1669,7 @@ async function runGeneration() {
     // check extinction
     if (potential_mothers.length === 0 || potential_fathers.length === 0) {
 
+        // not converting to module yet
         // await fadeInExtinctionMessage();
         await paintbrush.fadeIn(drawExtinctionMessage, .05); // untested
 
@@ -1684,14 +1685,21 @@ async function runGeneration() {
 
     var parents = selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length);
     
-    if (dialogue) {
+    if (simGlobals.dialogue) {
         await sleep(1000);
 
-        // skipping (double opacity)
         await runSelectionAnimations(closest_organism, parents);
 
-        await paintbrush.fadeToNewColor(drawSelectionPhaseExitText, .02);
+        await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseExitText, .02);
     }
+
+
+
+
+    // ===== Converted up to here (sim_type='classic' only, no win/lose scenarios) =====
+
+
+
 
     // PHASE: CROSSOVER / MUTATE / REPRODUCE
 
@@ -2140,23 +2148,23 @@ function beginSelectionProcess() {
     var potential_mothers = [];
     var potential_fathers = [];
 
-    for (var i = 0; i < organisms.length; i++) {
+    for (var i = 0; i < simGlobals.organisms.length; i++) {
         // Give organisms with negative fitness a chance to reproduce
-        if (organisms[i].fitness < 0) {
-            organisms[i].fitness = 0.01;
+        if (simGlobals.organisms[i].fitness < 0) {
+            simGlobals.organisms[i].fitness = 0.01;
         }
 
         // I'm going to try this implementation >> (organism.fitness * 100) ** 1.25
-        for (var j = 0; j < Math.ceil((organisms[i].fitness * 100) ** 2); j++) {
-            if (organisms[i].gender === 'female') {
-                potential_mothers.push(organisms[i]);
+        for (var j = 0; j < Math.ceil((simGlobals.organisms[i].fitness * 100) ** 2); j++) {
+            if (simGlobals.organisms[i].gender === 'female') {
+                potential_mothers.push(simGlobals.organisms[i]);
             }
-            else if (organisms[i].gender === 'male') {
-                potential_fathers.push(organisms[i]);
+            else if (simGlobals.organisms[i].gender === 'male') {
+                potential_fathers.push(simGlobals.organisms[i]);
             }
         }
-        console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
-        console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * 100) ** 2)} times.`);
+        // console.log(`Fitness for Organism ${i}: ${simGlobals.organisms[i].fitness}`);
+        // console.log(`Organism ${i} was added to array ${Math.ceil((simGlobals.organisms[i].fitness * 100) ** 2)} times.`);
     }
 
     var potential_parents = {
@@ -2179,8 +2187,8 @@ function selectParentsForReproduction(potential_mothers, potential_fathers, next
     //     [mother9, father9]
     // ]
 
-    console.log(`organisms.length: ${organisms.length}`);
-    console.log(`target length: ${next_gen_target_length}`);
+    // console.log(`organisms.length: ${simGlobals.organisms.length}`);
+    // console.log(`target length: ${next_gen_target_length}`);
 
     var parents = [];
     // goal: pair together males and females 
@@ -2190,7 +2198,7 @@ function selectParentsForReproduction(potential_mothers, potential_fathers, next
     // boundary target length = organisms.length + num_of_deceased_organisms
     // this way, our species will try to reproduce the same amount of organisms it started the generation with, rather than
     // organisms.length, which would always decline as organisms die
-    for (var i = 0; i < (next_gen_target_length / 2); i++) {
+    for (let i = 0; i < (next_gen_target_length / 2); i++) {
         let mother_index = Math.floor(Math.random() * potential_mothers.length);
         let father_index = Math.floor(Math.random() * potential_fathers.length);
 
@@ -2535,36 +2543,24 @@ function updateSuccessfulOrganism(organism) {
 }
 
 // Selection Phase
-function drawSelectionPhaseEntryText(opacity, old_opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(10, 70, 250, 20);
-
-    ctx.font = "20px arial";
-
-    ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
-    ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText("Select Most-Fit Individuals", 10, 90);
-}
 
 async function runClosestOrganismAnimations (closest_organism) {
 
-    await paintbrush.fadeIn(drawClosestOrganismText, .02);
+    await paintbrush.fadeIn(Drawings.drawClosestOrganismText, .02);
 
     // give paintbrush a subject to draw
     paintbrush.subject = closest_organism;
 
     // highlight most-fit organism 
     for (let i = 0; i <= 2; i++) {
-        await paintbrush.fadeIn(drawClosestOrganismNatural, .04);
-        await paintbrush.fadeIn(drawClosestOrganismHighlighted, .04);
+        await paintbrush.fadeIn(Drawings.drawClosestOrganismNatural, .04);
+        await paintbrush.fadeIn(Drawings.drawClosestOrganismHighlighted, .04);
     }
     await sleep(1000);
 
     // fade out text, return organism to natural color
-    await paintbrush.fadeOut(drawClosestOrganismText, .02);
-    await paintbrush.fadeIn(drawClosestOrganismNatural, .04);
+    await paintbrush.fadeOut(Drawings.drawClosestOrganismText, .02);
+    await paintbrush.fadeIn(Drawings.drawClosestOrganismNatural, .04);
 
     // done drawing closet organism
     paintbrush.subject = null;
@@ -2574,62 +2570,39 @@ async function runClosestOrganismAnimations (closest_organism) {
     })
 }
 
-function drawClosestOrganismText(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(750, 450, 275, 20);
-
-    ctx.font = "20px arial";
-    ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
-    ctx.fillText("Most-Fit Individual", 800, 470);   
-}
-
-function drawClosestOrganismHighlighted(opacity) {
-    ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
-    ctx.beginPath();
-    ctx.arc(paintbrush.subject.x, paintbrush.subject.y, paintbrush.subject.radius, 0, Math.PI*2, false);
-    ctx.fill();
-}
-
-function drawClosestOrganismNatural(opacity) {
-    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.beginPath();
-    ctx.arc(paintbrush.subject.x, paintbrush.subject.y, paintbrush.subject.radius, 0, Math.PI*2, false);
-    ctx.fill();
-}
-
 async function highlightChosenParents(parents) {
 
     // set subject for paintbrush
     paintbrush.subject = parents;
 
     // highlight mothers
-    await paintbrush.fadeIn(drawMothersText, .02);
+    await paintbrush.fadeIn(Drawings.drawMothersText, .02);
 
     for (let i = 0; i <= 2; i++) {
-        await paintbrush.fadeIn(drawMothersHighlighted, .03);
-        await paintbrush.fadeIn(drawMothersNatural, .03);
+        await paintbrush.fadeIn(Drawings.drawMothersHighlighted, .03);
+        await paintbrush.fadeIn(Drawings.drawMothersNatural, .03);
     }
 
     // highlight fathers
     // !!! change fathers color to a lighter blue
-    await paintbrush.fadeIn(drawFathersText, .02);
+    await paintbrush.fadeIn(Drawings.drawFathersText, .02);
 
     for (let i = 0; i <= 2; i++) {
-        await paintbrush.fadeIn(drawFathersHighlighted, .03);
-        await paintbrush.fadeIn(drawFathersNatural, .03);
+        await paintbrush.fadeIn(Drawings.drawFathersHighlighted, .03);
+        await paintbrush.fadeIn(Drawings.drawFathersNatural, .03);
     }
     await sleep(1000);
 
     // highlight all
-    await paintbrush.fadeIn(drawMothersHighlighted, .03);
-    await paintbrush.fadeIn(drawFathersHighlighted, .03);
-    await paintbrush.fadeIn(drawNotChosenText, .02);
+    await paintbrush.fadeIn(Drawings.drawMothersHighlighted, .03);
+    await paintbrush.fadeIn(Drawings.drawFathersHighlighted, .03);
+    await paintbrush.fadeIn(Drawings.drawNotChosenText, .02);
     await sleep(1000); 
 
     // fade out all
-    await paintbrush.fadeOut(drawAllSelectedOrganismsText, .02);
-    await paintbrush.fadeIn(drawBothParentTypesNatural, .02);
-    await paintbrush.fadeOut(drawOrganisms, .05);
+    await paintbrush.fadeOut(Drawings.drawAllSelectedOrganismsText, .02);
+    await paintbrush.fadeIn(Drawings.drawBothParentTypesNatural, .02);
+    await paintbrush.fadeOut(Drawings.drawOrganisms, .05);
     await sleep(1000);
 
     // done with parents
@@ -2638,133 +2611,6 @@ async function highlightChosenParents(parents) {
     return new Promise(resolve => {
         resolve("Highlight Chosen Parents Animation Complete");
     })
-}
-
-function drawMothersText(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(750, 480, 275, 20);
-    
-    ctx.font = "20px arial";
-    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-    ctx.fillText("Females Selected", 800, 500);
-}
-
-function drawFathersText(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(750, 510, 275, 20);
-
-    ctx.font = "20px arial";
-    ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
-    ctx.fillText("Males Selected", 800, 530);
-}
-
-function drawMothersHighlighted(opacity) {
-    for (let i = 0; i < paintbrush.subject.length; i++) {
-        ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-        ctx.beginPath();
-        ctx.arc(paintbrush.subject[i][0].x, paintbrush.subject[i][0].y, paintbrush.subject[i][0].radius, 0, Math.PI*2, false);
-        ctx.fill();
-    }
-}
-
-function drawMothersNatural(opacity) {
-    for (var i = 0; i < paintbrush.subject.length; i++) {
-        ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-        ctx.beginPath();
-        ctx.arc(paintbrush.subject[i][0].x, paintbrush.subject[i][0].y, paintbrush.subject[i][0].radius, 0, Math.PI*2, false);
-        ctx.fill();
-    }
-}
-
-function drawFathersHighlighted(opacity) {
-    for (var i = 0; i < paintbrush.subject.length; i++) {
-        ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
-        ctx.beginPath();
-        ctx.arc(paintbrush.subject[i][1].x, paintbrush.subject[i][1].y, paintbrush.subject[i][1].radius, 0, Math.PI*2, false);
-        ctx.fill();
-    }
-}
-
-function drawFathersNatural(opacity) {
-    for (var i = 0; i < paintbrush.subject.length; i++) {
-        ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-        ctx.beginPath();
-        ctx.arc(paintbrush.subject[i][1].x, paintbrush.subject[i][1].y, paintbrush.subject[i][1].radius, 0, Math.PI*2, false);
-        ctx.fill();
-    }
-}
-
-function drawBothParentTypesNatural(opacity) {
-    for (let i = 0; i < paintbrush.subject.length; i++) {
-        ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-        ctx.beginPath();
-        ctx.arc(paintbrush.subject[i][0].x, paintbrush.subject[i][0].y, paintbrush.subject[i][0].radius, 0, Math.PI*2, false);
-        ctx.fill();
-
-        ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-        ctx.beginPath();
-        ctx.arc(paintbrush.subject[i][1].x, paintbrush.subject[i][1].y, paintbrush.subject[i][1].radius, 0, Math.PI*2, false);
-        ctx.fill();
-    }
-}
-
-function drawNotChosenText(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(750, 540, 275, 20);
-    ctx.font = "20px arial";
-    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.fillText("Not Selected", 800, 560);
-}
-
-function drawAllSelectedOrganismsText(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(750, 480, 275, 100);
-
-    ctx.font = "20px arial";
-    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-    ctx.fillText("Females Selected", 800, 500);
-
-    ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
-    ctx.fillText("Males Selected", 800, 530);
-
-    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.fillText("Not Selected", 800, 560);
-}
-
-// similar to redrawOrganisms(), but this function accepts an opacity value to allow fading
-// used in multiple places
-function drawOrganisms(opacity) {
-    for (let i = 0; i < organisms.length; i++) {
-        ctx.fillStyle = 'black';
-        ctx.beginPath();
-        ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-        ctx.fill();
-
-        ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
-        ctx.beginPath();
-        ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-        ctx.fill();
-    }
-}
-
-function drawSelectionPhaseExitText(opacity, old_opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(10, 70, 240, 20);
-
-    ctx.font = "20px arial";
-
-    ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
-    ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-    ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-    ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-    // is this necessary?
-    if (opacity >= 1.00) {
-        ctx.fillStyle = 'black';
-        ctx.fillRect(10, 10, 275, 200);
-        drawPhases();
-    }
 }
 
 // Crossover Phase =======================================
