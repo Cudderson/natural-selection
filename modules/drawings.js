@@ -309,6 +309,158 @@ function drawSelectionPhaseExitText(opacity, old_opacity) {
     // }
 }
 
+function drawCrossoverPhaseEntryText(opacity, old_opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 100, 200, 20);
+
+    ctx.font = "20px arial";
+
+    ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+    ctx.fillText("Crossover", 10, 120);
+
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText("Crossover", 10, 120);
+}
+
+function drawCrossoverDescriptionText(opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(75, 275, 950, 150);
+
+    var description = "Genes of the selected parent couples are combined to create new offspring.";
+
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.fillText(description, 200, 300);
+}
+
+function drawCrossoverPhaseExitText(opacity, old_opacity) {
+    //animate
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 100, 100, 20);
+
+    ctx.font = "20px arial";
+
+    ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
+    ctx.fillText("Crossover", 10, 120);
+
+    ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx.fillText("Crossover", 10, 120);
+
+    // is this necessary?
+    // if (opacity >= 1.00) {
+    //     ctx.fillStyle = 'black';
+    //     ctx.fillRect(10, 10, 275, 200);
+    //     drawPhases();
+    // }    
+}
+
+function drawMutationPhaseEntryText(opacity, old_opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 130, 200, 20);
+
+    ctx.font = "20px arial";
+
+    ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+    ctx.fillText("Mutate", 10, 150);
+
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText("Mutate", 10, 150);
+}
+
+function drawMutationDescriptionText(opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(100, 275, 800, 150);
+
+    var description = "To maintain genetic diversity, a small percentage of random genes are mutated";
+    var mutation_rate_text = `Mutation Rate: ${(simGlobals.MUTATION_RATE * 100).toFixed(2)}%`.toString();
+
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.fillText(description, 190, 300);
+
+    ctx.font = "22px arial";
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText(mutation_rate_text, 420, 350);
+}
+
+function drawMutationPhaseExitText(opacity, old_opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 130, 100, 20);
+    ctx.font = "20px arial";
+
+    ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
+    ctx.fillText("Mutate", 10, 150);
+
+    ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx.fillText("Mutate", 10, 150);
+
+    // is this necessary?
+    // if (opacity >= 1.00) {
+    //     ctx.fillStyle = 'black';
+    //     ctx.fillRect(10, 10, 275, 200);
+    //     drawPhases();
+    // }
+}
+
+function drawCreateNewGenPhaseEntryText(opacity, old_opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 10, 250, 20);
+
+    ctx.font = "20px arial";
+
+    ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+    ctx.fillText("Create New Generation", 10, 30);
+
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText("Create New Generation", 10, 30);
+} 
+
+function drawGenerationSummaryText(opacity) {
+    let generation_summary_text = `Generation ${simGlobals.generation_count} Summary:`;
+    let generation_average_fitness_preface = 'Average Fitness:';
+    let generation_offspring_reproduced_preface = 'Offspring Reproduced:';
+
+    ctx.fillStyle = 'black';
+    ctx.fillRect(100, 250, 800, 200);
+
+    ctx.font = "22px arial";
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.fillText(generation_summary_text, 380, 280);
+
+    ctx.font = "20px arial";
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.fillText(generation_average_fitness_preface, 380, 330);
+
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText(simGlobals.average_fitness.toFixed(2).toString(), 600, 330);
+
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.fillText(generation_offspring_reproduced_preface, 380, 355);
+
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText(simGlobals.organisms.length.toString(), 600, 355);
+}
+
+function drawCreateNewGenPhaseExitText(opacity, old_opacity) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 10, 215, 20);
+
+    ctx.font = "20px arial";
+
+    ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
+    ctx.fillText("Create New Generation", 10, 30);
+
+    ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx.fillText("Create New Generation", 10, 30);
+
+    // is this necessary?
+    // if (opacity >= 1.00) {
+    //     ctx.fillStyle = 'black';
+    //     ctx.fillRect(10, 10, 275, 200);
+    //     drawPhases();
+    // }
+}
+
 export {
     testModule, findSammy,
     drawSimulationSettings, drawSimulationIntro,
@@ -322,5 +474,9 @@ export {
     drawFathersHighlighted, drawFathersNatural,
     drawNotChosenText, drawAllSelectedOrganismsText,
     drawBothParentTypesNatural, drawOrganisms,
-    drawSelectionPhaseExitText,
+    drawSelectionPhaseExitText, drawCrossoverPhaseEntryText,
+    drawCrossoverDescriptionText, drawCrossoverPhaseExitText,
+    drawMutationPhaseEntryText, drawMutationDescriptionText,
+    drawMutationPhaseExitText, drawCreateNewGenPhaseEntryText,
+    drawGenerationSummaryText, drawCreateNewGenPhaseExitText,
 }
