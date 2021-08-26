@@ -98,9 +98,9 @@ simGlobals.FPS = 30; // []
 // Stores the position of the cursor
 simGlobals.coordinates = {'x':0 , 'y':0}; // []
 
-// ======================
+// ===================
 // ===== CLASSES =====
-// ======================
+// ===================
 
 class Organism {
     constructor (gender, x, y, ctx) {
@@ -1631,6 +1631,7 @@ function createOrganisms () {
 // ===== EVALUATION =====
 // ======================
 
+// convert to use animation style that paintbrush uses (frame_id)
 function updateAndMoveOrganismsBounds() {
     // 'organisms' was a param but I don't think we need to pass it because it's global
     // updateAndMoveOrganisms() returns a success flag
@@ -1639,17 +1640,18 @@ function updateAndMoveOrganismsBounds() {
         // clear and draw boundary
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(simGlobals.custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
 
         var canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height); // capture canvas for collision testing
         var finished = false;
         var position_rgba;
         var total_moves = 0;
+        let frame_id;
 
         function animateOrganisms() {
 
             if (!finished) {
-                if (total_moves >= GENE_COUNT * organisms.length) {
+                if (total_moves >= simGlobals.GENE_COUNT * simGlobals.organisms.length) {
                     finished = true;
                 }
                 else {
@@ -1658,7 +1660,7 @@ function updateAndMoveOrganismsBounds() {
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                     // draw boundary
-                    ctx.drawImage(custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(simGlobals.custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
 
                     // (FOR TESTING) draw checkpoints
                     // ctx.fillStyle = 'white';
@@ -1669,57 +1671,60 @@ function updateAndMoveOrganismsBounds() {
                     //     ctx.closePath();
                     // }
 
-                    for (let i = 0; i < organisms.length; i++) {
-                        if (organisms[i].is_alive) {
+                    for (let i = 0; i < simGlobals.organisms.length; i++) {
+                        if (simGlobals.organisms[i].is_alive) {
 
-                            position_rgba = getPixelXY(canvas_data, organisms[i].x, organisms[i].y);
+                            position_rgba = getPixelXY(canvas_data, simGlobals.organisms[i].x, simGlobals.organisms[i].y);
 
                             if (position_rgba[0] === 155 && position_rgba[1] === 245) { // consider only checking one value for performance
 
-                                let survived = Math.random() < RESILIENCE;
+                                let survived = Math.random() < simGlobals.RESILIENCE;
 
                                 if (survived) {
                                     // instead of update and move, move organism to inverse of last movement, update index
 
                                     // get inverse of last gene
-                                    let inverse_x_gene = (organisms[i].genes[organisms[i].index - 1][0]) * -1;
-                                    let inverse_y_gene = (organisms[i].genes[organisms[i].index - 1][1]) * -1;
+                                    let inverse_x_gene = (simGlobals.organisms[i].genes[simGlobals.organisms[i].index - 1][0]) * -1;
+                                    let inverse_y_gene = (simGlobals.organisms[i].genes[simGlobals.organisms[i].index - 1][1]) * -1;
 
                                     // update
-                                    organisms[i].x += inverse_x_gene;
-                                    organisms[i].y += inverse_y_gene;
+                                    simGlobals.organisms[i].x += inverse_x_gene;
+                                    simGlobals.organisms[i].y += inverse_y_gene;
 
                                     // increase index
-                                    organisms[i].index++;
+                                    simGlobals.organisms[i].index++;
 
                                     // move
-                                    organisms[i].move();
+                                    simGlobals.organisms[i].move();
                                 }
                                 else {
-                                    organisms[i].is_alive = false;
-                                    organisms[i].ctx.fillStyle = 'red';
-                                    organisms[i].ctx.beginPath();
-                                    organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-                                    organisms[i].ctx.fill();
+                                    simGlobals.organisms[i].is_alive = false;
+                                    ctx.fillStyle = 'red';
+                                    ctx.beginPath();
+                                    ctx.arc(
+                                        simGlobals.organisms[i].x, simGlobals.organisms[i].y,
+                                        simGlobals.organisms[i].radius, 0, Math.PI*2, false
+                                    );
+                                    ctx.fill();
                                 }
                             }
                             else {
-                                organisms[i].update();
-                                organisms[i].move();
+                                simGlobals.organisms[i].update();
+                                simGlobals.organisms[i].move();
                             }
                         }
                         else {
                             // draw deceased organism
-                            organisms[i].ctx.fillStyle = 'red';
-                            organisms[i].ctx.beginPath();
-                            organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-                            organisms[i].ctx.fill();
+                            ctx.fillStyle = 'red';
+                            ctx.beginPath();
+                            ctx.arc(simGlobals.organisms[i].x, simGlobals.organisms[i].y, simGlobals.organisms[i].radius, 0, Math.PI*2, false);
+                            ctx.fill();
                         }
                         total_moves++;
                     }
 
                 }
-                sleep(1000 / FPS); // looks smoother without fps
+                sleep(1000 / simGlobals.FPS); // looks smoother without fps
                 frame_id = requestAnimationFrame(animateOrganisms);
             }
 
@@ -1730,7 +1735,7 @@ function updateAndMoveOrganismsBounds() {
                 resolve(false);
             }
         }
-        start_test_guy_animation = requestAnimationFrame(animateOrganisms);
+        requestAnimationFrame(animateOrganisms);
     })
 }
 
@@ -1844,20 +1849,20 @@ function getShortestDistanceToNextCheckpoint(next_checkpoint) {
     var closest_organism;
 
     // calculate distance to closest checkpoint not yet reached
-    for (let n = 0; n < organisms.length; n++) {
+    for (let n = 0; n < simGlobals.organisms.length; n++) {
         // in future, make sure organism is alive before calculating its distance !!!!!!! (or remove deceased organisms from array)
         // distance^2 = a^2 + b^2
-        let horizontal_distance_squared = (organisms[n].x - custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2;
-        let vertical_distance_squared = (organisms[n].y - custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2;
+        let horizontal_distance_squared = (simGlobals.organisms[n].x - simGlobals.custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2;
+        let vertical_distance_squared = (simGlobals.organisms[n].y - simGlobals.custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2;
         let distance_to_checkpoint_squared = horizontal_distance_squared + vertical_distance_squared;
 
-        organisms[n].distance_to_next_checkpoint = Math.sqrt(distance_to_checkpoint_squared);
+        simGlobals.organisms[n].distance_to_next_checkpoint = Math.sqrt(distance_to_checkpoint_squared);
         console.log("Distance to next-closest checkpoint for organism " + n + ":");
-        console.log(organisms[n].distance_to_next_checkpoint);
+        console.log(simGlobals.organisms[n].distance_to_next_checkpoint);
 
-        if (organisms[n].distance_to_next_checkpoint < shortest_distance_to_checkpoint) {
-            shortest_distance_to_checkpoint = organisms[n].distance_to_next_checkpoint;
-            closest_organism = organisms[n]; // return only index if works better
+        if (simGlobals.organisms[n].distance_to_next_checkpoint < shortest_distance_to_checkpoint) {
+            shortest_distance_to_checkpoint = simGlobals.organisms[n].distance_to_next_checkpoint;
+            closest_organism = simGlobals.organisms[n]; // return only index if works better
         }
     }
     // we should have each organism's distance the closest checkpoint not yet reached.
@@ -1881,25 +1886,25 @@ function calcPopulationFitness () {
 
 function calcPopulationFitnessBounds(remaining_distance) {
     // scale = length of lines connecting epicenters from spawn>checkpoints>goal
-    var scale = scale_statistics['scale'];
+    let scale = simGlobals.scale_statistics['scale'];
 
     // calc/set distance_to_goal && fitness
-    total_fitness = 0.00;
-    for (let i = 0; i < organisms.length; i++) {
+    simGlobals.total_fitness = 0.00;
+    for (let i = 0; i < simGlobals.organisms.length; i++) {
 
         // this also sets each organism's distance_to_goal attribute
-        organisms[i].calcDistanceToGoalBounds(remaining_distance);
+        simGlobals.organisms[i].calcDistanceToGoalBounds(remaining_distance);
 
         // this also sets each organism's fitness attribute
-        organisms[i].calcFitnessBounds(scale);
+        simGlobals.organisms[i].calcFitnessBounds(scale);
 
-        total_fitness += organisms[i].fitness;
+        simGlobals.total_fitness += simGlobals.organisms[i].fitness;
     }
 
     // set average fitness
-    average_fitness = total_fitness / organisms.length;
+    simGlobals.average_fitness = simGlobals.total_fitness / simGlobals.organisms.length;
 
-    return average_fitness;
+    return simGlobals.average_fitness;
 }
 
 async function evaluatePopulation() {
@@ -2512,18 +2517,18 @@ async function runGeneration() {
         var closest_organism = population_resolution['closest_organism'];
         simGlobals.average_fitness = population_resolution['average_fitness'];
     }
-    else if (sim_type === 'boundary') {
+    else if (simGlobals.sim_type === 'boundary') {
         // we will follow the logic of the 'classic' sim type 
 
         // remove deceased organisms from array (organisms array is evaluated multiple times and deceased organisms aren't used)
-        console.log(`before checkPulse(): ${organisms.length}`);
+        console.log(`before checkPulse(): ${simGlobals.organisms.length}`);
 
         // reassign (.filter() does not change array)
-        organisms = organisms.filter(checkPulse);
-        console.log(`after checkPulse(): ${organisms.length}`);
+        simGlobals.organisms = simGlobals.organisms.filter(checkPulse);
+        console.log(`after checkPulse(): ${simGlobals.organisms.length}`);
 
         // draw checkpoints for reference
-        custom_boundary.drawCheckpoints();
+        simGlobals.custom_boundary.drawCheckpoints();
 
         // here, we set checkpoints[i].distance_to_goal 
         // should this only be done on iteration #1???
@@ -2537,13 +2542,13 @@ async function runGeneration() {
 
         // distance_to_goal = distance_to_next_checkpoint + next_checkpoint.distance_to_goal
         // 'next' will give us the index in the checkpoints array of the checkpoint we want to measure from
-        var remaining_distance = custom_boundary.checkpoints[checkpoint_data['next']].distance_to_goal;
+        var remaining_distance = simGlobals.custom_boundary.checkpoints[checkpoint_data['next']].distance_to_goal;
 
         // this function also will set each organism's distance_to_goal and fitness attributes
         // [] make sure this doesn't include deceased organisms (unless on purpose)
-        average_fitness = calcPopulationFitnessBounds(remaining_distance);
+        simGlobals.average_fitness = calcPopulationFitnessBounds(remaining_distance);
 
-        console.log(`Average Fitness: ${average_fitness}`);
+        console.log(`Average Fitness: ${simGlobals.average_fitness}`);
     }
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
@@ -2836,24 +2841,24 @@ function getPixelXY(canvas_data, x, y) {
 }
 
 function calcDistanceToGoalCheckpoints() {
-    var scale = scale_statistics['scale'];
-    var checkpoint_to_checkpoint_lengths = scale_statistics['checkpoint_lengths'];
-    var spawn_to_checkpoint_0_length = scale_statistics['spawn_to_checkpoint_0_length'];
-    var last_checkpoint_to_goal_length = scale_statistics['last_checkpoint_to_goal_length']; // keep for comparison
+    let scale = simGlobals.scale_statistics['scale'];
+    let checkpoint_to_checkpoint_lengths = simGlobals.scale_statistics['checkpoint_lengths'];
+    let spawn_to_checkpoint_0_length = simGlobals.scale_statistics['spawn_to_checkpoint_0_length'];
+    let last_checkpoint_to_goal_length = simGlobals.scale_statistics['last_checkpoint_to_goal_length']; // keep for comparison
 
-    var adjusted_scale;
+    let adjusted_scale;
 
     // checkpoint_to_checkpoint_lengths[0] = checkpoints[0] distance to next checkpoint
-    for (let i = 0; i < custom_boundary.checkpoints.length; i++) {
+    for (let i = 0; i < simGlobals.custom_boundary.checkpoints.length; i++) {
         if (i === 0) {
             // distance to goal for first checkpoint = scale - distance_from_spawn_to_first_checkpoint
             adjusted_scale = scale - spawn_to_checkpoint_0_length;
-            custom_boundary.checkpoints[i].distance_to_goal = adjusted_scale;
+            simGlobals.custom_boundary.checkpoints[i].distance_to_goal = adjusted_scale;
         }
         else {
             // i-1 will give us the length of the previous checkpoint to the current
             adjusted_scale -= checkpoint_to_checkpoint_lengths[i-1];
-            custom_boundary.checkpoints[i].distance_to_goal = adjusted_scale;
+            simGlobals.custom_boundary.checkpoints[i].distance_to_goal = adjusted_scale;
         }
     }
 }
@@ -2871,31 +2876,31 @@ function getFarthestCheckpointReached() {
     var next_checkpoint;
     var reached_checkpoint = false;
 
-    for (let k = custom_boundary.checkpoints.length - 1; k >= 0; k--) {
+    for (let k = simGlobals.custom_boundary.checkpoints.length - 1; k >= 0; k--) {
         console.log("k-loop iteration started");
         if (reached_checkpoint) {
             console.log("breaking out of k-loop, checkpoint was reached");
             break;
         }
-        for (let j = 0; j < organisms.length; j++) {
+        for (let j = 0; j < simGlobals.organisms.length; j++) {
             console.log("j-loop iteration started");
             // determine if organism is within the perimeter of the current checkpoint being checked
-            let x_lower_bound = (custom_boundary.checkpoints[k].coordinates[0]) - custom_boundary.checkpoints[k].size;
-            let x_upper_bound = (custom_boundary.checkpoints[k].coordinates[0]) + custom_boundary.checkpoints[k].size;
-            let y_lower_bound = (custom_boundary.checkpoints[k].coordinates[1]) - custom_boundary.checkpoints[k].size;
-            let y_upper_bound = (custom_boundary.checkpoints[k].coordinates[1]) + custom_boundary.checkpoints[k].size;
+            let x_lower_bound = (simGlobals.custom_boundary.checkpoints[k].coordinates[0]) - simGlobals.custom_boundary.checkpoints[k].size;
+            let x_upper_bound = (simGlobals.custom_boundary.checkpoints[k].coordinates[0]) + simGlobals.custom_boundary.checkpoints[k].size;
+            let y_lower_bound = (simGlobals.custom_boundary.checkpoints[k].coordinates[1]) - simGlobals.custom_boundary.checkpoints[k].size;
+            let y_upper_bound = (simGlobals.custom_boundary.checkpoints[k].coordinates[1]) + simGlobals.custom_boundary.checkpoints[k].size;
 
             // can replace vars with definitions once confident working
             // check if organism within x && y bounds of checkpoint we're checking
-            if (organisms[j].x > x_lower_bound && organisms[j].x < x_upper_bound) {
-                if (organisms[j].y > y_lower_bound && organisms[j].y < y_upper_bound) {
+            if (simGlobals.organisms[j].x > x_lower_bound && simGlobals.organisms[j].x < x_upper_bound) {
+                if (simGlobals.organisms[j].y > y_lower_bound && simGlobals.organisms[j].y < y_upper_bound) {
 
                     console.log("We have reached a checkpoint.");
 
                     reached_checkpoint = true;
                     current_checkpoint = k;
 
-                    if (k === custom_boundary.checkpoints.length - 1) {
+                    if (k === simGlobals.custom_boundary.checkpoints.length - 1) {
                         // final checkpoint was reached:
                         // previous = k-1, next = goal
                         previous_checkpoint = k - 1;
