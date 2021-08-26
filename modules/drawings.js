@@ -461,6 +461,70 @@ function drawCreateNewGenPhaseExitText(opacity, old_opacity) {
     // }
 }
 
+// =====
+// below are boundary drawings (mostly) just in case want to make another module
+// =====
+
+function drawBoundaryBoilerplate() {
+    // clear canvas
+    ctx.fillStyle = 'black';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // draw start/end points of boundary
+    // top
+    ctx.fillStyle = 'red';
+    ctx.fillRect(830, 0, 20, 50);
+    ctx.fillRect(950, 150, 50, 20);
+
+    // bottom
+    ctx.fillStyle = 'red';
+    ctx.fillRect(0, 430, 50, 20);
+    ctx.fillRect(150, 550, 20, 50);
+
+    // placeholder goal
+    // * If this doesn't work, consider calling drawFakeGoal() instead *
+    // var placeholder_goal = new Goal(925, 50, 20, ctx);
+    // placeholder_goal.drawGoal();
+    drawFakeGoal();
+
+
+    // draw instructions zones (no-draw zones)
+    ctx.lineWidth = 4;
+    ctx.strokeWidth = 4;
+    ctx.strokeStyle = 'rgb(148, 0, 211)';
+    ctx.strokeRect(736, 445, 272, 200);
+    ctx.strokeRect(-4, -4, 252, 157);
+}
+
+function drawBoundaryCreationIntroductionOne() {
+    drawBoundaryBoilerplate();
+
+    // erase boxes
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, 300, 200);
+    ctx.fillRect(720, 420, 300, 200);
+
+    // introduction
+    ctx.font = '40px arial';
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("Create Your Boundary", 330, 280);
+
+    ctx.font = '28px arial';
+    ctx.fillText("Press 'Enter' or click 'Continue'", 300, 360);
+} 
+
+function drawBoundaryCreationIntroductionTwo() {
+
+    drawBoundaryBoilerplate();
+
+    ctx.font = '28px arial';
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("These areas will be used for dialogue throughout the simulation.", 100, 270);
+    ctx.fillText("For best results, avoid drawing over them.", 200, 330);  
+    ctx.font = '24px arial'; 
+    ctx.fillText("Press 'Enter' or click 'Continue'", 300, 420);
+}
+
 export {
     testModule, findSammy,
     drawSimulationSettings, drawSimulationIntro,
@@ -479,4 +543,6 @@ export {
     drawMutationPhaseEntryText, drawMutationDescriptionText,
     drawMutationPhaseExitText, drawCreateNewGenPhaseEntryText,
     drawGenerationSummaryText, drawCreateNewGenPhaseExitText,
+    drawBoundaryBoilerplate, drawBoundaryCreationIntroductionOne,
+    drawBoundaryCreationIntroductionTwo,
 }
