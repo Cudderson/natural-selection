@@ -249,6 +249,8 @@ class Boundary {
             Drawings.drawBoundaryBoilerplate();
 
             ctx.drawImage(this.top_boundary, 0, 0, canvas.width, canvas.height);
+
+            Drawings.eraseIllegalDrawingZones();
     
             // remove white dot and revert goal color
             ctx.fillStyle = 'rgb(155, 245, 0)';
@@ -1000,6 +1002,7 @@ function enterBoundaryCreationMode() {
 
     // *** on second thought, these functions make good closures, as they aren't used anywhere else.
     // *** I will still abstract the functions, but probably make more closures
+    // *** If I create a boundary_utils.js, these functions could be defined in there? (not a great idea)
 
     function draw(event) {
         if (event.buttons !== 1 || !allowed_to_draw) {
@@ -1484,6 +1487,8 @@ function updateAndMoveOrganismsBounds() {
         var total_moves = 0;
         let frame_id;
 
+        let goal = new Goal(0, 0, 0, ctx);
+
         function animateOrganisms() {
 
             if (!finished) {
@@ -1495,7 +1500,7 @@ function updateAndMoveOrganismsBounds() {
                     ctx.fillStyle = 'black';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                    // draw boundary
+                    // draw boundary (includes goal?)
                     ctx.drawImage(simGlobals.custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
 
                     // (FOR TESTING) draw checkpoints
@@ -1506,6 +1511,10 @@ function updateAndMoveOrganismsBounds() {
                     //     ctx.fill();
                     //     ctx.closePath();
                     // }
+
+                    // draw stats / phase
+                    goal.showStatistics();
+                    Drawings.drawStaticEvaluationPhaseText();
 
                     for (let i = 0; i < simGlobals.organisms.length; i++) {
                         if (simGlobals.organisms[i].is_alive) {

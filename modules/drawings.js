@@ -487,7 +487,6 @@ function drawBoundaryBoilerplate() {
     // placeholder_goal.drawGoal();
     drawFakeGoal();
 
-
     // draw instructions zones (no-draw zones)
     ctx.lineWidth = 4;
     ctx.strokeWidth = 4;
@@ -584,6 +583,12 @@ function drawBoundaryCompletionHelpText() {
     ctx.font = '20px arial';
     ctx.fillText("[ need text here ]", 770, 530);
     // ctx.fillText("non-overlapping line", 770, 555);
+}
+
+function eraseIllegalDrawingZones() {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(732, 442, 272, 200);
+    ctx.fillRect(0, 0, 252, 157);
 }
 
 // win/lose scenarios
@@ -852,5 +857,5 @@ export {
     redrawOrganisms, drawStaticEvaluationPhaseText,
     updateSuccessfulOrganism, highlightClassicSimType,
     highlightBoundarySimType, drawInitialSimSelectionScreen,
-    prepareToRunSimulation,
+    prepareToRunSimulation, eraseIllegalDrawingZones,
 }
