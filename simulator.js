@@ -1,12 +1,11 @@
 document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
-// ===== begin module testing =====
 import * as Drawings from "./modules/drawings.js";
 
 Drawings.testModule('Hello everybody!');
 
-// convert html function calls to eventlisteners in js (place in appropriate functions)
-
+// convert html function calls to eventlisteners in js 
+// *** (place in appropriate functions!!) ***
 document.getElementById("apply-form").addEventListener('submit', function submitForm(event) {
     // don't submit form
     event.preventDefault();
@@ -18,111 +17,14 @@ document.getElementById("apply-form").addEventListener('submit', function submit
 });
 
 // allow run_btn to simply run the simulation
-// [x] turn off this listener in runSimulation()
 document.getElementsByClassName("run-btn")[0].addEventListener("click", runSimulation);
 
-// convert stopSimulation() to be called from js vs html
+// maybe have this do the reload directly?
 document.getElementsByClassName("stop-btn")[0].addEventListener('click', function stopSim() {
     stopSimulation();
 });
 
-// ===== HERE =====
-// * Because I have created two modules, my 'global' variables aren't actually global anymore.
-// * To use a global variable now, I need to bind it to the window object.
-// * (understand reason why more in-depth)
-// * - What I don't currently understand is why the imported functions don't get access to the variables defined in the namespace
-//     that they were imported into
-//         - I think it's because modules have their own scope, so even though I'm importing a function into this scope, I can't reference
-//           variables initialized in this scope because they don't exist in the imported function's scope (i think)
-
-// - Probable solution: bind the 'global' variables in this file to window, giving both modules access to them
-
-// FINAL PLAN:
-// 1. [x] For the meantime, bind the global vars in simulator.js to window (global)
-//          - Would be good idea to create one global object to protect namespace (simGlobals{}?)
-//          - (window._____ creates a new attribute for the window object, so make sure to not declare twice)
-// 2. [] Import the drawings from drawings.js as a single module to keep namespace protected
-// 3. [] Over time, determine where variables can live without being global, reducing the amount of window attributes created
-
-// * * * remember: var is hoisted, const&let are not * * *
-
-// Why I'm doing this:
-// - The imported functions need access to variables defined in simulator.js top-level. Before it was a module, the vars in this
-//   file were global, and I'm just making them global again.
-// - The imported functions are only drawing functions, they do not alter variables whatsoever
-// - Over time, I will slowly convert vars from global to more-local once I identify where they are/are not needed
-
-// ================
-
-// ===== End Module Test/Refactor =====
-
-// ===== GLOBALIZE =====
-// starting coordinates for organisms and goal
-// const INITIAL_X = 500;
-// const INITIAL_Y = 500;
-// const GOAL_X_POS = 500;
-// const GOAL_Y_POS = 50;
-
-// window.INITIAL_X = INITIAL_X; // *** This creates a separate window object attribute!
-
-// Module.findX(); // works (needs be declared after Temporal Dead Zone for const, let, class)
-// but are they the same? (no, window._____ creates a new attribute for the window object)
-
-// organism global default settings
-// var TOTAL_ORGANISMS = 100;
-// var GENE_COUNT = 250;
-// var MUTATION_RATE = 0.03;
-// var MIN_GENE = -5;
-// var MAX_GENE = 5;
-// // for boundary sims
-// var RESILIENCE = 1.00; // starts at perfect resilience
-// var dialogue = false;
-
-// boundary simulations start organisms/goal at different location
-// const INITIAL_X_BOUND = 50;
-// const INITIAL_Y_BOUND = 550;
-// const GOAL_X_POS_BOUNDS = 925;
-// const GOAL_Y_POS_BOUNDS = 50;
-
-// boundary globals
-// var custom_boundary;
-// var scale_statistics; // this is/should be only computed once (boundary doesn't change)
-
-// flags
-// var sim_type;
-// var simulation_started = false;
-// var simulation_succeeded = false;
-
-// track total generations
-// var generation_count = 0;
-
-// generation statistics
-// var average_fitness = 0.00;
-// var total_fitness = 0.00;
-
-// containers holding organisms and next-generation organisms
-// var organisms = [];
-// var offspring_organisms = [];
-
-// canvas & drawing context
-// reconsider how these are used
-// var canvas = document.getElementById("main-canvas");
-// var ctx = canvas.getContext("2d");
-
-// ********** name conflicts with canvas_data in updateAndMoveOrganismsBounds, need to fix
-// var canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-// frame rate
-// const FPS = 30;
-
-// Stores the position of the cursor
-// let coordinates = {'x':0 , 'y':0};
-
-// testing class Paintbrush as global for now
-// var paintbrush;
-
-// ===== OLD VARS ABOVE =============================================================================
-// ===== NEW VARS BELOW =============================================================================
+// ===== vars =====
 
 window.simGlobals = {};
 
@@ -196,11 +98,9 @@ simGlobals.FPS = 30; // []
 // Stores the position of the cursor
 simGlobals.coordinates = {'x':0 , 'y':0}; // []
 
-// [x] consider making a direct window object attribute
-function createPaintbrush() {
-    window.paintbrush = new Paintbrush();
-}
-// ===== END GLOBALIZE =====
+// ======================
+// ===== CLASSES =====
+// ======================
 
 class Organism {
     constructor (gender, x, y, ctx) {
@@ -815,7 +715,726 @@ class Paintbrush {
     }
 }
 
-// Main Drivers
+// =======================
+// ===== SETTINGS =====
+// =======================
+
+function displaySettingsForm() {
+
+    // ensure only settings button showing
+    var settings_btn = document.getElementsByClassName("settings-btn")[0];
+    var start_btn = document.getElementsByClassName("run-btn")[0];
+    var stop_btn = document.getElementsByClassName("stop-btn")[0];
+    var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
+
+    settings_btn.style.display = 'block';
+    start_btn.style.display = 'none';
+    stop_btn.style.display = 'none';
+    save_bounds_btn.style.display = 'none';
+
+    // turn off canvas, turn on settings
+    var canvas_container = document.getElementsByClassName("canvas-container")[0];
+    var settings_container = document.getElementsByClassName("settings-container")[0];
+
+    canvas_container.style.display = 'none';
+    settings_container.style.display = 'block';
+
+    if (simGlobals.sim_type === 'classic') {
+        // display classic settings (no death/resilience)
+        document.getElementsByClassName("resilience-setting-label")[0].style.display = 'none';
+        document.getElementsByClassName("resilience-input")[0].style.display = 'none';
+    }
+
+    // movement setting helper (move/abstract)
+    var movement_speed_setting = document.getElementById("move-speed");
+    var error_message = document.getElementsByClassName("error-message")[0];
+
+    movement_speed_setting.addEventListener('focusin', function() {
+        error_message.style.color = "var(--closest_organism_gold)";
+        error_message.innerHTML = "Movement Speed Range: 1 - 7";
+        movement_speed_setting.addEventListener('focusout', function() {
+            error_message.style.color = 'var(--mother-pink)';
+            error_message.innerHTML = "";
+        })
+    })
+
+    movement_speed_setting.addEventListener('keydown', function(event) {
+        // function blocks keystrokes not within the acceptable range for movement speed
+        var keystroke = preValidateMovementSetting(event);
+        if (keystroke === 1) {
+            event.preventDefault();
+        }
+    });
+
+}
+
+// [] should stop title screen animation when settings is called
+function validateSettingsForm() {
+
+    var error_message = document.getElementsByClassName("error-message")[0];
+
+    // clear error message on call
+    error_message.style.color = "var(--mother-pink)";
+    error_message.innerHTML = "";
+
+    var settings_manager = {};
+
+    // returns error message or "valid"
+    settings_manager['organisms_setting'] = validateTotalOrganismsSetting();
+    settings_manager['movement_setting'] = validateMovementSetting();
+    settings_manager['gene_setting'] = validateGeneCountSetting();
+    settings_manager['mutation_setting'] = validateMutationRateSetting();
+    settings_manager['resilience_setting'] = validateResilienceSetting();
+
+    // should make value red too, and change to green on keystroke
+    for (let message in settings_manager) {
+        if (settings_manager[message] != "valid") {
+            error_message.innerHTML = settings_manager[message];
+            return false;
+        }
+    }
+
+    // dialogue
+    var dialogue_setting = document.getElementById("dialogue-checkbox");
+    if (dialogue_setting.checked) {
+        simGlobals.dialogue = true;
+    }
+    else {
+        simGlobals.dialogue = false;
+    }
+
+    // returns to title screen
+    finishApplyingSettings();
+
+    // restart animation ===
+    // here, we should instead bring user to a screen that tells them their simulation is
+    // ready to run, and present a button/cue to begin simulation
+
+    // playTitleScreenAnimation();
+    prepareToRunSimulation();
+
+    // don't submit the form
+    return false;
+}
+
+function validateTotalOrganismsSetting() {
+    var total_organisms_setting = document.getElementById("total-organisms");
+
+    if (typeof parseInt(total_organisms_setting.value) === 'number' && parseInt(total_organisms_setting.value) > 0) {
+        if (parseInt(total_organisms_setting.value > 9999)) {
+            simGlobals.TOTAL_ORGANISMS = 9999;
+        }
+        else {
+            simGlobals.TOTAL_ORGANISMS = Math.abs(parseInt(total_organisms_setting.value));
+        }
+        total_organisms_setting.style.borderBottom = '2px solid var(--custom-green)';
+        return 'valid';
+    }
+    else {
+        total_organisms_setting.style.borderBottom = '2px solid var(--mother-pink)';
+        return '* Invalid number of organisms. Please input a positive number.';
+    }
+}
+
+function validateGeneCountSetting() {
+    var gene_count_setting = document.getElementById("gene-count");
+
+    if (typeof parseInt(gene_count_setting.value) === 'number' && parseInt(gene_count_setting.value) > 0) {
+        if (parseInt(gene_count_setting.value) > 1000) {
+            simGlobals.GENE_COUNT = 1000;
+        }
+        else {
+            simGlobals.GENE_COUNT = Math.abs(parseInt(gene_count_setting.value));
+        }
+        gene_count_setting.style.borderBottom = '2px solid var(--custom-green)';
+        return "valid";
+    }
+    else {
+        gene_count_setting.style.borderBottom = '2px solid var(--mother-pink)';
+        return "* Invalid gene count. Please input a positive number.";
+    }
+}
+
+function validateMutationRateSetting() {
+    var mutation_rate_setting = document.getElementById("mutation-rate");
+
+    // consider allowing float here
+    if (typeof parseInt(mutation_rate_setting.value) === 'number' && parseInt(mutation_rate_setting.value) > 0) {
+        if (parseInt(mutation_rate_setting.value) > 100) {
+            simGlobals.MUTATION_RATE = 1;
+        }
+        else {
+            simGlobals.MUTATION_RATE = parseInt(mutation_rate_setting.value) / 100;
+        }
+        mutation_rate_setting.style.borderBottom = '2px solid var(--custom-green)';
+        return "valid";
+    }
+    else {
+        mutation_rate_setting.style.borderBottom = '2px solid var(--mother-pink)';
+        return "Invalid mutation rate. Please input a positive percentage value. (3 = 3%)";
+    }
+}
+
+function preValidateMovementSetting(event) {
+
+    // prevent keystrokes that aren't === 1-7 || Backspace, <, > 
+    var movement_key = event.key;
+    if (movement_key > "0" && movement_key <= "7") {
+        return 0;
+    }
+    else if (movement_key === "Backspace" || movement_key === "ArrowLeft" || movement_key === "ArrowRight") {
+        return 0;
+    }
+    else {
+        return 1;
+    }
+}
+
+function validateMovementSetting() {
+    var movement_speed_setting = document.getElementById("move-speed");
+
+    // create max and min genes from movement speed
+    // pre-validated in preValidateMovementSetting();
+    if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 7) {
+        simGlobals.MIN_GENE = parseInt(movement_speed_setting.value) * -1;
+        simGlobals.MAX_GENE = parseInt(movement_speed_setting.value);
+        movement_speed_setting.style.borderBottom = "2px solid var(--custom-green)";
+        return "valid";
+    } 
+    else {
+        movement_speed_setting.style.borderBottom = '2px solid var(--mother-pink)';
+        return "Invalid movement speed. Please input a positive number between 1 - 7.";
+    }   
+}
+
+function validateResilienceSetting() {
+    // we want to only allow numbers from 0 - 100 inclusive
+
+    let resilience_setting = document.getElementById("resilience");
+
+    if (parseInt(resilience_setting.value) >= 0 && parseInt(resilience_setting.value) <= 100 && typeof parseInt(resilience_setting.value) === 'number') {
+        simGlobals.RESILIENCE = parseInt(resilience_setting.value) / 100;
+        resilience_setting.style.borderBottom = "2px solid var(--custom-green)";
+        return "valid";
+    } 
+    else {
+        resilience_setting.style.borderBottom = '2px solid var(--mother-pink)';
+        return "Invalid resilience value. Please input a positive number between 0 - 100";
+    } 
+}
+
+function finishApplyingSettings() {
+    // make html changes before function returns
+    var canvas_container = document.getElementsByClassName("canvas-container")[0];
+    var settings_container = document.getElementsByClassName("settings-container")[0];
+
+    canvas_container.style.display = 'block';
+    settings_container.style.display = 'none';
+
+    var start_btn = document.getElementsByClassName("run-btn")[0];
+    start_btn.style.display = 'block';
+
+    return 0;
+}
+
+// ====================
+// ===== BOUNDARY =====
+// ====================
+
+// *DRAWING*
+function drawBoundaryBoilerplate() {
+    // clear canvas
+    ctx.fillStyle = 'black';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // draw start/end points of boundary
+    // top
+    ctx.fillStyle = 'red';
+    ctx.fillRect(830, 0, 20, 50);
+    ctx.fillRect(950, 150, 50, 20);
+
+    // bottom
+    ctx.fillStyle = 'red';
+    ctx.fillRect(0, 430, 50, 20);
+    ctx.fillRect(150, 550, 20, 50);
+
+    // placeholder goal
+    var placeholder_goal = new Goal(925, 50, 20, ctx);
+    placeholder_goal.drawGoal();
+
+    // draw instructions zones (no-draw zones)
+    ctx.lineWidth = 4;
+    ctx.strokeWidth = 4;
+    ctx.strokeStyle = 'rgb(148, 0, 211)';
+    ctx.strokeRect(736, 445, 272, 200);
+    ctx.strokeRect(-4, -4, 252, 157);
+}
+
+function applyBoundaryModeStyles() {
+    // turn off settings, turn on canvas
+    var canvas_container = document.getElementsByClassName("canvas-container")[0];
+    var settings_container = document.getElementsByClassName("settings-container")[0];
+
+    canvas_container.style.display = 'block';
+    settings_container.style.display = 'none';
+
+    drawBoundaryBoilerplate();
+
+    // hide buttons
+    document.getElementsByClassName("settings-btn")[0].style.display = 'none';
+    document.getElementsByClassName("run-btn")[0].style.display = 'none';
+    document.getElementsByClassName("sim-type-classic")[0].style.display = 'none';
+    document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
+
+    let stop_btn = document.getElementsByClassName("stop-btn")[0];
+
+    stop_btn.style.gridColumn = "1 / 2";
+    stop_btn.style.width = "75%";
+    stop_btn.innerHTML = "Back";
+    stop_btn.style.display = "block";
+}
+
+// called before enterBoundaryCreationMode()
+// *DRAWING*
+function displayBoundaryCreationIntroductionOne() {
+    // could maybe be an animation, but not now
+    console.log("boundary creation introduction called");
+
+    drawBoundaryBoilerplate();
+
+    // erase boxes
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, 300, 200);
+    ctx.fillRect(720, 420, 300, 200);
+
+    // introduction
+    ctx.font = '40px arial';
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("Create Your Boundary", 330, 280);
+
+    ctx.font = '28px arial';
+    ctx.fillText("Press 'Enter' or click 'Continue'", 300, 360);
+
+    // hardcode as html element if needed
+    let next_btn = document.getElementsByClassName("next-btn")[0];
+    next_btn.style.display = 'block';
+
+    next_btn.addEventListener('click', function continueIntroduction() {
+        // remove listener
+        next_btn.removeEventListener('click', continueIntroduction);
+
+        // go to next screen
+        displayBoundaryCreationIntroductionTwo();
+    })
+
+    document.addEventListener('keydown', function checkKeystroke(event) {
+        if (event.key === 'Enter') {
+            // destroy listeners
+            document.removeEventListener('keydown', checkKeystroke);
+
+            // go to next screen
+            displayBoundaryCreationIntroductionTwo();
+        }
+    })
+} 
+
+// *DRAWING*
+function displayBoundaryCreationIntroductionTwo() {
+
+    drawBoundaryBoilerplate();
+
+    ctx.font = '28px arial';
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("These areas will be used for dialogue throughout the simulation.", 100, 270);
+    ctx.fillText("For best results, avoid drawing over them.", 200, 330);  
+    ctx.font = '24px arial'; 
+    ctx.fillText("Press 'Enter' or click 'Continue'", 300, 420);
+
+    // change text
+    let next_btn = document.getElementsByClassName("next-btn")[0];
+    next_btn.innerHTML = 'Okay';
+
+    next_btn.addEventListener('click', function finishBoundaryIntroduction() {
+        // remove listener
+        next_btn.removeEventListener('click', finishBoundaryIntroduction);
+
+        next_btn.style.display = 'none';
+
+        // go to next screen
+        enterBoundaryCreationMode();
+    })    
+
+    document.addEventListener('keydown', function checkKeystroke(event) {
+        if (event.key === 'Enter') {
+            // remove listener
+            document.removeEventListener('keydown', checkKeystroke);
+
+            // hide next_btn
+            next_btn.style.display = 'none';
+
+            // go to next screen
+            // just a placeholder test
+            enterBoundaryCreationMode();
+        }
+    })
+}
+
+// this could do text & styles
+// *DRAWING*
+function drawBoundaryDrawingHelpText(step) {
+
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.font= "24px arial";
+    ctx.fillText(step, 80, 40);
+
+    ctx.font = '18px arial';
+    ctx.fillText("Draw a line connecting", 25, 75)
+    ctx.fillText("the red endpoints from", 25, 95);
+    ctx.fillText("bottom to top", 25, 115);
+
+    ctx.font = '20px arial';
+    ctx.fillText("For best results, draw", 770, 505);
+    ctx.fillText("a slow, continuous,", 770, 530);
+    ctx.fillText("non-overlapping line", 770, 555);
+}
+
+// *DRAWING*
+function drawBoundaryValidationHelpText() {
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.font= "24px arial";
+    ctx.fillText("Validation", 70, 40);
+
+    ctx.font = '18px arial';
+    ctx.fillText("To verify that the goal", 25, 70)
+    ctx.fillText("is reachable, draw a line", 25, 90);
+    ctx.fillText("connecting the white dot", 25, 110);
+    ctx.fillText("to the goal", 25, 130);
+
+    // no bottom black square on this one
+    ctx.fillStyle = 'black';
+    ctx.fillRect(730, 440, 280, 220);
+
+    // not using, keep just in case
+    // ctx.font = '20px arial';
+    // ctx.fillText("For best results, draw", 770, 505);
+    // ctx.fillText("a slow, continuous,", 770, 530);
+    // ctx.fillText("non-overlapping line", 770, 555);
+}
+
+// *DRAWING*
+function drawBoundaryCompletionHelpText() {
+    // remove upper-left text area
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, 300, 200);
+
+    // redraw bottom-left text area
+    ctx.lineWidth = 4;
+    ctx.strokeWidth = 4;
+    ctx.strokeStyle = 'rgb(148, 0, 211)';
+    ctx.strokeRect(736, 445, 272, 200);
+
+    ctx.font = '24px arial';
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.fillText("Complete!", 805, 490);
+    // still determining what to say at this point
+
+    // ctx.fillText("For best results, draw", 770, 505);
+    ctx.font = '20px arial';
+    ctx.fillText("[ need text here ]", 770, 530);
+    // ctx.fillText("non-overlapping line", 770, 555);
+}
+
+// this function will be refactored/cleaned
+function enterBoundaryCreationMode() {
+
+    // drawing flag and step tracker
+    var allowed_to_draw = false; // could be method of Paintbrush
+    var boundary_step = "bottom-boundary"; // could be attribute of Boundary? idk..
+
+    // create new boundary
+    var new_boundary = new Boundary();
+
+    // this function name doesn't fit well anymore, rename
+    applyBoundaryModeStyles();
+
+    // write here until compound function made
+    drawBoundaryDrawingHelpText("Step 1");
+    
+    // belongs to class Painbrush, not Boundary
+    function draw(event) {
+        if (event.buttons !== 1 || !allowed_to_draw) {
+            // return if left-mouse button not pressed or if user not allowed to draw
+            return;
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(coordinates['x'], coordinates['y']);
+        updateMousePosition(event);
+
+        // draw different line depending on boundary_step
+        if (boundary_step === 'full-boundary') {
+
+            // get pixel color before drawing, reject if green
+            let pixel_data = getPixelXY(canvas_data_bad_practice, coordinates['x'], coordinates['y']);
+
+            if (pixel_data[0] == 155) {
+                // green touched, reject
+                console.log("illegal white line. returning.");
+                allowed_to_draw = false;
+
+                // should erase white line (redraw everything except the white line)
+                // this should be it's own function too (this same code is repeated in validateBoundaryConnection())
+                // draw boilerplate and top&bottom boundaries
+                drawBoundaryBoilerplate();
+                ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
+                ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
+                drawBoundaryValidationHelpText();
+
+                // draw white dot
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(80, 510, 10, 0, Math.PI*2, false);
+                ctx.fill();
+
+                // make goal new color (can be a flag in drawBoundaryBoilerplate())
+                ctx.fillStyle = 'rgb(232, 0, 118)';
+                ctx.fillRect(925, 50, 20, 20);
+                
+                return;
+            }
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 1;
+        }
+        else {
+            ctx.strokeStyle = 'rgb(155, 245, 0)'; //green 
+            ctx.lineWidth = 20;
+
+            // store coordinates here while drawing boundaries
+            if (boundary_step === 'bottom-boundary') {
+                // save to bottom coords
+                new_boundary.bottom_boundary_coordinates.push([coordinates['x'], coordinates['y']]);
+            }
+            else {
+                // save to top coords
+                new_boundary.top_boundary_coordinates.push([coordinates['x'], coordinates['y']]);
+            }
+
+        }
+
+        ctx.lineCap = 'round';
+        ctx.lineTo(coordinates['x'], coordinates['y']);
+        ctx.stroke();
+        ctx.closePath();
+    }
+
+    // will belong to class Paintbrush, not Boundary
+    function requestDrawingPermission(event) {
+        // this function is called on mousedown and will update the drawing flag that gives
+        // users ability to draw if legal
+        console.log("User would like to draw.");
+        
+        // need to grab coords since updateMousePosition() can't update function var anymore.
+        // possible solution: global coordinates variable
+        // trying that now.
+        updateMousePosition(event);
+
+        if (boundary_step === 'bottom-boundary') {
+            // check that user is trying to draw from first connector (ctx.fillRect(150, 550, 20, 50))
+            // make helper function eventually
+            if (coordinates['x'] >= 150 && coordinates['x'] <= 170 && coordinates['y'] >= 550) {
+                console.log("You clicked on the connector!");
+                allowed_to_draw = true;
+            }
+            else {
+                console.log("Not allowed to draw, mouse not on connector:");
+                console.log(coordinates);
+                allowed_to_draw = false;
+            }
+        }
+        else if (boundary_step === 'top-boundary') {
+            // check that user is trying to draw from the first connector (ctx.fillRect(0, 430, 50, 20))
+            if (coordinates['x'] >= 0 && coordinates['x'] <= 50 && coordinates['y'] >= 430 && coordinates['y'] <= 450) {
+                allowed_to_draw = true;
+            }
+            else {
+                console.log("Not allowed to draw, mouse not on connector.");
+                allowed_to_draw = false;
+            }
+        }
+        // final step: draw line from spawn to goal
+        else if (boundary_step === 'full-boundary') {
+            // check that user is trying to draw from the white dot (ctx.arc(80, 510, 10, 0, Math.PI*2, false))
+            if (coordinates['x'] >= 70 && coordinates['x'] <= 90 && 
+                coordinates['y'] >= 500 && coordinates['y'] <= 520 ) {
+
+                allowed_to_draw = true;
+            }
+            else {
+                console.log("You missed the white dot...");
+                allowed_to_draw = false;
+            } 
+
+        }
+        else if (boundary_step === 'confirmation') {
+            // don't allow user to draw in confirmation phase
+            allowed_to_draw = false;
+        }
+    }
+
+    // break this down into smaller function when all working
+    // should this whole thing be a class method?
+    function validateBoundaryConnection(event) {
+        console.log("mouseup heard");
+        // should make sure that the user was allowed to draw, otherwise return
+        if (allowed_to_draw) {
+            // check boundary step
+            if (boundary_step === 'bottom-boundary') {
+                let bottom_boundary_is_valid = new_boundary.validateBottom(event);
+
+                if (bottom_boundary_is_valid) {
+                    // update step and store boundary
+                    new_boundary.save('bottom');
+                    boundary_step = "top-boundary";
+                    drawBoundaryDrawingHelpText("Step 2");
+                }
+                else {
+                    // erase bottom-boundary coords when illegal line drawn
+                    new_boundary.bottom_boundary_coordinates = [];
+
+                    // redraw boilerplate
+                    drawBoundaryBoilerplate();
+
+                    // redraw bottom-step help text
+                    drawBoundaryDrawingHelpText("Step 1");
+
+                    console.log("invalid");
+                    // error message 
+                }
+            }
+            else if (boundary_step === "top-boundary") {
+                let top_boundary_is_valid = new_boundary.validateTop(event);
+
+                if (top_boundary_is_valid) {
+                    // update step and store boundary
+                    // store top-boundary
+                    new_boundary.save('top');
+                    boundary_step = 'full-boundary';
+
+                    // draw next-step text 
+                    drawBoundaryValidationHelpText();
+                }
+                else {
+                    // reset top boundary coords when illegal line drawn
+                    new_boundary.top_boundary_coordinates = [];
+
+                    // redraw boilerplate and help text
+                    drawBoundaryBoilerplate();
+
+                    // draw valid bottom-boundary
+                    ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
+
+                    drawBoundaryDrawingHelpText("Step 2");
+
+                    // error message
+                }
+            }
+            else if (boundary_step === 'full-boundary') {
+                // hereeeee
+                let full_boundary_is_valid = new_boundary.validateFull();
+
+                if (full_boundary_is_valid) {
+                    // update step
+                    boundary_step = 'confirmation';
+                    allowed_to_draw = false;
+                    
+                    // make goal white to show success
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(925, 50, 20, 20);
+
+                    // should display help text on bottom-left area
+                    drawBoundaryCompletionHelpText();
+
+                    // display button to proceed, hide 'back' btn
+                    document.getElementsByClassName("save-boundaries-btn")[0].style.display = 'block';
+                    document.getElementsByClassName("stop-btn")[0].style.display = 'none';
+                }
+                else {
+                    // error message
+
+                    // erase line and return to last step
+                    // draw boilerplate and top&bottom boundaries
+                    drawBoundaryBoilerplate();
+                    ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
+                    drawBoundaryValidationHelpText();
+                }
+            }
+        }
+        else {
+            return;
+        }
+    }
+    
+    // respond to each event individually (pass event for mouse position)
+    canvas.addEventListener('mouseenter', updateMousePosition);
+    canvas.addEventListener('mousedown', requestDrawingPermission);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', validateBoundaryConnection);
+
+    // make class method?
+    let save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
+
+    save_bounds_btn.addEventListener("click", function() {
+        console.log("Saving Custom Boundaries");
+
+        // save full boundary
+        new_boundary.save('full');
+
+        // normalize boundary coordinate array sizes
+        new_boundary.prepareBoundaryForCheckpoints();
+
+        // let's make sure the boundaries are same length and not the same values
+        // console.log(custom_boundary.top_boundary_coordinates.length, custom_boundary.bottom_boundary_coordinates.length);
+        // console.log(custom_boundary.top_boundary_coordinates, custom_boundary.bottom_boundary_coordinates);
+
+        // ===== here =====
+        // next, we'll create the checkpoints to be used by our fitness function
+        new_boundary.createCheckpoints();
+
+        // still using custom_boundary global, I don't like it ==!CHANGE!==
+        custom_boundary = new_boundary;
+
+        // update global scale_statistics
+        scale_statistics = setScale();
+
+        // return to settings
+
+        // ===== this should display boundary version of settings form =====
+        displaySettingsForm(); //turned off while testing checkpoints
+    });
+}
+
+// ======================
+// ===== PRE-SIM =====
+// ======================
+
+function createPaintbrush() {
+    window.paintbrush = new Paintbrush();
+}
+
+// this is a drawing
+function prepareToRunSimulation() {
+    // clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    document.getElementsByClassName("settings-btn")[0].style.display = 'none';
+
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.font = '50px arial';
+    ctx.fillText("Simulation Ready", 300, 270);
+    ctx.font = '28px arial'
+    ctx.fillText("Press 'Run Simulation'", 350, 400);
+}
+
 // all drawings for this function moved to drawings.js
 async function runPreSimAnimations() {
 
@@ -845,23 +1464,932 @@ async function runPreSimAnimations() {
     })
 }
 
-// this function will be deleted after integration, can just call runSimulation() directly
-// deprecated
-function checkSimType() {
-    // eventually, both sims will be the same, this is for testing
-    if (custom_boundary) {
-        // testing new boundary fitness function
-        // testBoundarySim();
+function selectSimulationType() {
+    drawInitialSimSelectionScreen();
+    turnOnSimTypeSelectionListeners();
+}
 
-        // integration testing
-        runSimulation();
+// example images not final. consider more zoomed-in images
+function drawInitialSimSelectionScreen() {
+    // let's get the dimensions of my screenshots (300x300 needed)
+    let classic_example = document.getElementById("classic-example");
+    let boundary_example = document.getElementById("boundary-example");
+
+    // hide start button and clear canvas
+    let start_btn = document.getElementsByClassName("start-btn")[0];
+    start_btn.style.display = 'none';
+
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // show sim-type buttons 
+    document.getElementsByClassName("sim-type-classic")[0].style.display = "block";
+    document.getElementsByClassName("sim-type-boundary")[0].style.display = "block";
+
+    // could turn this initial drawing into a function too
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.font = '50px arial';
+    ctx.fillText("Select Simulation Type", 240, 80);
+    ctx.font = '30px arial';
+    ctx.fillText("Classic", 190, 500);
+    ctx.fillText("Boundary", 690, 500);
+
+    ctx.strokeStyle = 'rgb(148, 0, 211)';
+    ctx.lineWidth = 4;
+    ctx.shadowColor = 'rgb(148, 0, 211)';
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(100, 150, 300, 300);
+    ctx.strokeRect(600, 150, 300, 300);
+
+    // draw images scaled to 300x300
+    ctx.drawImage(classic_example, 100, 150, 300, 300);
+    ctx.drawImage(boundary_example, 600, 150, 300, 300);   
+}
+
+function handleSimTypeBtnMouseover(event) {
+    console.log(event.target.className);
+    if (event.target.className === 'sim-type-classic') {
+        simGlobals.sim_type = highlightClassicSimType();
     }
-    else {
-        console.log("nope");
-        runSimulation();
+    else if (event.target.className === 'sim-type-boundary') {
+        simGlobals.sim_type = highlightBoundarySimType();
     }
 }
 
+function handleSimTypeBtnClick() {
+    if (simGlobals.sim_type != null) {
+        applySimType();
+    }
+}
+
+function turnOnSimTypeSelectionListeners() {
+    // allow arrow keys to highlight sim types, 'enter' to confirm
+    document.addEventListener('keydown', handleSimTypeSelectionKeyPress);
+
+    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
+    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
+
+    // add event listeners to buttons (move to better place if needed)
+    sim_type_btn_classic.addEventListener('mouseover', handleSimTypeBtnMouseover);
+    sim_type_btn_boundary.addEventListener('mouseover', handleSimTypeBtnMouseover);
+
+    // when button is clicked, sim_type will be set
+    sim_type_btn_classic.addEventListener('click', handleSimTypeBtnClick);
+    sim_type_btn_boundary.addEventListener('click', handleSimTypeBtnClick);
+}
+
+function turnOffSimTypeSelectionEventListeners() {
+    if (simGlobals.sim_type != null) {
+        // turn off event listeners before displaying next canvas
+        let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
+        let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
+    
+        sim_type_btn_classic.removeEventListener('mouseover', handleSimTypeBtnMouseover);
+        sim_type_btn_classic.removeEventListener('click', handleSimTypeBtnClick);
+        sim_type_btn_boundary.removeEventListener('mouseover', handleSimTypeBtnMouseover);
+        sim_type_btn_boundary.removeEventListener('click', handleSimTypeBtnClick);
+        document.removeEventListener('keydown', handleSimTypeSelectionKeyPress);
+    }
+}
+
+function handleSimTypeSelectionKeyPress(event) {
+    switch(event.key) {
+        case "ArrowLeft":
+            // the solution is to sync this variable with the sim_type var that runSimulation()/checkSimType() checks
+            // i'll do that now. set sim_type here
+            simGlobals.sim_type = highlightClassicSimType();
+            break;
+
+        case "ArrowRight":
+            simGlobals.sim_type = highlightBoundarySimType();
+            break;
+        
+        case "Enter":
+            if (simGlobals.sim_type != null) {
+                applySimType();
+            }
+            else {
+                console.log("sim type not selected.");
+            }
+            break;
+    }  
+}
+
+function highlightClassicSimType() {
+    console.log("left arrow pressed");
+
+    // highlight classic btn, return boundary btn to normal
+    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
+    sim_type_btn_classic.style.backgroundColor = 'rgb(155, 245, 0)';
+    sim_type_btn_classic.style.color = 'black';
+
+    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
+    sim_type_btn_boundary.style.backgroundColor = 'rgb(148, 0, 211)';
+    sim_type_btn_boundary.style.color = 'rgb(155, 245, 0)';
+
+    // clear rects
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'black';
+    ctx.fillRect(70, 120, 870, 450);
+
+    // redraw 'classic' border highlighted
+    ctx.strokeStyle = 'rgb(155, 245, 0)';
+    ctx.shadowColor = 'rgb(155, 245, 0)';
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(100, 150, 300, 300);
+
+    // redraw 'classic' text highlighted
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.font = '30px arial';
+    ctx.fillText("Classic", 190, 500);
+
+    // redraw 'boundary' border normal
+    ctx.strokeStyle = 'rgb(148, 0, 211)';
+    ctx.shadowColor = 'rgb(148, 0, 211)';
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(600, 150, 300, 300);
+
+    // redraw boundary text normal
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("Boundary", 690, 500);
+
+    // redraw example images scaled to 300x300
+    let classic_example = document.getElementById("classic-example");
+    let boundary_example = document.getElementById("boundary-example");
+    ctx.drawImage(classic_example, 100, 150, 300, 300);
+    ctx.drawImage(boundary_example, 600, 150, 300, 300);  
+
+    return 'classic';
+}
+
+function highlightBoundarySimType() {
+    console.log("right arrow pressed");
+
+    // highlight boundary button, return classic button to normal
+    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
+    sim_type_btn_boundary.style.backgroundColor = 'rgb(155, 245, 0)';
+    sim_type_btn_boundary.style.color = 'black';
+
+    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
+    sim_type_btn_classic.style.backgroundColor = 'rgb(148, 0, 211)';
+    sim_type_btn_classic.style.color = 'rgb(155, 245, 0)';
+
+    // clear rects
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'black';
+    ctx.fillRect(70, 120, 870, 450);
+
+    // redraw 'boundary' border highlighted
+    ctx.strokeStyle = 'rgb(155, 245, 0)';
+    ctx.shadowColor = 'rgb(155, 245, 0)';
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(600, 150, 300, 300);
+
+    // redraw 'boundary' text highlighted
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.font = '30px arial';
+    ctx.fillText("Boundary", 690, 500);
+
+    // redraw 'classic' border normal
+    ctx.strokeStyle = 'rgb(148, 0, 211)';
+    ctx.shadowColor = 'rgb(148, 0, 211)';
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(100, 150, 300, 300);
+
+    // redraw 'classic' text normal
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("Classic", 190, 500);
+
+    // redraw example images scaled to 300x300
+    let classic_example = document.getElementById("classic-example");
+    let boundary_example = document.getElementById("boundary-example");
+    ctx.drawImage(classic_example, 100, 150, 300, 300);
+    ctx.drawImage(boundary_example, 600, 150, 300, 300); 
+
+    return 'boundary';
+}
+
+function applySimType() {
+
+    // turn off listeners and hide buttons
+    turnOffSimTypeSelectionEventListeners();
+
+    document.getElementsByClassName("sim-type-classic")[0].style.display = 'none';
+    document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
+
+    if (simGlobals.sim_type === 'classic') {
+        displaySettingsForm();
+    }
+    else if (simGlobals.sim_type === 'boundary') {
+        // user must create boundary before settings configuration
+        displayBoundaryCreationIntroductionOne();
+    }
+}
+
+function createOrganisms () {
+    let gender;
+    let male_count = 0;
+    let female_count = 0;
+    let spawn_x = simGlobals.INITIAL_X;
+    let spawn_y = simGlobals.INITIAL_Y;
+
+    // update spawn point if boundary simulation
+    if (simGlobals.sim_type === 'boundary') {
+        spawn_x = simGlobals.INITIAL_X_BOUND;
+        spawn_y = simGlobals.INITIAL_Y_BOUND;
+    }
+
+    // create equal number of males and females
+    for (var i = 0; i < simGlobals.TOTAL_ORGANISMS; i++) {
+        if (i % 2) {
+            gender = 'male';
+            male_count++;
+        }
+        else {
+            gender = 'female';
+            female_count++;
+        }
+
+        let organism = new Organism(gender, spawn_x, spawn_y, ctx);
+
+        organism.setRandomGenes();
+        simGlobals.organisms.push(organism);
+    }
+    console.log(`FEMALES CREATED: ${female_count}, MALES CREATED: ${male_count}`);
+
+    // consider not making organisms global, but pass it to runGeneration()/runSimulation() from here
+}
+
+// ======================
+// ===== EVALUATION =====
+// ======================
+
+function updateAndMoveOrganismsBounds() {
+    // 'organisms' was a param but I don't think we need to pass it because it's global
+    // updateAndMoveOrganisms() returns a success flag
+
+    return new Promise(resolve => {
+        // clear and draw boundary
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
+
+        var canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height); // capture canvas for collision testing
+        var finished = false;
+        var position_rgba;
+        var total_moves = 0;
+
+        function animateOrganisms() {
+
+            if (!finished) {
+                if (total_moves >= GENE_COUNT * organisms.length) {
+                    finished = true;
+                }
+                else {
+                    // clear
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    // draw boundary
+                    ctx.drawImage(custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
+
+                    // (FOR TESTING) draw checkpoints
+                    // ctx.fillStyle = 'white';
+                    // for (let i = 0; i < custom_boundary.checkpoints.length; i++) {
+                    //     ctx.beginPath();
+                    //     ctx.arc(custom_boundary.checkpoints[i][0], custom_boundary.checkpoints[i][1], 10, 0, Math.PI*2, false);
+                    //     ctx.fill();
+                    //     ctx.closePath();
+                    // }
+
+                    for (let i = 0; i < organisms.length; i++) {
+                        if (organisms[i].is_alive) {
+
+                            position_rgba = getPixelXY(canvas_data, organisms[i].x, organisms[i].y);
+
+                            if (position_rgba[0] === 155 && position_rgba[1] === 245) { // consider only checking one value for performance
+
+                                let survived = Math.random() < RESILIENCE;
+
+                                if (survived) {
+                                    // instead of update and move, move organism to inverse of last movement, update index
+
+                                    // get inverse of last gene
+                                    let inverse_x_gene = (organisms[i].genes[organisms[i].index - 1][0]) * -1;
+                                    let inverse_y_gene = (organisms[i].genes[organisms[i].index - 1][1]) * -1;
+
+                                    // update
+                                    organisms[i].x += inverse_x_gene;
+                                    organisms[i].y += inverse_y_gene;
+
+                                    // increase index
+                                    organisms[i].index++;
+
+                                    // move
+                                    organisms[i].move();
+                                }
+                                else {
+                                    organisms[i].is_alive = false;
+                                    organisms[i].ctx.fillStyle = 'red';
+                                    organisms[i].ctx.beginPath();
+                                    organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+                                    organisms[i].ctx.fill();
+                                }
+                            }
+                            else {
+                                organisms[i].update();
+                                organisms[i].move();
+                            }
+                        }
+                        else {
+                            // draw deceased organism
+                            organisms[i].ctx.fillStyle = 'red';
+                            organisms[i].ctx.beginPath();
+                            organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+                            organisms[i].ctx.fill();
+                        }
+                        total_moves++;
+                    }
+
+                }
+                sleep(1000 / FPS); // looks smoother without fps
+                frame_id = requestAnimationFrame(animateOrganisms);
+            }
+
+            else {
+                //resolve
+                cancelAnimationFrame(frame_id);
+                // ======! resolving 'false' until success logic implemented !======
+                resolve(false);
+            }
+        }
+        start_test_guy_animation = requestAnimationFrame(animateOrganisms);
+    })
+}
+
+function updateAndMoveOrganisms(goal) {
+    return new Promise(resolve => {
+        let total_moves = 0;
+        let finished = false;
+        let success_flag = false;
+        let frame_id;
+
+        // why is this async?
+        async function animateOrganisms() {
+            if (!finished) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                goal.drawGoal();
+                goal.showStatistics();
+
+                if (simGlobals.dialogue) {
+                    drawStaticEvaluationPhaseText();
+                }
+
+                for (var i = 0; i < simGlobals.organisms.length; i++) {
+                    if (simGlobals.organisms[i].reached_goal == false) {
+                        simGlobals.organisms[i].update();
+                        simGlobals.organisms[i].move();
+                        hasReachedGoal(simGlobals.organisms[i], goal);
+                    }
+                    else {
+                        updateSuccessfulOrganism(simGlobals.organisms[i]);
+                        success_flag = true;
+                    }
+                    total_moves++;
+                }
+                if (total_moves == (simGlobals.organisms.length * simGlobals.GENE_COUNT)) {
+                    finished = true;
+                }
+
+                sleep(1000 / simGlobals.FPS); // control drawing FPS for organisms
+                frame_id = requestAnimationFrame(animateOrganisms);
+            }
+            else {
+                // resolve
+                cancelAnimationFrame(frame_id);
+                resolve(success_flag);
+            }
+        }
+        requestAnimationFrame(animateOrganisms);
+    })
+}
+
+function hasReachedGoal(organism, goal) {
+    // check if within y-range 
+    if ((organism.y - (organism.radius / 2)) >= goal.y && (organism.y - (organism.radius / 2)) <= (goal.y + goal.size)) {
+        // check if within x-range
+        if ((organism.x - (organism.radius / 2)) >= goal.x && (organism.x - (organism.radius / 2)) <= (goal.x + goal.size)) {
+            // organism reached goal
+            organism.reached_goal = true;
+        }
+    }
+}
+
+// not ready to convert yet **
+async function runEvaluationAnimation() {
+
+    // ** not doing updateAndMove(), only fades for now
+
+    // need to draw goal at location depending on sim type
+    if (simGlobals.sim_type === 'classic') {
+        var goal = new Goal(simGlobals.GOAL_X_POS, simGlobals.GOAL_Y_POS, 20, ctx);
+        var success_flag = await updateAndMoveOrganisms(goal); // ideally don't pass in goal here
+    }
+    else {
+        // var goal = new Goal(GOAL_X_POS_BOUNDS, GOAL_Y_POS_BOUNDS, 20, ctx); not sure if needed (goal saved in boundary drawing)
+        var success_flag = await updateAndMoveOrganismsBounds();
+    }
+
+    // updateAndMoveOrganisms() is the classic version of boundary sim's updateAndMoveOrganismsBounds()
+    // we can combine them (standalone for now)
+
+    return new Promise((resolve, reject) => {
+        if (success_flag) {
+            resolve(true);
+        }
+        else {
+            resolve(false);
+        }
+    })
+}
+
+function getShortestDistanceToGoal() {
+
+    var shortest_distance = 10000;
+    var closest_organism_index;
+
+    // though this loop identifies closest organism, it ALSO updates organism's distance_to_goal attribute
+    for (var i = 0; i < simGlobals.organisms.length; i++) {
+        var distance_to_goal = simGlobals.organisms[i].calcDistanceToGoal();
+        if (distance_to_goal < shortest_distance) {
+            shortest_distance = distance_to_goal;
+            closest_organism_index = i;
+        }
+    }
+
+    var closest_organism = simGlobals.organisms[closest_organism_index];
+
+    return closest_organism;
+}
+
+function getShortestDistanceToNextCheckpoint(next_checkpoint) {
+    var shortest_distance_to_checkpoint = 10000;
+    var closest_organism;
+
+    // calculate distance to closest checkpoint not yet reached
+    for (let n = 0; n < organisms.length; n++) {
+        // in future, make sure organism is alive before calculating its distance !!!!!!! (or remove deceased organisms from array)
+        // distance^2 = a^2 + b^2
+        let horizontal_distance_squared = (organisms[n].x - custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2;
+        let vertical_distance_squared = (organisms[n].y - custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2;
+        let distance_to_checkpoint_squared = horizontal_distance_squared + vertical_distance_squared;
+
+        organisms[n].distance_to_next_checkpoint = Math.sqrt(distance_to_checkpoint_squared);
+        console.log("Distance to next-closest checkpoint for organism " + n + ":");
+        console.log(organisms[n].distance_to_next_checkpoint);
+
+        if (organisms[n].distance_to_next_checkpoint < shortest_distance_to_checkpoint) {
+            shortest_distance_to_checkpoint = organisms[n].distance_to_next_checkpoint;
+            closest_organism = organisms[n]; // return only index if works better
+        }
+    }
+    // we should have each organism's distance the closest checkpoint not yet reached.
+    return closest_organism;
+}
+
+function calcPopulationFitness () {
+    return new Promise(resolve => {
+        // reset total_fitness before calculation
+        simGlobals.total_fitness = 0;
+        for (var i = 0; i < simGlobals.organisms.length; i++) {
+            simGlobals.organisms[i].calcFitness();
+            simGlobals.total_fitness += simGlobals.organisms[i].fitness;
+        }
+
+        // redundant, fix
+        simGlobals.average_fitness = simGlobals.total_fitness / simGlobals.organisms.length;
+        resolve(simGlobals.average_fitness);
+    })
+}
+
+function calcPopulationFitnessBounds(remaining_distance) {
+    // scale = length of lines connecting epicenters from spawn>checkpoints>goal
+    var scale = scale_statistics['scale'];
+
+    // calc/set distance_to_goal && fitness
+    total_fitness = 0.00;
+    for (let i = 0; i < organisms.length; i++) {
+
+        // this also sets each organism's distance_to_goal attribute
+        organisms[i].calcDistanceToGoalBounds(remaining_distance);
+
+        // this also sets each organism's fitness attribute
+        organisms[i].calcFitnessBounds(scale);
+
+        total_fitness += organisms[i].fitness;
+    }
+
+    // set average fitness
+    average_fitness = total_fitness / organisms.length;
+
+    return average_fitness;
+}
+
+async function evaluatePopulation() {
+    // to do
+    const shortest_distance_resolution = await getShortestDistanceToGoal();
+    simGlobals.average_fitness = await calcPopulationFitness();
+
+    // also redundant, fix
+    var population_resolution = {
+        'closest_organism': shortest_distance_resolution,
+        'average_fitness': simGlobals.average_fitness
+    }
+
+    return new Promise(resolve => {
+        resolve(population_resolution);
+    })
+}
+
+// *DRAWING*
+function drawStaticEvaluationPhaseText() {
+    ctx.font = "20px arial";
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Create New Generation", 10, 30);
+
+    ctx.fillStyle = 'rgba(155, 245, 0, 1)';
+    ctx.fillText("Evaluate Individuals", 10, 60);
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Select Most-Fit Individuals", 10, 90);
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Crossover", 10, 120);
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Mutate", 10, 150);
+}
+
+// *DRAWING*
+function updateSuccessfulOrganism(organism) {
+    organism.ctx.fillStyle = 'red';
+    organism.ctx.beginPath();
+    organism.ctx.arc(organism.x, organism.y, organism.radius, 0, Math.PI*2, false);
+    organism.ctx.fill();
+}
+
+// =====================
+// ===== SELECTION =====
+// =====================
+
+function beginSelectionProcess() {
+    // fill array with candidates for reproduction
+    var potential_mothers = [];
+    var potential_fathers = [];
+
+    for (var i = 0; i < simGlobals.organisms.length; i++) {
+        // Give organisms with negative fitness a chance to reproduce
+        if (simGlobals.organisms[i].fitness < 0) {
+            simGlobals.organisms[i].fitness = 0.01;
+        }
+
+        // I'm going to try this implementation >> (organism.fitness * 100) ** 1.25
+        for (var j = 0; j < Math.ceil((simGlobals.organisms[i].fitness * 100) ** 2); j++) {
+            if (simGlobals.organisms[i].gender === 'female') {
+                potential_mothers.push(simGlobals.organisms[i]);
+            }
+            else if (simGlobals.organisms[i].gender === 'male') {
+                potential_fathers.push(simGlobals.organisms[i]);
+            }
+        }
+        // console.log(`Fitness for Organism ${i}: ${simGlobals.organisms[i].fitness}`);
+        // console.log(`Organism ${i} was added to array ${Math.ceil((simGlobals.organisms[i].fitness * 100) ** 2)} times.`);
+    }
+
+    var potential_parents = {
+        'potential_mothers': potential_mothers,
+        'potential_fathers': potential_fathers
+    }
+
+    return new Promise(resolve => {
+        resolve(potential_parents);
+    })
+}
+
+function selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length) {
+
+    // example
+    // var parents = [
+    //     [mother0, father0],
+    //     [mother1, father1],
+    //     ... 
+    //     [mother9, father9]
+    // ]
+
+    // console.log(`organisms.length: ${simGlobals.organisms.length}`);
+    // console.log(`target length: ${next_gen_target_length}`);
+
+    var parents = [];
+    // goal: pair together males and females 
+    // create parents == TOTAL_ORGANISMS / 2 (each couple reproduces roughly 2 offspring)
+
+    // classic target length = organisms.length
+    // boundary target length = organisms.length + num_of_deceased_organisms
+    // this way, our species will try to reproduce the same amount of organisms it started the generation with, rather than
+    // organisms.length, which would always decline as organisms die
+    for (let i = 0; i < (next_gen_target_length / 2); i++) {
+        let mother_index = Math.floor(Math.random() * potential_mothers.length);
+        let father_index = Math.floor(Math.random() * potential_fathers.length);
+
+        let mother = potential_mothers[mother_index];
+        let father = potential_fathers[father_index];
+
+        let new_parents = [mother, father];
+
+        parents.push(new_parents);
+    }
+    return parents;
+}
+
+async function runClosestOrganismAnimations (closest_organism) {
+
+    await paintbrush.fadeIn(Drawings.drawClosestOrganismText, .02);
+
+    // give paintbrush a subject to draw
+    paintbrush.subject = closest_organism;
+
+    // highlight most-fit organism 
+    for (let i = 0; i <= 2; i++) {
+        await paintbrush.fadeIn(Drawings.drawClosestOrganismNatural, .04);
+        await paintbrush.fadeIn(Drawings.drawClosestOrganismHighlighted, .04);
+    }
+    await sleep(1000);
+
+    // fade out text, return organism to natural color
+    await paintbrush.fadeOut(Drawings.drawClosestOrganismText, .02);
+    await paintbrush.fadeIn(Drawings.drawClosestOrganismNatural, .04);
+
+    // done drawing closet organism
+    paintbrush.subject = null;
+
+    return new Promise(resolve => {
+        resolve();
+    })
+}
+
+async function runChosenParentsAnimations(parents) {
+
+    // set subject for paintbrush
+    paintbrush.subject = parents;
+
+    // highlight mothers
+    await paintbrush.fadeIn(Drawings.drawMothersText, .02);
+
+    for (let i = 0; i <= 2; i++) {
+        await paintbrush.fadeIn(Drawings.drawMothersHighlighted, .03);
+        await paintbrush.fadeIn(Drawings.drawMothersNatural, .03);
+    }
+
+    // highlight fathers
+    // !!! change fathers color to a lighter blue
+    await paintbrush.fadeIn(Drawings.drawFathersText, .02);
+
+    for (let i = 0; i <= 2; i++) {
+        await paintbrush.fadeIn(Drawings.drawFathersHighlighted, .03);
+        await paintbrush.fadeIn(Drawings.drawFathersNatural, .03);
+    }
+    await sleep(1000);
+
+    // highlight all
+    await paintbrush.fadeIn(Drawings.drawMothersHighlighted, .03);
+    await paintbrush.fadeIn(Drawings.drawFathersHighlighted, .03);
+    await paintbrush.fadeIn(Drawings.drawNotChosenText, .02);
+    await sleep(1000); 
+
+    // fade out all
+    await paintbrush.fadeOut(Drawings.drawAllSelectedOrganismsText, .02);
+    await paintbrush.fadeIn(Drawings.drawBothParentTypesNatural, .02);
+    await paintbrush.fadeOut(Drawings.drawOrganisms, .05);
+    await sleep(1000);
+
+    // done with parents
+    paintbrush.subject = null;
+
+    return new Promise(resolve => {
+        resolve("Highlight Chosen Parents Animation Complete");
+    })
+}
+
+async function runSelectionAnimations(closest_organism, parents) {
+    console.log("Called runSelectionAnimations()");
+    // maybe model other phases after this one
+    await runClosestOrganismAnimations(closest_organism); // finished
+    await runChosenParentsAnimations(parents);
+
+    return new Promise(resolve => {
+        resolve("Run Selection Animations Complete");
+    })
+}
+
+// ================================
+// ===== CROSSOVER & MUTATION =====
+// ================================
+
+// (Mutation handled on gene inheritance currently)
+function crossover(parents_to_crossover) {
+
+    let mother = parents_to_crossover[0];
+    let father = parents_to_crossover[1];
+
+    // create offspring's genes
+    let crossover_genes = [];
+
+    for (var j = 0; j < simGlobals.GENE_COUNT; j++) {
+        // select if mother or father gene will be used (50% probability)
+        var random_bool = Math.random();
+
+        // apply mutation for variance
+        // set upper and lower bound for gene mutation using MUTATION_RATE / 2
+        // this way, mother and father genes retain an equal chance of being chosen
+        if (random_bool < (simGlobals.MUTATION_RATE / 2) || random_bool > 1 - (simGlobals.MUTATION_RATE / 2)) {
+            let mutated_gene = getRandomGene(simGlobals.MIN_GENE, simGlobals.MAX_GENE);
+            crossover_genes.push(mutated_gene);
+        }
+        // mother gene chosen
+        else if (random_bool < 0.5) {
+            let mother_gene = mother.genes[j];
+            crossover_genes.push(mother_gene);
+        }
+        // father gene chosen
+        else {
+            let father_gene = father.genes[j];
+            crossover_genes.push(father_gene);
+        }
+    }
+
+    return crossover_genes;
+}
+
+// =================================
+// ===== CREATE NEW GENERATION =====
+// =================================
+
+function determineOffspringCount() {
+    // this shouldn't be declared every call.. (fix)
+    let possible_offspring_counts = [0, 0, 1, 1, 2, 2, 2, 3, 4, 5]; // sum = 20, 20/10items = 2avg
+
+    let offspring_count_index = Math.floor(Math.random() * possible_offspring_counts.length);
+    let offspring_count = possible_offspring_counts[offspring_count_index];
+    return offspring_count;
+}
+
+function getGender() {
+    let gender_indicator = Math.random();
+    let gender;
+    if (gender_indicator < 0.5) {
+        gender = 'female';
+    }
+    else {
+        gender = 'male';
+    }
+    return gender;
+}
+
+function reproduce(crossover_genes) {
+    let spawn_x = simGlobals.INITIAL_X;
+    let spawn_y = simGlobals.INITIAL_Y;
+
+    // update spawn point if boundary simulation
+    if (simGlobals.sim_type === 'boundary') {
+        spawn_x = simGlobals.INITIAL_X_BOUND;
+        spawn_y = simGlobals.INITIAL_Y_BOUND;
+    }
+
+    let offspring_gender = getGender();
+    let offspring = new Organism(offspring_gender, spawn_x, spawn_y, ctx);
+    offspring.genes = crossover_genes;
+
+    // push offspring to new population
+    simGlobals.offspring_organisms.push(offspring);
+}
+
+function reproduceNewGeneration(parents) {
+    for (var i = 0; i < parents.length; i++) {
+        var offspring_count = determineOffspringCount();
+
+        for (var j = 0; j < offspring_count; j++) {
+            let crossover_genes = crossover(parents[i]); // returns dict
+            reproduce(crossover_genes);
+        }
+    }
+    // set offspring_organisms as next generation of organisms
+    simGlobals.organisms = simGlobals.offspring_organisms;
+    simGlobals.offspring_organisms = [];
+}
+
+// ====================
+// ===== WIN/LOSE =====
+// ====================
+
+// *DRAWING*
+function drawSuccessMessage(opacity) {
+    // if this looks bad, it's because it doesn't have a clearRect()
+
+    ctx.font = '44px arial';
+    ctx.fillStyle = 'black';
+    ctx.fillText("Your Simulation Succeeded!", 235, 275);
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText("Your Simulation Succeeded!", 235, 275);
+
+    ctx.font = '30px arial';
+    ctx.fillStyle = 'black';
+    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
+
+    ctx.font = '26px arial';
+    ctx.fillStyle = 'black';
+    ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
+    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+    ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
+
+    ctx.font = '26px arial';
+    ctx.fillStyle = 'black';
+    ctx.fillText("Press 'Q' to Quit", 420, 450);
+    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+    ctx.fillText("Press 'Q' to Quit", 420, 450);
+
+}
+
+// clears text area and redraws organisms where they were
+function redrawOrganisms() {
+    ctx.fillStyle = 'black';
+    ctx.clearRect(235, 231, 550, 235);
+
+    // redraw organisms
+    for (var i = 0; i < organisms.length; i++) {
+        organisms[i].move();
+    }
+}
+
+// untested
+// *DRAWING*
+function drawExtinctionMessage() {
+    // clears
+    ctx.fillStyle = 'black';
+
+    ctx.font = '50px arial';
+    ctx.fillText("Simulation Failed", 310, 250);
+
+    ctx.font = "30px arial";
+    ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
+
+    ctx.font = '22px arial';
+    ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
+
+    // animations
+    ctx.font = '50px arial';
+    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
+    ctx.fillText("Simulation Failed", 310, 250);
+
+    ctx.font = "22px arial";
+    ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
+
+    ctx.font = "30px arial";
+    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
+    ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
+}
+
+// ============================
+// ===== EXTRAS / UNKNOWN =====
+// ============================
+
+// keep just in case
+function drawPhases() {
+    ctx.font = "20px arial";
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Create New Generation", 10, 30);
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Evaluate Individuals", 10, 60);
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Select Most-Fit Individuals", 10, 90);
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Crossover", 10, 120);
+
+    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx.fillText("Mutate", 10, 150);
+}
+
+// *DRAWING*
 function drawCurrentCheckpoint(index) {
     // draw farthest checkpoint reached
     ctx.strokeStyle = 'white';
@@ -876,6 +2404,7 @@ function drawCurrentCheckpoint(index) {
     ctx.closePath();
 }
 
+// *DRAWING*
 function drawPreviousCheckpoint(index) {
     // draw checkpoint_reached - 1 or spawn point
     if (index === 'spawn') {
@@ -903,6 +2432,7 @@ function drawPreviousCheckpoint(index) {
     }
 }
 
+// *DRAWING*
 function drawNextCheckpoint(index) {
     // draw next checkpoint not yet reached
     if (index === 'goal') {
@@ -1020,158 +2550,6 @@ function calcDistanceToGoalCheckpoints() {
             custom_boundary.checkpoints[i].distance_to_goal = adjusted_scale;
         }
     }
-}
-
-// needs to be updated for new class Boundary() (make class method?)
-function updateAndMoveOrganismsBounds() {
-    // 'organisms' was a param but I don't think we need to pass it because it's global
-    // updateAndMoveOrganisms() returns a success flag
-
-    return new Promise(resolve => {
-        // clear and draw boundary
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
-
-        var canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height); // capture canvas for collision testing
-        var finished = false;
-        var position_rgba;
-        var total_moves = 0;
-
-        function animateOrganisms() {
-
-            if (!finished) {
-                if (total_moves >= GENE_COUNT * organisms.length) {
-                    finished = true;
-                }
-                else {
-                    // clear
-                    ctx.fillStyle = 'black';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                    // draw boundary
-                    ctx.drawImage(custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
-
-                    // (FOR TESTING) draw checkpoints
-                    // ctx.fillStyle = 'white';
-                    // for (let i = 0; i < custom_boundary.checkpoints.length; i++) {
-                    //     ctx.beginPath();
-                    //     ctx.arc(custom_boundary.checkpoints[i][0], custom_boundary.checkpoints[i][1], 10, 0, Math.PI*2, false);
-                    //     ctx.fill();
-                    //     ctx.closePath();
-                    // }
-
-                    for (let i = 0; i < organisms.length; i++) {
-                        if (organisms[i].is_alive) {
-
-                            position_rgba = getPixelXY(canvas_data, organisms[i].x, organisms[i].y);
-
-                            if (position_rgba[0] === 155 && position_rgba[1] === 245) { // consider only checking one value for performance
-
-                                let survived = Math.random() < RESILIENCE;
-
-                                if (survived) {
-                                    // instead of update and move, move organism to inverse of last movement, update index
-
-                                    // get inverse of last gene
-                                    let inverse_x_gene = (organisms[i].genes[organisms[i].index - 1][0]) * -1;
-                                    let inverse_y_gene = (organisms[i].genes[organisms[i].index - 1][1]) * -1;
-
-                                    // update
-                                    organisms[i].x += inverse_x_gene;
-                                    organisms[i].y += inverse_y_gene;
-
-                                    // increase index
-                                    organisms[i].index++;
-
-                                    // move
-                                    organisms[i].move();
-                                }
-                                else {
-                                    organisms[i].is_alive = false;
-                                    organisms[i].ctx.fillStyle = 'red';
-                                    organisms[i].ctx.beginPath();
-                                    organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-                                    organisms[i].ctx.fill();
-                                }
-                            }
-                            else {
-                                organisms[i].update();
-                                organisms[i].move();
-                            }
-                        }
-                        else {
-                            // draw deceased organism
-                            organisms[i].ctx.fillStyle = 'red';
-                            organisms[i].ctx.beginPath();
-                            organisms[i].ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-                            organisms[i].ctx.fill();
-                        }
-                        total_moves++;
-                    }
-
-                }
-                sleep(1000 / FPS); // looks smoother without fps
-                frame_id = requestAnimationFrame(animateOrganisms);
-            }
-
-            else {
-                //resolve
-                cancelAnimationFrame(frame_id);
-                // ======! resolving 'false' until success logic implemented !======
-                resolve(false);
-            }
-        }
-        start_test_guy_animation = requestAnimationFrame(animateOrganisms);
-    })
-}
-
-// moved here for integration from evaluation phase section
-function updateAndMoveOrganisms(goal) {
-    return new Promise(resolve => {
-        let total_moves = 0;
-        let finished = false;
-        let success_flag = false;
-        let frame_id;
-
-        // why is this async?
-        async function animateOrganisms() {
-            if (!finished) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                goal.drawGoal();
-                goal.showStatistics();
-
-                if (simGlobals.dialogue) {
-                    drawStaticEvaluationPhaseText();
-                }
-
-                for (var i = 0; i < simGlobals.organisms.length; i++) {
-                    if (simGlobals.organisms[i].reached_goal == false) {
-                        simGlobals.organisms[i].update();
-                        simGlobals.organisms[i].move();
-                        hasReachedGoal(simGlobals.organisms[i], goal);
-                    }
-                    else {
-                        updateSuccessfulOrganism(simGlobals.organisms[i]);
-                        success_flag = true;
-                    }
-                    total_moves++;
-                }
-                if (total_moves == (simGlobals.organisms.length * simGlobals.GENE_COUNT)) {
-                    finished = true;
-                }
-
-                sleep(1000 / simGlobals.FPS); // control drawing FPS for organisms
-                frame_id = requestAnimationFrame(animateOrganisms);
-            }
-            else {
-                // resolve
-                cancelAnimationFrame(frame_id);
-                resolve(success_flag);
-            }
-        }
-        requestAnimationFrame(animateOrganisms);
-    })
 }
 
 function getFarthestCheckpointReached() {
@@ -1492,52 +2870,212 @@ function checkPulse(organism) {
     return organism.is_alive;
 }
 
-// END CUSTOM BOUNDARY SIM TEST
-function prepareToRunSimulation() {
-    // clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    document.getElementsByClassName("settings-btn")[0].style.display = 'none';
-
-    ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font = '50px arial';
-    ctx.fillText("Simulation Ready", 300, 270);
-    ctx.font = '28px arial'
-    ctx.fillText("Press 'Run Simulation'", 350, 400);
-}
-
-async function runSimulation () {
-
-    // remove run-btn listener
-    document.getElementsByClassName("run-btn")[0].removeEventListener('click', runSimulation);
-
-    simGlobals.simulation_started = true;
-
-    console.log("Running Simulation with these settings:");
-    console.log(`Total Organisms: ${simGlobals.TOTAL_ORGANISMS}`);
-    console.log(`Gene Count: ${simGlobals.GENE_COUNT}`);
-    console.log(`Resilience: ${simGlobals.RESILIENCE}`);
-    console.log(`Mutation Rate: ${simGlobals.MUTATION_RATE}`);
-    console.log(`Min/Max Gene: [${simGlobals.MIN_GENE}, ${simGlobals.MAX_GENE}]`);
-    console.log(`Dialogue: ${simGlobals.dialogue}`);
-
-    // make start/settings buttons disappear, display stop simulation button
-    document.getElementsByClassName("run-btn")[0].style.display = 'none';
-    document.getElementsByClassName("settings-btn")[0].style.display = 'none';
-    document.getElementsByClassName("stop-btn")[0].style.display = 'block';
-
-    // pre-sim animations *****
-    await runPreSimAnimations();
-
-    /// PHASE: CREATE NEW GENERATION/POPULATION
-    createOrganisms();
-    console.log("Amount of organisms created = " + simGlobals.organisms.length);
-
+function sleep(milliseconds) {
+    console.log(`Sleeping for ${(milliseconds / 1000)} second(s).`);
+    const date = Date.now();
+    let currentDate = null;
     do {
-        const result = await runGeneration();
-        console.log(result);
-    } while (simGlobals.generation_count < 1000);
+        currentDate = Date.now();
+    } 
+    while (currentDate - date < milliseconds);
+    return new Promise((resolve, reject) => {
+        resolve();
+    })
 }
+
+function getUserDecision() {
+    console.log("Waiting for key press...");
+    return new Promise(resolve => {
+        document.addEventListener('keydown', function(event) {
+            var key = event.key;
+            resolve(key);
+        });
+    })
+}
+
+function getRandomGene(min, max) {
+    var random_x = Math.floor(Math.random() * (max - min + 1) + min);
+    var random_y = Math.floor(Math.random() * (max - min + 1) + min);
+    var random_gene = [random_x, random_y];
+    return random_gene;
+}
+
+function updateMousePosition(event) {
+    let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
+
+    // store current mouse position
+    coordinates['x'] = event.clientX - rect.left;
+    coordinates['y'] = event.clientY - rect.top;
+
+    // console.log(coordinates);
+}
+
+// ========================
+// ===== TITLE SCREEN =====
+// ========================
+
+function createTitleScreenOrganisms() {
+    let title_organisms = [];
+    for (let i = 0; i < 100; i++) {
+        // we need a random x&y value to start the organism at 
+        let random_x = Math.floor(Math.random() * canvas.width);
+        let random_y = Math.floor(Math.random() * canvas.height);
+
+        let new_organism = new Organism('female', random_x, random_y, ctx);
+
+        // ** NEED TO ALTER fadeInTitleAnimation() IF ANYTHING HERE CHANGES
+        for (let j = 0; j < 250; j++) {
+            let random_gene = getRandomGene(-5, 5);
+            new_organism.genes.push(random_gene);
+        }
+
+        title_organisms.push(new_organism);
+    }
+    return title_organisms;
+}
+
+function fadeInTitleAnimation(title_organisms) {
+    let opacity = 0.00;
+    let opacity_tracker = 0.00;
+    let finished = false;
+    let cycles = 0;
+    let start_button_pressed = false; // flag to resolve animation
+
+    let logo = document.getElementById("logo");
+    let press_start_text = document.getElementById("press-start");
+    let start_btn = document.getElementsByClassName("start-btn")[0];
+
+    start_btn.addEventListener("click", function updateStartBtnFlagOnClick() {
+        console.log("Start Button Clicked");
+        start_button_pressed = true;
+
+        // remove eventListener after flag set
+        start_btn.removeEventListener("click", updateStartBtnFlagOnClick);
+    });
+
+    document.addEventListener('keydown', function updateStartBtnFlagOnEnter(event) {
+        if (event.key === "Enter") {
+            console.log("Start Button Pressed");
+            start_button_pressed = true;
+
+            // remove eventListener after flag set
+            document.removeEventListener('keydown', updateStartBtnFlagOnEnter);
+        }
+    });
+
+    return new Promise(resolve => {
+        function animateTitle() {
+            if (!finished && !simGlobals.simulation_started) {
+
+                // respond to event listener flag
+                if (start_button_pressed) {
+                    // cancel and resolve
+                    cancelAnimationFrame(frame_id);
+                    return resolve("Display Sim Types");
+                }
+
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+                // move organisms forever (works)
+                for (let i = 0; i < 100; i++) {
+                    if (title_organisms[0].index < 250) {
+                        // update and move
+                        if (title_organisms[i].index < 250) {
+                            title_organisms[i].x += title_organisms[i].genes[title_organisms[i].index][0];
+                            title_organisms[i].y += title_organisms[i].genes[title_organisms[i].index][1];
+                            title_organisms[i].index++;
+                        }
+                        title_organisms[i].move();
+                    }
+                    else {
+                        cycles++;
+                        console.log("Resetting Gene Index");
+
+                        for (let j = 0; j < 100; j++) {
+                            title_organisms[j].index = 0;
+                        }
+
+                        if (cycles >= 5) {
+                            finished = true;
+                        }
+                    }
+                }
+
+                // use globalAlpha, then reset
+                // could make this class Paintbrush in the future for this and goal class methods
+                ctx.globalAlpha = opacity;
+                ctx.drawImage(logo, 105, 275);
+
+                ctx.globalAlpha = 0.8;
+                // blink start text 
+                if (opacity_tracker >= 0.12 && opacity_tracker <= 0.24) {
+                    // only draw image half of the time
+                    ctx.drawImage(press_start_text, 300, 400, 400, 40);
+                }
+                else if (opacity_tracker > 0.24) {
+                    // reset tracker
+                    opacity_tracker = 0.00;
+                }
+                opacity_tracker += 0.005;
+
+                if (opacity < 1.00) {
+                    opacity += 0.005;
+                }
+
+                // return to 1 for organisms
+                ctx.globalAlpha = 1;
+
+                // FPS is an example of a variable that doesn't need to be global ( in window )
+                sleep(750 / simGlobals.FPS); // control drawing FPS for organisms
+                // var????? why
+                var frame_id = requestAnimationFrame(animateTitle);
+            }
+            else {
+                // resolves every n cycles to prevent overflow
+                cancelAnimationFrame(frame_id);
+                resolve("Keep Playing");
+            }
+        }
+        requestAnimationFrame(animateTitle);
+    })
+
+}
+
+async function playTitleScreenAnimation() {
+    console.log("Simulation Ready!");
+
+    var title_organisms = createTitleScreenOrganisms();
+
+    // create paintbrush as window object
+    createPaintbrush();
+    
+    do {
+        console.log("Starting Title Animation");
+
+        var status = await fadeInTitleAnimation(title_organisms);
+
+        // if (status === "Display Settings") {
+        //     console.log("Displaying Settings");
+        //     displaySettingsForm();
+        // }
+        if (status === "Display Sim Types") {
+            console.log("start button pressed. displaying sim types");
+            // call here!
+            selectSimulationType();
+        }
+        else if (status === "TEST BOUNDARY MODE") {
+            console.log("Entering Boundary Mode");
+            enterBoundaryCreationMode();
+        }
+        
+    }
+    while (simGlobals.simulation_started === false && status === "Keep Playing");
+}
+
+// ================
+// ===== MAIN =====
+// ================
 
 // maybe async ruins this functions performance?
 async function runGeneration() {
@@ -1733,1665 +3271,40 @@ async function runGeneration() {
     })
 }
 
+async function runSimulation () {
+
+    // remove run-btn listener
+    document.getElementsByClassName("run-btn")[0].removeEventListener('click', runSimulation);
+
+    simGlobals.simulation_started = true;
+
+    console.log("Running Simulation with these settings:");
+    console.log(`Total Organisms: ${simGlobals.TOTAL_ORGANISMS}`);
+    console.log(`Gene Count: ${simGlobals.GENE_COUNT}`);
+    console.log(`Resilience: ${simGlobals.RESILIENCE}`);
+    console.log(`Mutation Rate: ${simGlobals.MUTATION_RATE}`);
+    console.log(`Min/Max Gene: [${simGlobals.MIN_GENE}, ${simGlobals.MAX_GENE}]`);
+    console.log(`Dialogue: ${simGlobals.dialogue}`);
+
+    // make start/settings buttons disappear, display stop simulation button
+    document.getElementsByClassName("run-btn")[0].style.display = 'none';
+    document.getElementsByClassName("settings-btn")[0].style.display = 'none';
+    document.getElementsByClassName("stop-btn")[0].style.display = 'block';
+
+    // pre-sim animations *****
+    await runPreSimAnimations();
+
+    /// PHASE: CREATE NEW GENERATION/POPULATION
+    createOrganisms();
+    console.log("Amount of organisms created = " + simGlobals.organisms.length);
+
+    do {
+        const result = await runGeneration();
+        console.log(result);
+    } while (simGlobals.generation_count < 1000);
+}
+
 function stopSimulation() {
     // reloads the page
     document.location.reload();
 }
-
-function selectSimulationType() {
-    drawInitialSimSelectionScreen();
-    turnOnSimTypeSelectionListeners();
-}
-
-// example images not final. consider more zoomed-in images
-function drawInitialSimSelectionScreen() {
-    // let's get the dimensions of my screenshots (300x300 needed)
-    let classic_example = document.getElementById("classic-example");
-    let boundary_example = document.getElementById("boundary-example");
-
-    // hide start button and clear canvas
-    let start_btn = document.getElementsByClassName("start-btn")[0];
-    start_btn.style.display = 'none';
-
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // show sim-type buttons 
-    document.getElementsByClassName("sim-type-classic")[0].style.display = "block";
-    document.getElementsByClassName("sim-type-boundary")[0].style.display = "block";
-
-    // could turn this initial drawing into a function too
-    ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.font = '50px arial';
-    ctx.fillText("Select Simulation Type", 240, 80);
-    ctx.font = '30px arial';
-    ctx.fillText("Classic", 190, 500);
-    ctx.fillText("Boundary", 690, 500);
-
-    ctx.strokeStyle = 'rgb(148, 0, 211)';
-    ctx.lineWidth = 4;
-    ctx.shadowColor = 'rgb(148, 0, 211)';
-    ctx.shadowBlur = 10;
-    ctx.strokeRect(100, 150, 300, 300);
-    ctx.strokeRect(600, 150, 300, 300);
-
-    // draw images scaled to 300x300
-    ctx.drawImage(classic_example, 100, 150, 300, 300);
-    ctx.drawImage(boundary_example, 600, 150, 300, 300);   
-}
-
-function handleSimTypeBtnMouseover(event) {
-    console.log(event.target.className);
-    if (event.target.className === 'sim-type-classic') {
-        simGlobals.sim_type = highlightClassicSimType();
-    }
-    else if (event.target.className === 'sim-type-boundary') {
-        simGlobals.sim_type = highlightBoundarySimType();
-    }
-}
-
-function handleSimTypeBtnClick() {
-    if (simGlobals.sim_type != null) {
-        applySimType();
-    }
-}
-
-function turnOnSimTypeSelectionListeners() {
-    // allow arrow keys to highlight sim types, 'enter' to confirm
-    document.addEventListener('keydown', handleSimTypeSelectionKeyPress);
-
-    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
-    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
-
-    // add event listeners to buttons (move to better place if needed)
-    sim_type_btn_classic.addEventListener('mouseover', handleSimTypeBtnMouseover);
-    sim_type_btn_boundary.addEventListener('mouseover', handleSimTypeBtnMouseover);
-
-    // when button is clicked, sim_type will be set
-    sim_type_btn_classic.addEventListener('click', handleSimTypeBtnClick);
-    sim_type_btn_boundary.addEventListener('click', handleSimTypeBtnClick);
-}
-
-
-function turnOffSimTypeSelectionEventListeners() {
-    if (simGlobals.sim_type != null) {
-        // turn off event listeners before displaying next canvas
-        let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
-        let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
-    
-        sim_type_btn_classic.removeEventListener('mouseover', handleSimTypeBtnMouseover);
-        sim_type_btn_classic.removeEventListener('click', handleSimTypeBtnClick);
-        sim_type_btn_boundary.removeEventListener('mouseover', handleSimTypeBtnMouseover);
-        sim_type_btn_boundary.removeEventListener('click', handleSimTypeBtnClick);
-        document.removeEventListener('keydown', handleSimTypeSelectionKeyPress);
-    }
-}
-
-// currently, both buttons and 'enter' will call displaySettingsForm()
-function handleSimTypeSelectionKeyPress(event) {
-    switch(event.key) {
-        case "ArrowLeft":
-            // the solution is to sync this variable with the sim_type var that runSimulation()/checkSimType() checks
-            // i'll do that now. set sim_type here
-            simGlobals.sim_type = highlightClassicSimType();
-            break;
-
-        case "ArrowRight":
-            simGlobals.sim_type = highlightBoundarySimType();
-            break;
-        
-        case "Enter":
-            if (simGlobals.sim_type != null) {
-                applySimType();
-            }
-            else {
-                console.log("sim type not selected.");
-            }
-            break;
-    }  
-}
-
-function highlightClassicSimType() {
-    console.log("left arrow pressed");
-
-    // highlight classic btn, return boundary btn to normal
-    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
-    sim_type_btn_classic.style.backgroundColor = 'rgb(155, 245, 0)';
-    sim_type_btn_classic.style.color = 'black';
-
-    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
-    sim_type_btn_boundary.style.backgroundColor = 'rgb(148, 0, 211)';
-    sim_type_btn_boundary.style.color = 'rgb(155, 245, 0)';
-
-    // clear rects
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'black';
-    ctx.fillRect(70, 120, 870, 450);
-
-    // redraw 'classic' border highlighted
-    ctx.strokeStyle = 'rgb(155, 245, 0)';
-    ctx.shadowColor = 'rgb(155, 245, 0)';
-    ctx.shadowBlur = 10;
-    ctx.strokeRect(100, 150, 300, 300);
-
-    // redraw 'classic' text highlighted
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font = '30px arial';
-    ctx.fillText("Classic", 190, 500);
-
-    // redraw 'boundary' border normal
-    ctx.strokeStyle = 'rgb(148, 0, 211)';
-    ctx.shadowColor = 'rgb(148, 0, 211)';
-    ctx.shadowBlur = 10;
-    ctx.strokeRect(600, 150, 300, 300);
-
-    // redraw boundary text normal
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("Boundary", 690, 500);
-
-    // redraw example images scaled to 300x300
-    let classic_example = document.getElementById("classic-example");
-    let boundary_example = document.getElementById("boundary-example");
-    ctx.drawImage(classic_example, 100, 150, 300, 300);
-    ctx.drawImage(boundary_example, 600, 150, 300, 300);  
-
-    return 'classic';
-}
-
-function highlightBoundarySimType() {
-    console.log("right arrow pressed");
-
-    // highlight boundary button, return classic button to normal
-    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
-    sim_type_btn_boundary.style.backgroundColor = 'rgb(155, 245, 0)';
-    sim_type_btn_boundary.style.color = 'black';
-
-    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
-    sim_type_btn_classic.style.backgroundColor = 'rgb(148, 0, 211)';
-    sim_type_btn_classic.style.color = 'rgb(155, 245, 0)';
-
-    // clear rects
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'black';
-    ctx.fillRect(70, 120, 870, 450);
-
-    // redraw 'boundary' border highlighted
-    ctx.strokeStyle = 'rgb(155, 245, 0)';
-    ctx.shadowColor = 'rgb(155, 245, 0)';
-    ctx.shadowBlur = 10;
-    ctx.strokeRect(600, 150, 300, 300);
-
-    // redraw 'boundary' text highlighted
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font = '30px arial';
-    ctx.fillText("Boundary", 690, 500);
-
-    // redraw 'classic' border normal
-    ctx.strokeStyle = 'rgb(148, 0, 211)';
-    ctx.shadowColor = 'rgb(148, 0, 211)';
-    ctx.shadowBlur = 10;
-    ctx.strokeRect(100, 150, 300, 300);
-
-    // redraw 'classic' text normal
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("Classic", 190, 500);
-
-    // redraw example images scaled to 300x300
-    let classic_example = document.getElementById("classic-example");
-    let boundary_example = document.getElementById("boundary-example");
-    ctx.drawImage(classic_example, 100, 150, 300, 300);
-    ctx.drawImage(boundary_example, 600, 150, 300, 300); 
-
-    return 'boundary';
-}
-
-function applySimType() {
-
-    // turn off listeners and hide buttons
-    turnOffSimTypeSelectionEventListeners();
-
-    document.getElementsByClassName("sim-type-classic")[0].style.display = 'none';
-    document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
-
-    if (simGlobals.sim_type === 'classic') {
-        displaySettingsForm();
-    }
-    else if (simGlobals.sim_type === 'boundary') {
-        // user must create boundary before settings configuration
-        displayBoundaryCreationIntroductionOne();
-    }
-}
-
-// 1. Create Initial Population
-function createOrganisms () {
-    let gender;
-    let male_count = 0;
-    let female_count = 0;
-    let spawn_x = simGlobals.INITIAL_X;
-    let spawn_y = simGlobals.INITIAL_Y;
-
-    // update spawn point if boundary simulation
-    if (simGlobals.sim_type === 'boundary') {
-        spawn_x = simGlobals.INITIAL_X_BOUND;
-        spawn_y = simGlobals.INITIAL_Y_BOUND;
-    }
-
-    // create equal number of males and females
-    for (var i = 0; i < simGlobals.TOTAL_ORGANISMS; i++) {
-        if (i % 2) {
-            gender = 'male';
-            male_count++;
-        }
-        else {
-            gender = 'female';
-            female_count++;
-        }
-
-        let organism = new Organism(gender, spawn_x, spawn_y, ctx);
-
-        organism.setRandomGenes();
-        simGlobals.organisms.push(organism);
-    }
-    console.log(`FEMALES CREATED: ${female_count}, MALES CREATED: ${male_count}`);
-
-    // consider not making organisms global, but pass it to runGeneration()/runSimulation() from here
-}
-
-function getRandomGene(min, max) {
-    var random_x = Math.floor(Math.random() * (max - min + 1) + min);
-    var random_y = Math.floor(Math.random() * (max - min + 1) + min);
-    var random_gene = [random_x, random_y];
-    return random_gene;
-}
-
-// 2. Evaluate
-
-// updateAndMoveOrganisms() was here, moved for integration
-
-function hasReachedGoal(organism, goal) {
-    // check if within y-range 
-    if ((organism.y - (organism.radius / 2)) >= goal.y && (organism.y - (organism.radius / 2)) <= (goal.y + goal.size)) {
-        // check if within x-range
-        if ((organism.x - (organism.radius / 2)) >= goal.x && (organism.x - (organism.radius / 2)) <= (goal.x + goal.size)) {
-            // organism reached goal
-            organism.reached_goal = true;
-        }
-    }
-}
-
-async function evaluatePopulation() {
-    // to do
-    const shortest_distance_resolution = await getShortestDistanceToGoal();
-    simGlobals.average_fitness = await calcPopulationFitness();
-
-    // also redundant, fix
-    var population_resolution = {
-        'closest_organism': shortest_distance_resolution,
-        'average_fitness': simGlobals.average_fitness
-    }
-
-    return new Promise(resolve => {
-        resolve(population_resolution);
-    })
-}
-
-function getShortestDistanceToGoal() {
-
-    var shortest_distance = 10000;
-    var closest_organism_index;
-
-    // though this loop identifies closest organism, it ALSO updates organism's distance_to_goal attribute
-    for (var i = 0; i < simGlobals.organisms.length; i++) {
-        var distance_to_goal = simGlobals.organisms[i].calcDistanceToGoal();
-        if (distance_to_goal < shortest_distance) {
-            shortest_distance = distance_to_goal;
-            closest_organism_index = i;
-        }
-    }
-
-    var closest_organism = simGlobals.organisms[closest_organism_index];
-
-    return closest_organism;
-}
-
-function getShortestDistanceToNextCheckpoint(next_checkpoint) {
-    var shortest_distance_to_checkpoint = 10000;
-    var closest_organism;
-
-    // calculate distance to closest checkpoint not yet reached
-    for (let n = 0; n < organisms.length; n++) {
-        // in future, make sure organism is alive before calculating its distance !!!!!!! (or remove deceased organisms from array)
-        // distance^2 = a^2 + b^2
-        let horizontal_distance_squared = (organisms[n].x - custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2;
-        let vertical_distance_squared = (organisms[n].y - custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2;
-        let distance_to_checkpoint_squared = horizontal_distance_squared + vertical_distance_squared;
-
-        organisms[n].distance_to_next_checkpoint = Math.sqrt(distance_to_checkpoint_squared);
-        console.log("Distance to next-closest checkpoint for organism " + n + ":");
-        console.log(organisms[n].distance_to_next_checkpoint);
-
-        if (organisms[n].distance_to_next_checkpoint < shortest_distance_to_checkpoint) {
-            shortest_distance_to_checkpoint = organisms[n].distance_to_next_checkpoint;
-            closest_organism = organisms[n]; // return only index if works better
-        }
-    }
-    // we should have each organism's distance the closest checkpoint not yet reached.
-    return closest_organism;
-}
-
-function calcPopulationFitness () {
-    return new Promise(resolve => {
-        // reset total_fitness before calculation
-        simGlobals.total_fitness = 0;
-        for (var i = 0; i < simGlobals.organisms.length; i++) {
-            simGlobals.organisms[i].calcFitness();
-            simGlobals.total_fitness += simGlobals.organisms[i].fitness;
-        }
-
-        // redundant, fix
-        simGlobals.average_fitness = simGlobals.total_fitness / simGlobals.organisms.length;
-        resolve(simGlobals.average_fitness);
-    })
-}
-
-function calcPopulationFitnessBounds(remaining_distance) {
-    // scale = length of lines connecting epicenters from spawn>checkpoints>goal
-    var scale = scale_statistics['scale'];
-
-    // calc/set distance_to_goal && fitness
-    total_fitness = 0.00;
-    for (let i = 0; i < organisms.length; i++) {
-
-        // this also sets each organism's distance_to_goal attribute
-        organisms[i].calcDistanceToGoalBounds(remaining_distance);
-
-        // this also sets each organism's fitness attribute
-        organisms[i].calcFitnessBounds(scale);
-
-        total_fitness += organisms[i].fitness;
-    }
-
-    // set average fitness
-    average_fitness = total_fitness / organisms.length;
-
-    return average_fitness;
-}
-
-// 3. Selection
-async function runSelectionAnimations(closest_organism, parents) {
-    console.log("Called runSelectionAnimations()");
-    // maybe model other phases after this one
-    await runClosestOrganismAnimations(closest_organism); // finished
-    await highlightChosenParents(parents);
-
-    return new Promise(resolve => {
-        resolve("Run Selection Animations Complete");
-    })
-}
-
-function beginSelectionProcess() {
-    // fill array with candidates for reproduction
-    var potential_mothers = [];
-    var potential_fathers = [];
-
-    for (var i = 0; i < simGlobals.organisms.length; i++) {
-        // Give organisms with negative fitness a chance to reproduce
-        if (simGlobals.organisms[i].fitness < 0) {
-            simGlobals.organisms[i].fitness = 0.01;
-        }
-
-        // I'm going to try this implementation >> (organism.fitness * 100) ** 1.25
-        for (var j = 0; j < Math.ceil((simGlobals.organisms[i].fitness * 100) ** 2); j++) {
-            if (simGlobals.organisms[i].gender === 'female') {
-                potential_mothers.push(simGlobals.organisms[i]);
-            }
-            else if (simGlobals.organisms[i].gender === 'male') {
-                potential_fathers.push(simGlobals.organisms[i]);
-            }
-        }
-        // console.log(`Fitness for Organism ${i}: ${simGlobals.organisms[i].fitness}`);
-        // console.log(`Organism ${i} was added to array ${Math.ceil((simGlobals.organisms[i].fitness * 100) ** 2)} times.`);
-    }
-
-    var potential_parents = {
-        'potential_mothers': potential_mothers,
-        'potential_fathers': potential_fathers
-    }
-
-    return new Promise(resolve => {
-        resolve(potential_parents);
-    })
-}
-
-function selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length) {
-
-    // example
-    // var parents = [
-    //     [mother0, father0],
-    //     [mother1, father1],
-    //     ... 
-    //     [mother9, father9]
-    // ]
-
-    // console.log(`organisms.length: ${simGlobals.organisms.length}`);
-    // console.log(`target length: ${next_gen_target_length}`);
-
-    var parents = [];
-    // goal: pair together males and females 
-    // create parents == TOTAL_ORGANISMS / 2 (each couple reproduces roughly 2 offspring)
-
-    // classic target length = organisms.length
-    // boundary target length = organisms.length + num_of_deceased_organisms
-    // this way, our species will try to reproduce the same amount of organisms it started the generation with, rather than
-    // organisms.length, which would always decline as organisms die
-    for (let i = 0; i < (next_gen_target_length / 2); i++) {
-        let mother_index = Math.floor(Math.random() * potential_mothers.length);
-        let father_index = Math.floor(Math.random() * potential_fathers.length);
-
-        let mother = potential_mothers[mother_index];
-        let father = potential_fathers[father_index];
-
-        let new_parents = [mother, father];
-
-        parents.push(new_parents);
-    }
-    return parents;
-}
-
-function reproduceNewGeneration(parents) {
-    for (var i = 0; i < parents.length; i++) {
-        var offspring_count = determineOffspringCount();
-
-        for (var j = 0; j < offspring_count; j++) {
-            let crossover_genes = crossover(parents[i]); // returns dict
-            reproduce(crossover_genes);
-        }
-    }
-    // set offspring_organisms as next generation of organisms
-    simGlobals.organisms = simGlobals.offspring_organisms;
-    simGlobals.offspring_organisms = [];
-}
-
-function determineOffspringCount() {
-    // this shouldn't be declared every call.. (fix)
-    let possible_offspring_counts = [0, 0, 1, 1, 2, 2, 2, 3, 4, 5]; // sum = 20, 20/10items = 2avg
-
-    let offspring_count_index = Math.floor(Math.random() * possible_offspring_counts.length);
-    let offspring_count = possible_offspring_counts[offspring_count_index];
-    return offspring_count;
-}
-
-// 4 & 5. Crossover & Mutate (Mutation handled on gene inheritance)
-function crossover(parents_to_crossover) {
-
-    let mother = parents_to_crossover[0];
-    let father = parents_to_crossover[1];
-
-    // create offspring's genes
-    let crossover_genes = [];
-
-    for (var j = 0; j < simGlobals.GENE_COUNT; j++) {
-        // select if mother or father gene will be used (50% probability)
-        var random_bool = Math.random();
-
-        // apply mutation for variance
-        // set upper and lower bound for gene mutation using MUTATION_RATE / 2
-        // this way, mother and father genes retain an equal chance of being chosen
-        if (random_bool < (simGlobals.MUTATION_RATE / 2) || random_bool > 1 - (simGlobals.MUTATION_RATE / 2)) {
-            let mutated_gene = getRandomGene(simGlobals.MIN_GENE, simGlobals.MAX_GENE);
-            crossover_genes.push(mutated_gene);
-        }
-        // mother gene chosen
-        else if (random_bool < 0.5) {
-            let mother_gene = mother.genes[j];
-            crossover_genes.push(mother_gene);
-        }
-        // father gene chosen
-        else {
-            let father_gene = father.genes[j];
-            crossover_genes.push(father_gene);
-        }
-    }
-
-    return crossover_genes;
-}
-
-function getGender() {
-    let gender_indicator = Math.random();
-    let gender;
-    if (gender_indicator < 0.5) {
-        gender = 'female';
-    }
-    else {
-        gender = 'male';
-    }
-    return gender;
-}
-
-function reproduce(crossover_genes) {
-    let spawn_x = simGlobals.INITIAL_X;
-    let spawn_y = simGlobals.INITIAL_Y;
-
-    // update spawn point if boundary simulation
-    if (simGlobals.sim_type === 'boundary') {
-        spawn_x = simGlobals.INITIAL_X_BOUND;
-        spawn_y = simGlobals.INITIAL_Y_BOUND;
-    }
-
-    let offspring_gender = getGender();
-    let offspring = new Organism(offspring_gender, spawn_x, spawn_y, ctx);
-    offspring.genes = crossover_genes;
-
-    // push offspring to new population
-    simGlobals.offspring_organisms.push(offspring);
-}
-
-// *** Animations ***
-// Title Screen
-// convert to 'let'
-async function playTitleScreenAnimation() {
-    console.log("Simulation Ready!");
-
-    var title_organisms = createTitleScreenOrganisms();
-
-    // create paintbrush as window object
-    createPaintbrush();
-    
-    do {
-        console.log("Starting Title Animation");
-
-        var status = await fadeInTitleAnimation(title_organisms);
-
-        // if (status === "Display Settings") {
-        //     console.log("Displaying Settings");
-        //     displaySettingsForm();
-        // }
-        if (status === "Display Sim Types") {
-            console.log("start button pressed. displaying sim types");
-            // call here!
-            selectSimulationType();
-        }
-        else if (status === "TEST BOUNDARY MODE") {
-            console.log("Entering Boundary Mode");
-            enterBoundaryCreationMode();
-        }
-        
-    }
-    while (simGlobals.simulation_started === false && status === "Keep Playing");
-}
-
-// uses var, should be using let
-function createTitleScreenOrganisms() {
-    let title_organisms = [];
-    for (let i = 0; i < 100; i++) {
-        // we need a random x&y value to start the organism at 
-        let random_x = Math.floor(Math.random() * canvas.width);
-        let random_y = Math.floor(Math.random() * canvas.height);
-
-        let new_organism = new Organism('female', random_x, random_y, ctx);
-
-        // ** NEED TO ALTER fadeInTitleAnimation() IF ANYTHING HERE CHANGES
-        for (let j = 0; j < 250; j++) {
-            let random_gene = getRandomGene(-5, 5);
-            new_organism.genes.push(random_gene);
-        }
-
-        title_organisms.push(new_organism);
-    }
-    return title_organisms;
-}
-
-function fadeInTitleAnimation(title_organisms) {
-    let opacity = 0.00;
-    let opacity_tracker = 0.00;
-    let finished = false;
-    let cycles = 0;
-    let start_button_pressed = false; // flag to resolve animation
-
-    let logo = document.getElementById("logo");
-    let press_start_text = document.getElementById("press-start");
-    let start_btn = document.getElementsByClassName("start-btn")[0];
-
-    start_btn.addEventListener("click", function updateStartBtnFlagOnClick() {
-        console.log("Start Button Clicked");
-        start_button_pressed = true;
-
-        // remove eventListener after flag set
-        start_btn.removeEventListener("click", updateStartBtnFlagOnClick);
-    });
-
-    document.addEventListener('keydown', function updateStartBtnFlagOnEnter(event) {
-        if (event.key === "Enter") {
-            console.log("Start Button Pressed");
-            start_button_pressed = true;
-
-            // remove eventListener after flag set
-            document.removeEventListener('keydown', updateStartBtnFlagOnEnter);
-        }
-    });
-
-    return new Promise(resolve => {
-        function animateTitle() {
-            if (!finished && !simGlobals.simulation_started) {
-
-                // respond to event listener flag
-                if (start_button_pressed) {
-                    // cancel and resolve
-                    cancelAnimationFrame(frame_id);
-                    return resolve("Display Sim Types");
-                }
-
-                ctx.fillStyle = 'black';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-                // move organisms forever (works)
-                for (let i = 0; i < 100; i++) {
-                    if (title_organisms[0].index < 250) {
-                        // update and move
-                        if (title_organisms[i].index < 250) {
-                            title_organisms[i].x += title_organisms[i].genes[title_organisms[i].index][0];
-                            title_organisms[i].y += title_organisms[i].genes[title_organisms[i].index][1];
-                            title_organisms[i].index++;
-                        }
-                        title_organisms[i].move();
-                    }
-                    else {
-                        cycles++;
-                        console.log("Resetting Gene Index");
-
-                        for (let j = 0; j < 100; j++) {
-                            title_organisms[j].index = 0;
-                        }
-
-                        if (cycles >= 5) {
-                            finished = true;
-                        }
-                    }
-                }
-
-                // use globalAlpha, then reset
-                // could make this class Paintbrush in the future for this and goal class methods
-                ctx.globalAlpha = opacity;
-                ctx.drawImage(logo, 105, 275);
-
-                ctx.globalAlpha = 0.8;
-                // blink start text 
-                if (opacity_tracker >= 0.12 && opacity_tracker <= 0.24) {
-                    // only draw image half of the time
-                    ctx.drawImage(press_start_text, 300, 400, 400, 40);
-                }
-                else if (opacity_tracker > 0.24) {
-                    // reset tracker
-                    opacity_tracker = 0.00;
-                }
-                opacity_tracker += 0.005;
-
-                if (opacity < 1.00) {
-                    opacity += 0.005;
-                }
-
-                // return to 1 for organisms
-                ctx.globalAlpha = 1;
-
-                // FPS is an example of a variable that doesn't need to be global ( in window )
-                sleep(750 / simGlobals.FPS); // control drawing FPS for organisms
-                // var????? why
-                var frame_id = requestAnimationFrame(animateTitle);
-            }
-            else {
-                // resolves every n cycles to prevent overflow
-                cancelAnimationFrame(frame_id);
-                resolve("Keep Playing");
-            }
-        }
-        requestAnimationFrame(animateTitle);
-    })
-
-}
-
-// Simulation Introduction
-
-// * all drawings for runPreSimAnimations() were moved to drawings.js (working)
-
-function drawPhases() {
-    ctx.font = "20px arial";
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Create New Generation", 10, 30);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Evaluate Individuals", 10, 60);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Crossover", 10, 120);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Mutate", 10, 150);
-}
-
-// Evaluation Phase
-// not ready to convert yet
-async function runEvaluationAnimation() {
-
-    // ** not doing updateAndMove(), only fades for now
-
-    // need to draw goal at location depending on sim type
-    if (simGlobals.sim_type === 'classic') {
-        var goal = new Goal(simGlobals.GOAL_X_POS, simGlobals.GOAL_Y_POS, 20, ctx);
-        var success_flag = await updateAndMoveOrganisms(goal); // ideally don't pass in goal here
-    }
-    else {
-        // var goal = new Goal(GOAL_X_POS_BOUNDS, GOAL_Y_POS_BOUNDS, 20, ctx); not sure if needed (goal saved in boundary drawing)
-        var success_flag = await updateAndMoveOrganismsBounds();
-    }
-
-    // updateAndMoveOrganisms() is the classic version of boundary sim's updateAndMoveOrganismsBounds()
-    // we can combine them (standalone for now)
-
-    return new Promise((resolve, reject) => {
-        if (success_flag) {
-            resolve(true);
-        }
-        else {
-            resolve(false);
-        }
-    })
-}
-
-// for evaluation animation during updateAndMove()
-function drawStaticEvaluationPhaseText() {
-    ctx.font = "20px arial";
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Create New Generation", 10, 30);
-
-    ctx.fillStyle = 'rgba(155, 245, 0, 1)';
-    ctx.fillText("Evaluate Individuals", 10, 60);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Crossover", 10, 120);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Mutate", 10, 150);
-}
-
-function updateSuccessfulOrganism(organism) {
-    organism.ctx.fillStyle = 'red';
-    organism.ctx.beginPath();
-    organism.ctx.arc(organism.x, organism.y, organism.radius, 0, Math.PI*2, false);
-    organism.ctx.fill();
-}
-
-// Selection Phase
-
-async function runClosestOrganismAnimations (closest_organism) {
-
-    await paintbrush.fadeIn(Drawings.drawClosestOrganismText, .02);
-
-    // give paintbrush a subject to draw
-    paintbrush.subject = closest_organism;
-
-    // highlight most-fit organism 
-    for (let i = 0; i <= 2; i++) {
-        await paintbrush.fadeIn(Drawings.drawClosestOrganismNatural, .04);
-        await paintbrush.fadeIn(Drawings.drawClosestOrganismHighlighted, .04);
-    }
-    await sleep(1000);
-
-    // fade out text, return organism to natural color
-    await paintbrush.fadeOut(Drawings.drawClosestOrganismText, .02);
-    await paintbrush.fadeIn(Drawings.drawClosestOrganismNatural, .04);
-
-    // done drawing closet organism
-    paintbrush.subject = null;
-
-    return new Promise(resolve => {
-        resolve();
-    })
-}
-
-async function highlightChosenParents(parents) {
-
-    // set subject for paintbrush
-    paintbrush.subject = parents;
-
-    // highlight mothers
-    await paintbrush.fadeIn(Drawings.drawMothersText, .02);
-
-    for (let i = 0; i <= 2; i++) {
-        await paintbrush.fadeIn(Drawings.drawMothersHighlighted, .03);
-        await paintbrush.fadeIn(Drawings.drawMothersNatural, .03);
-    }
-
-    // highlight fathers
-    // !!! change fathers color to a lighter blue
-    await paintbrush.fadeIn(Drawings.drawFathersText, .02);
-
-    for (let i = 0; i <= 2; i++) {
-        await paintbrush.fadeIn(Drawings.drawFathersHighlighted, .03);
-        await paintbrush.fadeIn(Drawings.drawFathersNatural, .03);
-    }
-    await sleep(1000);
-
-    // highlight all
-    await paintbrush.fadeIn(Drawings.drawMothersHighlighted, .03);
-    await paintbrush.fadeIn(Drawings.drawFathersHighlighted, .03);
-    await paintbrush.fadeIn(Drawings.drawNotChosenText, .02);
-    await sleep(1000); 
-
-    // fade out all
-    await paintbrush.fadeOut(Drawings.drawAllSelectedOrganismsText, .02);
-    await paintbrush.fadeIn(Drawings.drawBothParentTypesNatural, .02);
-    await paintbrush.fadeOut(Drawings.drawOrganisms, .05);
-    await sleep(1000);
-
-    // done with parents
-    paintbrush.subject = null;
-
-    return new Promise(resolve => {
-        resolve("Highlight Chosen Parents Animation Complete");
-    })
-}
-
-// Success/Fail
-function drawSuccessMessage(opacity) {
-    // if this looks bad, it's because it doesn't have a clearRect()
-
-    ctx.font = '44px arial';
-    ctx.fillStyle = 'black';
-    ctx.fillText("Your Simulation Succeeded!", 235, 275);
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText("Your Simulation Succeeded!", 235, 275);
-
-    ctx.font = '30px arial';
-    ctx.fillStyle = 'black';
-    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
-
-    ctx.font = '26px arial';
-    ctx.fillStyle = 'black';
-    ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
-    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-    ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
-
-    ctx.font = '26px arial';
-    ctx.fillStyle = 'black';
-    ctx.fillText("Press 'Q' to Quit", 420, 450);
-    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-    ctx.fillText("Press 'Q' to Quit", 420, 450);
-
-}
-
-// clears text area and redraws organisms where they were
-function redrawOrganisms() {
-    ctx.fillStyle = 'black';
-    ctx.clearRect(235, 231, 550, 235);
-
-    // redraw organisms
-    for (var i = 0; i < organisms.length; i++) {
-        organisms[i].move();
-    }
-}
-
-// untested
-function drawExtinctionMessage() {
-    // clears
-    ctx.fillStyle = 'black';
-
-    ctx.font = '50px arial';
-    ctx.fillText("Simulation Failed", 310, 250);
-
-    ctx.font = "30px arial";
-    ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
-
-    ctx.font = '22px arial';
-    ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
-
-    // animations
-    ctx.font = '50px arial';
-    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-    ctx.fillText("Simulation Failed", 310, 250);
-
-    ctx.font = "22px arial";
-    ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
-
-    ctx.font = "30px arial";
-    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
-}
-
-// *** Settings ***
-function displaySettingsForm() {
-
-    // ensure only settings button showing
-    var settings_btn = document.getElementsByClassName("settings-btn")[0];
-    var start_btn = document.getElementsByClassName("run-btn")[0];
-    var stop_btn = document.getElementsByClassName("stop-btn")[0];
-    var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
-
-    settings_btn.style.display = 'block';
-    start_btn.style.display = 'none';
-    stop_btn.style.display = 'none';
-    save_bounds_btn.style.display = 'none';
-
-    // turn off canvas, turn on settings
-    var canvas_container = document.getElementsByClassName("canvas-container")[0];
-    var settings_container = document.getElementsByClassName("settings-container")[0];
-
-    canvas_container.style.display = 'none';
-    settings_container.style.display = 'block';
-
-    if (simGlobals.sim_type === 'classic') {
-        // display classic settings (no death/resilience)
-        document.getElementsByClassName("resilience-setting-label")[0].style.display = 'none';
-        document.getElementsByClassName("resilience-input")[0].style.display = 'none';
-    }
-
-    // movement setting helper (move/abstract)
-    var movement_speed_setting = document.getElementById("move-speed");
-    var error_message = document.getElementsByClassName("error-message")[0];
-
-    movement_speed_setting.addEventListener('focusin', function() {
-        error_message.style.color = "var(--closest_organism_gold)";
-        error_message.innerHTML = "Movement Speed Range: 1 - 7";
-        movement_speed_setting.addEventListener('focusout', function() {
-            error_message.style.color = 'var(--mother-pink)';
-            error_message.innerHTML = "";
-        })
-    })
-
-    movement_speed_setting.addEventListener('keydown', function(event) {
-        // function blocks keystrokes not within the acceptable range for movement speed
-        var keystroke = preValidateMovementSetting(event);
-        if (keystroke === 1) {
-            event.preventDefault();
-        }
-    });
-
-}
-
-// should stop title screen animation when settings is called
-function validateSettingsForm() {
-
-    var error_message = document.getElementsByClassName("error-message")[0];
-
-    // clear error message on call
-    error_message.style.color = "var(--mother-pink)";
-    error_message.innerHTML = "";
-
-    var settings_manager = {};
-
-    // returns error message or "valid"
-    settings_manager['organisms_setting'] = validateTotalOrganismsSetting();
-    settings_manager['movement_setting'] = validateMovementSetting();
-    settings_manager['gene_setting'] = validateGeneCountSetting();
-    settings_manager['mutation_setting'] = validateMutationRateSetting();
-    settings_manager['resilience_setting'] = validateResilienceSetting();
-
-    // should make value red too, and change to green on keystroke
-    for (let message in settings_manager) {
-        if (settings_manager[message] != "valid") {
-            error_message.innerHTML = settings_manager[message];
-            return false;
-        }
-    }
-
-    // dialogue
-    var dialogue_setting = document.getElementById("dialogue-checkbox");
-    if (dialogue_setting.checked) {
-        simGlobals.dialogue = true;
-    }
-    else {
-        simGlobals.dialogue = false;
-    }
-
-    // returns to title screen
-    finishApplyingSettings();
-
-    // restart animation ===
-    // here, we should instead bring user to a screen that tells them their simulation is
-    // ready to run, and present a button/cue to begin simulation
-
-    // playTitleScreenAnimation();
-    prepareToRunSimulation();
-
-    // don't submit the form
-    return false;
-}
-
-function validateTotalOrganismsSetting() {
-    var total_organisms_setting = document.getElementById("total-organisms");
-
-    if (typeof parseInt(total_organisms_setting.value) === 'number' && parseInt(total_organisms_setting.value) > 0) {
-        if (parseInt(total_organisms_setting.value > 9999)) {
-            simGlobals.TOTAL_ORGANISMS = 9999;
-        }
-        else {
-            simGlobals.TOTAL_ORGANISMS = Math.abs(parseInt(total_organisms_setting.value));
-        }
-        total_organisms_setting.style.borderBottom = '2px solid var(--custom-green)';
-        return 'valid';
-    }
-    else {
-        total_organisms_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        return '* Invalid number of organisms. Please input a positive number.';
-    }
-}
-
-function validateGeneCountSetting() {
-    var gene_count_setting = document.getElementById("gene-count");
-
-    if (typeof parseInt(gene_count_setting.value) === 'number' && parseInt(gene_count_setting.value) > 0) {
-        if (parseInt(gene_count_setting.value) > 1000) {
-            simGlobals.GENE_COUNT = 1000;
-        }
-        else {
-            simGlobals.GENE_COUNT = Math.abs(parseInt(gene_count_setting.value));
-        }
-        gene_count_setting.style.borderBottom = '2px solid var(--custom-green)';
-        return "valid";
-    }
-    else {
-        gene_count_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        return "* Invalid gene count. Please input a positive number.";
-    }
-}
-
-function validateMutationRateSetting() {
-    var mutation_rate_setting = document.getElementById("mutation-rate");
-
-    // consider allowing float here
-    if (typeof parseInt(mutation_rate_setting.value) === 'number' && parseInt(mutation_rate_setting.value) > 0) {
-        if (parseInt(mutation_rate_setting.value) > 100) {
-            simGlobals.MUTATION_RATE = 1;
-        }
-        else {
-            simGlobals.MUTATION_RATE = parseInt(mutation_rate_setting.value) / 100;
-        }
-        mutation_rate_setting.style.borderBottom = '2px solid var(--custom-green)';
-        return "valid";
-    }
-    else {
-        mutation_rate_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        return "Invalid mutation rate. Please input a positive percentage value. (3 = 3%)";
-    }
-}
-
-function preValidateMovementSetting(event) {
-
-    // prevent keystrokes that aren't === 1-7 || Backspace, <, > 
-    var movement_key = event.key;
-    if (movement_key > "0" && movement_key <= "7") {
-        return 0;
-    }
-    else if (movement_key === "Backspace" || movement_key === "ArrowLeft" || movement_key === "ArrowRight") {
-        return 0;
-    }
-    else {
-        return 1;
-    }
-}
-
-function validateMovementSetting() {
-    var movement_speed_setting = document.getElementById("move-speed");
-
-    // create max and min genes from movement speed
-    // pre-validated in preValidateMovementSetting();
-    if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 7) {
-        simGlobals.MIN_GENE = parseInt(movement_speed_setting.value) * -1;
-        simGlobals.MAX_GENE = parseInt(movement_speed_setting.value);
-        movement_speed_setting.style.borderBottom = "2px solid var(--custom-green)";
-        return "valid";
-    } 
-    else {
-        movement_speed_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        return "Invalid movement speed. Please input a positive number between 1 - 7.";
-    }   
-}
-
-function validateResilienceSetting() {
-    // we want to only allow numbers from 0 - 100 inclusive
-
-    let resilience_setting = document.getElementById("resilience");
-
-    if (parseInt(resilience_setting.value) >= 0 && parseInt(resilience_setting.value) <= 100 && typeof parseInt(resilience_setting.value) === 'number') {
-        simGlobals.RESILIENCE = parseInt(resilience_setting.value) / 100;
-        resilience_setting.style.borderBottom = "2px solid var(--custom-green)";
-        return "valid";
-    } 
-    else {
-        resilience_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        return "Invalid resilience value. Please input a positive number between 0 - 100";
-    } 
-}
-
-function finishApplyingSettings() {
-    // make html changes before function returns
-    var canvas_container = document.getElementsByClassName("canvas-container")[0];
-    var settings_container = document.getElementsByClassName("settings-container")[0];
-
-    canvas_container.style.display = 'block';
-    settings_container.style.display = 'none';
-
-    var start_btn = document.getElementsByClassName("run-btn")[0];
-    start_btn.style.display = 'block';
-
-    return 0;
-}
-
-// Utilities
-function sleep(milliseconds) {
-    console.log(`Sleeping for ${(milliseconds / 1000)} second(s).`);
-    const date = Date.now();
-    let currentDate = null;
-    do {
-        currentDate = Date.now();
-    } 
-    while (currentDate - date < milliseconds);
-    return new Promise((resolve, reject) => {
-        resolve();
-    })
-}
-
-function getUserDecision() {
-    console.log("Waiting for key press...");
-    return new Promise(resolve => {
-        document.addEventListener('keydown', function(event) {
-            var key = event.key;
-            resolve(key);
-        });
-    })
-}
-
-// TESTING BOUNDARIES ==============================================================
-
-// could make class method
-function drawBoundaryBoilerplate() {
-    // clear canvas
-    ctx.fillStyle = 'black';
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // draw start/end points of boundary
-    // top
-    ctx.fillStyle = 'red';
-    ctx.fillRect(830, 0, 20, 50);
-    ctx.fillRect(950, 150, 50, 20);
-
-    // bottom
-    ctx.fillStyle = 'red';
-    ctx.fillRect(0, 430, 50, 20);
-    ctx.fillRect(150, 550, 20, 50);
-
-    // placeholder goal
-    var placeholder_goal = new Goal(925, 50, 20, ctx);
-    placeholder_goal.drawGoal();
-
-    // draw instructions zones (no-draw zones)
-    ctx.lineWidth = 4;
-    ctx.strokeWidth = 4;
-    ctx.strokeStyle = 'rgb(148, 0, 211)';
-    ctx.strokeRect(736, 445, 272, 200);
-    ctx.strokeRect(-4, -4, 252, 157);
-}
-
-// would belong to class Paintbrush, not Boundary
-function updateMousePosition(event) {
-    let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
-
-    // store current mouse position
-    coordinates['x'] = event.clientX - rect.left;
-    coordinates['y'] = event.clientY - rect.top;
-
-    // console.log(coordinates);
-}
-
-// called before enterBoundaryCreationMode()
-function displayBoundaryCreationIntroductionOne() {
-    // could maybe be an animation, but not now
-    console.log("boundary creation introduction called");
-
-    drawBoundaryBoilerplate();
-
-    // erase boxes
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, 300, 200);
-    ctx.fillRect(720, 420, 300, 200);
-
-    // introduction
-    ctx.font = '40px arial';
-    ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("Create Your Boundary", 330, 280);
-
-    ctx.font = '28px arial';
-    ctx.fillText("Press 'Enter' or click 'Continue'", 300, 360);
-
-    // hardcode as html element if needed
-    let next_btn = document.getElementsByClassName("next-btn")[0];
-    next_btn.style.display = 'block';
-
-    next_btn.addEventListener('click', function continueIntroduction() {
-        // remove listener
-        next_btn.removeEventListener('click', continueIntroduction);
-
-        // go to next screen
-        displayBoundaryCreationIntroductionTwo();
-    })
-
-    document.addEventListener('keydown', function checkKeystroke(event) {
-        if (event.key === 'Enter') {
-            // destroy listeners
-            document.removeEventListener('keydown', checkKeystroke);
-
-            // go to next screen
-            displayBoundaryCreationIntroductionTwo();
-        }
-    })
-} 
-
-function displayBoundaryCreationIntroductionTwo() {
-
-    drawBoundaryBoilerplate();
-
-    ctx.font = '28px arial';
-    ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("These areas will be used for dialogue throughout the simulation.", 100, 270);
-    ctx.fillText("For best results, avoid drawing over them.", 200, 330);  
-    ctx.font = '24px arial'; 
-    ctx.fillText("Press 'Enter' or click 'Continue'", 300, 420);
-
-    // change text
-    let next_btn = document.getElementsByClassName("next-btn")[0];
-    next_btn.innerHTML = 'Okay';
-
-    next_btn.addEventListener('click', function finishBoundaryIntroduction() {
-        // remove listener
-        next_btn.removeEventListener('click', finishBoundaryIntroduction);
-
-        next_btn.style.display = 'none';
-
-        // go to next screen
-        enterBoundaryCreationMode();
-    })    
-
-    document.addEventListener('keydown', function checkKeystroke(event) {
-        if (event.key === 'Enter') {
-            // remove listener
-            document.removeEventListener('keydown', checkKeystroke);
-
-            // hide next_btn
-            next_btn.style.display = 'none';
-
-            // go to next screen
-            // just a placeholder test
-            enterBoundaryCreationMode();
-        }
-    })
-}
-
-function applyBoundaryModeStyles() {
-    // turn off settings, turn on canvas
-    var canvas_container = document.getElementsByClassName("canvas-container")[0];
-    var settings_container = document.getElementsByClassName("settings-container")[0];
-
-    canvas_container.style.display = 'block';
-    settings_container.style.display = 'none';
-
-    drawBoundaryBoilerplate();
-
-    // hide buttons
-    document.getElementsByClassName("settings-btn")[0].style.display = 'none';
-    document.getElementsByClassName("run-btn")[0].style.display = 'none';
-    document.getElementsByClassName("sim-type-classic")[0].style.display = 'none';
-    document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
-
-    let stop_btn = document.getElementsByClassName("stop-btn")[0];
-
-    stop_btn.style.gridColumn = "1 / 2";
-    stop_btn.style.width = "75%";
-    stop_btn.innerHTML = "Back";
-    stop_btn.style.display = "block";
-}
-
-// this could do text & styles
-function drawBoundaryDrawingHelpText(step) {
-
-    ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font= "24px arial";
-    ctx.fillText(step, 80, 40);
-
-    ctx.font = '18px arial';
-    ctx.fillText("Draw a line connecting", 25, 75)
-    ctx.fillText("the red endpoints from", 25, 95);
-    ctx.fillText("bottom to top", 25, 115);
-
-    ctx.font = '20px arial';
-    ctx.fillText("For best results, draw", 770, 505);
-    ctx.fillText("a slow, continuous,", 770, 530);
-    ctx.fillText("non-overlapping line", 770, 555);
-}
-
-function drawBoundaryValidationHelpText() {
-    ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font= "24px arial";
-    ctx.fillText("Validation", 70, 40);
-
-    ctx.font = '18px arial';
-    ctx.fillText("To verify that the goal", 25, 70)
-    ctx.fillText("is reachable, draw a line", 25, 90);
-    ctx.fillText("connecting the white dot", 25, 110);
-    ctx.fillText("to the goal", 25, 130);
-
-    // no bottom black square on this one
-    ctx.fillStyle = 'black';
-    ctx.fillRect(730, 440, 280, 220);
-
-    // not using, keep just in case
-    // ctx.font = '20px arial';
-    // ctx.fillText("For best results, draw", 770, 505);
-    // ctx.fillText("a slow, continuous,", 770, 530);
-    // ctx.fillText("non-overlapping line", 770, 555);
-}
-
-function drawBoundaryCompletionHelpText() {
-    // remove upper-left text area
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, 300, 200);
-
-    // redraw bottom-left text area
-    ctx.lineWidth = 4;
-    ctx.strokeWidth = 4;
-    ctx.strokeStyle = 'rgb(148, 0, 211)';
-    ctx.strokeRect(736, 445, 272, 200);
-
-    ctx.font = '24px arial';
-    ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.fillText("Complete!", 805, 490);
-    // still determining what to say at this point
-
-    // ctx.fillText("For best results, draw", 770, 505);
-    ctx.font = '20px arial';
-    ctx.fillText("[ need text here ]", 770, 530);
-    // ctx.fillText("non-overlapping line", 770, 555);
-}
-
-// this function will be refactored/cleaned
-function enterBoundaryCreationMode() {
-
-    // drawing flag and step tracker
-    var allowed_to_draw = false; // could be method of Paintbrush
-    var boundary_step = "bottom-boundary"; // could be attribute of Boundary? idk..
-
-    // create new boundary
-    var new_boundary = new Boundary();
-
-    // this function name doesn't fit well anymore, rename
-    applyBoundaryModeStyles();
-
-    // write here until compound function made
-    drawBoundaryDrawingHelpText("Step 1");
-    
-    // belongs to class Painbrush, not Boundary
-    function draw(event) {
-        if (event.buttons !== 1 || !allowed_to_draw) {
-            // return if left-mouse button not pressed or if user not allowed to draw
-            return;
-        }
-
-        ctx.beginPath();
-        ctx.moveTo(coordinates['x'], coordinates['y']);
-        updateMousePosition(event);
-
-        // draw different line depending on boundary_step
-        if (boundary_step === 'full-boundary') {
-
-            // get pixel color before drawing, reject if green
-            let pixel_data = getPixelXY(canvas_data_bad_practice, coordinates['x'], coordinates['y']);
-
-            if (pixel_data[0] == 155) {
-                // green touched, reject
-                console.log("illegal white line. returning.");
-                allowed_to_draw = false;
-
-                // should erase white line (redraw everything except the white line)
-                // this should be it's own function too (this same code is repeated in validateBoundaryConnection())
-                // draw boilerplate and top&bottom boundaries
-                drawBoundaryBoilerplate();
-                ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
-                ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
-                drawBoundaryValidationHelpText();
-
-                // draw white dot
-                ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(80, 510, 10, 0, Math.PI*2, false);
-                ctx.fill();
-
-                // make goal new color (can be a flag in drawBoundaryBoilerplate())
-                ctx.fillStyle = 'rgb(232, 0, 118)';
-                ctx.fillRect(925, 50, 20, 20);
-                
-                return;
-            }
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 1;
-        }
-        else {
-            ctx.strokeStyle = 'rgb(155, 245, 0)'; //green 
-            ctx.lineWidth = 20;
-
-            // store coordinates here while drawing boundaries
-            if (boundary_step === 'bottom-boundary') {
-                // save to bottom coords
-                new_boundary.bottom_boundary_coordinates.push([coordinates['x'], coordinates['y']]);
-            }
-            else {
-                // save to top coords
-                new_boundary.top_boundary_coordinates.push([coordinates['x'], coordinates['y']]);
-            }
-
-        }
-
-        ctx.lineCap = 'round';
-        ctx.lineTo(coordinates['x'], coordinates['y']);
-        ctx.stroke();
-        ctx.closePath();
-    }
-
-    // will belong to class Paintbrush, not Boundary
-    function requestDrawingPermission(event) {
-        // this function is called on mousedown and will update the drawing flag that gives
-        // users ability to draw if legal
-        console.log("User would like to draw.");
-        
-        // need to grab coords since updateMousePosition() can't update function var anymore.
-        // possible solution: global coordinates variable
-        // trying that now.
-        updateMousePosition(event);
-
-        if (boundary_step === 'bottom-boundary') {
-            // check that user is trying to draw from first connector (ctx.fillRect(150, 550, 20, 50))
-            // make helper function eventually
-            if (coordinates['x'] >= 150 && coordinates['x'] <= 170 && coordinates['y'] >= 550) {
-                console.log("You clicked on the connector!");
-                allowed_to_draw = true;
-            }
-            else {
-                console.log("Not allowed to draw, mouse not on connector:");
-                console.log(coordinates);
-                allowed_to_draw = false;
-            }
-        }
-        else if (boundary_step === 'top-boundary') {
-            // check that user is trying to draw from the first connector (ctx.fillRect(0, 430, 50, 20))
-            if (coordinates['x'] >= 0 && coordinates['x'] <= 50 && coordinates['y'] >= 430 && coordinates['y'] <= 450) {
-                allowed_to_draw = true;
-            }
-            else {
-                console.log("Not allowed to draw, mouse not on connector.");
-                allowed_to_draw = false;
-            }
-        }
-        // final step: draw line from spawn to goal
-        else if (boundary_step === 'full-boundary') {
-            // check that user is trying to draw from the white dot (ctx.arc(80, 510, 10, 0, Math.PI*2, false))
-            if (coordinates['x'] >= 70 && coordinates['x'] <= 90 && 
-                coordinates['y'] >= 500 && coordinates['y'] <= 520 ) {
-
-                allowed_to_draw = true;
-            }
-            else {
-                console.log("You missed the white dot...");
-                allowed_to_draw = false;
-            } 
-
-        }
-        else if (boundary_step === 'confirmation') {
-            // don't allow user to draw in confirmation phase
-            allowed_to_draw = false;
-        }
-    }
-
-    // break this down into smaller function when all working
-    // should this whole thing be a class method?
-    function validateBoundaryConnection(event) {
-        console.log("mouseup heard");
-        // should make sure that the user was allowed to draw, otherwise return
-        if (allowed_to_draw) {
-            // check boundary step
-            if (boundary_step === 'bottom-boundary') {
-                let bottom_boundary_is_valid = new_boundary.validateBottom(event);
-
-                if (bottom_boundary_is_valid) {
-                    // update step and store boundary
-                    new_boundary.save('bottom');
-                    boundary_step = "top-boundary";
-                    drawBoundaryDrawingHelpText("Step 2");
-                }
-                else {
-                    // erase bottom-boundary coords when illegal line drawn
-                    new_boundary.bottom_boundary_coordinates = [];
-
-                    // redraw boilerplate
-                    drawBoundaryBoilerplate();
-
-                    // redraw bottom-step help text
-                    drawBoundaryDrawingHelpText("Step 1");
-
-                    console.log("invalid");
-                    // error message 
-                }
-            }
-            else if (boundary_step === "top-boundary") {
-                let top_boundary_is_valid = new_boundary.validateTop(event);
-
-                if (top_boundary_is_valid) {
-                    // update step and store boundary
-                    // store top-boundary
-                    new_boundary.save('top');
-                    boundary_step = 'full-boundary';
-
-                    // draw next-step text 
-                    drawBoundaryValidationHelpText();
-                }
-                else {
-                    // reset top boundary coords when illegal line drawn
-                    new_boundary.top_boundary_coordinates = [];
-
-                    // redraw boilerplate and help text
-                    drawBoundaryBoilerplate();
-
-                    // draw valid bottom-boundary
-                    ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
-
-                    drawBoundaryDrawingHelpText("Step 2");
-
-                    // error message
-                }
-            }
-            else if (boundary_step === 'full-boundary') {
-                // hereeeee
-                let full_boundary_is_valid = new_boundary.validateFull();
-
-                if (full_boundary_is_valid) {
-                    // update step
-                    boundary_step = 'confirmation';
-                    allowed_to_draw = false;
-                    
-                    // make goal white to show success
-                    ctx.fillStyle = 'white';
-                    ctx.fillRect(925, 50, 20, 20);
-
-                    // should display help text on bottom-left area
-                    drawBoundaryCompletionHelpText();
-
-                    // display button to proceed, hide 'back' btn
-                    document.getElementsByClassName("save-boundaries-btn")[0].style.display = 'block';
-                    document.getElementsByClassName("stop-btn")[0].style.display = 'none';
-                }
-                else {
-                    // error message
-
-                    // erase line and return to last step
-                    // draw boilerplate and top&bottom boundaries
-                    drawBoundaryBoilerplate();
-                    ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
-                    drawBoundaryValidationHelpText();
-                }
-            }
-        }
-        else {
-            return;
-        }
-    }
-    
-    // respond to each event individually (pass event for mouse position)
-    canvas.addEventListener('mouseenter', updateMousePosition);
-    canvas.addEventListener('mousedown', requestDrawingPermission);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', validateBoundaryConnection);
-
-    // make class method?
-    let save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
-
-    save_bounds_btn.addEventListener("click", function() {
-        console.log("Saving Custom Boundaries");
-
-        // save full boundary
-        new_boundary.save('full');
-
-        // normalize boundary coordinate array sizes
-        new_boundary.prepareBoundaryForCheckpoints();
-
-        // let's make sure the boundaries are same length and not the same values
-        // console.log(custom_boundary.top_boundary_coordinates.length, custom_boundary.bottom_boundary_coordinates.length);
-        // console.log(custom_boundary.top_boundary_coordinates, custom_boundary.bottom_boundary_coordinates);
-
-        // ===== here =====
-        // next, we'll create the checkpoints to be used by our fitness function
-        new_boundary.createCheckpoints();
-
-        // still using custom_boundary global, I don't like it ==!CHANGE!==
-        custom_boundary = new_boundary;
-
-        // update global scale_statistics
-        scale_statistics = setScale();
-
-        // return to settings
-
-        // ===== this should display boundary version of settings form =====
-        displaySettingsForm(); //turned off while testing checkpoints
-    });
-}
-
-// =================================================================================
