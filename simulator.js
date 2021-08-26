@@ -98,6 +98,16 @@ simGlobals.FPS = 30; // []
 // Stores the position of the cursor
 simGlobals.coordinates = {'x':0 , 'y':0}; // []
 
+// testing 2 canvases for optimimal rendering
+// called in selectSimulationType()
+function testCanvasTwo() {
+    // test, draw something on back canvas
+    let canvas2 = document.getElementById("background-canvas");
+    let ctx2 = canvas2.getContext("2d");
+    ctx2.fillStyle = 'orange';
+    ctx2.fillRect(0, 0, 400, 400);
+}
+
 // ===================
 // ===== CLASSES =====
 // ===================
@@ -1285,6 +1295,7 @@ async function runPreSimAnimations() {
 
 function selectSimulationType() {
     Drawings.drawInitialSimSelectionScreen();
+    testCanvasTwo();
     turnOnSimTypeSelectionListeners();
 }
 

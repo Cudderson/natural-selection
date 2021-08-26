@@ -792,8 +792,8 @@ function drawInitialSimSelectionScreen() {
     let start_btn = document.getElementsByClassName("start-btn")[0];
     start_btn.style.display = 'none';
 
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // ctx.fillStyle = 'black';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // show sim-type buttons 
     document.getElementsByClassName("sim-type-classic")[0].style.display = "block";
