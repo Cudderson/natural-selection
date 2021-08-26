@@ -81,7 +81,7 @@ simGlobals.average_fitness = 0.00; // [x]
 simGlobals.total_fitness = 0.00; // []
 
 // containers holding organisms and next-generation organisms
-simGlobals.organisms = []; // []
+simGlobals.organisms = []; // [x]
 simGlobals.offspring_organisms = []; // []
 
 // canvas & drawing context
@@ -971,6 +971,7 @@ function applyBoundaryModeStyles() {
     stop_btn.style.display = "block";
 }
 
+// this function must remain outside closure, as Boundary calls it (unless boundary creation mode becomes a class method?)
 function updateMousePosition(event) {
     let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
 
@@ -995,17 +996,11 @@ function enterBoundaryCreationMode() {
     // this function name doesn't fit well anymore, rename
     applyBoundaryModeStyles();
 
-    // ======================
-    // ===== START HERE =====
-    // ======================
-
     Drawings.drawBoundaryDrawingHelpText("Step 1");
-    
 
-    // * Skipping the functions for now, focusing on drawing conversion *
+    // *** on second thought, these functions make good closures, as they aren't used anywhere else.
+    // *** I will still abstract the functions, but probably make more closures
 
-
-    // belongs to class Painbrush, not Boundary
     function draw(event) {
         if (event.buttons !== 1 || !allowed_to_draw) {
             // return if left-mouse button not pressed or if user not allowed to draw
@@ -1072,15 +1067,11 @@ function enterBoundaryCreationMode() {
         ctx.closePath();
     }
 
-    // will belong to class Paintbrush, not Boundary
     function requestDrawingPermission(event) {
         // this function is called on mousedown and will update the drawing flag that gives
         // users ability to draw if legal
         console.log("User would like to draw.");
         
-        // need to grab coords since updateMousePosition() can't update function var anymore.
-        // possible solution: global coordinates variable
-        // trying that now.
         updateMousePosition(event);
 
         if (boundary_step === 'bottom-boundary') {
@@ -1132,7 +1123,6 @@ function enterBoundaryCreationMode() {
         console.log("mouseup heard");
         // should make sure that the user was allowed to draw, otherwise return
         if (allowed_to_draw) {
-            // check boundary step
             if (boundary_step === 'bottom-boundary') {
                 let bottom_boundary_is_valid = new_boundary.validateBottom(event);
 
@@ -1179,12 +1169,9 @@ function enterBoundaryCreationMode() {
                     ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
 
                     Drawings.drawBoundaryDrawingHelpText("Step 2");
-
-                    // error message
                 }
             }
             else if (boundary_step === 'full-boundary') {
-                // hereeeee
                 let full_boundary_is_valid = new_boundary.validateFull();
 
                 if (full_boundary_is_valid) {
@@ -1204,8 +1191,6 @@ function enterBoundaryCreationMode() {
                     document.getElementsByClassName("stop-btn")[0].style.display = 'none';
                 }
                 else {
-                    // error message
-
                     // erase line and return to last step
                     // draw boilerplate and top&bottom boundaries
                     Drawings.drawBoundaryBoilerplate();
@@ -1213,9 +1198,6 @@ function enterBoundaryCreationMode() {
                     Drawings.drawBoundaryValidationHelpText();
                 }
             }
-        }
-        else {
-            return;
         }
     }
     
@@ -1253,6 +1235,8 @@ function enterBoundaryCreationMode() {
         simGlobals.scale_statistics = setScale();
 
         // return to settings
+
+        // should we turn off all listeners here???
 
         // ===== this should display boundary version of settings form =====
         displaySettingsForm();
