@@ -2204,74 +2204,8 @@ function reproduceNewGeneration(parents) {
 // ===== WIN/LOSE =====
 // ====================
 
-// *DRAWING*
-function drawSuccessMessage(opacity) {
-    // if this looks bad, it's because it doesn't have a clearRect()
-
-    ctx.font = '44px arial';
-    ctx.fillStyle = 'black';
-    ctx.fillText("Your Simulation Succeeded!", 235, 275);
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText("Your Simulation Succeeded!", 235, 275);
-
-    ctx.font = '30px arial';
-    ctx.fillStyle = 'black';
-    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
-
-    ctx.font = '26px arial';
-    ctx.fillStyle = 'black';
-    ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
-    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-    ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
-
-    ctx.font = '26px arial';
-    ctx.fillStyle = 'black';
-    ctx.fillText("Press 'Q' to Quit", 420, 450);
-    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-    ctx.fillText("Press 'Q' to Quit", 420, 450);
-
-}
-
-// clears text area and redraws organisms where they were
-function redrawOrganisms() {
-    ctx.fillStyle = 'black';
-    ctx.clearRect(235, 231, 550, 235);
-
-    // redraw organisms
-    for (var i = 0; i < organisms.length; i++) {
-        organisms[i].move();
-    }
-}
-
-// untested
-// *DRAWING*
-function drawExtinctionMessage() {
-    // clears
-    ctx.fillStyle = 'black';
-
-    ctx.font = '50px arial';
-    ctx.fillText("Simulation Failed", 310, 250);
-
-    ctx.font = "30px arial";
-    ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
-
-    ctx.font = '22px arial';
-    ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
-
-    // animations
-    ctx.font = '50px arial';
-    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-    ctx.fillText("Simulation Failed", 310, 250);
-
-    ctx.font = "22px arial";
-    ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
-
-    ctx.font = "30px arial";
-    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
-}
+// * all win/lose drawings converted to module *
+// * keeping in case function is created to play those animations *
 
 // ========================
 // ===== TITLE SCREEN =====
@@ -2471,7 +2405,7 @@ async function runGeneration() {
 
             // give user time to see their win
             await sleep(1500);
-            await paintbrush.fadeIn(drawSuccessMessage, .02); // untested
+            await paintbrush.fadeIn(Drawings.drawSuccessMessage, .02); // untested
 
             do {
                 var key_pressed = await getUserDecision();
@@ -2481,8 +2415,8 @@ async function runGeneration() {
 
             console.log("Key Accepted: " + key_pressed);
 
-            await paintbrush.fadeOut(drawSuccessMessage, .05);
-            redrawOrganisms(); // not tested yet (could try using rAF for one frame to ensure user sees?)
+            await paintbrush.fadeOut(Drawings.drawSuccessMessage, .05);
+            Drawings.redrawOrganisms(); // not tested yet (could try using rAF for one frame to ensure user sees?)
 
             if (key_pressed === 'Enter') {
                 console.log("Continuing Simulation.");
@@ -2491,7 +2425,7 @@ async function runGeneration() {
             else if (key_pressed === 'q') {
                 console.log("Quitting Simulation.");
 
-                await paintbrush.fadeOut(drawOrganisms, .05);
+                await paintbrush.fadeOut(Drawings.drawOrganisms, .05);
 
                 // possibly fade stats to black here too?
                 stopSimulation();
