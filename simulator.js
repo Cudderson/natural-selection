@@ -817,7 +817,7 @@ function validateSettingsForm() {
     // ready to run, and present a button/cue to begin simulation
 
     // playTitleScreenAnimation();
-    prepareToRunSimulation();
+    Drawings.prepareToRunSimulation();
 
     // don't submit the form
     return false;
@@ -1267,20 +1267,6 @@ function createPaintbrush() {
     window.paintbrush = new Paintbrush();
 }
 
-// this is a drawing
-function prepareToRunSimulation() {
-    // clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    document.getElementsByClassName("settings-btn")[0].style.display = 'none';
-
-    ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font = '50px arial';
-    ctx.fillText("Simulation Ready", 300, 270);
-    ctx.font = '28px arial'
-    ctx.fillText("Press 'Run Simulation'", 350, 400);
-}
-
 // all drawings for this function moved to drawings.js
 async function runPreSimAnimations() {
 
@@ -1311,54 +1297,17 @@ async function runPreSimAnimations() {
 }
 
 function selectSimulationType() {
-    drawInitialSimSelectionScreen();
+    Drawings.drawInitialSimSelectionScreen();
     turnOnSimTypeSelectionListeners();
-}
-
-// example images not final. consider more zoomed-in images
-function drawInitialSimSelectionScreen() {
-    // let's get the dimensions of my screenshots (300x300 needed)
-    let classic_example = document.getElementById("classic-example");
-    let boundary_example = document.getElementById("boundary-example");
-
-    // hide start button and clear canvas
-    let start_btn = document.getElementsByClassName("start-btn")[0];
-    start_btn.style.display = 'none';
-
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // show sim-type buttons 
-    document.getElementsByClassName("sim-type-classic")[0].style.display = "block";
-    document.getElementsByClassName("sim-type-boundary")[0].style.display = "block";
-
-    // could turn this initial drawing into a function too
-    ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.font = '50px arial';
-    ctx.fillText("Select Simulation Type", 240, 80);
-    ctx.font = '30px arial';
-    ctx.fillText("Classic", 190, 500);
-    ctx.fillText("Boundary", 690, 500);
-
-    ctx.strokeStyle = 'rgb(148, 0, 211)';
-    ctx.lineWidth = 4;
-    ctx.shadowColor = 'rgb(148, 0, 211)';
-    ctx.shadowBlur = 10;
-    ctx.strokeRect(100, 150, 300, 300);
-    ctx.strokeRect(600, 150, 300, 300);
-
-    // draw images scaled to 300x300
-    ctx.drawImage(classic_example, 100, 150, 300, 300);
-    ctx.drawImage(boundary_example, 600, 150, 300, 300);   
 }
 
 function handleSimTypeBtnMouseover(event) {
     console.log(event.target.className);
     if (event.target.className === 'sim-type-classic') {
-        simGlobals.sim_type = highlightClassicSimType();
+        simGlobals.sim_type = Drawings.highlightClassicSimType();
     }
     else if (event.target.className === 'sim-type-boundary') {
-        simGlobals.sim_type = highlightBoundarySimType();
+        simGlobals.sim_type = Drawings.highlightBoundarySimType();
     }
 }
 
@@ -1403,11 +1352,11 @@ function handleSimTypeSelectionKeyPress(event) {
         case "ArrowLeft":
             // the solution is to sync this variable with the sim_type var that runSimulation()/checkSimType() checks
             // i'll do that now. set sim_type here
-            simGlobals.sim_type = highlightClassicSimType();
+            simGlobals.sim_type = Drawings.highlightClassicSimType();
             break;
 
         case "ArrowRight":
-            simGlobals.sim_type = highlightBoundarySimType();
+            simGlobals.sim_type = Drawings.highlightBoundarySimType();
             break;
         
         case "Enter":
@@ -1419,104 +1368,6 @@ function handleSimTypeSelectionKeyPress(event) {
             }
             break;
     }  
-}
-
-function highlightClassicSimType() {
-    console.log("left arrow pressed");
-
-    // highlight classic btn, return boundary btn to normal
-    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
-    sim_type_btn_classic.style.backgroundColor = 'rgb(155, 245, 0)';
-    sim_type_btn_classic.style.color = 'black';
-
-    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
-    sim_type_btn_boundary.style.backgroundColor = 'rgb(148, 0, 211)';
-    sim_type_btn_boundary.style.color = 'rgb(155, 245, 0)';
-
-    // clear rects
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'black';
-    ctx.fillRect(70, 120, 870, 450);
-
-    // redraw 'classic' border highlighted
-    ctx.strokeStyle = 'rgb(155, 245, 0)';
-    ctx.shadowColor = 'rgb(155, 245, 0)';
-    ctx.shadowBlur = 10;
-    ctx.strokeRect(100, 150, 300, 300);
-
-    // redraw 'classic' text highlighted
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font = '30px arial';
-    ctx.fillText("Classic", 190, 500);
-
-    // redraw 'boundary' border normal
-    ctx.strokeStyle = 'rgb(148, 0, 211)';
-    ctx.shadowColor = 'rgb(148, 0, 211)';
-    ctx.shadowBlur = 10;
-    ctx.strokeRect(600, 150, 300, 300);
-
-    // redraw boundary text normal
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("Boundary", 690, 500);
-
-    // redraw example images scaled to 300x300
-    let classic_example = document.getElementById("classic-example");
-    let boundary_example = document.getElementById("boundary-example");
-    ctx.drawImage(classic_example, 100, 150, 300, 300);
-    ctx.drawImage(boundary_example, 600, 150, 300, 300);  
-
-    return 'classic';
-}
-
-function highlightBoundarySimType() {
-    console.log("right arrow pressed");
-
-    // highlight boundary button, return classic button to normal
-    let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
-    sim_type_btn_boundary.style.backgroundColor = 'rgb(155, 245, 0)';
-    sim_type_btn_boundary.style.color = 'black';
-
-    let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
-    sim_type_btn_classic.style.backgroundColor = 'rgb(148, 0, 211)';
-    sim_type_btn_classic.style.color = 'rgb(155, 245, 0)';
-
-    // clear rects
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'black';
-    ctx.fillRect(70, 120, 870, 450);
-
-    // redraw 'boundary' border highlighted
-    ctx.strokeStyle = 'rgb(155, 245, 0)';
-    ctx.shadowColor = 'rgb(155, 245, 0)';
-    ctx.shadowBlur = 10;
-    ctx.strokeRect(600, 150, 300, 300);
-
-    // redraw 'boundary' text highlighted
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font = '30px arial';
-    ctx.fillText("Boundary", 690, 500);
-
-    // redraw 'classic' border normal
-    ctx.strokeStyle = 'rgb(148, 0, 211)';
-    ctx.shadowColor = 'rgb(148, 0, 211)';
-    ctx.shadowBlur = 10;
-    ctx.strokeRect(100, 150, 300, 300);
-
-    // redraw 'classic' text normal
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("Classic", 190, 500);
-
-    // redraw example images scaled to 300x300
-    let classic_example = document.getElementById("classic-example");
-    let boundary_example = document.getElementById("boundary-example");
-    ctx.drawImage(classic_example, 100, 150, 300, 300);
-    ctx.drawImage(boundary_example, 600, 150, 300, 300); 
-
-    return 'boundary';
 }
 
 function turnOnBoundaryIntroductionOneListeners() {
@@ -1754,7 +1605,7 @@ function updateAndMoveOrganisms(goal) {
                 goal.showStatistics();
 
                 if (simGlobals.dialogue) {
-                    drawStaticEvaluationPhaseText();
+                    Drawings.drawStaticEvaluationPhaseText();
                 }
 
                 for (var i = 0; i < simGlobals.organisms.length; i++) {
@@ -1764,7 +1615,7 @@ function updateAndMoveOrganisms(goal) {
                         hasReachedGoal(simGlobals.organisms[i], goal);
                     }
                     else {
-                        updateSuccessfulOrganism(simGlobals.organisms[i]);
+                        Drawings.updateSuccessfulOrganism(simGlobals.organisms[i]);
                         success_flag = true;
                     }
                     total_moves++;
@@ -1921,34 +1772,6 @@ async function evaluatePopulation() {
     return new Promise(resolve => {
         resolve(population_resolution);
     })
-}
-
-// *DRAWING*
-function drawStaticEvaluationPhaseText() {
-    ctx.font = "20px arial";
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Create New Generation", 10, 30);
-
-    ctx.fillStyle = 'rgba(155, 245, 0, 1)';
-    ctx.fillText("Evaluate Individuals", 10, 60);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Crossover", 10, 120);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Mutate", 10, 150);
-}
-
-// *DRAWING*
-function updateSuccessfulOrganism(organism) {
-    organism.ctx.fillStyle = 'red';
-    organism.ctx.beginPath();
-    organism.ctx.arc(organism.x, organism.y, organism.radius, 0, Math.PI*2, false);
-    organism.ctx.fill();
 }
 
 // =====================
@@ -2352,10 +2175,6 @@ async function playTitleScreenAnimation() {
 
         var status = await fadeInTitleAnimation(title_organisms);
 
-        // if (status === "Display Settings") {
-        //     console.log("Displaying Settings");
-        //     displaySettingsForm();
-        // }
         if (status === "Display Sim Types") {
             console.log("start button pressed. displaying sim types");
             // call here!
@@ -2630,7 +2449,9 @@ function drawPhases() {
     ctx.fillText("Mutate", 10, 150);
 }
 
-// *DRAWING*
+// this trio of drawings isn't used, but is useful for debugging. Keep til the end
+
+// *DRAWING* 1
 function drawCurrentCheckpoint(index) {
     // draw farthest checkpoint reached
     ctx.strokeStyle = 'white';
@@ -2645,7 +2466,7 @@ function drawCurrentCheckpoint(index) {
     ctx.closePath();
 }
 
-// *DRAWING*
+// *DRAWING* 2
 function drawPreviousCheckpoint(index) {
     // draw checkpoint_reached - 1 or spawn point
     if (index === 'spawn') {
@@ -2673,7 +2494,7 @@ function drawPreviousCheckpoint(index) {
     }
 }
 
-// *DRAWING*
+// *DRAWING* 3
 function drawNextCheckpoint(index) {
     // draw next checkpoint not yet reached
     if (index === 'goal') {
