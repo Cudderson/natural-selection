@@ -246,7 +246,7 @@ class Boundary {
         else if (boundary_type === 'full') {
             // save full
             console.log("saving full boundary");
-            drawBoundaryBoilerplate();
+            Drawings.drawBoundaryBoilerplate();
 
             ctx.drawImage(this.top_boundary, 0, 0, canvas.width, canvas.height);
     
@@ -271,7 +271,7 @@ class Boundary {
 
         // check if boundary ended on endpoint
         // endpoint: ctx.fillRect(950, 150, 50, 20);
-        if (coordinates['x'] >= 950 && coordinates['y'] >= 150 && coordinates['y'] <= 200) {
+        if (simGlobals.coordinates['x'] >= 950 && simGlobals.coordinates['y'] >= 150 && simGlobals.coordinates['y'] <= 200) {
             // valid, update boundary step
             console.log("valid boundary");
 
@@ -298,7 +298,7 @@ class Boundary {
 
         // check if boundary on endpoint
         // endpoint: (ctx.fillRect(830, 0, 20, 50))
-        if (coordinates['x'] >= 830 && coordinates['x'] <= 850 && coordinates['y'] <= 50) {
+        if (simGlobals.coordinates['x'] >= 830 && simGlobals.coordinates['x'] <= 850 && simGlobals.coordinates['y'] <= 50) {
             // valid, update boundary step
             console.log("valid boundary");
 
@@ -320,7 +320,7 @@ class Boundary {
             // update canvas data
             canvas = document.getElementById("main-canvas");
             ctx = canvas.getContext("2d");
-            canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            simGlobals.canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
             return true;
         }
@@ -336,8 +336,8 @@ class Boundary {
     validateFull() {
         // check if user ended line on goal
         // Goal(925, 50, 20, ctx);
-        if (coordinates['x'] >= 925 && coordinates['x'] <= 945 &&
-            coordinates['y'] >= 50 && coordinates['y'] <= 70) {
+        if (simGlobals.coordinates['x'] >= 925 && simGlobals.coordinates['x'] <= 945 &&
+            simGlobals.coordinates['y'] >= 50 && simGlobals.coordinates['y'] <= 70) {
 
             return true;
         }
@@ -481,7 +481,7 @@ class Boundary {
         ctx.strokeWidth = 1;
         ctx.lineCap = 'round';
         var step = Math.ceil(this.top_boundary_coordinates.length / 10);
-        var line_counter=  0;
+        var line_counter = 0;
 
         for (let i = 0; i < this.top_boundary_coordinates.length; i++) {
             // step 2: draw a line from top[coordinate] to bottom[coordinate]
@@ -489,19 +489,22 @@ class Boundary {
             // we could divide the total by 10, 243 / 10 = 24.3
             // if i % Math.ceil(24.3) === 0: draw line
             if (i % step === 0) {
-                ctx.beginPath();
-                ctx.moveTo(this.top_boundary_coordinates[i][0], this.top_boundary_coordinates[i][1])
-                ctx.lineTo(this.bottom_boundary_coordinates[i][0], this.bottom_boundary_coordinates[i][1]);
-                ctx.stroke();
-                ctx.closePath();
+                // * keep drawings just in case *
+                // ctx.beginPath();
+                // ctx.moveTo(this.top_boundary_coordinates[i][0], this.top_boundary_coordinates[i][1])
+                // ctx.lineTo(this.bottom_boundary_coordinates[i][0], this.bottom_boundary_coordinates[i][1]);
+                // ctx.stroke();
+                // ctx.closePath();
                 line_counter++;
 
                 // draw dot on middle of each line (distance between x's - distance between y's)
                 let mid_x = Math.floor((this.top_boundary_coordinates[i][0] + this.bottom_boundary_coordinates[i][0]) / 2); 
                 let mid_y = Math.floor((this.top_boundary_coordinates[i][1] + this.bottom_boundary_coordinates[i][1]) / 2);
-                ctx.beginPath();
-                ctx.arc(mid_x, mid_y, 2, 0, Math.PI*2, false);
-                ctx.fill();
+
+                // * keep drawings just in case *
+                // ctx.beginPath();
+                // ctx.arc(mid_x, mid_y, 2, 0, Math.PI*2, false);
+                // ctx.fill();
 
                 // store checkpoint coordinates
                 this.checkpoints.push({'coordinates': [mid_x, mid_y]});
@@ -518,20 +521,23 @@ class Boundary {
 
         // step 1: draw line connecting each checkpoint (we can maybe do in within loop after working)
         for (let j = 0; j < this.checkpoints.length - 1; j++) {
-            ctx.beginPath();
-            ctx.moveTo(this.checkpoints[j].coordinates[0], this.checkpoints[j].coordinates[1]);
-            ctx.lineTo(this.checkpoints[j+1].coordinates[0], this.checkpoints[j+1].coordinates[1]);
-            ctx.stroke();
-            ctx.closePath();
+            // * keep drawings just in case *
+            // ctx.beginPath();
+            // ctx.moveTo(this.checkpoints[j].coordinates[0], this.checkpoints[j].coordinates[1]);
+            // ctx.lineTo(this.checkpoints[j+1].coordinates[0], this.checkpoints[j+1].coordinates[1]);
+            // ctx.stroke();
+            // ctx.closePath();
 
             // let's now mark the halfway point between each line drawn
             let path_mid_x = Math.floor((this.checkpoints[j].coordinates[0] + this.checkpoints[j+1].coordinates[0]) / 2);
             let path_mid_y = Math.floor((this.checkpoints[j].coordinates[1] + this.checkpoints[j+1].coordinates[1]) / 2);
-            ctx.fillStyle = 'orange';
-            ctx.beginPath();
-            ctx.arc(path_mid_x, path_mid_y, 5, 0, Math.PI*2, false);
-            ctx.fill();
-            ctx.closePath();
+
+            // * keep drawings just in case *
+            // ctx.fillStyle = 'orange';
+            // ctx.beginPath();
+            // ctx.arc(path_mid_x, path_mid_y, 5, 0, Math.PI*2, false);
+            // ctx.fill();
+            // ctx.closePath();
 
             // store checkpoint's halfway point to the next checkpoint as 'halfway_point': [x, y]
             this.checkpoints[j].halfway_point = [path_mid_x, path_mid_y];
@@ -941,7 +947,6 @@ function finishApplyingSettings() {
 // ===== BOUNDARY =====
 // ====================
 
-
 function applyBoundaryModeStyles() {
     // turn off settings, turn on canvas
     var canvas_container = document.getElementsByClassName("canvas-container")[0];
@@ -966,73 +971,18 @@ function applyBoundaryModeStyles() {
     stop_btn.style.display = "block";
 }
 
-// this could do text & styles
-// *DRAWING*
-function drawBoundaryDrawingHelpText(step) {
+function updateMousePosition(event) {
+    let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
 
-    ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font= "24px arial";
-    ctx.fillText(step, 80, 40);
+    // store current mouse position
+    simGlobals.coordinates['x'] = event.clientX - rect.left;
+    simGlobals.coordinates['y'] = event.clientY - rect.top;
 
-    ctx.font = '18px arial';
-    ctx.fillText("Draw a line connecting", 25, 75)
-    ctx.fillText("the red endpoints from", 25, 95);
-    ctx.fillText("bottom to top", 25, 115);
-
-    ctx.font = '20px arial';
-    ctx.fillText("For best results, draw", 770, 505);
-    ctx.fillText("a slow, continuous,", 770, 530);
-    ctx.fillText("non-overlapping line", 770, 555);
-}
-
-// *DRAWING*
-function drawBoundaryValidationHelpText() {
-    ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font= "24px arial";
-    ctx.fillText("Validation", 70, 40);
-
-    ctx.font = '18px arial';
-    ctx.fillText("To verify that the goal", 25, 70)
-    ctx.fillText("is reachable, draw a line", 25, 90);
-    ctx.fillText("connecting the white dot", 25, 110);
-    ctx.fillText("to the goal", 25, 130);
-
-    // no bottom black square on this one
-    ctx.fillStyle = 'black';
-    ctx.fillRect(730, 440, 280, 220);
-
-    // not using, keep just in case
-    // ctx.font = '20px arial';
-    // ctx.fillText("For best results, draw", 770, 505);
-    // ctx.fillText("a slow, continuous,", 770, 530);
-    // ctx.fillText("non-overlapping line", 770, 555);
-}
-
-// *DRAWING*
-function drawBoundaryCompletionHelpText() {
-    // remove upper-left text area
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, 300, 200);
-
-    // redraw bottom-left text area
-    ctx.lineWidth = 4;
-    ctx.strokeWidth = 4;
-    ctx.strokeStyle = 'rgb(148, 0, 211)';
-    ctx.strokeRect(736, 445, 272, 200);
-
-    ctx.font = '24px arial';
-    ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.fillText("Complete!", 805, 490);
-    // still determining what to say at this point
-
-    // ctx.fillText("For best results, draw", 770, 505);
-    ctx.font = '20px arial';
-    ctx.fillText("[ need text here ]", 770, 530);
-    // ctx.fillText("non-overlapping line", 770, 555);
+    // console.log(coordinates);
 }
 
 // this function will be refactored/cleaned
-// I believe everything works up to here from module ?
+// all drawings in this function converted to module, all working
 function enterBoundaryCreationMode() {
 
     // drawing flag and step tracker
@@ -1049,9 +999,12 @@ function enterBoundaryCreationMode() {
     // ===== START HERE =====
     // ======================
 
-    // write here until compound function made
-    drawBoundaryDrawingHelpText("Step 1");
+    Drawings.drawBoundaryDrawingHelpText("Step 1");
     
+
+    // * Skipping the functions for now, focusing on drawing conversion *
+
+
     // belongs to class Painbrush, not Boundary
     function draw(event) {
         if (event.buttons !== 1 || !allowed_to_draw) {
@@ -1060,14 +1013,14 @@ function enterBoundaryCreationMode() {
         }
 
         ctx.beginPath();
-        ctx.moveTo(coordinates['x'], coordinates['y']);
+        ctx.moveTo(simGlobals.coordinates['x'], simGlobals.coordinates['y']);
         updateMousePosition(event);
 
         // draw different line depending on boundary_step
         if (boundary_step === 'full-boundary') {
 
             // get pixel color before drawing, reject if green
-            let pixel_data = getPixelXY(canvas_data_bad_practice, coordinates['x'], coordinates['y']);
+            let pixel_data = getPixelXY(simGlobals.canvas_data_bad_practice, simGlobals.coordinates['x'], simGlobals.coordinates['y']);
 
             if (pixel_data[0] == 155) {
                 // green touched, reject
@@ -1077,10 +1030,10 @@ function enterBoundaryCreationMode() {
                 // should erase white line (redraw everything except the white line)
                 // this should be it's own function too (this same code is repeated in validateBoundaryConnection())
                 // draw boilerplate and top&bottom boundaries
-                drawBoundaryBoilerplate();
+                Drawings.drawBoundaryBoilerplate();
                 ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
                 ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
-                drawBoundaryValidationHelpText();
+                Drawings.drawBoundaryValidationHelpText();
 
                 // draw white dot
                 ctx.fillStyle = 'white';
@@ -1104,17 +1057,17 @@ function enterBoundaryCreationMode() {
             // store coordinates here while drawing boundaries
             if (boundary_step === 'bottom-boundary') {
                 // save to bottom coords
-                new_boundary.bottom_boundary_coordinates.push([coordinates['x'], coordinates['y']]);
+                new_boundary.bottom_boundary_coordinates.push([simGlobals.coordinates['x'], simGlobals.coordinates['y']]);
             }
             else {
                 // save to top coords
-                new_boundary.top_boundary_coordinates.push([coordinates['x'], coordinates['y']]);
+                new_boundary.top_boundary_coordinates.push([simGlobals.coordinates['x'], simGlobals.coordinates['y']]);
             }
 
         }
 
         ctx.lineCap = 'round';
-        ctx.lineTo(coordinates['x'], coordinates['y']);
+        ctx.lineTo(simGlobals.coordinates['x'], simGlobals.coordinates['y']);
         ctx.stroke();
         ctx.closePath();
     }
@@ -1133,19 +1086,19 @@ function enterBoundaryCreationMode() {
         if (boundary_step === 'bottom-boundary') {
             // check that user is trying to draw from first connector (ctx.fillRect(150, 550, 20, 50))
             // make helper function eventually
-            if (coordinates['x'] >= 150 && coordinates['x'] <= 170 && coordinates['y'] >= 550) {
+            if (simGlobals.coordinates['x'] >= 150 && simGlobals.coordinates['x'] <= 170 && simGlobals.coordinates['y'] >= 550) {
                 console.log("You clicked on the connector!");
                 allowed_to_draw = true;
             }
             else {
                 console.log("Not allowed to draw, mouse not on connector:");
-                console.log(coordinates);
+                console.log(simGlobals.coordinates);
                 allowed_to_draw = false;
             }
         }
         else if (boundary_step === 'top-boundary') {
             // check that user is trying to draw from the first connector (ctx.fillRect(0, 430, 50, 20))
-            if (coordinates['x'] >= 0 && coordinates['x'] <= 50 && coordinates['y'] >= 430 && coordinates['y'] <= 450) {
+            if (simGlobals.coordinates['x'] >= 0 && simGlobals.coordinates['x'] <= 50 && simGlobals.coordinates['y'] >= 430 && simGlobals.coordinates['y'] <= 450) {
                 allowed_to_draw = true;
             }
             else {
@@ -1156,8 +1109,8 @@ function enterBoundaryCreationMode() {
         // final step: draw line from spawn to goal
         else if (boundary_step === 'full-boundary') {
             // check that user is trying to draw from the white dot (ctx.arc(80, 510, 10, 0, Math.PI*2, false))
-            if (coordinates['x'] >= 70 && coordinates['x'] <= 90 && 
-                coordinates['y'] >= 500 && coordinates['y'] <= 520 ) {
+            if (simGlobals.coordinates['x'] >= 70 && simGlobals.coordinates['x'] <= 90 && 
+                simGlobals.coordinates['y'] >= 500 && simGlobals.coordinates['y'] <= 520 ) {
 
                 allowed_to_draw = true;
             }
@@ -1187,17 +1140,17 @@ function enterBoundaryCreationMode() {
                     // update step and store boundary
                     new_boundary.save('bottom');
                     boundary_step = "top-boundary";
-                    drawBoundaryDrawingHelpText("Step 2");
+                    Drawings.drawBoundaryDrawingHelpText("Step 2");
                 }
                 else {
                     // erase bottom-boundary coords when illegal line drawn
                     new_boundary.bottom_boundary_coordinates = [];
 
                     // redraw boilerplate
-                    drawBoundaryBoilerplate();
+                    Drawings.drawBoundaryBoilerplate();
 
                     // redraw bottom-step help text
-                    drawBoundaryDrawingHelpText("Step 1");
+                    Drawings.drawBoundaryDrawingHelpText("Step 1");
 
                     console.log("invalid");
                     // error message 
@@ -1213,19 +1166,19 @@ function enterBoundaryCreationMode() {
                     boundary_step = 'full-boundary';
 
                     // draw next-step text 
-                    drawBoundaryValidationHelpText();
+                    Drawings.drawBoundaryValidationHelpText();
                 }
                 else {
                     // reset top boundary coords when illegal line drawn
                     new_boundary.top_boundary_coordinates = [];
 
                     // redraw boilerplate and help text
-                    drawBoundaryBoilerplate();
+                    Drawings.drawBoundaryBoilerplate();
 
                     // draw valid bottom-boundary
                     ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
 
-                    drawBoundaryDrawingHelpText("Step 2");
+                    Drawings.drawBoundaryDrawingHelpText("Step 2");
 
                     // error message
                 }
@@ -1244,7 +1197,7 @@ function enterBoundaryCreationMode() {
                     ctx.fillRect(925, 50, 20, 20);
 
                     // should display help text on bottom-left area
-                    drawBoundaryCompletionHelpText();
+                    Drawings.drawBoundaryCompletionHelpText();
 
                     // display button to proceed, hide 'back' btn
                     document.getElementsByClassName("save-boundaries-btn")[0].style.display = 'block';
@@ -1255,9 +1208,9 @@ function enterBoundaryCreationMode() {
 
                     // erase line and return to last step
                     // draw boilerplate and top&bottom boundaries
-                    drawBoundaryBoilerplate();
+                    Drawings.drawBoundaryBoilerplate();
                     ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
-                    drawBoundaryValidationHelpText();
+                    Drawings.drawBoundaryValidationHelpText();
                 }
             }
         }
@@ -1293,15 +1246,16 @@ function enterBoundaryCreationMode() {
         new_boundary.createCheckpoints();
 
         // still using custom_boundary global, I don't like it ==!CHANGE!==
-        custom_boundary = new_boundary;
+        simGlobals.custom_boundary = new_boundary;
 
         // update global scale_statistics
-        scale_statistics = setScale();
+        // should only need to be called once here, right?
+        simGlobals.scale_statistics = setScale();
 
         // return to settings
 
         // ===== this should display boundary version of settings form =====
-        displaySettingsForm(); //turned off while testing checkpoints
+        displaySettingsForm();
     });
 }
 
@@ -2810,15 +2764,15 @@ function setScale() {
     // will store length of checkpoint to the next checkpoint
     var checkpoint_to_checkpoint_lengths = [];
 
-    for (let i = 1; i < custom_boundary.checkpoints.length; i++) {
+    for (let i = 1; i < simGlobals.custom_boundary.checkpoints.length; i++) {
         // compute distance from last checkpoint to current
         let horizontal_distance_squared = (
-            custom_boundary.checkpoints[i].coordinates[0] - 
-            custom_boundary.checkpoints[i-1].coordinates[0]) ** 2;
+            simGlobals.custom_boundary.checkpoints[i].coordinates[0] - 
+            simGlobals.custom_boundary.checkpoints[i-1].coordinates[0]) ** 2;
         
         let vertical_distance_squared = (
-            custom_boundary.checkpoints[i].coordinates[1] - 
-            custom_boundary.checkpoints[i-1].coordinates[1]) ** 2;
+            simGlobals.custom_boundary.checkpoints[i].coordinates[1] - 
+            simGlobals.custom_boundary.checkpoints[i-1].coordinates[1]) ** 2;
         
         let distance_squared = horizontal_distance_squared + vertical_distance_squared;
         let distance_from_previous_checkpoint_to_current = Math.sqrt(distance_squared);
@@ -2833,8 +2787,8 @@ function setScale() {
     }
 
     // add distance from spawn to checkpoint[0] to scale
-    let horizontal_distance_squared = (INITIAL_X_BOUND - custom_boundary.checkpoints[0].coordinates[0]) ** 2;
-    let vertical_distance_squared = (INITIAL_Y_BOUND - custom_boundary.checkpoints[0].coordinates[1]) ** 2;
+    let horizontal_distance_squared = (simGlobals.INITIAL_X_BOUND - simGlobals.custom_boundary.checkpoints[0].coordinates[0]) ** 2;
+    let vertical_distance_squared = (simGlobals.INITIAL_Y_BOUND - simGlobals.custom_boundary.checkpoints[0].coordinates[1]) ** 2;
     let distance_squared = horizontal_distance_squared + vertical_distance_squared;
     let distance_from_spawn_to_first_checkpoint = Math.sqrt(distance_squared);
 
@@ -2843,9 +2797,9 @@ function setScale() {
 
     // add distance from final checkpoint to goal to scale
     let final_to_goal_horizontal_distance_squared = (
-        custom_boundary.checkpoints[custom_boundary.checkpoints.length - 1].coordinates[0] - GOAL_X_POS_BOUNDS) ** 2;
+        simGlobals.custom_boundary.checkpoints[simGlobals.custom_boundary.checkpoints.length - 1].coordinates[0] - simGlobals.GOAL_X_POS_BOUNDS) ** 2;
     let final_to_goal_vertical_distance_squared = (
-        custom_boundary.checkpoints[custom_boundary.checkpoints.length - 1].coordinates[1] - GOAL_Y_POS_BOUNDS) ** 2;
+        simGlobals.custom_boundary.checkpoints[simGlobals.custom_boundary.checkpoints.length - 1].coordinates[1] - simGlobals.GOAL_Y_POS_BOUNDS) ** 2;
 
     let distance_squared_to_goal = final_to_goal_horizontal_distance_squared + final_to_goal_vertical_distance_squared;
 
@@ -3245,14 +3199,4 @@ function getRandomGene(min, max) {
     var random_y = Math.floor(Math.random() * (max - min + 1) + min);
     var random_gene = [random_x, random_y];
     return random_gene;
-}
-
-function updateMousePosition(event) {
-    let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
-
-    // store current mouse position
-    coordinates['x'] = event.clientX - rect.left;
-    coordinates['y'] = event.clientY - rect.top;
-
-    // console.log(coordinates);
 }

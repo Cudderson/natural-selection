@@ -525,6 +525,68 @@ function drawBoundaryCreationIntroductionTwo() {
     ctx.fillText("Press 'Enter' or click 'Continue'", 300, 420);
 }
 
+function drawBoundaryDrawingHelpText(step) {
+
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.font= "24px arial";
+    ctx.fillText(step, 80, 40);
+
+    ctx.font = '18px arial';
+    ctx.fillText("Draw a line connecting", 25, 75)
+    ctx.fillText("the red endpoints from", 25, 95);
+    ctx.fillText("bottom to top", 25, 115);
+
+    ctx.font = '20px arial';
+    ctx.fillText("For best results, draw", 770, 505);
+    ctx.fillText("a slow, continuous,", 770, 530);
+    ctx.fillText("non-overlapping line", 770, 555);
+}
+
+function drawBoundaryValidationHelpText() {
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.font= "24px arial";
+    ctx.fillText("Validation", 70, 40);
+
+    ctx.font = '18px arial';
+    ctx.fillText("To verify that the goal", 25, 70)
+    ctx.fillText("is reachable, draw a line", 25, 90);
+    ctx.fillText("connecting the white dot", 25, 110);
+    ctx.fillText("to the goal", 25, 130);
+
+    // no bottom black square on this one
+    ctx.fillStyle = 'black';
+    ctx.fillRect(730, 440, 280, 220);
+
+    // not using, keep just in case
+    // ctx.font = '20px arial';
+    // ctx.fillText("For best results, draw", 770, 505);
+    // ctx.fillText("a slow, continuous,", 770, 530);
+    // ctx.fillText("non-overlapping line", 770, 555);
+}
+
+function drawBoundaryCompletionHelpText() {
+    // remove upper-left text area
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, 300, 200);
+
+    // redraw bottom-left text area
+    ctx.lineWidth = 4;
+    ctx.strokeWidth = 4;
+    ctx.strokeStyle = 'rgb(148, 0, 211)';
+    ctx.strokeRect(736, 445, 272, 200);
+
+    ctx.font = '24px arial';
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.fillText("Complete!", 805, 490);
+    // still determining what to say at this point
+
+    // ctx.fillText("For best results, draw", 770, 505);
+    ctx.font = '20px arial';
+    ctx.fillText("[ need text here ]", 770, 530);
+    // ctx.fillText("non-overlapping line", 770, 555);
+}
+
+
 export {
     testModule, findSammy,
     drawSimulationSettings, drawSimulationIntro,
@@ -544,5 +606,6 @@ export {
     drawMutationPhaseExitText, drawCreateNewGenPhaseEntryText,
     drawGenerationSummaryText, drawCreateNewGenPhaseExitText,
     drawBoundaryBoilerplate, drawBoundaryCreationIntroductionOne,
-    drawBoundaryCreationIntroductionTwo,
+    drawBoundaryCreationIntroductionTwo, drawBoundaryDrawingHelpText,
+    drawBoundaryValidationHelpText, drawBoundaryCompletionHelpText,
 }
