@@ -1491,8 +1491,6 @@ function updateAndMoveOrganismsBounds() {
         let goal = new Goal(0, 0, 0, ctx);
         goal.showStatistics();
 
-        Drawings.drawStaticEvaluationPhaseText();
-
         var finished = false;
         var position_rgba;
         var total_moves = 0;
@@ -1588,10 +1586,6 @@ function updateAndMoveOrganisms(goal) {
         // [x] incorporate canvas2 to draw stats & phase once, rather than every frame
         goal.drawGoal();
         goal.showStatistics();
-
-        if (simGlobals.dialogue) {
-            Drawings.drawStaticEvaluationPhaseText();
-        }
 
         // why is this async?
         async function animateOrganisms() {
@@ -2187,22 +2181,12 @@ async function playTitleScreenAnimation() {
 async function runGeneration() {
 
     if (simGlobals.dialogue) {
-
-        // ** could group these phase-change animations as functions ?? **
-
         // fade in gray on canvas2
         await paintbrush.fadeIn(Drawings.drawPhases, .02);
-        ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
-        Drawings.drawPhases();
-
         await sleep(800);
 
         // fade in highlighted eval phase on canvas2
         await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .02);
-
-        // erase eval text on canvas2 and redraw on canvas2
-        ctx2.clearRect(0, 0, 1000, 600);
-        Drawings.drawStaticEvaluationPhaseText();
     }
 
     // Phase: Evaluate Individuals
@@ -2253,12 +2237,9 @@ async function runGeneration() {
     }
 
     if (simGlobals.dialogue) {
-        // group as phase-change function
-
         await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseExitText, .02);
 
         await paintbrush.fadeOut(Drawings.drawStats, .02); // put here to fade out stats before average fitness updated
-
         await sleep(1000);
     }
 
@@ -2304,8 +2285,6 @@ async function runGeneration() {
         console.log(`Average Fitness: ${simGlobals.average_fitness}`);
     }
 
-    // ===== phase-changes integrated with canvas2 up to here =====
-
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     if (simGlobals.dialogue) {
         await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseEntryText, .02);
@@ -2345,6 +2324,12 @@ async function runGeneration() {
 
         await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseExitText, .02);
     }
+
+
+    
+    // ===== phase-changes integrated with canvas2 up to here =====
+
+
 
     // PHASE: CROSSOVER / MUTATE / REPRODUCE
 

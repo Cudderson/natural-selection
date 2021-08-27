@@ -122,7 +122,7 @@ function drawPhases(opacity) {
     ctx2.fillText("Mutate", 10, 150);
 }
 
-// consider a phase drawing module
+// phase module
 function drawEvaluationPhaseEntryText(opacity, old_opacity) {
     // would be better to only clear evaluate-phase area
     ctx2.clearRect(10, 40, 180, 20);
@@ -136,6 +136,7 @@ function drawEvaluationPhaseEntryText(opacity, old_opacity) {
     ctx2.fillText("Evaluate Individuals", 10, 60);
 }
 
+// phase module
 function drawEvaluationPhaseExitText(opacity, old_opacity) {
     ctx2.clearRect(10, 40, 180, 20);
 
@@ -147,17 +148,18 @@ function drawEvaluationPhaseExitText(opacity, old_opacity) {
     ctx2.fillText("Evaluate Individuals", 10, 60);
 }
 
+// phase module
 function drawSelectionPhaseEntryText(opacity, old_opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(10, 70, 250, 20);
+    ctx2.fillStyle = 'black';
+    ctx2.fillRect(10, 70, 245, 20);
 
-    ctx.font = "20px arial";
+    ctx2.font = "20px arial";
 
-    ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
-    ctx.fillText("Select Most-Fit Individuals", 10, 90);
+    ctx2.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+    ctx2.fillText("Select Most-Fit Individuals", 10, 90);
 
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText("Select Most-Fit Individuals", 10, 90);
+    ctx2.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx2.fillText("Select Most-Fit Individuals", 10, 90);
 }
 
 function drawClosestOrganismText(opacity) {
@@ -290,24 +292,18 @@ function drawOrganisms(opacity) {
     }
 }
 
+// phase module
 function drawSelectionPhaseExitText(opacity, old_opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(10, 70, 240, 20);
+    ctx2.fillStyle = 'black';
+    ctx2.fillRect(10, 70, 245, 20);
 
-    ctx.font = "20px arial";
+    ctx2.font = "20px arial";
 
-    ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
-    ctx.fillText("Select Most-Fit Individuals", 10, 90);
+    ctx2.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
+    ctx2.fillText("Select Most-Fit Individuals", 10, 90);
 
-    ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-    ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-    // is this necessary? save just in case
-    // if (opacity >= 1.00) {
-    //     ctx.fillStyle = 'black';
-    //     ctx.fillRect(10, 10, 275, 200);
-    //     drawPhases();
-    // }
+    ctx2.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx2.fillText("Select Most-Fit Individuals", 10, 90);
 }
 
 function drawCrossoverPhaseEntryText(opacity, old_opacity) {
@@ -659,27 +655,6 @@ function drawExtinctionMessage() {
     ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
 }
 
-// * canvas2 drawing
-function drawStaticEvaluationPhaseText() {
-    console.log("this should only be called once (drawStaticEvaluationPhaseText())");
-    ctx2.font = "20px arial";
-
-    ctx2.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx2.fillText("Create New Generation", 10, 30);
-
-    ctx2.fillStyle = 'rgba(155, 245, 0, 1)';
-    ctx2.fillText("Evaluate Individuals", 10, 60);
-
-    ctx2.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx2.fillText("Select Most-Fit Individuals", 10, 90);
-
-    ctx2.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx2.fillText("Crossover", 10, 120);
-
-    ctx2.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx2.fillText("Mutate", 10, 150);
-}
-
 function updateSuccessfulOrganism(organism) {
     ctx.fillStyle = 'red';
     ctx.beginPath();
@@ -857,7 +832,7 @@ export {
     drawBoundaryCreationIntroductionTwo, drawBoundaryDrawingHelpText,
     drawBoundaryValidationHelpText, drawBoundaryCompletionHelpText,
     drawSuccessMessage, drawExtinctionMessage,
-    redrawOrganisms, drawStaticEvaluationPhaseText,
+    redrawOrganisms,
     updateSuccessfulOrganism, highlightClassicSimType,
     highlightBoundarySimType, drawInitialSimSelectionScreen,
     prepareToRunSimulation, eraseIllegalDrawingZones,
