@@ -1282,9 +1282,6 @@ async function runPreSimAnimations() {
     await paintbrush.fadeOut(Drawings.drawExplanationAndGoal, .02);
     await sleep(1000);
 
-    await paintbrush.fadeIn(Drawings.drawStats, .01);
-    await sleep(200);
-
     return new Promise(resolve => {
         resolve("pre-sim animations complete!");
     })
@@ -1487,10 +1484,6 @@ function updateAndMoveOrganismsBounds() {
         // capture canvas/boundary for collision detection
         var canvas2_data = ctx2.getImageData(0, 0, canvas.width, canvas.height);
 
-        // canvas2 drawings
-        let goal = new Goal(0, 0, 0, ctx);
-        goal.showStatistics();
-
         var finished = false;
         var position_rgba;
         var total_moves = 0;
@@ -1583,9 +1576,8 @@ function updateAndMoveOrganisms(goal) {
         let success_flag = false;
         let frame_id;
 
-        // [x] incorporate canvas2 to draw stats & phase once, rather than every frame
+        // [x] we should draw goal on canvas2 
         goal.drawGoal();
-        goal.showStatistics();
 
         // why is this async?
         async function animateOrganisms() {
@@ -2180,15 +2172,25 @@ async function playTitleScreenAnimation() {
 // maybe async ruins this functions performance?
 async function runGeneration() {
 
-    if (simGlobals.dialogue) {
-        // fade in gray on canvas2 on first iteration
-        if (simGlobals.generation_count === 0) {
-            await paintbrush.fadeIn(Drawings.drawPhases, .02);
-        }
-        await sleep(800);
+    if (simGlobals.generation_count === 0) {
+        await paintbrush.fadeIn(Drawings.drawStats, .02);
+        await sleep(500);
 
-        // fade in highlighted eval phase on canvas2
-        await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .02);
+        if (simGlobals.dialogue) {
+            await paintbrush.fadeIn(Drawings.drawPhases, .02);
+            await sleep(500);
+            await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .02);
+        }
+    }
+    else {
+        if (simGlobals.dialogue) {
+            await paintbrush.fadeIn(Drawings.drawStats, .02);
+            await sleep(500);
+            await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .02);
+        }
+        else {
+            Drawings.drawStats();
+        }
     }
 
     // Phase: Evaluate Individuals
@@ -2241,9 +2243,11 @@ async function runGeneration() {
     if (simGlobals.dialogue) {
         await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseExitText, .02);
 
-        await paintbrush.fadeOut(Drawings.drawStats, .02); // put here to fade out stats before average fitness updated
+        await paintbrush.fadeOut(Drawings.drawStats, .015); // put here to fade out stats before average fitness updated
         await sleep(1000);
     }
+
+    // i believe that somewhere below here, a black square is drawn over the stats area? *******************************************
 
     // store length of organisms array before deceased organisms filtered out for reproduction (boundary sims)
     var next_gen_target_length = simGlobals.organisms.length;
@@ -2334,8 +2338,6 @@ async function runGeneration() {
         // this function pushes new gen organisms to offspring_organisms[]
         // consider combing to make function
         reproduceNewGeneration(parents);
-
-        // move only phase drawings to canvas2
 
         await paintbrush.fadeToNewColor(Drawings.drawCrossoverPhaseEntryText, .02);
         await paintbrush.fadeIn(Drawings.drawCrossoverDescriptionText, .025);

@@ -10,8 +10,7 @@ function findSammy() {
 // ===== drawings for simulator.js =====
 function drawSimulationSettings(opacity) {
 
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.font = "30px arial";
@@ -40,7 +39,6 @@ function drawSimulationSettings(opacity) {
 }
 
 function drawSimulationIntro(opacity) {
-    ctx.fillStyle = 'black';
     ctx.clearRect(0, 75, canvas.width, 500);
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
@@ -53,16 +51,14 @@ function drawSimulationIntro(opacity) {
 }
 
 function drawFakeGoal(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(500, 50, 20, 20);
+    ctx.clearRect(500, 50, 20, 20);
     
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
     ctx.fillRect(500, 50, 20, 20);
 }
 
 function drawSimulationExplanation(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 100, canvas.width, canvas.height);
+    ctx.clearRect(0, 100, canvas.width, canvas.height);
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.font = '22px arial';
@@ -72,7 +68,6 @@ function drawSimulationExplanation(opacity) {
 }
 
 function drawExplanationAndGoal(opacity) {
-    ctx.fillStyle = 'black';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
@@ -88,19 +83,19 @@ function drawExplanationAndGoal(opacity) {
 
 // may need to be updated for resilience
 function drawStats(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(738, 510, 250, 90);
+    ctx2.clearRect(700, 510, 350, 120);
 
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.font = "22px arial";
-    ctx.fillText('Generation:', 740, 535);
-    ctx.fillText(simGlobals.generation_count.toString(), 940, 535);
-    ctx.fillText('Population Size:', 740, 560);
-    ctx.fillText(simGlobals.TOTAL_ORGANISMS.toString(), 940, 560);
-    ctx.fillText('Average Fitness:', 740, 585);
-    ctx.fillText(simGlobals.average_fitness.toString(), 940, 585);
+    ctx2.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx2.font = "22px arial";
+    ctx2.fillText('Generation:', 740, 535);
+    ctx2.fillText(simGlobals.generation_count.toString(), 940, 535);
+    ctx2.fillText('Population Size:', 740, 560);
+    ctx2.fillText(simGlobals.TOTAL_ORGANISMS.toString(), 940, 560);
+    ctx2.fillText('Average Fitness:', 740, 585);
+    ctx2.fillText(simGlobals.average_fitness.toString(), 940, 585);
 }
 
+// phase module
 function drawPhases(opacity) {
     ctx2.clearRect(0, 0, 245, 150);
 
@@ -161,8 +156,7 @@ function drawSelectionPhaseEntryText(opacity, old_opacity) {
 }
 
 function drawClosestOrganismText(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(750, 450, 275, 20);
+    ctx.clearRect(750, 450, 275, 20);
 
     ctx.font = "20px arial";
     ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
@@ -184,8 +178,7 @@ function drawClosestOrganismNatural(opacity) {
 }
 
 function drawMothersText(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(750, 480, 275, 20);
+    ctx.clearRect(750, 480, 275, 20);
     
     ctx.font = "20px arial";
     ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
@@ -193,8 +186,7 @@ function drawMothersText(opacity) {
 }
 
 function drawFathersText(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(750, 510, 275, 20);
+    ctx.clearRect(750, 510, 275, 20);
 
     ctx.font = "20px arial";
     ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
@@ -238,16 +230,15 @@ function drawFathersNatural(opacity) {
 }
 
 function drawNotChosenText(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(750, 540, 275, 20);
+    ctx.clearRect(750, 540, 275, 20);
+
     ctx.font = "20px arial";
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.fillText("Not Selected", 800, 560);
 }
 
 function drawAllSelectedOrganismsText(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(750, 480, 275, 100);
+    ctx.clearRect(750, 480, 275, 100);
 
     ctx.font = "20px arial";
     ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
