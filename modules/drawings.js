@@ -101,49 +101,50 @@ function drawStats(opacity) {
     ctx.fillText(simGlobals.average_fitness.toString(), 940, 585);
 }
 
+function drawPhases(opacity) {
+    ctx2.clearRect(0, 0, 245, 150);
+
+    ctx2.font = "20px arial";
+
+    ctx2.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx2.fillText("Create New Generation", 10, 30);
+
+    ctx2.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx2.fillText("Evaluate Individuals", 10, 60);
+
+    ctx2.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx2.fillText("Select Most-Fit Individuals", 10, 90);
+
+    ctx2.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx2.fillText("Crossover", 10, 120);
+
+    ctx2.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx2.fillText("Mutate", 10, 150);
+}
+
+// consider a phase drawing module
 function drawEvaluationPhaseEntryText(opacity, old_opacity) {
     // would be better to only clear evaluate-phase area
-    ctx.clearRect(10, 10, 275, 200);
+    ctx2.clearRect(10, 40, 180, 20);
 
-    ctx.font = "20px arial";
+    ctx2.font = "20px arial";
 
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Create New Generation", 10, 30);
+    ctx2.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+    ctx2.fillText("Evaluate Individuals", 10, 60);
 
-    ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
-    ctx.fillText("Evaluate Individuals", 10, 60);
-
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText("Evaluate Individuals", 10, 60);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Crossover", 10, 120);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Mutate", 10, 150);
+    ctx2.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx2.fillText("Evaluate Individuals", 10, 60);
 }
 
 function drawEvaluationPhaseExitText(opacity, old_opacity) {
-    // each frame, draw the same text with less gold and then more gray
-    ctx.fillStyle = 'black';
-    ctx.fillRect(10, 40, 180, 20);
+    ctx2.clearRect(10, 40, 180, 20);
 
-    ctx.font = "20px arial";
-    ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
-    ctx.fillText("Evaluate Individuals", 10, 60);
+    ctx2.font = "20px arial";
+    ctx2.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
+    ctx2.fillText("Evaluate Individuals", 10, 60);
 
-    ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-    ctx.fillText("Evaluate Individuals", 10, 60);
-
-    // I don't think I need this?
-    // if (opacity >= 0.99) {
-    //     ctx.fillStyle = 'black';
-    //     ctx.fillRect(10, 10, 275, 200);
-    //     drawPhases();
-    // }
+    ctx2.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx2.fillText("Evaluate Individuals", 10, 60);
 }
 
 function drawSelectionPhaseEntryText(opacity, old_opacity) {
@@ -860,4 +861,5 @@ export {
     updateSuccessfulOrganism, highlightClassicSimType,
     highlightBoundarySimType, drawInitialSimSelectionScreen,
     prepareToRunSimulation, eraseIllegalDrawingZones,
+    drawPhases,
 }

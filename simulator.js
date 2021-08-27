@@ -1262,7 +1262,6 @@ function createPaintbrush() {
     window.paintbrush = new Paintbrush();
 }
 
-// all drawings for this function moved to drawings.js
 async function runPreSimAnimations() {
 
     // *** pre-sim animations will vary slightly (death, boundary), depending on sim type ***
@@ -2188,18 +2187,29 @@ async function playTitleScreenAnimation() {
 async function runGeneration() {
 
     if (simGlobals.dialogue) {
-        // looks weird for now (opacity doesn't start at 0) (fix when polishing)
+
+        // ** could group these phase-change animations as functions ?? **
+
+        // fade in gray on canvas2
+        await paintbrush.fadeIn(Drawings.drawPhases, .02);
+        ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
+        Drawings.drawPhases();
+
+        await sleep(800);
+
+        // fade in highlighted eval phase on canvas2
         await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .02);
+
+        // erase eval text on canvas2 and redraw on canvas2
+        ctx2.clearRect(0, 0, 1000, 600);
+        Drawings.drawStaticEvaluationPhaseText();
     }
 
     // Phase: Evaluate Individuals
 
     if (simGlobals.simulation_succeeded) {
 
-        // ** starting canvas2 integration here **
-
         await runEvaluationAnimation();
-
     }
     else {
         // check if simulation succeeded 
@@ -2243,10 +2253,10 @@ async function runGeneration() {
     }
 
     if (simGlobals.dialogue) {
-        // await paintbrush.fadeToNewColor(drawEvaluationPhaseExitText, .02);
+        // group as phase-change function
+
         await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseExitText, .02);
 
-        // await paintbrush.fadeOut(drawStats, .02); // put here to fade out stats before average fitness updated
         await paintbrush.fadeOut(Drawings.drawStats, .02); // put here to fade out stats before average fitness updated
 
         await sleep(1000);
@@ -2293,6 +2303,8 @@ async function runGeneration() {
 
         console.log(`Average Fitness: ${simGlobals.average_fitness}`);
     }
+
+    // ===== phase-changes integrated with canvas2 up to here =====
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     if (simGlobals.dialogue) {
@@ -2418,26 +2430,6 @@ function stopSimulation() {
 // ============================
 // ===== EXTRAS / UNKNOWN =====
 // ============================
-
-// keep just in case
-function drawPhases() {
-    ctx.font = "20px arial";
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Create New Generation", 10, 30);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Evaluate Individuals", 10, 60);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Select Most-Fit Individuals", 10, 90);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Crossover", 10, 120);
-
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Mutate", 10, 150);
-}
 
 // this trio of drawings isn't used, but is useful for debugging. Keep til the end
 
