@@ -57,6 +57,12 @@ function drawFakeGoal(opacity) {
     ctx.fillRect(500, 50, 20, 20);
 }
 
+// cannot be animated right now
+function drawFakeGoalBounds() {
+    ctx.fillStyle = `rgba(155, 245, 0, 1)`;
+    ctx.fillRect(925, 50, 20, 20);
+}
+
 function drawSimulationExplanation(opacity) {
     ctx.clearRect(0, 100, canvas.width, canvas.height);
 
@@ -140,6 +146,27 @@ function drawEvaluationPhaseExitText(opacity, old_opacity) {
 
     ctx2.fillStyle = `rgba(100, 100, 100, ${opacity})`;
     ctx2.fillText("Evaluate Individuals", 10, 60);
+}
+
+function drawStaticEvaluationPhaseText() {
+    ctx2.clearRect(0, 0, 245, 150);
+
+    ctx2.font = "20px arial";
+
+    ctx2.fillStyle = `rgba(100, 100, 100, 1)`;
+    ctx2.fillText("Create New Generation", 10, 30);
+
+    ctx2.fillStyle = `rgba(155, 245, 0, 1)`;
+    ctx2.fillText("Evaluate Individuals", 10, 60);
+
+    ctx2.fillStyle = `rgba(100, 100, 100, 1)`;
+    ctx2.fillText("Select Most-Fit Individuals", 10, 90);
+
+    ctx2.fillStyle = `rgba(100, 100, 100, 1)`;
+    ctx2.fillText("Crossover", 10, 120);
+
+    ctx2.fillStyle = `rgba(100, 100, 100, 1)`;
+    ctx2.fillText("Mutate", 10, 150);
 }
 
 // phase module
@@ -430,8 +457,6 @@ function drawCreateNewGenPhaseExitText(opacity, old_opacity) {
 // =====
 
 function drawBoundaryBoilerplate() {
-    // clear canvas
-    ctx.fillStyle = 'black';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // draw start/end points of boundary
@@ -446,10 +471,7 @@ function drawBoundaryBoilerplate() {
     ctx.fillRect(150, 550, 20, 50);
 
     // placeholder goal
-    // * If this doesn't work, consider calling drawFakeGoal() instead *
-    // var placeholder_goal = new Goal(925, 50, 20, ctx);
-    // placeholder_goal.drawGoal();
-    drawFakeGoal();
+    drawFakeGoalBounds();
 
     // draw instructions zones (no-draw zones)
     ctx.lineWidth = 4;
@@ -799,7 +821,7 @@ export {
     drawBoundaryCreationIntroductionTwo, drawBoundaryDrawingHelpText,
     drawBoundaryValidationHelpText, drawBoundaryCompletionHelpText,
     drawSuccessMessage, drawExtinctionMessage,
-    redrawOrganisms,
+    redrawOrganisms, drawStaticEvaluationPhaseText,
     updateSuccessfulOrganism, highlightClassicSimType,
     highlightBoundarySimType, drawInitialSimSelectionScreen,
     prepareToRunSimulation, eraseIllegalDrawingZones,

@@ -1478,11 +1478,15 @@ function createOrganisms () {
 function updateAndMoveOrganismsBounds() {
     return new Promise(resolve => {
         // clear and draw boundary (draw on canvas2)
+        // capture canvas/boundary for collision detection
+        // (this could be done once instead of every gen)
         ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
         ctx2.drawImage(simGlobals.custom_boundary.full_boundary, 0, 0, canvas2.width, canvas2.height);
-
-        // capture canvas/boundary for collision detection
         var canvas2_data = ctx2.getImageData(0, 0, canvas.width, canvas.height);
+
+        // draw phases & stats (should be outside function)
+        Drawings.drawStats();
+        Drawings.drawStaticEvaluationPhaseText();
 
         var finished = false;
         var position_rgba;
@@ -2268,7 +2272,7 @@ async function runGeneration() {
         console.log(`after checkPulse(): ${simGlobals.organisms.length}`);
 
         // draw checkpoints for reference
-        simGlobals.custom_boundary.drawCheckpoints();
+        // simGlobals.custom_boundary.drawCheckpoints();
 
         // here, we set checkpoints[i].distance_to_goal 
         // should this only be done on iteration #1???
