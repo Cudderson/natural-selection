@@ -2181,8 +2181,10 @@ async function playTitleScreenAnimation() {
 async function runGeneration() {
 
     if (simGlobals.dialogue) {
-        // fade in gray on canvas2
-        await paintbrush.fadeIn(Drawings.drawPhases, .02);
+        // fade in gray on canvas2 on first iteration
+        if (simGlobals.generation_count === 0) {
+            await paintbrush.fadeIn(Drawings.drawPhases, .02);
+        }
         await sleep(800);
 
         // fade in highlighted eval phase on canvas2
@@ -2325,20 +2327,15 @@ async function runGeneration() {
         await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseExitText, .02);
     }
 
-
-    
-    // ===== phase-changes integrated with canvas2 up to here =====
-
-
-
     // PHASE: CROSSOVER / MUTATE / REPRODUCE
-
-    // follow same naming convention for these animations!
+    // [] still need to fadeout boundary before these animations
     if (simGlobals.dialogue) {
         // this function handles crossover, mutation and reproduction
         // this function pushes new gen organisms to offspring_organisms[]
         // consider combing to make function
         reproduceNewGeneration(parents);
+
+        // move only phase drawings to canvas2
 
         await paintbrush.fadeToNewColor(Drawings.drawCrossoverPhaseEntryText, .02);
         await paintbrush.fadeIn(Drawings.drawCrossoverDescriptionText, .025);

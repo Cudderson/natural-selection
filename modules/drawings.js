@@ -124,7 +124,6 @@ function drawPhases(opacity) {
 
 // phase module
 function drawEvaluationPhaseEntryText(opacity, old_opacity) {
-    // would be better to only clear evaluate-phase area
     ctx2.clearRect(10, 40, 180, 20);
 
     ctx2.font = "20px arial";
@@ -150,8 +149,7 @@ function drawEvaluationPhaseExitText(opacity, old_opacity) {
 
 // phase module
 function drawSelectionPhaseEntryText(opacity, old_opacity) {
-    ctx2.fillStyle = 'black';
-    ctx2.fillRect(10, 70, 245, 20);
+    ctx2.clearRect(10, 70, 245, 20);
 
     ctx2.font = "20px arial";
 
@@ -294,8 +292,7 @@ function drawOrganisms(opacity) {
 
 // phase module
 function drawSelectionPhaseExitText(opacity, old_opacity) {
-    ctx2.fillStyle = 'black';
-    ctx2.fillRect(10, 70, 245, 20);
+    ctx2.clearRect(10, 70, 245, 20);
 
     ctx2.font = "20px arial";
 
@@ -306,17 +303,17 @@ function drawSelectionPhaseExitText(opacity, old_opacity) {
     ctx2.fillText("Select Most-Fit Individuals", 10, 90);
 }
 
+// phase module
 function drawCrossoverPhaseEntryText(opacity, old_opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(10, 100, 200, 20);
+    ctx2.clearRect(10, 100, 200, 20);
 
-    ctx.font = "20px arial";
+    ctx2.font = "20px arial";
 
-    ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
-    ctx.fillText("Crossover", 10, 120);
+    ctx2.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+    ctx2.fillText("Crossover", 10, 120);
 
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText("Crossover", 10, 120);
+    ctx2.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx2.fillText("Crossover", 10, 120);
 }
 
 function drawCrossoverDescriptionText(opacity) {
@@ -330,38 +327,30 @@ function drawCrossoverDescriptionText(opacity) {
     ctx.fillText(description, 200, 300);
 }
 
+// phase module
 function drawCrossoverPhaseExitText(opacity, old_opacity) {
-    //animate
-    ctx.fillStyle = 'black';
-    ctx.fillRect(10, 100, 100, 20);
+    ctx2.clearRect(10, 100, 100, 20);
 
-    ctx.font = "20px arial";
+    ctx2.font = "20px arial";
 
-    ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
-    ctx.fillText("Crossover", 10, 120);
+    ctx2.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
+    ctx2.fillText("Crossover", 10, 120);
 
-    ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-    ctx.fillText("Crossover", 10, 120);
-
-    // is this necessary?
-    // if (opacity >= 1.00) {
-    //     ctx.fillStyle = 'black';
-    //     ctx.fillRect(10, 10, 275, 200);
-    //     drawPhases();
-    // }    
+    ctx2.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx2.fillText("Crossover", 10, 120); 
 }
 
+// phase module
 function drawMutationPhaseEntryText(opacity, old_opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(10, 130, 200, 20);
+    ctx2.clearRect(10, 130, 200, 20);
 
-    ctx.font = "20px arial";
+    ctx2.font = "20px arial";
 
-    ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
-    ctx.fillText("Mutate", 10, 150);
+    ctx2.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+    ctx2.fillText("Mutate", 10, 150);
 
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText("Mutate", 10, 150);
+    ctx2.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx2.fillText("Mutate", 10, 150);
 }
 
 function drawMutationDescriptionText(opacity) {
@@ -380,36 +369,30 @@ function drawMutationDescriptionText(opacity) {
     ctx.fillText(mutation_rate_text, 420, 350);
 }
 
+// phase module
 function drawMutationPhaseExitText(opacity, old_opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(10, 130, 100, 20);
-    ctx.font = "20px arial";
+    ctx2.clearRect(10, 130, 100, 20);
 
-    ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
-    ctx.fillText("Mutate", 10, 150);
+    ctx2.font = "20px arial";
 
-    ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-    ctx.fillText("Mutate", 10, 150);
+    ctx2.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
+    ctx2.fillText("Mutate", 10, 150);
 
-    // is this necessary?
-    // if (opacity >= 1.00) {
-    //     ctx.fillStyle = 'black';
-    //     ctx.fillRect(10, 10, 275, 200);
-    //     drawPhases();
-    // }
+    ctx2.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx2.fillText("Mutate", 10, 150);
 }
 
+// phase module
 function drawCreateNewGenPhaseEntryText(opacity, old_opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(10, 10, 250, 20);
+    ctx2.clearRect(10, 10, 250, 20);
 
-    ctx.font = "20px arial";
+    ctx2.font = "20px arial";
 
-    ctx.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
-    ctx.fillText("Create New Generation", 10, 30);
+    ctx2.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
+    ctx2.fillText("Create New Generation", 10, 30);
 
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText("Create New Generation", 10, 30);
+    ctx2.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx2.fillText("Create New Generation", 10, 30);
 } 
 
 function drawGenerationSummaryText(opacity) {
@@ -438,24 +421,17 @@ function drawGenerationSummaryText(opacity) {
     ctx.fillText(simGlobals.organisms.length.toString(), 600, 355);
 }
 
+// phase module
 function drawCreateNewGenPhaseExitText(opacity, old_opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(10, 10, 215, 20);
+    ctx2.clearRect(10, 10, 215, 20);
 
-    ctx.font = "20px arial";
+    ctx2.font = "20px arial";
 
-    ctx.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
-    ctx.fillText("Create New Generation", 10, 30);
+    ctx2.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
+    ctx2.fillText("Create New Generation", 10, 30);
 
-    ctx.fillStyle = `rgba(100, 100, 100, ${opacity})`;
-    ctx.fillText("Create New Generation", 10, 30);
-
-    // is this necessary?
-    // if (opacity >= 1.00) {
-    //     ctx.fillStyle = 'black';
-    //     ctx.fillRect(10, 10, 275, 200);
-    //     drawPhases();
-    // }
+    ctx2.fillStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx2.fillText("Create New Generation", 10, 30);
 }
 
 // =====
