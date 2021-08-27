@@ -89,6 +89,10 @@ simGlobals.offspring_organisms = []; // []
 window.canvas = document.getElementById("main-canvas");
 window.ctx = canvas.getContext("2d");
 
+// testing background canvas for better performance
+window.canvas2 = document.getElementById("background-canvas");
+window.ctx2 = canvas2.getContext("2d");
+
 // ********** name conflicts with canvas_data in updateAndMoveOrganismsBounds, need to fix
 simGlobals.canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height); // []
 
@@ -98,15 +102,6 @@ simGlobals.FPS = 30; // []
 // Stores the position of the cursor
 simGlobals.coordinates = {'x':0 , 'y':0}; // []
 
-// testing 2 canvases for optimimal rendering
-// called in selectSimulationType()
-function testCanvasTwo() {
-    // test, draw something on back canvas
-    let canvas2 = document.getElementById("background-canvas");
-    let ctx2 = canvas2.getContext("2d");
-    ctx2.fillStyle = 'orange';
-    ctx2.fillRect(0, 0, 400, 400);
-}
 
 // ===================
 // ===== CLASSES =====
@@ -202,23 +197,26 @@ class Goal {
 
     // could convert final 2 class methods to new class Paintbrush ex. **
     drawGoal() {
-        this.ctx.fillStyle = 'rgba(155, 245, 0, 1)';
-        this.ctx.fillRect(this.x, this.y, this.size, this.size);
+        console.log("should only be called once (drawGoal())");
+        ctx2.fillStyle = 'rgba(155, 245, 0, 1)';
+        ctx2.fillRect(this.x, this.y, this.size, this.size);
     }
 
     // convert to drawings.js? why is the goal performing this?
     // this function is not good
     showStatistics() {
+        console.log("this should only be called once (showStatistics())");
         simGlobals.average_fitness = Number(simGlobals.average_fitness).toFixed(2);
-        var population_size = simGlobals.organisms.length;
-        this.ctx.fillStyle = 'rgba(155, 245, 0, 1)';
-        this.ctx.font = "22px arial";
-        this.ctx.fillText('Generation:', 740, 535);
-        this.ctx.fillText(simGlobals.generation_count.toString(), 940, 535);
-        this.ctx.fillText('Population Size:', 740, 560);
-        this.ctx.fillText(population_size.toString(), 940, 560);
-        this.ctx.fillText('Average Fitness:', 740, 585);
-        this.ctx.fillText(simGlobals.average_fitness.toString(), 940, 585);
+        let population_size = simGlobals.organisms.length;
+
+        ctx2.fillStyle = 'rgba(155, 245, 0, 1)';
+        ctx2.font = "22px arial";
+        ctx2.fillText('Generation:', 740, 535);
+        ctx2.fillText(simGlobals.generation_count.toString(), 940, 535);
+        ctx2.fillText('Population Size:', 740, 560);
+        ctx2.fillText(population_size.toString(), 940, 560);
+        ctx2.fillText('Average Fitness:', 740, 585);
+        ctx2.fillText(simGlobals.average_fitness.toString(), 940, 585);
     }
 }
 
@@ -1295,7 +1293,6 @@ async function runPreSimAnimations() {
 
 function selectSimulationType() {
     Drawings.drawInitialSimSelectionScreen();
-    testCanvasTwo();
     turnOnSimTypeSelectionListeners();
 }
 
@@ -1483,22 +1480,24 @@ function createOrganisms () {
 // updateAndMove() functions will not be converted to module (complex animations)
 
 function updateAndMoveOrganismsBounds() {
-    // 'organisms' was a param but I don't think we need to pass it because it's global
-    // updateAndMoveOrganisms() returns a success flag
-
     return new Promise(resolve => {
-        // clear and draw boundary
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(simGlobals.custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
+        // clear and draw boundary (draw on canvas2)
+        ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
+        ctx2.drawImage(simGlobals.custom_boundary.full_boundary, 0, 0, canvas2.width, canvas2.height);
 
-        var canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height); // capture canvas for collision testing
+        // capture canvas/boundary for collision detection
+        var canvas2_data = ctx2.getImageData(0, 0, canvas.width, canvas.height);
+
+        // canvas2 drawings
+        let goal = new Goal(0, 0, 0, ctx);
+        goal.showStatistics();
+
+        Drawings.drawStaticEvaluationPhaseText();
+
         var finished = false;
         var position_rgba;
         var total_moves = 0;
         let frame_id;
-
-        let goal = new Goal(0, 0, 0, ctx);
 
         function animateOrganisms() {
 
@@ -1507,30 +1506,15 @@ function updateAndMoveOrganismsBounds() {
                     finished = true;
                 }
                 else {
-                    // clear
-                    ctx.fillStyle = 'black';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                    // draw boundary (includes goal?)
-                    ctx.drawImage(simGlobals.custom_boundary.full_boundary, 0, 0, canvas.width, canvas.height);
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                     // (FOR TESTING) draw checkpoints
-                    // ctx.fillStyle = 'white';
-                    // for (let i = 0; i < custom_boundary.checkpoints.length; i++) {
-                    //     ctx.beginPath();
-                    //     ctx.arc(custom_boundary.checkpoints[i][0], custom_boundary.checkpoints[i][1], 10, 0, Math.PI*2, false);
-                    //     ctx.fill();
-                    //     ctx.closePath();
-                    // }
-
-                    // draw stats / phase
-                    goal.showStatistics();
-                    Drawings.drawStaticEvaluationPhaseText();
+                    // drawCheckpoints();
 
                     for (let i = 0; i < simGlobals.organisms.length; i++) {
                         if (simGlobals.organisms[i].is_alive) {
 
-                            position_rgba = getPixelXY(canvas_data, simGlobals.organisms[i].x, simGlobals.organisms[i].y);
+                            position_rgba = getPixelXY(canvas2_data, simGlobals.organisms[i].x, simGlobals.organisms[i].y);
 
                             if (position_rgba[0] === 155 && position_rgba[1] === 245) { // consider only checking one value for performance
 
@@ -1602,16 +1586,18 @@ function updateAndMoveOrganisms(goal) {
         let success_flag = false;
         let frame_id;
 
+        // [x] incorporate canvas2 to draw stats & phase once, rather than every frame
+        goal.drawGoal();
+        goal.showStatistics();
+
+        if (simGlobals.dialogue) {
+            Drawings.drawStaticEvaluationPhaseText();
+        }
+
         // why is this async?
         async function animateOrganisms() {
             if (!finished) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                goal.drawGoal();
-                goal.showStatistics();
-
-                if (simGlobals.dialogue) {
-                    Drawings.drawStaticEvaluationPhaseText();
-                }
 
                 for (var i = 0; i < simGlobals.organisms.length; i++) {
                     if (simGlobals.organisms[i].reached_goal == false) {
@@ -2207,13 +2193,12 @@ async function runGeneration() {
     }
 
     // Phase: Evaluate Individuals
-    // this is where statistics are redrawn (goal.showStatistics())
+
     if (simGlobals.simulation_succeeded) {
 
+        // ** starting canvas2 integration here **
 
-        // skipping this (updateAndMove() not converted yet)
         await runEvaluationAnimation();
-
 
     }
     else {

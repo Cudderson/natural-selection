@@ -658,23 +658,25 @@ function drawExtinctionMessage() {
     ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
 }
 
+// * canvas2 drawing
 function drawStaticEvaluationPhaseText() {
-    ctx.font = "20px arial";
+    console.log("this should only be called once (drawStaticEvaluationPhaseText())");
+    ctx2.font = "20px arial";
 
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Create New Generation", 10, 30);
+    ctx2.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx2.fillText("Create New Generation", 10, 30);
 
-    ctx.fillStyle = 'rgba(155, 245, 0, 1)';
-    ctx.fillText("Evaluate Individuals", 10, 60);
+    ctx2.fillStyle = 'rgba(155, 245, 0, 1)';
+    ctx2.fillText("Evaluate Individuals", 10, 60);
 
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Select Most-Fit Individuals", 10, 90);
+    ctx2.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx2.fillText("Select Most-Fit Individuals", 10, 90);
 
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Crossover", 10, 120);
+    ctx2.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx2.fillText("Crossover", 10, 120);
 
-    ctx.fillStyle = 'rgba(100, 100, 100, 1)';
-    ctx.fillText("Mutate", 10, 150);
+    ctx2.fillStyle = 'rgba(100, 100, 100, 1)';
+    ctx2.fillText("Mutate", 10, 150);
 }
 
 function updateSuccessfulOrganism(organism) {
