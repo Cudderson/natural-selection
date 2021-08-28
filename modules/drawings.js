@@ -101,6 +101,20 @@ function drawStats(opacity) {
     ctx2.fillText(simGlobals.average_fitness.toString(), 940, 585);
 }
 
+// for preserving drawing on canvas during animations
+function drawStatsStatic(context) {
+    context.clearRect(700, 510, 350, 120);
+
+    context.fillStyle = `rgba(155, 245, 0, 1)`;
+    context.font = "22px arial";
+    context.fillText('Generation:', 740, 535);
+    context.fillText(simGlobals.generation_count.toString(), 940, 535);
+    context.fillText('Population Size:', 740, 560);
+    context.fillText(simGlobals.TOTAL_ORGANISMS.toString(), 940, 560);
+    context.fillText('Average Fitness:', 740, 585);
+    context.fillText(simGlobals.average_fitness.toString(), 940, 585);
+}
+
 // phase module
 function drawPhases(opacity) {
     ctx2.clearRect(0, 0, 245, 150);
@@ -148,25 +162,25 @@ function drawEvaluationPhaseExitText(opacity, old_opacity) {
     ctx2.fillText("Evaluate Individuals", 10, 60);
 }
 
-function drawStaticEvaluationPhaseText() {
-    ctx2.clearRect(0, 0, 245, 150);
+function drawStaticEvaluationPhaseText(context) {
+    context.clearRect(0, 0, 245, 150);
 
-    ctx2.font = "20px arial";
+    context.font = "20px arial";
 
-    ctx2.fillStyle = `rgba(100, 100, 100, 1)`;
-    ctx2.fillText("Create New Generation", 10, 30);
+    context.fillStyle = `rgba(100, 100, 100, 1)`;
+    context.fillText("Create New Generation", 10, 30);
 
-    ctx2.fillStyle = `rgba(155, 245, 0, 1)`;
-    ctx2.fillText("Evaluate Individuals", 10, 60);
+    context.fillStyle = `rgba(155, 245, 0, 1)`;
+    context.fillText("Evaluate Individuals", 10, 60);
 
-    ctx2.fillStyle = `rgba(100, 100, 100, 1)`;
-    ctx2.fillText("Select Most-Fit Individuals", 10, 90);
+    context.fillStyle = `rgba(100, 100, 100, 1)`;
+    context.fillText("Select Most-Fit Individuals", 10, 90);
 
-    ctx2.fillStyle = `rgba(100, 100, 100, 1)`;
-    ctx2.fillText("Crossover", 10, 120);
+    context.fillStyle = `rgba(100, 100, 100, 1)`;
+    context.fillText("Crossover", 10, 120);
 
-    ctx2.fillStyle = `rgba(100, 100, 100, 1)`;
-    ctx2.fillText("Mutate", 10, 150);
+    context.fillStyle = `rgba(100, 100, 100, 1)`;
+    context.fillText("Mutate", 10, 150);
 }
 
 // accepts a context/ctx to specify the canvas to draw on
@@ -871,4 +885,5 @@ export {
     prepareToRunSimulation, eraseIllegalDrawingZones,
     drawPhases, drawDeceasedOrganisms,
     drawBoundary, drawStaticSelectionPhaseText,
+    drawStatsStatic,
 }

@@ -1475,16 +1475,8 @@ function createOrganisms () {
 
 function updateAndMoveOrganismsBounds() {
     return new Promise(resolve => {
-        // clear and draw boundary (draw on canvas2)
-        // capture canvas/boundary for collision detection
-        // (this could be done once instead of every gen)
-        ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
-        ctx2.drawImage(simGlobals.custom_boundary.full_boundary, 0, 0, canvas2.width, canvas2.height);
-        var canvas2_data = ctx2.getImageData(0, 0, canvas.width, canvas.height);
 
-        // draw phases & stats (should be outside function)
-        Drawings.drawStats();
-        Drawings.drawStaticEvaluationPhaseText();
+        var canvas2_data = ctx2.getImageData(0, 0, canvas.width, canvas.height);
 
         var finished = false;
         var position_rgba;
@@ -1626,10 +1618,7 @@ function hasReachedGoal(organism, goal) {
     }
 }
 
-// not ready to convert yet **
 async function runEvaluationAnimation() {
-
-    // ** not doing updateAndMove(), only fades for now
 
     // need to draw goal at location depending on sim type
     if (simGlobals.sim_type === 'classic') {
@@ -1637,6 +1626,19 @@ async function runEvaluationAnimation() {
         var success_flag = await updateAndMoveOrganisms(goal); // ideally don't pass in goal here
     }
     else {
+        // draw eval text and stats on canvas1
+        ctx2.clearRect(0, 0, 245, 150);
+        Drawings.drawStaticEvaluationPhaseText(ctx);
+        Drawings.drawStatsStatic(ctx);
+
+        await paintbrush.fadeIn(Drawings.drawBoundary, .01);
+        ctx2.globalAlpha = 1;
+
+        // clear canvas1 and redraw eval text and stats on canvas2
+        ctx.clearRect(0, 0, 245, 150);
+        Drawings.drawStaticEvaluationPhaseText(ctx2);
+        Drawings.drawStatsStatic(ctx2);
+
         // var goal = new Goal(GOAL_X_POS_BOUNDS, GOAL_Y_POS_BOUNDS, 20, ctx); not sure if needed (goal saved in boundary drawing)
         var success_flag = await updateAndMoveOrganismsBounds();
     }
@@ -1885,7 +1887,11 @@ async function runChosenParentsAnimations(parents) {
     await paintbrush.fadeIn(Drawings.drawBothParentTypesNatural, .02);
     await paintbrush.fadeOut(Drawings.drawOrganisms, .02);
 
-    // [] after working, move this to the end of runSelection animations
+
+
+    // [] *** after working, move this to the end of runSelection animations ***
+
+
 
     if (simGlobals.sim_type === 'boundary') {
         await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .02);
