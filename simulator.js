@@ -986,10 +986,10 @@ function updateMousePosition(event) {
     let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
 
     // store current mouse position
-    simGlobals.coordinates['x'] = event.clientX - rect.left;
-    simGlobals.coordinates['y'] = event.clientY - rect.top;
+    simGlobals.coordinates['x'] = Math.floor(event.clientX - rect.left);
+    simGlobals.coordinates['y'] = Math.floor(event.clientY - rect.top);
 
-    // console.log(coordinates);
+    console.log(simGlobals.coordinates);
 }
 
 // this function will be refactored/cleaned
@@ -2555,6 +2555,7 @@ function getPixel(canvas_data, index) {
 }
 
 function getPixelXY(canvas_data, x, y) {
+    console.log(canvas_data.width);
     var index = y * canvas_data.width + x;
 
     // how it works?
