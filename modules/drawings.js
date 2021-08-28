@@ -295,6 +295,7 @@ function drawBothParentTypesNatural(opacity) {
 // similar to redrawOrganisms(), but this function accepts an opacity value to allow fading
 // used in multiple places
 function drawOrganisms(opacity) {
+
     for (let i = 0; i < simGlobals.organisms.length; i++) {
         ctx.fillStyle = 'black';
         ctx.beginPath();
@@ -309,11 +310,15 @@ function drawOrganisms(opacity) {
 }
 
 function drawDeceasedOrganisms(opacity) {
+
+    // test just clearing the rect
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     for (let i = 0; i < simGlobals.deceased_organisms.length; i++) {
-        ctx.fillStyle = 'black';
-        ctx.beginPath();
-        ctx.arc(simGlobals.deceased_organisms[i].x, simGlobals.deceased_organisms[i].y, simGlobals.deceased_organisms[i].radius, 0, Math.PI*2, false);
-        ctx.fill();
+        // ctx.fillStyle = 'black';
+        // ctx.beginPath();
+        // ctx.arc(simGlobals.deceased_organisms[i].x, simGlobals.deceased_organisms[i].y, simGlobals.deceased_organisms[i].radius, 0, Math.PI*2, false);
+        // ctx.fill();
 
         ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
         ctx.beginPath();

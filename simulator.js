@@ -1883,11 +1883,11 @@ async function runChosenParentsAnimations(parents) {
     // fade out all
     await paintbrush.fadeOut(Drawings.drawAllSelectedOrganismsText, .02);
     await paintbrush.fadeIn(Drawings.drawBothParentTypesNatural, .02);
-    await paintbrush.fadeOut(Drawings.drawOrganisms, .05);
+    await paintbrush.fadeOut(Drawings.drawOrganisms, .02);
 
     if (simGlobals.sim_type === 'boundary') {
         await sleep(500);
-        await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .05);
+        await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .02);
     }
     
     await sleep(1000);
@@ -2338,14 +2338,13 @@ async function runGeneration() {
     if (simGlobals.dialogue) {
         await runSelectionAnimations(closest_organism, parents);
 
-        await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseExitText, .02);
+        await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseExitText, .01);
     }
     else {
-        await paintbrush.fadeOut(Drawings.drawOrganisms, .05);
+        await paintbrush.fadeOut(Drawings.drawOrganisms, .02);
 
         if (simGlobals.sim_type === 'boundary') {
-            await sleep(500);
-            await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .05);            
+            await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .02);            
         }
     }
 
