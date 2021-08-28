@@ -1885,9 +1885,23 @@ async function runChosenParentsAnimations(parents) {
     await paintbrush.fadeIn(Drawings.drawBothParentTypesNatural, .02);
     await paintbrush.fadeOut(Drawings.drawOrganisms, .02);
 
+    // [] after working, move this to the end of runSelection animations
+
     if (simGlobals.sim_type === 'boundary') {
-        await sleep(500);
         await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .02);
+
+        // fade out boundary
+        // we should draw a static selection phase on canvas1, and erase that area on canvas2
+        ctx2.clearRect(0, 0, 245, 150);
+        Drawings.drawStaticSelectionPhaseText(ctx);
+
+        // fade out boundary and reset globalAlpha
+        await paintbrush.fadeOut(Drawings.drawBoundary, .01);
+        ctx2.globalAlpha = 1;
+
+        // next, we should erase the drawing on canvas1 and redraw on canvas2 (all working)
+        ctx.clearRect(0, 0, 245, 150);
+        Drawings.drawStaticSelectionPhaseText(ctx2);
     }
     
     await sleep(1000);

@@ -169,6 +169,28 @@ function drawStaticEvaluationPhaseText() {
     ctx2.fillText("Mutate", 10, 150);
 }
 
+// accepts a context/ctx to specify the canvas to draw on
+function drawStaticSelectionPhaseText(context) {
+    context.clearRect(0, 0, 245, 150);
+
+    context.font = "20px arial";
+
+    context.fillStyle = `rgba(100, 100, 100, 1)`;
+    context.fillText("Create New Generation", 10, 30);
+
+    context.fillStyle = `rgba(100, 100, 100, 1)`;
+    context.fillText("Evaluate Individuals", 10, 60);
+
+    context.fillStyle = `rgba(155, 245, 0, 1)`;
+    context.fillText("Select Most-Fit Individuals", 10, 90);
+
+    context.fillStyle = `rgba(100, 100, 100, 1)`;
+    context.fillText("Crossover", 10, 120);
+
+    context.fillStyle = `rgba(100, 100, 100, 1)`;
+    context.fillText("Mutate", 10, 150);
+}
+
 // phase module
 function drawSelectionPhaseEntryText(opacity, old_opacity) {
     ctx2.clearRect(10, 70, 245, 20);
@@ -593,6 +615,12 @@ function eraseIllegalDrawingZones() {
     ctx.fillRect(0, 0, 252, 157);
 }
 
+function drawBoundary(opacity) {
+    ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
+    ctx2.globalAlpha = opacity;
+    ctx2.drawImage(simGlobals.custom_boundary.full_boundary, 0, 0, canvas2.width, canvas2.height);
+}
+
 // win/lose scenarios
 
 function drawSuccessMessage(opacity) {
@@ -842,4 +870,5 @@ export {
     highlightBoundarySimType, drawInitialSimSelectionScreen,
     prepareToRunSimulation, eraseIllegalDrawingZones,
     drawPhases, drawDeceasedOrganisms,
+    drawBoundary, drawStaticSelectionPhaseText,
 }
