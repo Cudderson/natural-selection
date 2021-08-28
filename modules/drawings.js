@@ -1,12 +1,3 @@
-// tests
-function testModule(message) {
-    console.log(message);
-}
-
-function findSammy() {
-    console.log(simGlobals.sammy);
-}
-
 // ===== drawings for simulator.js =====
 function drawSimulationSettings(opacity) {
 
@@ -864,7 +855,6 @@ function prepareToRunSimulation() {
 }
 
 export {
-    testModule, findSammy,
     drawSimulationSettings, drawSimulationIntro,
     drawFakeGoal, drawSimulationExplanation,
     drawExplanationAndGoal, drawStats,

@@ -2,38 +2,9 @@ document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
 import * as Drawings from "./modules/drawings.js";
 
-Drawings.testModule('Hello everybody!');
-
-// convert html function calls to eventlisteners in js 
-// *** (place in appropriate functions!!) ***
-document.getElementById("apply-form").addEventListener('submit', function submitForm(event) {
-    // don't submit form
-    event.preventDefault();
-
-    validateSettingsForm();
-
-    // destroy listener
-    document.getElementById("apply-form").removeEventListener('submit', submitForm);
-});
-
-// allow run_btn to simply run the simulation
-document.getElementsByClassName("run-btn")[0].addEventListener("click", runSimulation);
-
-// maybe have this do the reload directly?
-document.getElementsByClassName("stop-btn")[0].addEventListener('click', function stopSim() {
-    stopSimulation();
-});
-
 // ===== vars =====
 
 window.simGlobals = {};
-
-// working test
-simGlobals.sammy = 'sammy';
-Drawings.findSammy();
-
-console.log(window.simGlobals);
-console.log(simGlobals);
 
 // ** NOTE: We really only need to globalize vars that will be used in our modules. 
 // The vars used in this file should be fine and not globalized
@@ -783,6 +754,17 @@ function displaySettingsForm() {
         }
     });
 
+    // turn on listener for apply button
+    document.getElementById("apply-form").addEventListener('submit', function submitForm(event) {
+        // don't submit form
+        event.preventDefault();
+    
+        validateSettingsForm();
+    
+        // destroy listener
+        document.getElementById("apply-form").removeEventListener('submit', submitForm);
+    });
+
 }
 
 // [] should stop title screen animation when settings is called
@@ -820,7 +802,7 @@ function validateSettingsForm() {
         simGlobals.dialogue = false;
     }
 
-    // returns to title screen
+    // turns off settings form, turns on canvas and run-btn + listener
     finishApplyingSettings();
 
     // restart animation ===
@@ -940,6 +922,7 @@ function validateResilienceSetting() {
     } 
 }
 
+// needs better name
 function finishApplyingSettings() {
     // make html changes before function returns
     var canvas_container = document.getElementsByClassName("canvas-container")[0];
@@ -948,8 +931,11 @@ function finishApplyingSettings() {
     canvas_container.style.display = 'block';
     settings_container.style.display = 'none';
 
-    var start_btn = document.getElementsByClassName("run-btn")[0];
+    let start_btn = document.getElementsByClassName("run-btn")[0];
     start_btn.style.display = 'block';
+
+    // allow btn-click to runSimulation()
+    start_btn.addEventListener("click", runSimulation);
 
     return 0;
 }
@@ -2391,6 +2377,18 @@ async function runSimulation () {
     // remove run-btn listener
     document.getElementsByClassName("run-btn")[0].removeEventListener('click', runSimulation);
 
+    // hide start/settings buttons
+    document.getElementsByClassName("run-btn")[0].style.display = 'none';
+    document.getElementsByClassName("settings-btn")[0].style.display = 'none';
+
+    // display stop simulation button & add its listener
+    let stop_sim_btn = document.getElementsByClassName("stop-btn")[0];
+    stop_sim_btn.style.display = 'block';
+
+    stop_sim_btn.addEventListener('click', function stopSim() {
+        stopSimulation();
+    });
+
     simGlobals.simulation_started = true;
 
     console.log("Running Simulation with these settings:");
@@ -2400,11 +2398,6 @@ async function runSimulation () {
     console.log(`Mutation Rate: ${simGlobals.MUTATION_RATE}`);
     console.log(`Min/Max Gene: [${simGlobals.MIN_GENE}, ${simGlobals.MAX_GENE}]`);
     console.log(`Dialogue: ${simGlobals.dialogue}`);
-
-    // make start/settings buttons disappear, display stop simulation button
-    document.getElementsByClassName("run-btn")[0].style.display = 'none';
-    document.getElementsByClassName("settings-btn")[0].style.display = 'none';
-    document.getElementsByClassName("stop-btn")[0].style.display = 'block';
 
     // pre-sim animations *****
     await runPreSimAnimations();
