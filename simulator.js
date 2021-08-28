@@ -1626,17 +1626,32 @@ async function runEvaluationAnimation() {
         var success_flag = await updateAndMoveOrganisms(goal); // ideally don't pass in goal here
     }
     else {
-        // draw eval text and stats on canvas1
-        ctx2.clearRect(0, 0, 245, 150);
-        Drawings.drawStaticEvaluationPhaseText(ctx);
+        // *** this is super messy ***
+
+        if (simGlobals.dialogue) {
+            // draw eval text and stats on canvas1
+            ctx2.clearRect(0, 0, 245, 150);
+            Drawings.drawStaticEvaluationPhaseText(ctx);
+        }
+
+        ctx2.clearRect(700, 510, 350, 120);
         Drawings.drawStatsStatic(ctx);
 
-        await paintbrush.fadeIn(Drawings.drawBoundary, .01);
-        ctx2.globalAlpha = 1;
+        if (simGlobals.generation_count === 0 && !simGlobals.dialogue) {
+            await paintbrush.fadeIn(Drawings.drawBoundary, .01);
+            ctx2.globalAlpha = 1;
+        }
 
-        // clear canvas1 and redraw eval text and stats on canvas2
-        ctx.clearRect(0, 0, 245, 150);
-        Drawings.drawStaticEvaluationPhaseText(ctx2);
+        if (simGlobals.dialogue) {
+            await paintbrush.fadeIn(Drawings.drawBoundary, .01);
+            ctx2.globalAlpha = 1;
+
+            // clear canvas1 and redraw eval text and stats on canvas2
+            ctx.clearRect(0, 0, 245, 150);
+            Drawings.drawStaticEvaluationPhaseText(ctx2);
+        }
+
+        ctx.clearRect(700, 510, 350, 120);
         Drawings.drawStatsStatic(ctx2);
 
         // var goal = new Goal(GOAL_X_POS_BOUNDS, GOAL_Y_POS_BOUNDS, 20, ctx); not sure if needed (goal saved in boundary drawing)
@@ -1886,13 +1901,23 @@ async function runChosenParentsAnimations(parents) {
     await paintbrush.fadeOut(Drawings.drawAllSelectedOrganismsText, .02);
     await paintbrush.fadeIn(Drawings.drawBothParentTypesNatural, .02);
     await paintbrush.fadeOut(Drawings.drawOrganisms, .02);
+    await sleep(1000);
 
+    // done with parents
+    paintbrush.subject = null;
 
+    return new Promise(resolve => {
+        resolve("Highlight Chosen Parents Animation Complete");
+    })
+}
 
-    // [] *** after working, move this to the end of runSelection animations ***
-
-
-
+async function runSelectionAnimations(closest_organism, parents) {
+    console.log("Called runSelectionAnimations()");
+    // maybe model other phases after this one
+    await runClosestOrganismAnimations(closest_organism); // finished
+    await runChosenParentsAnimations(parents);
+    
+    // make own function
     if (simGlobals.sim_type === 'boundary') {
         await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .02);
 
@@ -1909,22 +1934,6 @@ async function runChosenParentsAnimations(parents) {
         ctx.clearRect(0, 0, 245, 150);
         Drawings.drawStaticSelectionPhaseText(ctx2);
     }
-    
-    await sleep(1000);
-
-    // done with parents
-    paintbrush.subject = null;
-
-    return new Promise(resolve => {
-        resolve("Highlight Chosen Parents Animation Complete");
-    })
-}
-
-async function runSelectionAnimations(closest_organism, parents) {
-    console.log("Called runSelectionAnimations()");
-    // maybe model other phases after this one
-    await runClosestOrganismAnimations(closest_organism); // finished
-    await runChosenParentsAnimations(parents);
 
     return new Promise(resolve => {
         resolve("Run Selection Animations Complete");
