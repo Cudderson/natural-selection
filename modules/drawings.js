@@ -601,6 +601,12 @@ function drawBoundaryValidationHelpText() {
     // ctx.fillText("non-overlapping line", 770, 555);
 }
 
+function drawBoundaryValidationScreen(boundary) {
+    drawBoundaryBoilerplate();
+    ctx.drawImage(boundary, 0, 0, canvas.width, canvas.height);
+    drawBoundaryValidationHelpText();
+}
+
 function drawBoundaryCompletionHelpText() {
     // remove upper-left text area
     ctx.fillStyle = 'black';
@@ -885,5 +891,5 @@ export {
     prepareToRunSimulation, eraseIllegalDrawingZones,
     drawPhases, drawDeceasedOrganisms,
     drawBoundary, drawStaticSelectionPhaseText,
-    drawStatsStatic,
+    drawStatsStatic, drawBoundaryValidationScreen,
 }

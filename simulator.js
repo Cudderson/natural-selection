@@ -992,6 +992,7 @@ function updateMousePosition(event) {
 }
 
 // this function will be refactored/cleaned
+// it's not super bad, just need to decide how functions will be handled
 function enterBoundaryCreationMode() {
 
     // drawing flag and step tracker
@@ -1005,10 +1006,6 @@ function enterBoundaryCreationMode() {
     applyBoundaryModeStyles();
 
     Drawings.drawBoundaryDrawingHelpText("Step 1");
-
-    // *** on second thought, these functions make good closures, as they aren't used anywhere else.
-    // *** I will still abstract the functions, but probably make more closures
-    // *** If I create a boundary_utils.js, these functions could be defined in there? (not a great idea)
 
     function draw(event) {
         if (event.buttons !== 1 || !allowed_to_draw) {
@@ -1028,27 +1025,10 @@ function enterBoundaryCreationMode() {
 
             if (pixel_data[0] == 155) {
                 // green touched, reject
-                console.log("illegal white line. returning.");
                 allowed_to_draw = false;
-
-                // should erase white line (redraw everything except the white line)
-                // this should be it's own function too (this same code is repeated in validateBoundaryConnection())
-                // draw boilerplate and top&bottom boundaries
-                Drawings.drawBoundaryBoilerplate();
-                ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
-                ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
-                Drawings.drawBoundaryValidationHelpText();
-
-                // draw white dot
-                ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(80, 510, 10, 0, Math.PI*2, false);
-                ctx.fill();
-
-                // make goal new color (can be a flag in drawBoundaryBoilerplate())
-                ctx.fillStyle = 'rgb(232, 0, 118)';
-                ctx.fillRect(925, 50, 20, 20);
                 
+                // reset step
+                Drawings.drawBoundaryValidationScreen(new_boundary.top_boundary);
                 return;
             }
             ctx.strokeStyle = 'white';
@@ -1135,6 +1115,7 @@ function enterBoundaryCreationMode() {
             if (boundary_step === 'bottom-boundary') {
                 let bottom_boundary_is_valid = new_boundary.validateBottom(event);
 
+                // could make own function for this condition
                 if (bottom_boundary_is_valid) {
                     // update step and store boundary
                     new_boundary.save('bottom');
@@ -1145,19 +1126,15 @@ function enterBoundaryCreationMode() {
                     // erase bottom-boundary coords when illegal line drawn
                     new_boundary.bottom_boundary_coordinates = [];
 
-                    // redraw boilerplate
+                    // redraw boilerplate & help text
                     Drawings.drawBoundaryBoilerplate();
-
-                    // redraw bottom-step help text
                     Drawings.drawBoundaryDrawingHelpText("Step 1");
-
-                    console.log("invalid");
-                    // error message 
                 }
             }
             else if (boundary_step === "top-boundary") {
                 let top_boundary_is_valid = new_boundary.validateTop(event);
 
+                // could make own function for this condition
                 if (top_boundary_is_valid) {
                     // update step and store boundary
                     // store top-boundary
@@ -1171,7 +1148,7 @@ function enterBoundaryCreationMode() {
                     // reset top boundary coords when illegal line drawn
                     new_boundary.top_boundary_coordinates = [];
 
-                    // redraw boilerplate and help text
+                    // redraw boilerplate and help text (erases illegal user-drawn line)
                     Drawings.drawBoundaryBoilerplate();
 
                     // draw valid bottom-boundary
@@ -1183,6 +1160,7 @@ function enterBoundaryCreationMode() {
             else if (boundary_step === 'full-boundary') {
                 let full_boundary_is_valid = new_boundary.validateFull();
 
+                // could make own function for this condition
                 if (full_boundary_is_valid) {
                     // update step
                     boundary_step = 'confirmation';
@@ -1200,11 +1178,7 @@ function enterBoundaryCreationMode() {
                     document.getElementsByClassName("stop-btn")[0].style.display = 'none';
                 }
                 else {
-                    // erase line and return to last step
-                    // draw boilerplate and top&bottom boundaries
-                    Drawings.drawBoundaryBoilerplate();
-                    ctx.drawImage(new_boundary.top_boundary, 0, 0, canvas.width, canvas.height);
-                    Drawings.drawBoundaryValidationHelpText();
+                    Drawings.drawBoundaryValidationScreen(new_boundary.top_boundary);
                 }
             }
         }
@@ -1224,6 +1198,8 @@ function enterBoundaryCreationMode() {
 
         // save full boundary
         new_boundary.save('full');
+
+        // ** This whole execution flow could be own function such as: 'prepareBoundaryForSimulation()'
 
         // normalize boundary coordinate array sizes
         new_boundary.prepareBoundaryForCheckpoints();
@@ -1246,6 +1222,7 @@ function enterBoundaryCreationMode() {
         // return to settings
 
         // should we turn off all listeners here???
+        // - not yet. user could choose to redraw boundary?
 
         // ===== this should display boundary version of settings form =====
         displaySettingsForm();
