@@ -308,6 +308,20 @@ function drawOrganisms(opacity) {
     }
 }
 
+function drawDeceasedOrganisms(opacity) {
+    for (let i = 0; i < simGlobals.deceased_organisms.length; i++) {
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(simGlobals.deceased_organisms[i].x, simGlobals.deceased_organisms[i].y, simGlobals.deceased_organisms[i].radius, 0, Math.PI*2, false);
+        ctx.fill();
+
+        ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(simGlobals.deceased_organisms[i].x, simGlobals.deceased_organisms[i].y, simGlobals.deceased_organisms[i].radius, 0, Math.PI*2, false);
+        ctx.fill();
+    }
+}
+
 // phase module
 function drawSelectionPhaseExitText(opacity, old_opacity) {
     ctx2.clearRect(10, 70, 245, 20);
@@ -335,8 +349,7 @@ function drawCrossoverPhaseEntryText(opacity, old_opacity) {
 }
 
 function drawCrossoverDescriptionText(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(75, 275, 950, 150);
+    ctx.clearRect(75, 275, 950, 150);
 
     var description = "Genes of the selected parent couples are combined to create new offspring.";
 
@@ -372,8 +385,7 @@ function drawMutationPhaseEntryText(opacity, old_opacity) {
 }
 
 function drawMutationDescriptionText(opacity) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(100, 275, 800, 150);
+    ctx.clearRect(100, 275, 800, 150);
 
     var description = "To maintain genetic diversity, a small percentage of random genes are mutated";
     var mutation_rate_text = `Mutation Rate: ${(simGlobals.MUTATION_RATE * 100).toFixed(2)}%`.toString();
@@ -418,8 +430,7 @@ function drawGenerationSummaryText(opacity) {
     let generation_average_fitness_preface = 'Average Fitness:';
     let generation_offspring_reproduced_preface = 'Offspring Reproduced:';
 
-    ctx.fillStyle = 'black';
-    ctx.fillRect(100, 250, 800, 200);
+    ctx.clearRect(100, 250, 800, 200);
 
     ctx.font = "22px arial";
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
@@ -825,5 +836,5 @@ export {
     updateSuccessfulOrganism, highlightClassicSimType,
     highlightBoundarySimType, drawInitialSimSelectionScreen,
     prepareToRunSimulation, eraseIllegalDrawingZones,
-    drawPhases,
+    drawPhases, drawDeceasedOrganisms,
 }

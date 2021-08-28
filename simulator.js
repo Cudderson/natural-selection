@@ -83,6 +83,7 @@ simGlobals.total_fitness = 0.00; // []
 // containers holding organisms and next-generation organisms
 simGlobals.organisms = []; // [x]
 simGlobals.offspring_organisms = []; // []
+simGlobals.deceased_organisms = []; // [] make not global
 
 // canvas & drawing context
 // reconsider how these are used
@@ -988,12 +989,9 @@ function updateMousePosition(event) {
     // store current mouse position
     simGlobals.coordinates['x'] = Math.floor(event.clientX - rect.left);
     simGlobals.coordinates['y'] = Math.floor(event.clientY - rect.top);
-
-    console.log(simGlobals.coordinates);
 }
 
 // this function will be refactored/cleaned
-// all drawings in this function converted to module, all working
 function enterBoundaryCreationMode() {
 
     // drawing flag and step tracker
@@ -1886,6 +1884,12 @@ async function runChosenParentsAnimations(parents) {
     await paintbrush.fadeOut(Drawings.drawAllSelectedOrganismsText, .02);
     await paintbrush.fadeIn(Drawings.drawBothParentTypesNatural, .02);
     await paintbrush.fadeOut(Drawings.drawOrganisms, .05);
+
+    if (simGlobals.sim_type === 'boundary') {
+        await sleep(500);
+        await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .05);
+    }
+    
     await sleep(1000);
 
     // done with parents
@@ -2251,8 +2255,6 @@ async function runGeneration() {
         await sleep(1000);
     }
 
-    // i believe that somewhere below here, a black square is drawn over the stats area? *******************************************
-
     // store length of organisms array before deceased organisms filtered out for reproduction (boundary sims)
     var next_gen_target_length = simGlobals.organisms.length;
 
@@ -2262,13 +2264,19 @@ async function runGeneration() {
         simGlobals.average_fitness = population_resolution['average_fitness'];
     }
     else if (simGlobals.sim_type === 'boundary') {
-        // we will follow the logic of the 'classic' sim type 
+
+        // keeping in case I was wrong, and the new way doesn't work
+        // reassign (.filter() does not change array)
+        // simGlobals.organisms = simGlobals.organisms.filter(checkPulse);
 
         // remove deceased organisms from array (organisms array is evaluated multiple times and deceased organisms aren't used)
         console.log(`before checkPulse(): ${simGlobals.organisms.length}`);
 
-        // reassign (.filter() does not change array)
-        simGlobals.organisms = simGlobals.organisms.filter(checkPulse);
+        let organized_organisms = checkPulse(simGlobals.organisms);
+
+        simGlobals.organisms = organized_organisms['living_organisms'];
+        simGlobals.deceased_organisms = organized_organisms['deceased_organisms'];
+
         console.log(`after checkPulse(): ${simGlobals.organisms.length}`);
 
         // draw checkpoints for reference
@@ -2328,20 +2336,26 @@ async function runGeneration() {
     var parents = selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length);
     
     if (simGlobals.dialogue) {
-        await sleep(1000);
-
         await runSelectionAnimations(closest_organism, parents);
 
         await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseExitText, .02);
     }
+    else {
+        await paintbrush.fadeOut(Drawings.drawOrganisms, .05);
+
+        if (simGlobals.sim_type === 'boundary') {
+            await sleep(500);
+            await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .05);            
+        }
+    }
+
+    // this function handles crossover, mutation and reproduction
+    // this function pushes new gen organisms to offspring_organisms[]
+    reproduceNewGeneration(parents);
 
     // PHASE: CROSSOVER / MUTATE / REPRODUCE
     // [] still need to fadeout boundary before these animations
     if (simGlobals.dialogue) {
-        // this function handles crossover, mutation and reproduction
-        // this function pushes new gen organisms to offspring_organisms[]
-        // consider combing to make function
-        reproduceNewGeneration(parents);
 
         await paintbrush.fadeToNewColor(Drawings.drawCrossoverPhaseEntryText, .02);
         await paintbrush.fadeIn(Drawings.drawCrossoverDescriptionText, .025);
@@ -2361,18 +2375,9 @@ async function runGeneration() {
         await paintbrush.fadeOut(Drawings.drawGenerationSummaryText, .025);
         await paintbrush.fadeToNewColor(Drawings.drawCreateNewGenPhaseExitText, .02);
     }
-    else {
-        // without dialogue, we need to fade the organisms to black before reproduceNewGeneration() forgets old population
-        await sleep(1000);
-        // await fadeToBlack(organisms); // keep just in case
-        await paintbrush.fadeOut(Drawings.drawOrganisms, .05); // untested
-        await sleep(1000);
-        reproduceNewGeneration(parents);
-    }
 
     return new Promise(resolve => {
         simGlobals.generation_count++;
-        console.log("MADE IT HERE");
         resolve(simGlobals.generation_count);
     })
 }
@@ -2555,7 +2560,6 @@ function getPixel(canvas_data, index) {
 }
 
 function getPixelXY(canvas_data, x, y) {
-    console.log(canvas_data.width);
     var index = y * canvas_data.width + x;
 
     // how it works?
@@ -2672,9 +2676,21 @@ function getFarthestCheckpointReached() {
     }
 }
 
-function checkPulse(organism) {
-    console.log(`alive?: ${organism.is_alive}`);
-    return organism.is_alive;
+function checkPulse(organisms) {
+
+    let deceased_organisms = [];
+
+    for (let i = 0; i < organisms.length; i++) {
+        if (!organisms[i].is_alive) {
+            deceased_organisms.push(organisms[i]);
+            organisms.splice(i, 1);
+        }
+    }
+
+    return {
+        'living_organisms': organisms,
+        'deceased_organisms': deceased_organisms
+    }
 }
 
 function sleep(milliseconds) {
