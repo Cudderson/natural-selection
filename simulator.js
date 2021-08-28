@@ -1280,6 +1280,15 @@ async function runPreSimAnimations() {
     await paintbrush.fadeOut(Drawings.drawExplanationAndGoal, .02);
     await sleep(1000);
 
+    await paintbrush.fadeIn(Drawings.drawStats, .02);
+    await sleep(500);
+
+    if (simGlobals.dialogue) {
+        await paintbrush.fadeIn(Drawings.drawPhases, .02);
+        await sleep(500);
+        await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .02);
+    }
+
     return new Promise(resolve => {
         resolve("pre-sim animations complete!");
     })
@@ -2209,17 +2218,7 @@ async function playTitleScreenAnimation() {
 // maybe async ruins this functions performance?
 async function runGeneration() {
 
-    if (simGlobals.generation_count === 0) {
-        await paintbrush.fadeIn(Drawings.drawStats, .02);
-        await sleep(500);
-
-        if (simGlobals.dialogue) {
-            await paintbrush.fadeIn(Drawings.drawPhases, .02);
-            await sleep(500);
-            await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .02);
-        }
-    }
-    else {
+    if (simGlobals.generation_count != 0) {
         if (simGlobals.dialogue) {
             await paintbrush.fadeIn(Drawings.drawStats, .02);
             await sleep(500);
