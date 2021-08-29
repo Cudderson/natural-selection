@@ -524,7 +524,11 @@ class Boundary {
         }
 
         // determine size using halfway points (loop from 1 to 8 (skips first and last checkpoint))
+<<<<<<< HEAD
         for (let i = 1; i < this.checkpoints.length - i; i++) {
+=======
+        for (let i = 1; i < this.checkpoints.length - i; k++) {
+>>>>>>> fa7dcd0d87b68a22bc4dce6868e78aa9ed413783
             // determine length from checkpoint to previous checkpoints halfway point
             let current_location = this.checkpoints[i].coordinates;
             let previous_halfway_point = this.checkpoints[i-1].halfway_point;
