@@ -4,6 +4,18 @@ import * as Drawings from "./modules/drawings.js";
 
 // ===== vars =====
 
+// ***** Begin Deconstructing simGlobals() *****
+
+// - We want to have as few global variables as possible.
+
+// - We will identify where each variable is needed, and implement it locally there
+// -- one problem: drawings in module use some of these variables. This is a problem when we call paintbrush.fadeIn/Out(), where we cannot yet
+//                 pass dynamic context to draw. The obvious solution seems to be to add functionality for paintbrush's fade functions to 
+//                 accept additional drawing context. At first, I wanted to create a global object that held variables to draw, but this solution sounds better.
+//                     - This way, variables will be more locally-scoped and trustworthy.
+
+// [] Give paintbrush ability to accept additional drawing context (maybe a dictionary?)
+
 window.simGlobals = {};
 
 // ** NOTE: We really only need to globalize vars that will be used in our modules. 
@@ -524,11 +536,7 @@ class Boundary {
         }
 
         // determine size using halfway points (loop from 1 to 8 (skips first and last checkpoint))
-<<<<<<< HEAD
         for (let i = 1; i < this.checkpoints.length - i; i++) {
-=======
-        for (let i = 1; i < this.checkpoints.length - i; k++) {
->>>>>>> fa7dcd0d87b68a22bc4dce6868e78aa9ed413783
             // determine length from checkpoint to previous checkpoints halfway point
             let current_location = this.checkpoints[i].coordinates;
             let previous_halfway_point = this.checkpoints[i-1].halfway_point;
