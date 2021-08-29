@@ -2015,6 +2015,35 @@ function reproduceNewGeneration(parents) {
 // * all win/lose drawings converted to module *
 // * keeping in case function is created to play those animations *
 
+// untested
+function handleSuccessfulSimDecision() {
+    let key_pressed;
+
+    do {
+        key_pressed = await getUserDecision();
+        console.log(key_pressed);
+    }
+    while (key_pressed != "Enter" && key_pressed != "q");
+
+    console.log("Key Accepted: " + key_pressed);
+
+    await paintbrush.fadeOut(Drawings.drawSuccessMessage, .05);
+    Drawings.redrawOrganisms(); // not tested yet (could try using rAF for one frame to ensure user sees?)
+
+    if (key_pressed === 'Enter') {
+        console.log("Continuing Simulation.");
+        await sleep(500);
+    }
+    else if (key_pressed === 'q') {
+        console.log("Quitting Simulation.");
+
+        await paintbrush.fadeOut(Drawings.drawOrganisms, .05);
+
+        // possibly fade stats to black here too?
+        stopSimulation();
+    }
+}
+
 // ========================
 // ===== TITLE SCREEN =====
 // ========================
@@ -2204,7 +2233,7 @@ async function runGeneration() {
         console.log(`Success Flag: ${success_flag}`);
 
         // here, if success flag is true, we can await the success animation
-        // ***** skipping for now (want to get core animation converted before win scenario) *****
+        // untested
         if (success_flag) {
             // update flag
             simulation_succeeded = true;
@@ -2213,29 +2242,8 @@ async function runGeneration() {
             await sleep(1500);
             await paintbrush.fadeIn(Drawings.drawSuccessMessage, .02); // untested
 
-            do {
-                var key_pressed = await getUserDecision();
-                console.log(key_pressed);
-            }
-            while (key_pressed != "Enter" && key_pressed != "q");
-
-            console.log("Key Accepted: " + key_pressed);
-
-            await paintbrush.fadeOut(Drawings.drawSuccessMessage, .05);
-            Drawings.redrawOrganisms(); // not tested yet (could try using rAF for one frame to ensure user sees?)
-
-            if (key_pressed === 'Enter') {
-                console.log("Continuing Simulation.");
-                await sleep(500);
-            }
-            else if (key_pressed === 'q') {
-                console.log("Quitting Simulation.");
-
-                await paintbrush.fadeOut(Drawings.drawOrganisms, .05);
-
-                // possibly fade stats to black here too?
-                stopSimulation();
-            }
+            // untested
+            handleSuccessfulSimDecision();            
         }
     }
 
