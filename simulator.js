@@ -97,14 +97,14 @@ class Organism {
     }
 
     setRandomGenes() {
-        for (var i = 0; i < simGlobals.GENE_COUNT; i++) {
+        for (let i = 0; i < simGlobals.GENE_COUNT; i++) {
             var random_gene = getRandomGene(simGlobals.MIN_GENE, simGlobals.MAX_GENE);
             this.genes.push(random_gene);
         }
     }
 
     showGenes() {
-        for (var i = 0; i < simGlobals.GENE_COUNT; i++) {
+        for (let i = 0; i < simGlobals.GENE_COUNT; i++) {
             console.log(this.genes[i]);
         }
     }
@@ -354,11 +354,11 @@ class Boundary {
     }
 
     trimLongestBoundaryCoordinates(longest_boundary_coordinates, target_length) {
-        var num_coords_to_remove = longest_boundary_coordinates.length - target_length;
-        var percent_of_coords_to_remove = num_coords_to_remove / longest_boundary_coordinates.length;
-        var coords_removed = 0;
-        var coords_kept = 0;
-        var random_percentage;
+        let num_coords_to_remove = longest_boundary_coordinates.length - target_length;
+        let percent_of_coords_to_remove = num_coords_to_remove / longest_boundary_coordinates.length;
+        let coords_removed = 0;
+        let coords_kept = 0;
+        let random_percentage;
 
         console.log(`# of coordinates we need to remove: ${num_coords_to_remove}`);
         console.log(`which is ${percent_of_coords_to_remove}% of ${longest_boundary_coordinates.length}`);
@@ -366,7 +366,7 @@ class Boundary {
         console.log(`Starting loop`);
 
         // since splicing changes array size, preserve the length here so that we can evaluate all coordinates
-        var preserved_longest_length = longest_boundary_coordinates.length;
+        let preserved_longest_length = longest_boundary_coordinates.length;
 
         for (let i = 0; i < preserved_longest_length; i++) {
             random_percentage = Math.random();
@@ -406,7 +406,7 @@ class Boundary {
             console.log("Trimming extra coordinates")
             do {
                 // remove a random coordinate
-                var coordinate_to_remove = Math.floor(Math.random() * longest_boundary_coordinates.length);
+                let coordinate_to_remove = Math.floor(Math.random() * longest_boundary_coordinates.length);
                 longest_boundary_coordinates.splice(coordinate_to_remove, 1);
             }
             while (longest_boundary_coordinates.length !== target_length);
@@ -432,11 +432,11 @@ class Boundary {
         console.log(`bottom: ${this.bottom_boundary_coordinates.length}, top: ${this.top_boundary_coordinates.length}`);
 
         // Identify longest boundary for trimming (target_length = length of shortest boundary)
-        var longest_boundary_and_target = this.determineLongestBoundary();
+        let longest_boundary_and_target = this.determineLongestBoundary();
 
-        var longest_text = longest_boundary_and_target[0];
-        var longest_boundary_coordinates = longest_boundary_and_target[1];
-        var target_length = longest_boundary_and_target[2];
+        let longest_text = longest_boundary_and_target[0];
+        let longest_boundary_coordinates = longest_boundary_and_target[1];
+        let target_length = longest_boundary_and_target[2];
 
         // execute if boundary coordinate array lengths are not same size
         if (longest_text !== 'neither') {
@@ -462,8 +462,8 @@ class Boundary {
         ctx.fillStyle = 'white';
         ctx.strokeWidth = 1;
         ctx.lineCap = 'round';
-        var step = Math.ceil(this.top_boundary_coordinates.length / 10);
-        var line_counter = 0;
+        let step = Math.ceil(this.top_boundary_coordinates.length / 10);
+        let line_counter = 0;
 
         for (let i = 0; i < this.top_boundary_coordinates.length; i++) {
             // step 2: draw a line from top[coordinate] to bottom[coordinate]
@@ -710,22 +710,14 @@ class Paintbrush {
 function displaySettingsForm() {
 
     // ensure only settings button showing
-    var settings_btn = document.getElementsByClassName("settings-btn")[0];
-    var start_btn = document.getElementsByClassName("run-btn")[0];
-    var stop_btn = document.getElementsByClassName("stop-btn")[0];
-    var save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
-
-    settings_btn.style.display = 'block';
-    start_btn.style.display = 'none';
-    stop_btn.style.display = 'none';
-    save_bounds_btn.style.display = 'none';
+    document.getElementsByClassName("settings-btn")[0].style.display = 'block';
+    document.getElementsByClassName("run-btn")[0].style.display = 'none';
+    document.getElementsByClassName("stop-btn")[0].style.display = 'none';
+    document.getElementsByClassName("save-boundaries-btn")[0].style.display = 'none';
 
     // turn off canvas, turn on settings
-    var canvas_container = document.getElementsByClassName("canvas-container")[0];
-    var settings_container = document.getElementsByClassName("settings-container")[0];
-
-    canvas_container.style.display = 'none';
-    settings_container.style.display = 'block';
+    document.getElementsByClassName("canvas-container")[0].style.display = 'none';
+    document.getElementsByClassName("settings-container")[0].style.display = 'block';
 
     if (simGlobals.sim_type === 'classic') {
         // display classic settings (no death/resilience)
@@ -760,9 +752,6 @@ function displaySettingsForm() {
         event.preventDefault();
     
         validateSettingsForm();
-    
-        // destroy listener
-        document.getElementById("apply-form").removeEventListener('submit', submitForm);
     });
 
 }
@@ -2016,7 +2005,7 @@ function reproduceNewGeneration(parents) {
 // * keeping in case function is created to play those animations *
 
 // untested
-function handleSuccessfulSimDecision() {
+async function handleSuccessfulSimDecision() {
     let key_pressed;
 
     do {
