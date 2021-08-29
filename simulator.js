@@ -14,7 +14,17 @@ import * as Drawings from "./modules/drawings.js";
 //                 accept additional drawing context. At first, I wanted to create a global object that held variables to draw, but this solution sounds better.
 //                     - This way, variables will be more locally-scoped and trustworthy.
 
-// [] Give paintbrush ability to accept additional drawing context (maybe a dictionary?)
+// ** Since almost everything is called from runSimulation/runGeneration, maybe passing the inital stats/settings variables to those functions would be enough
+//    to keep track of them?
+
+// ** Idea: maybe we package the settings vars globally, (or pass them to functions) and then reference them within runSim()/Gen() as more-local vars?
+
+// ** Also worth noting that we might be able to grab the user-inputted settings from test.html at any time.
+
+// [x] Give paintbrush ability to accept additional drawing context (maybe a dictionary?)
+// [x] prove that content works with Drawings.drawSimulationSettings()
+// - Let's test if the settings in test.html are always available
+// [] Test html settings are always available by grabbing them from html vs simGlobals in drawSimulationSettings()
 
 window.simGlobals = {};
 
@@ -30,11 +40,11 @@ simGlobals.GOAL_X_POS = 500; // []
 simGlobals.GOAL_Y_POS = 50; // []
 
 // organism global default settings
-simGlobals.TOTAL_ORGANISMS = 100; // [x]
+simGlobals.TOTAL_ORGANISMS = 100; // [x] remember to update this var when new gen reproduced
 simGlobals.GENE_COUNT = 250; // [x]
 simGlobals.MUTATION_RATE = 0.03; // [x]
-simGlobals.MIN_GENE = -5; // []
-simGlobals.MAX_GENE = 5; // []
+simGlobals.MIN_GENE = -5; // [x]
+simGlobals.MAX_GENE = 5; // [x]
 // for boundary sims
 simGlobals.RESILIENCE = 1.00; // [x]
 // starts at perfect resilience
@@ -47,7 +57,7 @@ simGlobals.GOAL_X_POS_BOUNDS = 925; // []
 simGlobals.GOAL_Y_POS_BOUNDS = 50; // []
 
 // boundary globals
-simGlobals.custom_boundary; // []
+simGlobals.custom_boundary; // [x] (one drawing: drawBoundary())
 simGlobals.scale_statistics; // [] // this is/should be only computed once (boundary doesn't change)
 
 // flags
@@ -65,8 +75,8 @@ simGlobals.total_fitness = 0.00; // []
 
 // containers holding organisms and next-generation organisms
 simGlobals.organisms = []; // [x]
+simGlobals.deceased_organisms = []; // [x] make not global
 simGlobals.offspring_organisms = []; // []
-simGlobals.deceased_organisms = []; // [] make not global
 
 // canvas & drawing context
 // reconsider how these are used
@@ -614,7 +624,7 @@ class Paintbrush {
         this.subject = null; 
     }
 
-    fadeIn(drawing_function, step) {
+    fadeIn(drawing_function, step, content=null) {
         return new Promise(resolve => {
             let finished = false;
             let opacity = 0.00;
@@ -624,7 +634,7 @@ class Paintbrush {
                     // animate
 
                     // think of better name than drawing_function
-                    drawing_function(opacity);
+                    drawing_function(opacity, content);
                     
                     if (opacity >= 1.00) {
                         finished = true;
@@ -645,7 +655,7 @@ class Paintbrush {
         }) 
     }
 
-    fadeOut(drawing_function, step) {
+    fadeOut(drawing_function, step, content=null) {
         return new Promise(resolve => {
             let finished = false;
             let opacity = 1.00;
@@ -655,7 +665,7 @@ class Paintbrush {
                     // animate
 
                     // think of better name than drawing_function
-                    drawing_function(opacity);
+                    drawing_function(opacity, content);
                     
                     if (opacity <= 0.00) {
                         finished = true;
@@ -675,6 +685,7 @@ class Paintbrush {
         })
     }
 
+    // not adding 'content' here yet until necessary
     // accepts a drawing_function with 2 opacities (old color & new color)
     fadeToNewColor(drawing_function, step) {
         return new Promise(resolve => {
@@ -1221,9 +1232,22 @@ async function runPreSimAnimations() {
     // *** pre-sim animations will vary slightly (death, boundary), depending on sim type ***
 
     // (only with dialogue on!)
-    await paintbrush.fadeIn(Drawings.drawSimulationSettings, .01);
+
+    // testing content
+    let pre_sim_content = {};
+
+    pre_sim_content.total_organisms = document.getElementById("total-organisms").value;
+    pre_sim_content.gene_count = document.getElementById("gene-count").value;
+    pre_sim_content.movement_speed = document.getElementById("move-speed").value;
+    pre_sim_content.mutation_rate = document.getElementById("mutation-rate").value;
+    pre_sim_content.dialogue = document.getElementById("dialogue-checkbox").checked;
+
+    await paintbrush.fadeIn(Drawings.drawSimulationSettings, .01, pre_sim_content);
+
     await sleep(2000);
-    await paintbrush.fadeOut(Drawings.drawSimulationSettings, .02);
+    await paintbrush.fadeOut(Drawings.drawSimulationSettings, .02, pre_sim_content);
+
+    // works with content up to here!
 
     await paintbrush.fadeIn(Drawings.drawSimulationIntro, .01);
     await sleep(2000);

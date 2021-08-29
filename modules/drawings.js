@@ -1,5 +1,5 @@
 // ===== drawings for simulator.js =====
-function drawSimulationSettings(opacity) {
+function drawSimulationSettings(opacity, content) {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -15,13 +15,20 @@ function drawSimulationSettings(opacity) {
     ctx.fillText(`Mutation Rate:`, 300, 370);
     ctx.fillText(`Dialogue:`, 300, 410);
     
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(`${simGlobals.TOTAL_ORGANISMS}`, 600, 250);
-    ctx.fillText(`${simGlobals.GENE_COUNT}`, 600, 290);
-    ctx.fillText(`${simGlobals.MAX_GENE}`, 600, 330);
-    ctx.fillText(`${simGlobals.MUTATION_RATE}`, 600, 370);
+    // ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    // ctx.fillText(`${simGlobals.TOTAL_ORGANISMS}`, 600, 250);
+    // ctx.fillText(`${simGlobals.GENE_COUNT}`, 600, 290);
+    // ctx.fillText(`${simGlobals.MAX_GENE}`, 600, 330);
+    // ctx.fillText(`${simGlobals.MUTATION_RATE}`, 600, 370);
 
-    if (simGlobals.dialogue === false) {
+    // testing content (still need resilience incorporation)
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText(`${content.total_organisms}`, 600, 250);
+    ctx.fillText(`${content.gene_count}`, 600, 290);
+    ctx.fillText(`${content.movement_speed}`, 600, 330);
+    ctx.fillText(`${content.mutation_rate}`, 600, 370);
+
+    if (content.dialogue === false) {
         ctx.fillText(`Disabled`, 600, 410);
     }
     else {
