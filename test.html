@@ -14,12 +14,14 @@
   <img id="press-start" src="press_start_text.png">
   <img id="classic-example" src="classic_example.png">
   <img id="boundary-example" src="boundary_example.png">
+  <br>
   <div class="canvas-container">
     <canvas id="main-canvas" width="1000" height="600"></canvas>
+    <canvas id="background-canvas" width="1000" height="600"></canvas>
   </div>
   <div class="settings-container">
     <div class="settings-form"> 
-      <form id="apply-form" onsubmit="return validateSettingsForm()">
+      <form id="apply-form">
 
         <div class="settings-grid">
           <span class="settings-header">Simulation Settings</span>
@@ -81,14 +83,15 @@
     <button class="sim-type-classic">Select Classic</button>
     <button class="sim-type-boundary">Select Boundary</button>
     <!--boundary creation-->
-    <button class='next-btn'>Continue</button>
+    <button class="next-btn">Continue</button>
     <button class="save-boundaries-btn">Apply Boundary</button>
     <!--run/stop sim, settings-->
-    <button class="run-btn" onclick="checkSimType()">Run Simulation</button>
+    <button class="run-btn">Run Simulation</button>
     <button class="settings-btn">Settings</button>
-    <button class="stop-btn" onclick="stopSimulation()">Stop Simulation</button>
+    <button class="stop-btn">Stop Simulation</button>
   </div>
-    <script type="text/javascript" src="simulator.js"></script>
+    <script type="module" src="modules/drawings.js"></script>
+    <script type="module" src="simulator.js"></script>
 </body>
 
 </html>

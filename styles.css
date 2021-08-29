@@ -10,9 +10,19 @@ body {
     background: black;
 }
 
-#main-canvas {
-    background-color: black;
+#main-canvas, #background-canvas {
     border: 4px solid var(--darkviolet);
+}
+
+#main-canvas {
+    background-color: transparent;
+}
+
+#background-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
 }
 
 #logo, #press-start, #classic-example, #boundary-example {
@@ -22,6 +32,10 @@ body {
 .canvas-container, .btn-container, .settings-container {
     margin: 0 auto;
     width: 1000px;
+}
+
+.canvas-container {
+    position: relative;
 }
 
 .settings-container {
