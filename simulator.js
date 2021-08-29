@@ -24,7 +24,11 @@ import * as Drawings from "./modules/drawings.js";
 // [x] Give paintbrush ability to accept additional drawing context (maybe a dictionary?)
 // [x] prove that content works with Drawings.drawSimulationSettings()
 // - Let's test if the settings in test.html are always available
-// [] Test html settings are always available by grabbing them from html vs simGlobals in drawSimulationSettings()
+// [x] Test html settings are always available by grabbing them from html vs simGlobals in drawSimulationSettings()
+// --committed--
+// With sim settings available from html, we should be able to reference them at runSim()/runGen() as local variables
+
+// [x] finish pre-sim animations with new 'content' ability
 
 window.simGlobals = {};
 
@@ -1233,7 +1237,6 @@ async function runPreSimAnimations() {
 
     // (only with dialogue on!)
 
-    // testing content
     let pre_sim_content = {};
 
     pre_sim_content.total_organisms = document.getElementById("total-organisms").value;
@@ -1247,8 +1250,6 @@ async function runPreSimAnimations() {
     await sleep(2000);
     await paintbrush.fadeOut(Drawings.drawSimulationSettings, .02, pre_sim_content);
 
-    // works with content up to here!
-
     await paintbrush.fadeIn(Drawings.drawSimulationIntro, .01);
     await sleep(2000);
 
@@ -1260,7 +1261,11 @@ async function runPreSimAnimations() {
     await paintbrush.fadeOut(Drawings.drawExplanationAndGoal, .02);
     await sleep(1000);
 
-    await paintbrush.fadeIn(Drawings.drawStats, .02);
+    // add content for drawStats()
+    pre_sim_content.generation_count = 0;
+    pre_sim_content.average_fitness = '0.00';
+
+    await paintbrush.fadeIn(Drawings.drawStats, .02, pre_sim_content);
     await sleep(500);
 
     if (simGlobals.dialogue) {
@@ -1270,6 +1275,8 @@ async function runPreSimAnimations() {
     }
 
     return new Promise(resolve => {
+        // clear content to ensure no variable cross-up
+        pre_sim_content = null;
         resolve("pre-sim animations complete!");
     })
 }

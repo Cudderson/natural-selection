@@ -86,17 +86,17 @@ function drawExplanationAndGoal(opacity) {
 }
 
 // may need to be updated for resilience
-function drawStats(opacity) {
+function drawStats(opacity, content) {
     ctx2.clearRect(700, 510, 350, 120);
 
     ctx2.fillStyle = `rgba(155, 245, 0, ${opacity})`;
     ctx2.font = "22px arial";
     ctx2.fillText('Generation:', 740, 535);
-    ctx2.fillText(simGlobals.generation_count.toString(), 940, 535);
+    ctx2.fillText(content.generation_count.toString(), 940, 535);
     ctx2.fillText('Population Size:', 740, 560);
-    ctx2.fillText(simGlobals.TOTAL_ORGANISMS.toString(), 940, 560);
+    ctx2.fillText(content.total_organisms.toString(), 940, 560);
     ctx2.fillText('Average Fitness:', 740, 585);
-    ctx2.fillText(simGlobals.average_fitness.toString(), 940, 585);
+    ctx2.fillText(content.average_fitness.toString(), 940, 585);
 }
 
 // for preserving drawing on canvas during animations
