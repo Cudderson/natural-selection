@@ -27,8 +27,44 @@ import * as Drawings from "./modules/drawings.js";
 // [x] Test html settings are always available by grabbing them from html vs simGlobals in drawSimulationSettings()
 // --committed--
 // With sim settings available from html, we should be able to reference them at runSim()/runGen() as local variables
-
 // [x] finish pre-sim animations with new 'content' ability
+
+// ===== STARTING HERE =====
+
+// rough flow:
+// 1. before sim, set validated settings to global simSettings object
+//      - Perhaps save additional globals such as FPS, sim_type, INITIAL_POS, etc.
+// 2. if boundary, create Boundary object and store checkpoints, scale, etc
+// 3. runGen()
+// 4. when gen over, a resolve() happens, then runGen() is called again.
+//    - What does the next runGeneration() call need?? (besides global settings)
+//          - We will see.
+
+// One thing is for sure: the next runGen() call needs the new population of organisms reproduced at the end of generation.
+// Maybe runGen() could resolve with new organisms array, (average_fitness?) and possibly gen_count (if needed, could be global too)
+// As long as we have our organisms array and original settings, we should be able to runGen() fully.
+
+// settings can become 'const' after set!
+// --settings module?
+
+// ***** I forgot you can assign a subject to Paintbrush. *****
+
+// We don't need to make organisms global.
+// We will simply have our paintbrush global, and assign the paintbrush's subject as the organisms array before drawing! (yesyesyes)
+// edge-case: some drawings don't use paintbrush to be drawn, but are just called directly.
+//      - to combat this, we will have 2 options:
+//          1. create basic Paintbrush draw()/paint() method that can use object's subject attribute to execute drawing function
+//          2. add 'content' param to drawings that don't use paintbrush that can be passed necessary vars
+
+// does it make more sense to assign paintbrush 'subject', or to pass 'content' to the drawing functions?
+// *** - It just seems less clean to pass extra params, so we should use Paintbrush.subject ***
+// It may not be needed, and sometimes it might makes sense to just pass the array. We'll see.
+
+// ===== Executing =====
+// Goal: factor organisms array out of global object, and instead pass it to each runGen() call
+
+// [] save organisms from runSimulation > createOrganisms() to global 'initial_population'
+
 
 window.simGlobals = {};
 

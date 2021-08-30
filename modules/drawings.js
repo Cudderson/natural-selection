@@ -674,7 +674,7 @@ function redrawOrganisms() {
     ctx.clearRect(235, 231, 550, 235);
 
     // redraw organisms
-    for (var i = 0; i < organisms.length; i++) {
+    for (let i = 0; i < organisms.length; i++) {
         organisms[i].move();
     }
 }
