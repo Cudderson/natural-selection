@@ -1276,6 +1276,7 @@ async function runPreSimAnimations() {
 
     return new Promise(resolve => {
         // clear content to ensure no variable cross-up
+        console.log("making null");
         pre_sim_content = null;
         resolve("pre-sim animations complete!");
     })
@@ -1980,6 +1981,23 @@ function crossover(parents_to_crossover) {
     return crossover_genes;
 }
 
+// [] works
+async function runCrossoverAnimations() {
+    await paintbrush.fadeToNewColor(Drawings.drawCrossoverPhaseEntryText, .02);
+    await paintbrush.fadeIn(Drawings.drawCrossoverDescriptionText, .025);
+    await sleep(2000);
+    await paintbrush.fadeOut(Drawings.drawCrossoverDescriptionText, .025);
+    await paintbrush.fadeToNewColor(Drawings.drawCrossoverPhaseExitText, .02);
+}
+
+async function runMutationAnimations() {
+    await paintbrush.fadeToNewColor(Drawings.drawMutationPhaseEntryText, .02);
+    await paintbrush.fadeIn(Drawings.drawMutationDescriptionText, .025);
+    await sleep(2000);
+    await paintbrush.fadeOut(Drawings.drawMutationDescriptionText, .025);
+    await paintbrush.fadeToNewColor(Drawings.drawMutationPhaseExitText, .02);
+}
+
 // =================================
 // ===== CREATE NEW GENERATION =====
 // =================================
@@ -2072,6 +2090,14 @@ async function handleSuccessfulSimDecision() {
         // possibly fade stats to black here too?
         stopSimulation();
     }
+}
+
+async function runNewGenAnimations() {
+    await paintbrush.fadeToNewColor(Drawings.drawCreateNewGenPhaseEntryText, .02);
+    await paintbrush.fadeIn(Drawings.drawGenerationSummaryText, .025);
+    await sleep(2000);
+    await paintbrush.fadeOut(Drawings.drawGenerationSummaryText, .025);
+    await paintbrush.fadeToNewColor(Drawings.drawCreateNewGenPhaseExitText, .02);
 }
 
 // ========================
@@ -2283,7 +2309,13 @@ async function runGeneration() {
     if (simGlobals.dialogue) {
         await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseExitText, .02);
 
-        await paintbrush.fadeOut(Drawings.drawStats, .015); // put here to fade out stats before average fitness updated
+        // ** placeholder to test **
+        let content = {};
+        content.generation_count = 0;
+        content.total_organisms = 777;
+        content.average_fitness = 7.77;
+
+        await paintbrush.fadeOut(Drawings.drawStats, .015, content); // put here to fade out stats before average fitness updated
         await sleep(1000);
     }
 
@@ -2388,23 +2420,11 @@ async function runGeneration() {
     // [] still need to fadeout boundary before these animations
     if (simGlobals.dialogue) {
 
-        await paintbrush.fadeToNewColor(Drawings.drawCrossoverPhaseEntryText, .02);
-        await paintbrush.fadeIn(Drawings.drawCrossoverDescriptionText, .025);
-        await sleep(2000);
-        await paintbrush.fadeOut(Drawings.drawCrossoverDescriptionText, .025);
-        await paintbrush.fadeToNewColor(Drawings.drawCrossoverPhaseExitText, .02);
+        await runCrossoverAnimations();
 
-        await paintbrush.fadeToNewColor(Drawings.drawMutationPhaseEntryText, .02);
-        await paintbrush.fadeIn(Drawings.drawMutationDescriptionText, .025);
-        await sleep(2000);
-        await paintbrush.fadeOut(Drawings.drawMutationDescriptionText, .025);
-        await paintbrush.fadeToNewColor(Drawings.drawMutationPhaseExitText, .02);
+        await runMutationAnimations();
 
-        await paintbrush.fadeToNewColor(Drawings.drawCreateNewGenPhaseEntryText, .02);
-        await paintbrush.fadeIn(Drawings.drawGenerationSummaryText, .025);
-        await sleep(2000);
-        await paintbrush.fadeOut(Drawings.drawGenerationSummaryText, .025);
-        await paintbrush.fadeToNewColor(Drawings.drawCreateNewGenPhaseExitText, .02);
+        await runNewGenAnimations();
     }
 
     return new Promise(resolve => {
