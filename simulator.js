@@ -1811,31 +1811,31 @@ async function evaluatePopulation(organisms) {
 // ===== SELECTION =====
 // =====================
 
-function beginSelectionProcess() {
+function beginSelectionProcess(organisms) {
     // fill array with candidates for reproduction
     let potential_mothers = [];
     let potential_fathers = [];
 
-    for (let i = 0; i < simGlobals.organisms.length; i++) {
+    for (let i = 0; i < organisms.length; i++) {
         // Give organisms with negative fitness a chance to reproduce
-        if (simGlobals.organisms[i].fitness < 0) {
-            simGlobals.organisms[i].fitness = 0.01;
+        if (organisms[i].fitness < 0) {
+            organisms[i].fitness = 0.01;
         }
 
         // I'm going to try this implementation >> (organism.fitness * 100) ** 1.25
-        for (let j = 0; j < Math.ceil((simGlobals.organisms[i].fitness * 100) ** 2); j++) {
-            if (simGlobals.organisms[i].gender === 'female') {
-                potential_mothers.push(simGlobals.organisms[i]);
+        for (let j = 0; j < Math.ceil((organisms[i].fitness * 100) ** 2); j++) {
+            if (organisms[i].gender === 'female') {
+                potential_mothers.push(organisms[i]);
             }
-            else if (simGlobals.organisms[i].gender === 'male') {
-                potential_fathers.push(simGlobals.organisms[i]);
+            else if (organisms[i].gender === 'male') {
+                potential_fathers.push(organisms[i]);
             }
         }
-        // console.log(`Fitness for Organism ${i}: ${simGlobals.organisms[i].fitness}`);
-        // console.log(`Organism ${i} was added to array ${Math.ceil((simGlobals.organisms[i].fitness * 100) ** 2)} times.`);
+        // console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
+        // console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * 100) ** 2)} times.`);
     }
 
-    var potential_parents = {
+    let potential_parents = {
         'potential_mothers': potential_mothers,
         'potential_fathers': potential_fathers
     }
@@ -1906,7 +1906,7 @@ async function runClosestOrganismAnimations (closest_organism) {
     })
 }
 
-async function runChosenParentsAnimations(parents) {
+async function runChosenParentsAnimations(parents, organisms) {
 
     // set subject for paintbrush
     paintbrush.subject = parents;
@@ -1938,7 +1938,7 @@ async function runChosenParentsAnimations(parents) {
     // fade out all
     await paintbrush.fadeOut(Drawings.drawAllSelectedOrganismsText, .02);
     await paintbrush.fadeIn(Drawings.drawBothParentTypesNatural, .02);
-    await paintbrush.fadeOut(Drawings.drawOrganisms, .02);
+    await paintbrush.fadeOut(Drawings.drawOrganisms, .02, organisms);
     await sleep(1000);
 
     // done with parents
@@ -1949,11 +1949,11 @@ async function runChosenParentsAnimations(parents) {
     })
 }
 
-async function runSelectionAnimations(closest_organism, parents) {
+async function runSelectionAnimations(closest_organism, parents, organisms) {
     console.log("Called runSelectionAnimations()");
     // maybe model other phases after this one
     await runClosestOrganismAnimations(closest_organism); // finished
-    await runChosenParentsAnimations(parents);
+    await runChosenParentsAnimations(parents, organisms);
     
     // make own function
     if (simGlobals.sim_type === 'boundary') {
@@ -2416,18 +2416,16 @@ async function runGeneration(new_generation) {
         console.log(`Average Fitness: ${simGlobals.average_fitness}`);
     }
 
-    // [x] check when organisms array integrated up to here
-
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     if (simGlobals.dialogue) {
         await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseEntryText, .02);
     }
 
     // this phase includes: beginSelectionProcess(), selectParentsForReproduction()
-    const potential_parents = await beginSelectionProcess(); // maybe don't await here
+    let potential_parents = await beginSelectionProcess(organisms); // maybe don't await here
 
-    var potential_mothers = potential_parents['potential_mothers'];
-    var potential_fathers = potential_parents['potential_fathers'];
+    let potential_mothers = potential_parents['potential_mothers'];
+    let potential_fathers = potential_parents['potential_fathers'];
 
     // we shouldn't enter the selection phase if there aren't enough organisms to reproduce
     // this could happen if a population produced all males, then potential_mothers would never get filled, and program fails
@@ -2448,20 +2446,24 @@ async function runGeneration(new_generation) {
         stopSimulation();
     }
 
-    var parents = selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length);
+    let parents = selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length);
     
     if (simGlobals.dialogue) {
-        await runSelectionAnimations(closest_organism, parents);
+        await runSelectionAnimations(closest_organism, parents, organisms);
 
         await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseExitText, .01);
     }
     else {
-        await paintbrush.fadeOut(Drawings.drawOrganisms, .02);
+        // testing passing organisms as content
+        console.log(organisms);
+        await paintbrush.fadeOut(Drawings.drawOrganisms, .02, organisms);
 
         if (simGlobals.sim_type === 'boundary') {
             await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .02);            
         }
     }
+
+    // *** [x] check when organisms array integrated up to here ***
 
     // this function handles crossover, mutation and reproduction
     // this function pushes new gen organisms to offspring_organisms[]
