@@ -113,9 +113,9 @@ simGlobals.average_fitness = 0.00; // [x]
 simGlobals.total_fitness = 0.00; // []
 
 // containers holding organisms and next-generation organisms
-simGlobals.organisms = []; // [x]
+// simGlobals.organisms = []; FACTORED OUT OF GLOBAL
 simGlobals.deceased_organisms = []; // [x] make not global
-simGlobals.offspring_organisms = []; // []
+// simGlobals.offspring_organisms = []; FACTORED OUT OF GLOBAL
 
 // canvas & drawing context
 // reconsider how these are used
@@ -2075,21 +2075,29 @@ function reproduce(crossover_genes) {
     offspring.genes = crossover_genes;
 
     // push offspring to new population
-    simGlobals.offspring_organisms.push(offspring);
+    // simGlobals.offspring_organisms.push(offspring);
+    return offspring;
 }
 
 function reproduceNewGeneration(parents) {
+    // holds our new generation of organisms
+    let offspring_organisms = [];
+
     for (let i = 0; i < parents.length; i++) {
         let offspring_count = determineOffspringCount();
 
         for (let j = 0; j < offspring_count; j++) {
             let crossover_genes = crossover(parents[i]); // returns dict
-            reproduce(crossover_genes);
+            let offspring = reproduce(crossover_genes);
+            offspring_organisms.push(offspring);
         }
     }
     // set offspring_organisms as next generation of organisms
-    simGlobals.organisms = simGlobals.offspring_organisms;
-    simGlobals.offspring_organisms = [];
+    // simGlobals.organisms = simGlobals.offspring_organisms;
+    // simGlobals.offspring_organisms = [];
+
+    // let's return organisms / offspring_organisms
+    return offspring_organisms;
 }
 
 // ====================
@@ -2128,11 +2136,11 @@ async function handleSuccessfulSimDecision() {
     }
 }
 
-async function runNewGenAnimations() {
+async function runNewGenAnimations(offspring_organisms) {
     await paintbrush.fadeToNewColor(Drawings.drawCreateNewGenPhaseEntryText, .02);
-    await paintbrush.fadeIn(Drawings.drawGenerationSummaryText, .025);
+    await paintbrush.fadeIn(Drawings.drawGenerationSummaryText, .025, offspring_organisms);
     await sleep(2000);
-    await paintbrush.fadeOut(Drawings.drawGenerationSummaryText, .025);
+    await paintbrush.fadeOut(Drawings.drawGenerationSummaryText, .025, offspring_organisms);
     await paintbrush.fadeToNewColor(Drawings.drawCreateNewGenPhaseExitText, .02);
 }
 
@@ -2318,7 +2326,8 @@ async function runGeneration(new_generation) {
             await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .02);
         }
         else {
-            Drawings.drawStats();
+            // untested
+            Drawings.drawStatsStatic(ctx2);
         }
     }
 
@@ -2351,14 +2360,7 @@ async function runGeneration(new_generation) {
     if (simGlobals.dialogue) {
         await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseExitText, .02);
 
-        // ** placeholder to test **
-        // ignore this while integrating organisms array
-        let content = {};
-        content.generation_count = 0;
-        content.total_organisms = 777;
-        content.average_fitness = 7.77;
-
-        await paintbrush.fadeOut(Drawings.drawStats, .015, content); // put here to fade out stats before average fitness updated
+        await paintbrush.fadeOut(Drawings.drawStats, .015); // put here to fade out stats before average fitness updated
         await sleep(1000);
     }
 
@@ -2454,7 +2456,6 @@ async function runGeneration(new_generation) {
         await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseExitText, .01);
     }
     else {
-        // testing passing organisms as content
         console.log(organisms);
         await paintbrush.fadeOut(Drawings.drawOrganisms, .02, organisms);
 
@@ -2463,26 +2464,33 @@ async function runGeneration(new_generation) {
         }
     }
 
-    // *** [x] check when organisms array integrated up to here ***
+    // starting here ===
 
     // this function handles crossover, mutation and reproduction
     // this function pushes new gen organisms to offspring_organisms[]
-    reproduceNewGeneration(parents);
+    // get next generation of organisms
+    let offspring_organisms = reproduceNewGeneration(parents);
+
+    // we are done with organisms
+    organisms = [];
 
     // PHASE: CROSSOVER / MUTATE / REPRODUCE
-    // [] still need to fadeout boundary before these animations
     if (simGlobals.dialogue) {
 
         await runCrossoverAnimations();
 
         await runMutationAnimations();
 
-        await runNewGenAnimations();
+        await runNewGenAnimations(offspring_organisms);
     }
+
+    // anticipating needing more than just organisms for next-gen
+    new_generation = {};
+    new_generation.new_population = offspring_organisms;
 
     return new Promise(resolve => {
         simGlobals.generation_count++;
-        resolve(simGlobals.generation_count);
+        resolve(new_generation);
     })
 }
 
