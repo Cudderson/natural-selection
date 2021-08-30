@@ -53,8 +53,8 @@ import * as Drawings from "./modules/drawings.js";
 // We will simply have our paintbrush global, and assign the paintbrush's subject as the organisms array before drawing! (yesyesyes)
 // edge-case: some drawings don't use paintbrush to be drawn, but are just called directly.
 //      - to combat this, we will have 2 options:
-//          1. create basic Paintbrush draw()/paint() method that can use object's subject attribute to execute drawing function
-//          2. add 'content' param to drawings that don't use paintbrush that can be passed necessary vars
+//          1. [] create basic Paintbrush draw()/paint() method that can use object's subject attribute to execute drawing function
+//          2. [x] add 'content' param to drawings that don't use paintbrush that can be passed necessary vars
 
 // does it make more sense to assign paintbrush 'subject', or to pass 'content' to the drawing functions?
 // *** - It just seems less clean to pass extra params, so we should use Paintbrush.subject ***
@@ -62,8 +62,7 @@ import * as Drawings from "./modules/drawings.js";
 
 // ===== Executing =====
 // Goal: factor organisms array out of global object, and instead pass it to each runGen() call
-
-// [] save organisms from runSimulation > createOrganisms() to global 'initial_population'
+// - We will be using the content parameter to pass necessary content to drawing functions, rather than paintbrush.subject
 
 
 window.simGlobals = {};
@@ -181,10 +180,10 @@ class Organism {
 
     // remove personal ctx declarations from class
     move() {
-        this.ctx.fillStyle = 'rgba(148, 0, 211, 1)'; // darkviolet
-        this.ctx.beginPath();
-        this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2, false);
-        this.ctx.fill();
+        ctx.fillStyle = 'rgba(148, 0, 211, 1)'; // darkviolet
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2, false);
+        ctx.fill();
     }
 
     calcDistanceToGoal() {
@@ -1473,6 +1472,8 @@ function createOrganisms () {
     let spawn_x = simGlobals.INITIAL_X;
     let spawn_y = simGlobals.INITIAL_Y;
 
+    let initial_population = [];
+
     // update spawn point if boundary simulation
     if (simGlobals.sim_type === 'boundary') {
         spawn_x = simGlobals.INITIAL_X_BOUND;
@@ -1493,11 +1494,11 @@ function createOrganisms () {
         let organism = new Organism(gender, spawn_x, spawn_y, ctx);
 
         organism.setRandomGenes();
-        simGlobals.organisms.push(organism);
+        initial_population.push(organism);
     }
     console.log(`FEMALES CREATED: ${female_count}, MALES CREATED: ${male_count}`);
 
-    // consider not making organisms global, but pass it to runGeneration()/runSimulation() from here
+    return initial_population;
 }
 
 // ======================
@@ -1507,7 +1508,7 @@ function createOrganisms () {
 // updateAndMove() functions will not be converted to module (complex animations)
 // updateAndMove() not converted var >> let yet
 
-function updateAndMoveOrganismsBounds() {
+function updateAndMoveOrganismsBounds(organisms) {
     return new Promise(resolve => {
 
         var canvas2_data = ctx2.getImageData(0, 0, canvas.width, canvas.height);
@@ -1520,7 +1521,7 @@ function updateAndMoveOrganismsBounds() {
         function animateOrganisms() {
 
             if (!finished) {
-                if (total_moves >= simGlobals.GENE_COUNT * simGlobals.organisms.length) {
+                if (total_moves >= simGlobals.GENE_COUNT * organisms.length) {
                     finished = true;
                 }
                 else {
@@ -1529,10 +1530,10 @@ function updateAndMoveOrganismsBounds() {
                     // (FOR TESTING) draw checkpoints
                     // drawCheckpoints();
 
-                    for (let i = 0; i < simGlobals.organisms.length; i++) {
-                        if (simGlobals.organisms[i].is_alive) {
+                    for (let i = 0; i < organisms.length; i++) {
+                        if (organisms[i].is_alive) {
 
-                            position_rgba = getPixelXY(canvas2_data, simGlobals.organisms[i].x, simGlobals.organisms[i].y);
+                            position_rgba = getPixelXY(canvas2_data, organisms[i].x, organisms[i].y);
 
                             if (position_rgba[0] === 155 && position_rgba[1] === 245) { // consider only checking one value for performance
 
@@ -1542,40 +1543,37 @@ function updateAndMoveOrganismsBounds() {
                                     // instead of update and move, move organism to inverse of last movement, update index
 
                                     // get inverse of last gene
-                                    let inverse_x_gene = (simGlobals.organisms[i].genes[simGlobals.organisms[i].index - 1][0]) * -1;
-                                    let inverse_y_gene = (simGlobals.organisms[i].genes[simGlobals.organisms[i].index - 1][1]) * -1;
+                                    let inverse_x_gene = (organisms[i].genes[organisms[i].index - 1][0]) * -1;
+                                    let inverse_y_gene = (organisms[i].genes[organisms[i].index - 1][1]) * -1;
 
                                     // update
-                                    simGlobals.organisms[i].x += inverse_x_gene;
-                                    simGlobals.organisms[i].y += inverse_y_gene;
+                                    organisms[i].x += inverse_x_gene;
+                                    organisms[i].y += inverse_y_gene;
 
                                     // increase index
-                                    simGlobals.organisms[i].index++;
+                                    organisms[i].index++;
 
                                     // move
-                                    simGlobals.organisms[i].move();
+                                    organisms[i].move();
                                 }
                                 else {
-                                    simGlobals.organisms[i].is_alive = false;
+                                    organisms[i].is_alive = false;
                                     ctx.fillStyle = 'red';
                                     ctx.beginPath();
-                                    ctx.arc(
-                                        simGlobals.organisms[i].x, simGlobals.organisms[i].y,
-                                        simGlobals.organisms[i].radius, 0, Math.PI*2, false
-                                    );
+                                    ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
                                     ctx.fill();
                                 }
                             }
                             else {
-                                simGlobals.organisms[i].update();
-                                simGlobals.organisms[i].move();
+                                organisms[i].update();
+                                organisms[i].move();
                             }
                         }
                         else {
                             // draw deceased organism
                             ctx.fillStyle = 'red';
                             ctx.beginPath();
-                            ctx.arc(simGlobals.organisms[i].x, simGlobals.organisms[i].y, simGlobals.organisms[i].radius, 0, Math.PI*2, false);
+                            ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
                             ctx.fill();
                         }
                         total_moves++;
@@ -1597,7 +1595,7 @@ function updateAndMoveOrganismsBounds() {
     })
 }
 
-function updateAndMoveOrganisms(goal) {
+function updateAndMoveOrganisms(goal, organisms) {
     return new Promise(resolve => {
         let total_moves = 0;
         let finished = false;
@@ -1612,19 +1610,19 @@ function updateAndMoveOrganisms(goal) {
             if (!finished) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                for (var i = 0; i < simGlobals.organisms.length; i++) {
-                    if (simGlobals.organisms[i].reached_goal == false) {
-                        simGlobals.organisms[i].update();
-                        simGlobals.organisms[i].move();
-                        hasReachedGoal(simGlobals.organisms[i], goal);
+                for (let i = 0; i < organisms.length; i++) {
+                    if (organisms[i].reached_goal == false) {
+                        organisms[i].update();
+                        organisms[i].move();
+                        hasReachedGoal(organisms[i], goal);
                     }
                     else {
-                        Drawings.updateSuccessfulOrganism(simGlobals.organisms[i]);
+                        Drawings.updateSuccessfulOrganism(organisms[i]);
                         success_flag = true;
                     }
                     total_moves++;
                 }
-                if (total_moves == (simGlobals.organisms.length * simGlobals.GENE_COUNT)) {
+                if (total_moves == (organisms.length * simGlobals.GENE_COUNT)) {
                     finished = true;
                 }
 
@@ -1653,14 +1651,14 @@ function hasReachedGoal(organism, goal) {
 }
 
 // not converted var >> let yet
-async function runEvaluationAnimation() {
+async function runEvaluationAnimation(organisms) {
 
     // need to draw goal at location depending on sim type
     if (simGlobals.sim_type === 'classic') {
         var goal = new Goal(simGlobals.GOAL_X_POS, simGlobals.GOAL_Y_POS, 20, ctx);
-        var success_flag = await updateAndMoveOrganisms(goal); // ideally don't pass in goal here
+        var success_flag = await updateAndMoveOrganisms(goal, organisms); // ideally don't pass in goal here
     }
-    else {
+    else if (simGlobals.sim_type === 'boundary') {
         // *** this is super messy ***
 
         if (simGlobals.dialogue) {
@@ -1690,11 +1688,8 @@ async function runEvaluationAnimation() {
         Drawings.drawStatsStatic(ctx2);
 
         // var goal = new Goal(GOAL_X_POS_BOUNDS, GOAL_Y_POS_BOUNDS, 20, ctx); not sure if needed (goal saved in boundary drawing)
-        var success_flag = await updateAndMoveOrganismsBounds();
+        var success_flag = await updateAndMoveOrganismsBounds(organisms);
     }
-
-    // updateAndMoveOrganisms() is the classic version of boundary sim's updateAndMoveOrganismsBounds()
-    // we can combine them (standalone for now)
 
     return new Promise((resolve, reject) => {
         if (success_flag) {
@@ -2303,7 +2298,13 @@ async function playTitleScreenAnimation() {
 
 // maybe async ruins this functions performance?
 // not converted var >> let yet (both runGeneration() and runSimulation())
-async function runGeneration() {
+async function runGeneration(new_generation) {
+
+    console.log("runGeneration() called");
+    console.log(new_generation.new_population);
+
+    // start with let, upgrade to var if needed
+    let organisms = new_generation.new_population;
 
     if (simGlobals.generation_count != 0) {
         if (simGlobals.dialogue) {
@@ -2320,11 +2321,11 @@ async function runGeneration() {
 
     if (simGlobals.simulation_succeeded) {
 
-        await runEvaluationAnimation();
+        await runEvaluationAnimation(organisms);
     }
     else {
         // check if simulation succeeded 
-        let success_flag = await runEvaluationAnimation();
+        let success_flag = await runEvaluationAnimation(organisms);
         console.log(`Success Flag: ${success_flag}`);
 
         // here, if success flag is true, we can await the success animation
@@ -2341,6 +2342,8 @@ async function runGeneration() {
             handleSuccessfulSimDecision();            
         }
     }
+
+    // [x] check when integrated up to here (organisms)
 
     if (simGlobals.dialogue) {
         await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseExitText, .02);
@@ -2500,12 +2503,16 @@ async function runSimulation () {
     await runPreSimAnimations();
 
     /// PHASE: CREATE NEW GENERATION/POPULATION
-    createOrganisms();
-    console.log("Amount of organisms created = " + simGlobals.organisms.length);
+    let initial_population = createOrganisms();
+    console.log("Amount of organisms created = " + initial_population.length);
+
+    // could save to global, but I'll try it passing it the same way future gens will first
+    let new_generation = {};
+    new_generation.new_population = initial_population;
 
     do {
-        const result = await runGeneration();
-        console.log(result);
+        new_generation = await runGeneration(new_generation);
+        // console.log(result);
     } while (simGlobals.generation_count < 1000);
 }
 
