@@ -86,21 +86,21 @@ function drawExplanationAndGoal(opacity) {
 }
 
 // may need to be updated for resilience
-function drawStats(opacity) {
+function drawStats(opacity, stats) {
     ctx2.clearRect(700, 510, 350, 120);
 
     ctx2.fillStyle = `rgba(155, 245, 0, ${opacity})`;
     ctx2.font = "22px arial";
     ctx2.fillText('Generation:', 740, 535);
-    ctx2.fillText(simGlobals.generation_count.toString(), 940, 535);
+    ctx2.fillText(simGlobals.generation_count.toString(), 940, 535); // keeping global until decision
     ctx2.fillText('Population Size:', 740, 560);
-    ctx2.fillText(simGlobals.TOTAL_ORGANISMS.toString(), 940, 560);
+    ctx2.fillText(stats.organism_count.toString(), 940, 560);
     ctx2.fillText('Average Fitness:', 740, 585);
-    ctx2.fillText(simGlobals.average_fitness.toString(), 940, 585);
+    ctx2.fillText(stats.average_fitness.toString(), 940, 585);
 }
 
 // for preserving drawing on canvas during animations
-function drawStatsStatic(context) {
+function drawStatsStatic(context, stats) {
     context.clearRect(700, 510, 350, 120);
 
     context.fillStyle = `rgba(155, 245, 0, 1)`;
@@ -108,9 +108,9 @@ function drawStatsStatic(context) {
     context.fillText('Generation:', 740, 535);
     context.fillText(simGlobals.generation_count.toString(), 940, 535);
     context.fillText('Population Size:', 740, 560);
-    context.fillText(simGlobals.TOTAL_ORGANISMS.toString(), 940, 560);
+    context.fillText(stats.organism_count.toString(), 940, 560);
     context.fillText('Average Fitness:', 740, 585);
-    context.fillText(simGlobals.average_fitness.toString(), 940, 585);
+    context.fillText(stats.average_fitness.toString(), 940, 585);
 }
 
 // phase module

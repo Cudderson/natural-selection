@@ -4,67 +4,6 @@ import * as Drawings from "./modules/drawings.js";
 
 // ===== vars =====
 
-// ***** Begin Deconstructing simGlobals() *****
-
-// - We want to have as few global variables as possible.
-
-// - We will identify where each variable is needed, and implement it locally there
-// -- one problem: drawings in module use some of these variables. This is a problem when we call paintbrush.fadeIn/Out(), where we cannot yet
-//                 pass dynamic context to draw. The obvious solution seems to be to add functionality for paintbrush's fade functions to 
-//                 accept additional drawing context. At first, I wanted to create a global object that held variables to draw, but this solution sounds better.
-//                     - This way, variables will be more locally-scoped and trustworthy.
-
-// ** Since almost everything is called from runSimulation/runGeneration, maybe passing the inital stats/settings variables to those functions would be enough
-//    to keep track of them?
-
-// ** Idea: maybe we package the settings vars globally, (or pass them to functions) and then reference them within runSim()/Gen() as more-local vars?
-
-// ** Also worth noting that we might be able to grab the user-inputted settings from test.html at any time.
-
-// [x] Give paintbrush ability to accept additional drawing context (maybe a dictionary?)
-// [x] prove that content works with Drawings.drawSimulationSettings()
-// - Let's test if the settings in test.html are always available
-// [x] Test html settings are always available by grabbing them from html vs simGlobals in drawSimulationSettings()
-// --committed--
-// With sim settings available from html, we should be able to reference them at runSim()/runGen() as local variables
-// [x] finish pre-sim animations with new 'content' ability
-
-// ===== STARTING HERE =====
-
-// rough flow:
-// 1. before sim, set validated settings to global simSettings object
-//      - Perhaps save additional globals such as FPS, sim_type, INITIAL_POS, etc.
-// 2. if boundary, create Boundary object and store checkpoints, scale, etc
-// 3. runGen()
-// 4. when gen over, a resolve() happens, then runGen() is called again.
-//    - What does the next runGeneration() call need?? (besides global settings)
-//          - We will see.
-
-// One thing is for sure: the next runGen() call needs the new population of organisms reproduced at the end of generation.
-// Maybe runGen() could resolve with new organisms array, (average_fitness?) and possibly gen_count (if needed, could be global too)
-// As long as we have our organisms array and original settings, we should be able to runGen() fully.
-
-// settings can become 'const' after set!
-// --settings module?
-
-// ***** I forgot you can assign a subject to Paintbrush. *****
-
-// We don't need to make organisms global.
-// We will simply have our paintbrush global, and assign the paintbrush's subject as the organisms array before drawing! (yesyesyes)
-// edge-case: some drawings don't use paintbrush to be drawn, but are just called directly.
-//      - to combat this, we will have 2 options:
-//          1. [] create basic Paintbrush draw()/paint() method that can use object's subject attribute to execute drawing function
-//          2. [x] add 'content' param to drawings that don't use paintbrush that can be passed necessary vars
-
-// does it make more sense to assign paintbrush 'subject', or to pass 'content' to the drawing functions?
-// *** - It just seems less clean to pass extra params, so we should use Paintbrush.subject ***
-// It may not be needed, and sometimes it might makes sense to just pass the array. We'll see.
-
-// ===== Executing =====
-// Goal: factor organisms array out of global object, and instead pass it to each runGen() call
-// - We will be using the content parameter to pass necessary content to drawing functions, rather than paintbrush.subject
-
-
 window.simGlobals = {};
 
 // ** NOTE: We really only need to globalize vars that will be used in our modules. 
@@ -79,7 +18,7 @@ simGlobals.GOAL_X_POS = 500; // []
 simGlobals.GOAL_Y_POS = 50; // []
 
 // organism global default settings
-simGlobals.TOTAL_ORGANISMS = 100; // [x] remember to update this var when new gen reproduced
+simGlobals.TOTAL_ORGANISMS = 100; // [x]
 simGlobals.GENE_COUNT = 250; // [x]
 simGlobals.MUTATION_RATE = 0.03; // [x]
 simGlobals.MIN_GENE = -5; // [x]
@@ -107,15 +46,8 @@ simGlobals.simulation_succeeded = false; // []
 // track total generations
 simGlobals.generation_count = 0; // [x]
 
-// generation statistics
-simGlobals.average_fitness = 0.00; // [x]
-// does this really need to be global?
-simGlobals.total_fitness = 0.00; // []
-
 // containers holding organisms and next-generation organisms
-// simGlobals.organisms = []; FACTORED OUT OF GLOBAL
 simGlobals.deceased_organisms = []; // [x] make not global
-// simGlobals.offspring_organisms = []; FACTORED OUT OF GLOBAL
 
 // canvas & drawing context
 // reconsider how these are used
@@ -228,28 +160,11 @@ class Goal {
         this.ctx = ctx;
     }
 
-    // could convert final 2 class methods to new class Paintbrush ex. **
+    // could convert final class method to drawings.js, we don't need a Goal class lol **
     drawGoal() {
         console.log("should only be called once (drawGoal())");
         ctx2.fillStyle = 'rgba(155, 245, 0, 1)';
         ctx2.fillRect(this.x, this.y, this.size, this.size);
-    }
-
-    // convert to drawings.js? why is the goal performing this?
-    // this function is not good
-    showStatistics() {
-        console.log("this should only be called once (showStatistics())");
-        simGlobals.average_fitness = Number(simGlobals.average_fitness).toFixed(2);
-        let population_size = simGlobals.organisms.length;
-
-        ctx2.fillStyle = 'rgba(155, 245, 0, 1)';
-        ctx2.font = "22px arial";
-        ctx2.fillText('Generation:', 740, 535);
-        ctx2.fillText(simGlobals.generation_count.toString(), 940, 535);
-        ctx2.fillText('Population Size:', 740, 560);
-        ctx2.fillText(population_size.toString(), 940, 560);
-        ctx2.fillText('Average Fitness:', 740, 585);
-        ctx2.fillText(simGlobals.average_fitness.toString(), 940, 585);
     }
 }
 
@@ -1273,18 +1188,19 @@ async function runPreSimAnimations() {
 
     // (only with dialogue on!)
 
-    let pre_sim_content = {};
+    let pre_sim_stats = {};
 
-    pre_sim_content.total_organisms = document.getElementById("total-organisms").value;
-    pre_sim_content.gene_count = document.getElementById("gene-count").value;
-    pre_sim_content.movement_speed = document.getElementById("move-speed").value;
-    pre_sim_content.mutation_rate = document.getElementById("mutation-rate").value;
-    pre_sim_content.dialogue = document.getElementById("dialogue-checkbox").checked;
+    // these will probably be global, won't need to grab like this
+    // pre_sim_stats.total_organisms = document.getElementById("total-organisms").value;
+    // pre_sim_stats.gene_count = document.getElementById("gene-count").value;
+    // pre_sim_stats.movement_speed = document.getElementById("move-speed").value;
+    // pre_sim_stats.mutation_rate = document.getElementById("mutation-rate").value;
+    // pre_sim_stats.dialogue = document.getElementById("dialogue-checkbox").checked;
 
-    await paintbrush.fadeIn(Drawings.drawSimulationSettings, .01, pre_sim_content);
+    await paintbrush.fadeIn(Drawings.drawSimulationSettings, .01, pre_sim_stats);
 
     await sleep(2000);
-    await paintbrush.fadeOut(Drawings.drawSimulationSettings, .02, pre_sim_content);
+    await paintbrush.fadeOut(Drawings.drawSimulationSettings, .02, pre_sim_stats);
 
     await paintbrush.fadeIn(Drawings.drawSimulationIntro, .01);
     await sleep(2000);
@@ -1298,10 +1214,11 @@ async function runPreSimAnimations() {
     await sleep(1000);
 
     // add content for drawStats()
-    pre_sim_content.generation_count = 0;
-    pre_sim_content.average_fitness = '0.00';
+    pre_sim_stats.generation_count = 0;
+    pre_sim_stats.average_fitness = '0.00';
+    pre_sim_stats.organism_count = document.getElementById("total-organisms").value;
 
-    await paintbrush.fadeIn(Drawings.drawStats, .02, pre_sim_content);
+    await paintbrush.fadeIn(Drawings.drawStats, .02, pre_sim_stats);
     await sleep(500);
 
     if (simGlobals.dialogue) {
@@ -1313,7 +1230,7 @@ async function runPreSimAnimations() {
     return new Promise(resolve => {
         // clear content to ensure no variable cross-up
         console.log("making null");
-        pre_sim_content = null;
+        pre_sim_stats = null;
         resolve("pre-sim animations complete!");
     })
 }
@@ -1652,7 +1569,7 @@ function hasReachedGoal(organism, goal) {
 }
 
 // not converted var >> let yet
-async function runEvaluationAnimation(organisms) {
+async function runEvaluationAnimation(organisms, stats) {
 
     // need to draw goal at location depending on sim type
     if (simGlobals.sim_type === 'classic') {
@@ -1669,7 +1586,7 @@ async function runEvaluationAnimation(organisms) {
         }
 
         ctx2.clearRect(700, 510, 350, 120);
-        Drawings.drawStatsStatic(ctx);
+        Drawings.drawStatsStatic(ctx, stats);
 
         if (simGlobals.generation_count === 0 && !simGlobals.dialogue) {
             await paintbrush.fadeIn(Drawings.drawBoundary, .01);
@@ -1686,7 +1603,7 @@ async function runEvaluationAnimation(organisms) {
         }
 
         ctx.clearRect(700, 510, 350, 120);
-        Drawings.drawStatsStatic(ctx2);
+        Drawings.drawStatsStatic(ctx2, stats);
 
         // var goal = new Goal(GOAL_X_POS_BOUNDS, GOAL_Y_POS_BOUNDS, 20, ctx); not sure if needed (goal saved in boundary drawing)
         var success_flag = await updateAndMoveOrganismsBounds(organisms);
@@ -1750,16 +1667,15 @@ function calcPopulationFitness (organisms) {
     // does this really need to be a promise?
     return new Promise(resolve => {
         // reset total_fitness before calculation
-        simGlobals.total_fitness = 0;
+        let total_fitness = 0.00;
 
         for (let i = 0; i < organisms.length; i++) {
             organisms[i].calcFitness();
-            simGlobals.total_fitness += organisms[i].fitness;
+            total_fitness += organisms[i].fitness;
         }
 
-        // redundant, fix
-        simGlobals.average_fitness = simGlobals.total_fitness / organisms.length;
-        resolve(simGlobals.average_fitness);
+        let average_fitness = total_fitness / organisms.length;
+        resolve(average_fitness);
     })
 }
 
@@ -1768,9 +1684,7 @@ function calcPopulationFitnessBounds(remaining_distance, organisms) {
     let scale = simGlobals.scale_statistics['scale'];
 
     // calc/set distance_to_goal && fitness
-    simGlobals.total_fitness = 0.00;
-
-    console.log(organisms);
+    let total_fitness = 0.00;
 
     for (let i = 0; i < organisms.length; i++) {
 
@@ -1780,26 +1694,26 @@ function calcPopulationFitnessBounds(remaining_distance, organisms) {
         // this also sets each organism's fitness attribute
         organisms[i].calcFitnessBounds(scale);
 
-        simGlobals.total_fitness += organisms[i].fitness;
+        total_fitness += organisms[i].fitness;
     }
 
     // set average fitness
-    simGlobals.average_fitness = simGlobals.total_fitness / organisms.length;
+    let average_fitness = total_fitness / organisms.length;
 
-    console.log(simGlobals.average_fitness, simGlobals.total_fitness, organisms.length);
-    return;
+    console.log(average_fitness, total_fitness, organisms.length);
+
+    return average_fitness;
 }
 
 // not converted var >> let yet
 async function evaluatePopulation(organisms) {
-    // to do
-    let shortest_distance_resolution = await getShortestDistanceToGoal(organisms);
-    simGlobals.average_fitness = await calcPopulationFitness(organisms);
+    let closest_organism = await getShortestDistanceToGoal(organisms);
+    let average_fitness = await calcPopulationFitness(organisms);
 
     // also redundant, fix
-    var population_resolution = {
-        'closest_organism': shortest_distance_resolution,
-        'average_fitness': simGlobals.average_fitness
+    let population_resolution = {
+        'closest_organism': closest_organism,
+        'average_fitness': average_fitness
     }
 
     return new Promise(resolve => {
@@ -2296,6 +2210,7 @@ async function playTitleScreenAnimation() {
             // call here!
             selectSimulationType();
         }
+        // not sure if this is called from here anymore?
         else if (status === "TEST BOUNDARY MODE") {
             console.log("Entering Boundary Mode");
             enterBoundaryCreationMode();
@@ -2319,15 +2234,21 @@ async function runGeneration(new_generation) {
     // start with let, upgrade to var if needed
     let organisms = new_generation.new_population;
 
+    // for drawStats()
+    let stats = {
+        'organism_count': organisms.length,
+        'average_fitness': new_generation.average_fitness,
+    }
+
     if (simGlobals.generation_count != 0) {
         if (simGlobals.dialogue) {
-            await paintbrush.fadeIn(Drawings.drawStats, .02);
+            await paintbrush.fadeIn(Drawings.drawStats, .02, stats);
             await sleep(500);
             await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .02);
         }
         else {
             // untested
-            Drawings.drawStatsStatic(ctx2);
+            Drawings.drawStatsStatic(ctx2, stats);
         }
     }
 
@@ -2335,11 +2256,11 @@ async function runGeneration(new_generation) {
 
     if (simGlobals.simulation_succeeded) {
 
-        await runEvaluationAnimation(organisms);
+        await runEvaluationAnimation(organisms, stats);
     }
     else {
         // check if simulation succeeded 
-        let success_flag = await runEvaluationAnimation(organisms);
+        let success_flag = await runEvaluationAnimation(organisms, stats);
         console.log(`Success Flag: ${success_flag}`);
 
         // here, if success flag is true, we can await the success animation
@@ -2360,18 +2281,24 @@ async function runGeneration(new_generation) {
     if (simGlobals.dialogue) {
         await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseExitText, .02);
 
-        await paintbrush.fadeOut(Drawings.drawStats, .015); // put here to fade out stats before average fitness updated
+        await paintbrush.fadeOut(Drawings.drawStats, .015, stats); // put here to fade out stats before average fitness updated
         await sleep(1000);
     }
 
     // store length of organisms array before deceased organisms filtered out for reproduction (boundary sims)
-    let next_gen_target_length = organisms.length;
+    // ***
+    // ***! I don't think we ever add deceased organisms to this total for boundary sims?!****
+    // *** ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    let next_gen_target_length = organisms.length; 
     let closest_organism;
+
+    // factoring out of global
+    let average_fitness;
 
     if (simGlobals.sim_type === 'classic') {
         let population_resolution = await evaluatePopulation(organisms); // maybe don't await here
         closest_organism = population_resolution['closest_organism'];
-        simGlobals.average_fitness = population_resolution['average_fitness'];
+        average_fitness = population_resolution['average_fitness'];
     }
     else if (simGlobals.sim_type === 'boundary') {
 
@@ -2412,11 +2339,13 @@ async function runGeneration(new_generation) {
         console.log(remaining_distance);
 
         // this function will set each organism's distance_to_goal and fitness attributes
-        // it also updates simGlobals.average_fitness
-        calcPopulationFitnessBounds(remaining_distance, organisms);
+        // it also updates average_fitness
+        average_fitness = calcPopulationFitnessBounds(remaining_distance, organisms);
 
-        console.log(`Average Fitness: ${simGlobals.average_fitness}`);
+        console.log(`Average Fitness: ${average_fitness}`);
     }
+
+    // average_fitness should be integrated up to here. I think the only think left to do is assign it to new_generation for the next-gen stats
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     if (simGlobals.dialogue) {
@@ -2487,6 +2416,7 @@ async function runGeneration(new_generation) {
     // anticipating needing more than just organisms for next-gen
     new_generation = {};
     new_generation.new_population = offspring_organisms;
+    new_generation.average_fitness = average_fitness; // this actually represents the previous generation's average fitness, keep in mind.
 
     return new Promise(resolve => {
         simGlobals.generation_count++;
