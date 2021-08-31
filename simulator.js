@@ -53,9 +53,6 @@ window.ctx = canvas.getContext("2d"); // [x]
 window.canvas2 = document.getElementById("background-canvas"); // [x]
 window.ctx2 = canvas2.getContext("2d"); // [x]
 
-// ********** name conflicts with canvas_data in updateAndMoveOrganismsBounds, need to fix
-simGlobals.canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height); // []
-
 // frame rate
 simGlobals.FPS = 30; // [x]
 
@@ -271,7 +268,7 @@ class Boundary {
             // update canvas data (not sure if I need to do this)
             canvas = document.getElementById("main-canvas");
             ctx = canvas.getContext("2d");
-            simGlobals.canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            // simGlobals.canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
             return true;
         }
@@ -960,8 +957,10 @@ function enterBoundaryCreationMode() {
         // draw different line depending on boundary_step
         if (boundary_step === 'full-boundary') {
 
+            let canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height)
+
             // get pixel color before drawing, reject if green
-            let pixel_data = getPixelXY(simGlobals.canvas_data_bad_practice, simGlobals.coordinates['x'], simGlobals.coordinates['y']);
+            let pixel_data = getPixelXY(canvas_data, simGlobals.coordinates['x'], simGlobals.coordinates['y']);
 
             if (pixel_data[0] == 155) {
                 // green touched, reject
