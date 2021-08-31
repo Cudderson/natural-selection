@@ -861,6 +861,12 @@ function prepareToRunSimulation() {
     ctx.fillText("Press 'Run Simulation'", 350, 400);
 }
 
+function drawGoal(goal) {
+    console.log("should only be called once (drawGoal())");
+    ctx2.fillStyle = 'rgba(155, 245, 0, 1)';
+    ctx2.fillRect(goal.x, goal.y, goal.size, goal.size);
+}
+
 export {
     drawSimulationSettings, drawSimulationIntro,
     drawFakeGoal, drawSimulationExplanation,
@@ -889,4 +895,5 @@ export {
     drawPhases, drawDeceasedOrganisms,
     drawBoundary, drawStaticSelectionPhaseText,
     drawStatsStatic, drawBoundaryValidationScreen,
+    drawGoal,
 }

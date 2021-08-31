@@ -143,20 +143,11 @@ class Organism {
     }
 }
 
-// doesn't need own ctx
 class Goal {
-    constructor(x, y, size, ctx) {
+    constructor(x, y, size) {
         this.x = x;
         this.y = y;
         this.size = size;
-        this.ctx = ctx;
-    }
-
-    // could convert final class method to drawings.js, we don't need a Goal class lol **
-    drawGoal() {
-        console.log("should only be called once (drawGoal())");
-        ctx2.fillStyle = 'rgba(155, 245, 0, 1)';
-        ctx2.fillRect(this.x, this.y, this.size, this.size);
     }
 }
 
@@ -1507,15 +1498,12 @@ function updateAndMoveOrganismsBounds(organisms) {
     })
 }
 
-function updateAndMoveOrganisms(goal, organisms) {
+function updateAndMoveOrganisms(organisms, goal) {
     return new Promise(resolve => {
         let total_moves = 0;
         let finished = false;
         let success_flag = false;
         let frame_id;
-
-        // [x] we should draw goal on canvas2 
-        goal.drawGoal();
 
         // why is this async?
         async function animateOrganisms() {
@@ -1567,8 +1555,10 @@ async function runEvaluationAnimation(organisms, stats) {
 
     // need to draw goal at location depending on sim type
     if (simGlobals.sim_type === 'classic') {
-        var goal = new Goal(simGlobals.GOAL_X_POS, simGlobals.GOAL_Y_POS, 20, ctx);
-        var success_flag = await updateAndMoveOrganisms(goal, organisms); // ideally don't pass in goal here
+        let goal = new Goal(simGlobals.GOAL_X_POS, simGlobals.GOAL_Y_POS, 20);
+        // draw goal on canvas2 (consider fade-in goal on dialogue sims?)
+        Drawings.drawGoal(goal);
+        var success_flag = await updateAndMoveOrganisms(organisms, goal); // still pass in goal for .hasReachedGoal()
     }
     else if (simGlobals.sim_type === 'boundary') {
         // *** this is super messy ***
