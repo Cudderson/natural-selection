@@ -651,9 +651,9 @@ function drawSuccessMessage(opacity) {
 
     ctx.font = '30px arial';
     ctx.fillStyle = 'black';
-    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
+    ctx.fillText(`Generations: ${simGlobals.generation_count}`, 420, 340);
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
+    ctx.fillText(`Generations: ${simGlobals.generation_count}`, 420, 340);
 
     ctx.font = '26px arial';
     ctx.fillStyle = 'black';

@@ -6,16 +6,15 @@ import * as Drawings from "./modules/drawings.js";
 
 window.simGlobals = {};
 
-// ** NOTE: We really only need to globalize vars that will be used in our modules. 
-// The vars used in this file should be fine and not globalized
+// *** Check box of variable that is okay to be in simSettings
 
-// *** Check box of variable when it is used by drawings.js
+// [x] factor simulation_succeeded out of simGlobals and into generation resolution package
 
 // starting coordinates for organisms and goal
-simGlobals.INITIAL_X = 500; // [] 
-simGlobals.INITIAL_Y = 500; // []
-simGlobals.GOAL_X_POS = 500; // []
-simGlobals.GOAL_Y_POS = 50; // []
+simGlobals.INITIAL_X = 500; // [x] 
+simGlobals.INITIAL_Y = 500; // [x]
+simGlobals.GOAL_X_POS = 500; // [x]
+simGlobals.GOAL_Y_POS = 50; // [x]
 
 // organism global default settings
 simGlobals.TOTAL_ORGANISMS = 100; // [x]
@@ -29,37 +28,36 @@ simGlobals.RESILIENCE = 1.00; // [x]
 simGlobals.dialogue = false; // [x]
 
 // boundary simulations start organisms/goal at different location
-simGlobals.INITIAL_X_BOUND = 50; // []
-simGlobals.INITIAL_Y_BOUND = 550; // []
-simGlobals.GOAL_X_POS_BOUNDS = 925; // []
-simGlobals.GOAL_Y_POS_BOUNDS = 50; // []
+simGlobals.INITIAL_X_BOUND = 50; // [x]
+simGlobals.INITIAL_Y_BOUND = 550; // [x]
+simGlobals.GOAL_X_POS_BOUNDS = 925; // [x]
+simGlobals.GOAL_Y_POS_BOUNDS = 50; // [x]
 
 // boundary globals
-simGlobals.custom_boundary; // [x] (one drawing: drawBoundary())
+simGlobals.custom_boundary; // [] (one drawing: drawBoundary())
 simGlobals.scale_statistics; // [] // this is/should be only computed once (boundary doesn't change)
 
 // flags
-simGlobals.sim_type; // []
-simGlobals.simulation_started = false; // []
-simGlobals.simulation_succeeded = false; // []
+simGlobals.sim_type; // [x]
+simGlobals.simulation_started = false; // [x]
 
 // track total generations
 simGlobals.generation_count = 0; // [x]
 
 // canvas & drawing context
 // reconsider how these are used
-window.canvas = document.getElementById("main-canvas");
-window.ctx = canvas.getContext("2d");
+window.canvas = document.getElementById("main-canvas"); // [x]
+window.ctx = canvas.getContext("2d"); // [x]
 
 // testing background canvas for better performance
-window.canvas2 = document.getElementById("background-canvas");
-window.ctx2 = canvas2.getContext("2d");
+window.canvas2 = document.getElementById("background-canvas"); // [x]
+window.ctx2 = canvas2.getContext("2d"); // [x]
 
 // ********** name conflicts with canvas_data in updateAndMoveOrganismsBounds, need to fix
 simGlobals.canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height); // []
 
 // frame rate
-simGlobals.FPS = 30; // []
+simGlobals.FPS = 30; // [x]
 
 // Stores the position of the cursor
 simGlobals.coordinates = {'x':0 , 'y':0}; // []
@@ -2237,6 +2235,10 @@ async function runGeneration(new_generation) {
         'average_fitness': new_generation.average_fitness,
     }
 
+    // intentional var to increase access to deeper scope
+    // once turned on, this is never turned off
+    var simulation_succeeded = new_generation.simulation_succeeded;
+
     if (simGlobals.generation_count != 0) {
         if (simGlobals.dialogue) {
             await paintbrush.fadeIn(Drawings.drawStats, .02, stats);
@@ -2251,7 +2253,7 @@ async function runGeneration(new_generation) {
 
     // Phase: Evaluate Individuals
 
-    if (simGlobals.simulation_succeeded) {
+    if (simulation_succeeded) {
 
         await runEvaluationAnimation(organisms, stats);
     }
@@ -2417,6 +2419,7 @@ async function runGeneration(new_generation) {
     new_generation = {};
     new_generation.new_population = offspring_organisms;
     new_generation.average_fitness = average_fitness; // this actually represents the previous generation's average fitness, keep in mind.
+    new_generation.simulation_succeeded = simulation_succeeded;
 
     return new Promise(resolve => {
         simGlobals.generation_count++;
@@ -2462,6 +2465,7 @@ async function runSimulation () {
     let new_generation = {};
     new_generation.new_population = initial_population;
     new_generation.average_fitness = 0.00;
+    new_generation.simulation_succeeded = false;
 
     do {
         new_generation = await runGeneration(new_generation);
