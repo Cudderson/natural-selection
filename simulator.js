@@ -46,9 +46,6 @@ simGlobals.simulation_succeeded = false; // []
 // track total generations
 simGlobals.generation_count = 0; // [x]
 
-// containers holding organisms and next-generation organisms
-simGlobals.deceased_organisms = []; // [x] make not global
-
 // canvas & drawing context
 // reconsider how these are used
 window.canvas = document.getElementById("main-canvas");
@@ -1863,7 +1860,7 @@ async function runChosenParentsAnimations(parents, organisms) {
     })
 }
 
-async function runSelectionAnimations(closest_organism, parents, organisms) {
+async function runSelectionAnimations(closest_organism, parents, organisms, deceased_organisms) {
     console.log("Called runSelectionAnimations()");
     // maybe model other phases after this one
     await runClosestOrganismAnimations(closest_organism); // finished
@@ -1871,7 +1868,7 @@ async function runSelectionAnimations(closest_organism, parents, organisms) {
     
     // make own function
     if (simGlobals.sim_type === 'boundary') {
-        await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .02);
+        await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .02, deceased_organisms);
 
         // fade out boundary
         // we should draw a static selection phase on canvas1, and erase that area on canvas2
@@ -2295,6 +2292,9 @@ async function runGeneration(new_generation) {
     // factoring out of global
     let average_fitness;
 
+    // for boundary sims
+    let deceased_organisms = [];
+
     if (simGlobals.sim_type === 'classic') {
         let population_resolution = await evaluatePopulation(organisms); // maybe don't await here
         closest_organism = population_resolution['closest_organism'];
@@ -2314,7 +2314,7 @@ async function runGeneration(new_generation) {
 
         // re-assign array to be only the living organisms
         organisms = organized_organisms['living_organisms'];
-        simGlobals.deceased_organisms = organized_organisms['deceased_organisms'];
+        deceased_organisms = organized_organisms['deceased_organisms'];
 
         console.log(`after checkPulse(): ${organisms.length}`);
 
@@ -2380,7 +2380,7 @@ async function runGeneration(new_generation) {
     let parents = selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length);
     
     if (simGlobals.dialogue) {
-        await runSelectionAnimations(closest_organism, parents, organisms);
+        await runSelectionAnimations(closest_organism, parents, organisms, deceased_organisms);
 
         await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseExitText, .01);
     }
@@ -2389,7 +2389,7 @@ async function runGeneration(new_generation) {
         await paintbrush.fadeOut(Drawings.drawOrganisms, .02, organisms);
 
         if (simGlobals.sim_type === 'boundary') {
-            await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .02);            
+            await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .02, deceased_organisms);            
         }
     }
 
@@ -2461,6 +2461,7 @@ async function runSimulation () {
     // could save to global, but I'll try it passing it the same way future gens will first
     let new_generation = {};
     new_generation.new_population = initial_population;
+    new_generation.average_fitness = 0.00;
 
     do {
         new_generation = await runGeneration(new_generation);

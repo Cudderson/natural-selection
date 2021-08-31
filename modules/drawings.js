@@ -343,12 +343,12 @@ function drawOrganisms(opacity, organisms) {
     }
 }
 
-function drawDeceasedOrganisms(opacity) {
+function drawDeceasedOrganisms(opacity, deceased_organisms) {
 
     // test just clearing the rect
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (let i = 0; i < simGlobals.deceased_organisms.length; i++) {
+    for (let i = 0; i < deceased_organisms.length; i++) {
         // ctx.fillStyle = 'black';
         // ctx.beginPath();
         // ctx.arc(simGlobals.deceased_organisms[i].x, simGlobals.deceased_organisms[i].y, simGlobals.deceased_organisms[i].radius, 0, Math.PI*2, false);
@@ -356,7 +356,7 @@ function drawDeceasedOrganisms(opacity) {
 
         ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
         ctx.beginPath();
-        ctx.arc(simGlobals.deceased_organisms[i].x, simGlobals.deceased_organisms[i].y, simGlobals.deceased_organisms[i].radius, 0, Math.PI*2, false);
+        ctx.arc(deceased_organisms[i].x, deceased_organisms[i].y, deceased_organisms[i].radius, 0, Math.PI*2, false);
         ctx.fill();
     }
 }
