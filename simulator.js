@@ -69,7 +69,6 @@ class Organism {
         this.gender = gender;
         this.x = x;
         this.y = y;
-        this.ctx = ctx; // not sure if needed (could be much faster with one ctx?)
         this.radius = 5; // always the same
         this.index = 0;
         this.genes = [];
@@ -1394,7 +1393,7 @@ function createOrganisms () {
             female_count++;
         }
 
-        let organism = new Organism(gender, spawn_x, spawn_y, ctx);
+        let organism = new Organism(gender, spawn_x, spawn_y);
 
         organism.setRandomGenes();
         initial_population.push(organism);
@@ -1969,7 +1968,7 @@ function reproduce(crossover_genes) {
     }
 
     let offspring_gender = getGender();
-    let offspring = new Organism(offspring_gender, spawn_x, spawn_y, ctx);
+    let offspring = new Organism(offspring_gender, spawn_x, spawn_y);
     offspring.genes = crossover_genes;
 
     // push offspring to new population
@@ -2034,11 +2033,11 @@ async function handleSuccessfulSimDecision() {
     }
 }
 
-async function runNewGenAnimations(offspring_organisms) {
+async function runNewGenAnimations(gen_summary_stats) {
     await paintbrush.fadeToNewColor(Drawings.drawCreateNewGenPhaseEntryText, .02);
-    await paintbrush.fadeIn(Drawings.drawGenerationSummaryText, .025, offspring_organisms);
+    await paintbrush.fadeIn(Drawings.drawGenerationSummaryText, .025, gen_summary_stats);
     await sleep(2000);
-    await paintbrush.fadeOut(Drawings.drawGenerationSummaryText, .025, offspring_organisms);
+    await paintbrush.fadeOut(Drawings.drawGenerationSummaryText, .025, gen_summary_stats);
     await paintbrush.fadeToNewColor(Drawings.drawCreateNewGenPhaseExitText, .02);
 }
 
@@ -2054,7 +2053,7 @@ function createTitleScreenOrganisms() {
         let random_x = Math.floor(Math.random() * canvas.width);
         let random_y = Math.floor(Math.random() * canvas.height);
 
-        let new_organism = new Organism('female', random_x, random_y, ctx);
+        let new_organism = new Organism('female', random_x, random_y);
 
         // ** NEED TO ALTER fadeInTitleAnimation() IF ANYTHING HERE CHANGES
         for (let j = 0; j < 250; j++) {
@@ -2209,7 +2208,7 @@ async function playTitleScreenAnimation() {
 // ================
 
 // maybe async ruins this functions performance?
-// not converted var >> let yet (both runGeneration() and runSimulation())
+// not converted var >> let yet
 async function runGeneration(new_generation) {
 
     console.log("runGeneration() called");
@@ -2224,7 +2223,7 @@ async function runGeneration(new_generation) {
         'average_fitness': new_generation.average_fitness,
     }
 
-    // intentional var to increase access to deeper scope
+    // intentional var to increase scope access
     // once turned on, this is never turned off
     var simulation_succeeded = new_generation.simulation_succeeded;
 
@@ -2274,9 +2273,6 @@ async function runGeneration(new_generation) {
     }
 
     // store length of organisms array before deceased organisms filtered out for reproduction (boundary sims)
-    // ***
-    // ***! I don't think we ever add deceased organisms to this total for boundary sims?!****
-    // *** ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     let next_gen_target_length = organisms.length; 
     let closest_organism;
 
@@ -2292,10 +2288,6 @@ async function runGeneration(new_generation) {
         average_fitness = population_resolution['average_fitness'];
     }
     else if (simGlobals.sim_type === 'boundary') {
-
-        // keeping in case I was wrong, and the new way doesn't work
-        // reassign (.filter() does not change array)
-        // simGlobals.organisms = simGlobals.organisms.filter(checkPulse);
 
         // remove deceased organisms from array (organisms array is evaluated multiple times and deceased organisms aren't used)
         console.log(`before checkPulse(): ${organisms.length}`);
@@ -2317,7 +2309,7 @@ async function runGeneration(new_generation) {
         calcDistanceToGoalCheckpoints();
 
         // get previous, current, and next checkpoints for current generation
-        var checkpoint_data = getFarthestCheckpointReached(organisms);
+        let checkpoint_data = getFarthestCheckpointReached(organisms);
 
         // this will set each organism's distance_to_next_checkpoint attribute
         // *** i think the problem lies here
@@ -2325,7 +2317,7 @@ async function runGeneration(new_generation) {
 
         // distance_to_goal = distance_to_next_checkpoint + next_checkpoint.distance_to_goal
         // 'next' will give us the index in the checkpoints array of the checkpoint we want to measure from
-        var remaining_distance = simGlobals.custom_boundary.checkpoints[checkpoint_data['next']].distance_to_goal;
+        let remaining_distance = simGlobals.custom_boundary.checkpoints[checkpoint_data['next']].distance_to_goal;
 
         console.log(remaining_distance);
 
@@ -2360,7 +2352,7 @@ async function runGeneration(new_generation) {
 
         await sleep(2000);
         do {
-            var exit_key = await getUserDecision();
+            let exit_key = await getUserDecision();
             console.log(exit_key);
         }
         while (exit_key != "q");
@@ -2401,10 +2393,15 @@ async function runGeneration(new_generation) {
 
         await runMutationAnimations();
 
-        await runNewGenAnimations(offspring_organisms);
+        let gen_summary_stats = {
+            'offspring_organisms': offspring_organisms,
+            'average_fitness': average_fitness,
+        }
+
+        await runNewGenAnimations(gen_summary_stats);
     }
 
-    // anticipating needing more than just organisms for next-gen
+    // prepare for next generation with necessary data
     new_generation = {};
     new_generation.new_population = offspring_organisms;
     new_generation.average_fitness = average_fitness; // this actually represents the previous generation's average fitness, keep in mind.

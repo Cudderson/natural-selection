@@ -464,7 +464,7 @@ function drawCreateNewGenPhaseEntryText(opacity, old_opacity) {
     ctx2.fillText("Create New Generation", 10, 30);
 } 
 
-function drawGenerationSummaryText(opacity, offspring_organisms) {
+function drawGenerationSummaryText(opacity, gen_summary_stats) {
     let generation_summary_text = `Generation ${simGlobals.generation_count} Summary:`;
     let generation_average_fitness_preface = 'Average Fitness:';
     let generation_offspring_reproduced_preface = 'Offspring Reproduced:';
@@ -480,13 +480,13 @@ function drawGenerationSummaryText(opacity, offspring_organisms) {
     ctx.fillText(generation_average_fitness_preface, 380, 330);
 
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(simGlobals.average_fitness.toFixed(2).toString(), 600, 330);
+    ctx.fillText(gen_summary_stats.average_fitness.toFixed(2).toString(), 600, 330);
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.fillText(generation_offspring_reproduced_preface, 380, 355);
 
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(offspring_organisms.length.toString(), 600, 355);
+    ctx.fillText(gen_summary_stats.offspring_organisms.length.toString(), 600, 355);
 }
 
 // phase module
