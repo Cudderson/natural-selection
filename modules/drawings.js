@@ -1,5 +1,5 @@
 // ===== drawings for simulator.js =====
-function drawSimulationSettings(opacity) {
+function drawSimulationSettings(opacity, content) {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -15,13 +15,20 @@ function drawSimulationSettings(opacity) {
     ctx.fillText(`Mutation Rate:`, 300, 370);
     ctx.fillText(`Dialogue:`, 300, 410);
     
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(`${simGlobals.TOTAL_ORGANISMS}`, 600, 250);
-    ctx.fillText(`${simGlobals.GENE_COUNT}`, 600, 290);
-    ctx.fillText(`${simGlobals.MAX_GENE}`, 600, 330);
-    ctx.fillText(`${simGlobals.MUTATION_RATE}`, 600, 370);
+    // ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    // ctx.fillText(`${simGlobals.TOTAL_ORGANISMS}`, 600, 250);
+    // ctx.fillText(`${simGlobals.GENE_COUNT}`, 600, 290);
+    // ctx.fillText(`${simGlobals.MAX_GENE}`, 600, 330);
+    // ctx.fillText(`${simGlobals.MUTATION_RATE}`, 600, 370);
 
-    if (simGlobals.dialogue === false) {
+    // testing content (still need resilience incorporation)
+    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+    ctx.fillText(`${content.total_organisms}`, 600, 250);
+    ctx.fillText(`${content.gene_count}`, 600, 290);
+    ctx.fillText(`${content.movement_speed}`, 600, 330);
+    ctx.fillText(`${content.mutation_rate}`, 600, 370);
+
+    if (content.dialogue === false) {
         ctx.fillText(`Disabled`, 600, 410);
     }
     else {
@@ -79,21 +86,21 @@ function drawExplanationAndGoal(opacity) {
 }
 
 // may need to be updated for resilience
-function drawStats(opacity) {
+function drawStats(opacity, stats) {
     ctx2.clearRect(700, 510, 350, 120);
 
     ctx2.fillStyle = `rgba(155, 245, 0, ${opacity})`;
     ctx2.font = "22px arial";
     ctx2.fillText('Generation:', 740, 535);
-    ctx2.fillText(simGlobals.generation_count.toString(), 940, 535);
+    ctx2.fillText(simGlobals.generation_count.toString(), 940, 535); // keeping global until decision
     ctx2.fillText('Population Size:', 740, 560);
-    ctx2.fillText(simGlobals.TOTAL_ORGANISMS.toString(), 940, 560);
+    ctx2.fillText(stats.organism_count.toString(), 940, 560);
     ctx2.fillText('Average Fitness:', 740, 585);
-    ctx2.fillText(simGlobals.average_fitness.toString(), 940, 585);
+    ctx2.fillText(stats.average_fitness.toString(), 940, 585);
 }
 
 // for preserving drawing on canvas during animations
-function drawStatsStatic(context) {
+function drawStatsStatic(context, stats) {
     context.clearRect(700, 510, 350, 120);
 
     context.fillStyle = `rgba(155, 245, 0, 1)`;
@@ -101,9 +108,9 @@ function drawStatsStatic(context) {
     context.fillText('Generation:', 740, 535);
     context.fillText(simGlobals.generation_count.toString(), 940, 535);
     context.fillText('Population Size:', 740, 560);
-    context.fillText(simGlobals.TOTAL_ORGANISMS.toString(), 940, 560);
+    context.fillText(stats.organism_count.toString(), 940, 560);
     context.fillText('Average Fitness:', 740, 585);
-    context.fillText(simGlobals.average_fitness.toString(), 940, 585);
+    context.fillText(stats.average_fitness.toString(), 940, 585);
 }
 
 // phase module
@@ -321,27 +328,27 @@ function drawBothParentTypesNatural(opacity) {
 
 // similar to redrawOrganisms(), but this function accepts an opacity value to allow fading
 // used in multiple places
-function drawOrganisms(opacity) {
+function drawOrganisms(opacity, organisms) {
 
-    for (let i = 0; i < simGlobals.organisms.length; i++) {
+    for (let i = 0; i < organisms.length; i++) {
         ctx.fillStyle = 'black';
         ctx.beginPath();
-        ctx.arc(simGlobals.organisms[i].x, simGlobals.organisms[i].y, simGlobals.organisms[i].radius, 0, Math.PI*2, false);
+        ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
         ctx.fill();
 
         ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
         ctx.beginPath();
-        ctx.arc(simGlobals.organisms[i].x, simGlobals.organisms[i].y, simGlobals.organisms[i].radius, 0, Math.PI*2, false);
+        ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
         ctx.fill();
     }
 }
 
-function drawDeceasedOrganisms(opacity) {
+function drawDeceasedOrganisms(opacity, deceased_organisms) {
 
     // test just clearing the rect
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (let i = 0; i < simGlobals.deceased_organisms.length; i++) {
+    for (let i = 0; i < deceased_organisms.length; i++) {
         // ctx.fillStyle = 'black';
         // ctx.beginPath();
         // ctx.arc(simGlobals.deceased_organisms[i].x, simGlobals.deceased_organisms[i].y, simGlobals.deceased_organisms[i].radius, 0, Math.PI*2, false);
@@ -349,7 +356,7 @@ function drawDeceasedOrganisms(opacity) {
 
         ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
         ctx.beginPath();
-        ctx.arc(simGlobals.deceased_organisms[i].x, simGlobals.deceased_organisms[i].y, simGlobals.deceased_organisms[i].radius, 0, Math.PI*2, false);
+        ctx.arc(deceased_organisms[i].x, deceased_organisms[i].y, deceased_organisms[i].radius, 0, Math.PI*2, false);
         ctx.fill();
     }
 }
@@ -457,7 +464,7 @@ function drawCreateNewGenPhaseEntryText(opacity, old_opacity) {
     ctx2.fillText("Create New Generation", 10, 30);
 } 
 
-function drawGenerationSummaryText(opacity) {
+function drawGenerationSummaryText(opacity, gen_summary_stats) {
     let generation_summary_text = `Generation ${simGlobals.generation_count} Summary:`;
     let generation_average_fitness_preface = 'Average Fitness:';
     let generation_offspring_reproduced_preface = 'Offspring Reproduced:';
@@ -473,13 +480,13 @@ function drawGenerationSummaryText(opacity) {
     ctx.fillText(generation_average_fitness_preface, 380, 330);
 
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(simGlobals.average_fitness.toFixed(2).toString(), 600, 330);
+    ctx.fillText(gen_summary_stats.average_fitness.toFixed(2).toString(), 600, 330);
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.fillText(generation_offspring_reproduced_preface, 380, 355);
 
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(simGlobals.organisms.length.toString(), 600, 355);
+    ctx.fillText(gen_summary_stats.offspring_organisms.length.toString(), 600, 355);
 }
 
 // phase module
@@ -644,9 +651,9 @@ function drawSuccessMessage(opacity) {
 
     ctx.font = '30px arial';
     ctx.fillStyle = 'black';
-    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
+    ctx.fillText(`Generations: ${simGlobals.generation_count}`, 420, 340);
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
+    ctx.fillText(`Generations: ${simGlobals.generation_count}`, 420, 340);
 
     ctx.font = '26px arial';
     ctx.fillStyle = 'black';
@@ -667,7 +674,7 @@ function redrawOrganisms() {
     ctx.clearRect(235, 231, 550, 235);
 
     // redraw organisms
-    for (var i = 0; i < organisms.length; i++) {
+    for (let i = 0; i < organisms.length; i++) {
         organisms[i].move();
     }
 }
@@ -854,6 +861,12 @@ function prepareToRunSimulation() {
     ctx.fillText("Press 'Run Simulation'", 350, 400);
 }
 
+function drawGoal(goal) {
+    console.log("should only be called once (drawGoal())");
+    ctx2.fillStyle = 'rgba(155, 245, 0, 1)';
+    ctx2.fillRect(goal.x, goal.y, goal.size, goal.size);
+}
+
 export {
     drawSimulationSettings, drawSimulationIntro,
     drawFakeGoal, drawSimulationExplanation,
@@ -882,4 +895,5 @@ export {
     drawPhases, drawDeceasedOrganisms,
     drawBoundary, drawStaticSelectionPhaseText,
     drawStatsStatic, drawBoundaryValidationScreen,
+    drawGoal,
 }
