@@ -922,12 +922,16 @@ function updateMousePosition(event) {
 // not converting var >> let here yet
 function enterBoundaryCreationMode() {
 
-    // drawing flag and step tracker
-    var allowed_to_draw = false; // could be method of Paintbrush
-    var boundary_step = "bottom-boundary"; // could be attribute of Boundary? idk..
+    // =============================================================================================
+    // === this is the first appearance of Boundary, and where the module will be first required ===
+    // =============================================================================================
 
     // create new boundary
     var new_boundary = new Boundary();
+
+    // drawing flag and step tracker
+    var allowed_to_draw = false; // could be method of Paintbrush
+    var boundary_step = "bottom-boundary"; // could be attribute of Boundary? idk..
 
     // this function name doesn't fit well anymore, rename
     applyBoundaryModeStyles();
@@ -1227,10 +1231,12 @@ function selectSimulationType() {
 function handleSimTypeBtnMouseover(event) {
     console.log(event.target.className);
     if (event.target.className === 'sim-type-classic') {
-        simGlobals.sim_type = Drawings.highlightClassicSimType();
+        simGlobals.sim_type = 'classic';
+        Drawings.highlightClassicSimType();
     }
     else if (event.target.className === 'sim-type-boundary') {
-        simGlobals.sim_type = Drawings.highlightBoundarySimType();
+        simGlobals.sim_type = 'boundary';
+        Drawings.highlightBoundarySimType();
     }
 }
 
@@ -1273,13 +1279,13 @@ function turnOffSimTypeSelectionEventListeners() {
 function handleSimTypeSelectionKeyPress(event) {
     switch(event.key) {
         case "ArrowLeft":
-            // the solution is to sync this variable with the sim_type var that runSimulation()/checkSimType() checks
-            // i'll do that now. set sim_type here
-            simGlobals.sim_type = Drawings.highlightClassicSimType();
+            simGlobals.sim_type = 'classic';
+            Drawings.highlightClassicSimType();
             break;
 
         case "ArrowRight":
-            simGlobals.sim_type = Drawings.highlightBoundarySimType();
+            simGlobals.sim_type = 'boundary';
+            Drawings.highlightBoundarySimType();
             break;
         
         case "Enter":
@@ -2066,7 +2072,7 @@ function createTitleScreenOrganisms() {
     return title_organisms;
 }
 
-// make sure function up to date
+// [] make sure function up to date
 function fadeInTitleAnimation(title_organisms) {
     let opacity = 0.00;
     let opacity_tracker = 0.00;
@@ -2088,7 +2094,7 @@ function fadeInTitleAnimation(title_organisms) {
 
     document.addEventListener('keydown', function updateStartBtnFlagOnEnter(event) {
         if (event.key === "Enter") {
-            console.log("Start Button Pressed");
+            console.log("Enter Pressed");
             start_button_pressed = true;
 
             // remove eventListener after flag set
@@ -2104,7 +2110,7 @@ function fadeInTitleAnimation(title_organisms) {
                 if (start_button_pressed) {
                     // cancel and resolve
                     cancelAnimationFrame(frame_id);
-                    return resolve("Display Sim Types");
+                    return resolve("Select Sim Type");
                 }
 
                 ctx.fillStyle = 'black';
@@ -2188,19 +2194,11 @@ async function playTitleScreenAnimation() {
 
         let status = await fadeInTitleAnimation(title_organisms);
 
-        if (status === "Display Sim Types") {
-            console.log("start button pressed. displaying sim types");
-            // call here!
+        if (status === 'Select Sim Type') {
             selectSimulationType();
         }
-        // not sure if this is called from here anymore?
-        else if (status === "TEST BOUNDARY MODE") {
-            console.log("Entering Boundary Mode");
-            enterBoundaryCreationMode();
-        }
-        
     }
-    while (simGlobals.simulation_started === false && status === "Keep Playing");
+    while (status === "Keep Playing");
 }
 
 // ================

@@ -758,8 +758,6 @@ function highlightClassicSimType() {
     let boundary_example = document.getElementById("boundary-example");
     ctx.drawImage(classic_example, 100, 150, 300, 300);
     ctx.drawImage(boundary_example, 600, 150, 300, 300);  
-
-    return 'classic';
 }
 
 function highlightBoundarySimType() {
@@ -807,8 +805,6 @@ function highlightBoundarySimType() {
     let boundary_example = document.getElementById("boundary-example");
     ctx.drawImage(classic_example, 100, 150, 300, 300);
     ctx.drawImage(boundary_example, 600, 150, 300, 300); 
-
-    return 'boundary';
 }
 
 // example images not final. consider more zoomed-in images
