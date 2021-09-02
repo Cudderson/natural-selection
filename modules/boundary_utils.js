@@ -574,6 +574,24 @@ class Boundary {
             'next': next_checkpoint
         }
     }
+
+    checkPulse(organisms) {
+
+        let deceased_organisms = [];
+    
+        for (let i = 0; i < organisms.length; i++) {
+            if (!organisms[i].is_alive) {
+                // make sure this is correct
+                deceased_organisms.push(organisms[i]);
+                organisms.splice(i, 1);
+            }
+        }
+    
+        return {
+            'living_organisms': organisms,
+            'deceased_organisms': deceased_organisms
+        }
+    }
 }
 
 // also rethink rect variable here

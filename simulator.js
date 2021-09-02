@@ -1884,7 +1884,7 @@ async function runGeneration(new_generation) {
         console.log(`before checkPulse(): ${organisms.length}`);
 
         // returns array of living and deceased organisms
-        let organized_organisms = checkPulse(organisms);
+        let organized_organisms = simGlobals.custom_boundary.checkPulse(organisms);
 
         // re-assign array to be only the living organisms
         organisms = organized_organisms['living_organisms'];
@@ -2141,24 +2141,6 @@ function getPixelXY(canvas_data, x, y) {
     // reading left to right, pixel at (2, 2) is pixel #2002 ?
 
     return getPixel(canvas_data, index);
-}
-
-function checkPulse(organisms) {
-
-    let deceased_organisms = [];
-
-    for (let i = 0; i < organisms.length; i++) {
-        if (!organisms[i].is_alive) {
-            // make sure this is correct
-            deceased_organisms.push(organisms[i]);
-            organisms.splice(i, 1);
-        }
-    }
-
-    return {
-        'living_organisms': organisms,
-        'deceased_organisms': deceased_organisms
-    }
 }
 
 function sleep(milliseconds) {
