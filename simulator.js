@@ -508,15 +508,7 @@ function applyBoundaryModeStyles() {
     stop_btn.style.display = "block";
 }
 
-// this function must remain outside closure, as Boundary calls it (unless boundary creation mode becomes a class method?)
-// also rethink rect variable here
-function updateMousePosition(event) {
-    let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
 
-    // store current mouse position
-    simGlobals.coordinates['x'] = Math.floor(event.clientX - rect.left);
-    simGlobals.coordinates['y'] = Math.floor(event.clientY - rect.top);
-}
 
 // this function will be refactored/cleaned
 // it's not super bad, just need to decide how functions will be handled
@@ -549,7 +541,7 @@ function enterBoundaryCreationMode() {
 
         ctx.beginPath();
         ctx.moveTo(simGlobals.coordinates['x'], simGlobals.coordinates['y']);
-        updateMousePosition(event);
+        BoundaryUtils.updateMousePosition(event);
 
         // draw different line depending on boundary_step
         if (boundary_step === 'full-boundary') {
@@ -597,7 +589,7 @@ function enterBoundaryCreationMode() {
         // users ability to draw if legal
         console.log("User would like to draw.");
         
-        updateMousePosition(event);
+        BoundaryUtils.updateMousePosition(event);
 
         if (boundary_step === 'bottom-boundary') {
             // check that user is trying to draw from first connector (ctx.fillRect(150, 550, 20, 50))
@@ -721,7 +713,7 @@ function enterBoundaryCreationMode() {
     }
     
     // respond to each event individually (pass event for mouse position)
-    canvas.addEventListener('mouseenter', updateMousePosition);
+    canvas.addEventListener('mouseenter', BoundaryUtils.updateMousePosition);
     canvas.addEventListener('mousedown', requestDrawingPermission);
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', validateBoundaryConnection);
@@ -732,27 +724,23 @@ function enterBoundaryCreationMode() {
     save_bounds_btn.addEventListener("click", function() {
         console.log("Saving Custom Boundaries");
 
+        // draw Boundary as it will appear in simulation
+        Drawings.drawFinalBoundary(new_boundary.top_boundary);
+
         // save full boundary
         new_boundary.save('full');
 
-        // ** This whole execution flow could be own function such as: 'prepareBoundaryForSimulation()'
+        // creates checkpoints
+        new_boundary.prepareBoundaryForSimulation();
 
-        // normalize boundary coordinate array sizes
-        new_boundary.prepareBoundaryForCheckpoints();
-
-        // let's make sure the boundaries are same length and not the same values
-        // console.log(custom_boundary.top_boundary_coordinates.length, custom_boundary.bottom_boundary_coordinates.length);
-        // console.log(custom_boundary.top_boundary_coordinates, custom_boundary.bottom_boundary_coordinates);
-
-        // ===== here =====
-        // next, we'll create the checkpoints to be used by our fitness function
-        new_boundary.createCheckpoints();
+        // ===== here (all working)=====
 
         // still using custom_boundary global, I don't like it ==!CHANGE!==
         simGlobals.custom_boundary = new_boundary;
 
         // update global scale_statistics
         // should only need to be called once here, right?
+        // should be a Boundary attribute
         simGlobals.scale_statistics = setScale();
 
         // return to settings
@@ -2197,6 +2185,7 @@ function setScale() {
     }
 }
 
+// getPixel() functions only used by enterBoundaryCreationMode.draw() and UpdateAndMoveOrganismsBounds()
 function getPixel(canvas_data, index) {
     let i = index * 4;
     let data = canvas_data.data;

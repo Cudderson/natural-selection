@@ -32,20 +32,6 @@ class Boundary {
         else if (boundary_type === 'full') {
             // save full
             console.log("saving full boundary");
-            Drawings.drawBoundaryBoilerplate();
-
-            ctx.drawImage(this.top_boundary, 0, 0, canvas.width, canvas.height);
-
-            Drawings.eraseIllegalDrawingZones();
-    
-            // remove white dot and revert goal color
-            ctx.fillStyle = 'rgb(155, 245, 0)';
-            ctx.fillRect(925, 50, 20, 20);
-    
-            ctx.fillStyle = 'black';
-            ctx.beginPath();
-            ctx.arc(80, 510, 12, 0, Math.PI*2, false);
-            ctx.fill();
 
             // save image as full-boundary
             this.full_boundary.src = canvas.toDataURL("image/png");
@@ -404,6 +390,25 @@ class Boundary {
         // works
         console.log("Hey man what's up?");
     }
+
+    prepareBoundaryForSimulation() {
+        // normalize boundary coordinate array sizes
+        this.prepareBoundaryForCheckpoints();
+
+        // next, we'll create the checkpoints to be used by our fitness function
+        this.createCheckpoints();
+    }
 }
 
-export { Boundary }
+// also rethink rect variable here
+// ** Had to move this function here so that Boundary can call it (this function is only used by Boundary) 
+// (Could become a BoundaryPencil() method or something with draw() and requestDrawingPermission())
+function updateMousePosition(event) {
+    let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
+
+    // store current mouse position
+    simGlobals.coordinates['x'] = Math.floor(event.clientX - rect.left);
+    simGlobals.coordinates['y'] = Math.floor(event.clientY - rect.top);
+}
+
+export { Boundary, updateMousePosition }

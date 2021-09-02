@@ -863,6 +863,23 @@ function drawGoal(goal) {
     ctx2.fillRect(goal.x, goal.y, goal.size, goal.size);
 }
 
+function drawFinalBoundary(final_boundary) {
+    drawBoundaryBoilerplate();
+
+    ctx.drawImage(final_boundary, 0, 0, canvas.width, canvas.height);
+
+    eraseIllegalDrawingZones();
+
+    // remove white dot and revert goal color
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.fillRect(925, 50, 20, 20);
+
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    ctx.arc(80, 510, 12, 0, Math.PI*2, false);
+    ctx.fill();
+}
+
 export {
     drawSimulationSettings, drawSimulationIntro,
     drawFakeGoal, drawSimulationExplanation,
@@ -891,5 +908,5 @@ export {
     drawPhases, drawDeceasedOrganisms,
     drawBoundary, drawStaticSelectionPhaseText,
     drawStatsStatic, drawBoundaryValidationScreen,
-    drawGoal,
+    drawGoal, drawFinalBoundary,
 }
