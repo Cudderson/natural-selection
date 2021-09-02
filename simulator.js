@@ -2,6 +2,9 @@ document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
 import * as Drawings from "./modules/drawings.js";
 import * as BoundaryUtils from "./modules/boundary_utils.js";
+import * as SettingsUtils from "./modules/settings_utils.js";
+
+SettingsUtils.testSettingsMod();
 
 // ===== vars =====
 
@@ -245,6 +248,8 @@ class Paintbrush {
 // =======================
 // ===== SETTINGS =====
 // =======================
+
+// converting settings to module
 
 function displaySettingsForm() {
 
