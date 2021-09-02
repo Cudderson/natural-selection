@@ -9,6 +9,7 @@ class Boundary {
         this.bottom_boundary_coordinates = [];
         // this.checkpoints = {'coordinates': [], 'size': null};
         this.checkpoints = []; // push dictionaries containing coordinates, halfway_point, distance_to_goal, and size
+        this.scale_statistics = null; 
     }
 
     save(boundary_type) {
@@ -375,6 +376,30 @@ class Boundary {
         // complete! checkpoints can be drawn with appropriate sizes now.
     }
 
+    // boundary method?
+    calcDistanceToGoalCheckpoints() {
+        let scale = this.scale_statistics['scale'];
+        let checkpoint_to_checkpoint_lengths = this.scale_statistics['checkpoint_lengths'];
+        let spawn_to_checkpoint_0_length = this.scale_statistics['spawn_to_checkpoint_0_length'];
+        let last_checkpoint_to_goal_length = this.scale_statistics['last_checkpoint_to_goal_length']; // keep for comparison
+
+        let adjusted_scale;
+
+        // checkpoint_to_checkpoint_lengths[0] = checkpoints[0] distance to next checkpoint
+        for (let i = 0; i < this.checkpoints.length; i++) {
+            if (i === 0) {
+                // distance to goal for first checkpoint = scale - distance_from_spawn_to_first_checkpoint
+                adjusted_scale = scale - spawn_to_checkpoint_0_length;
+                this.checkpoints[i].distance_to_goal = adjusted_scale;
+            }
+            else {
+                // i-1 will give us the length of the previous checkpoint to the current
+                adjusted_scale -= checkpoint_to_checkpoint_lengths[i-1];
+                this.checkpoints[i].distance_to_goal = adjusted_scale;
+            }
+        }
+    }
+
     // should be moved to drawings.js
     drawCheckpoints() {
         // === Draw Checkpoints ===
@@ -391,12 +416,79 @@ class Boundary {
         console.log("Hey man what's up?");
     }
 
+    setScale() {
+        // compute the lengths of lines connecting epicenters from spawn to checkpoints to goal
+        // store the individual line lengths in data structure for future reference
+        // consider recursion here? base case = i === 0
+    
+        let scale = 0.00;
+    
+        // will store length of checkpoint to the next checkpoint
+        let checkpoint_to_checkpoint_lengths = [];
+    
+        for (let i = 1; i < this.checkpoints.length; i++) {
+            // compute distance from last checkpoint to current
+            let horizontal_distance_squared = (
+                this.checkpoints[i].coordinates[0] - 
+                this.checkpoints[i-1].coordinates[0]) ** 2;
+            
+            let vertical_distance_squared = (
+                this.checkpoints[i].coordinates[1] - 
+                this.checkpoints[i-1].coordinates[1]) ** 2;
+            
+            let distance_squared = horizontal_distance_squared + vertical_distance_squared;
+            let distance_from_previous_checkpoint_to_current = Math.sqrt(distance_squared);
+    
+            // store length 
+            // when storing value as i-1, value represents distance from checkpoint to next
+            // checkpoint_to_checkpoint_lengths[0] = distance from boundary.checkpoints[0] to boundary.checkpoints[1]
+            checkpoint_to_checkpoint_lengths[i-1] = distance_from_previous_checkpoint_to_current;
+    
+            // update scale
+            scale += distance_from_previous_checkpoint_to_current;
+        }
+    
+        // add distance from spawn to checkpoint[0] to scale
+        let horizontal_distance_squared = (simGlobals.INITIAL_X_BOUND - this.checkpoints[0].coordinates[0]) ** 2;
+        let vertical_distance_squared = (simGlobals.INITIAL_Y_BOUND - this.checkpoints[0].coordinates[1]) ** 2;
+        let distance_squared = horizontal_distance_squared + vertical_distance_squared;
+        let distance_from_spawn_to_first_checkpoint = Math.sqrt(distance_squared);
+    
+        // update scale
+        scale += distance_from_spawn_to_first_checkpoint;
+    
+        // add distance from final checkpoint to goal to scale
+        let final_to_goal_horizontal_distance_squared = (this.checkpoints[this.checkpoints.length - 1].coordinates[0] - simGlobals.GOAL_X_POS_BOUNDS) ** 2;
+        let final_to_goal_vertical_distance_squared = (this.checkpoints[this.checkpoints.length - 1].coordinates[1] - simGlobals.GOAL_Y_POS_BOUNDS) ** 2;
+    
+        let distance_squared_to_goal = final_to_goal_horizontal_distance_squared + final_to_goal_vertical_distance_squared;
+    
+        let distance_from_final_checkpoint_to_goal = Math.sqrt(distance_squared_to_goal);
+    
+        scale += distance_from_final_checkpoint_to_goal;
+    
+        console.log(`final scale: ${scale}`);
+    
+        this.scale_statistics = {
+            'scale': scale,
+            'checkpoint_lengths': checkpoint_to_checkpoint_lengths,
+            'spawn_to_checkpoint_0_length': distance_from_spawn_to_first_checkpoint,
+            'last_checkpoint_to_goal_length': distance_from_final_checkpoint_to_goal
+        }
+    }
+
     prepareBoundaryForSimulation() {
         // normalize boundary coordinate array sizes
         this.prepareBoundaryForCheckpoints();
 
         // next, we'll create the checkpoints to be used by our fitness function
         this.createCheckpoints();
+
+        // sets instance scale_statistics attribute
+        this.setScale();
+
+        // with scale stats set, we can set each checkpoint's distance_to_goal attribute
+        this.calcDistanceToGoalCheckpoints();
     }
 }
 

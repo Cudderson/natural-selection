@@ -513,6 +513,7 @@ function applyBoundaryModeStyles() {
 // this function will be refactored/cleaned
 // it's not super bad, just need to decide how functions will be handled
 // not converting var >> let here yet
+// rename at end to beginBoundaryCreation() or createNewBoundary()
 function enterBoundaryCreationMode() {
 
     // =============================================================================================
@@ -730,7 +731,7 @@ function enterBoundaryCreationMode() {
         // save full boundary
         new_boundary.save('full');
 
-        // creates checkpoints
+        // creates checkpoints, sets scale attribute
         new_boundary.prepareBoundaryForSimulation();
 
         // ===== here (all working)=====
@@ -741,7 +742,8 @@ function enterBoundaryCreationMode() {
         // update global scale_statistics
         // should only need to be called once here, right?
         // should be a Boundary attribute
-        simGlobals.scale_statistics = setScale();
+        // moved to prepareBoundaryForSimulation
+        // simGlobals.scale_statistics = setScale();
 
         // return to settings
 
@@ -1259,9 +1261,9 @@ function calcPopulationFitness (organisms) {
     })
 }
 
-function calcPopulationFitnessBounds(remaining_distance, organisms) {
+function calcPopulationFitnessBounds(remaining_distance, organisms, scale) {
     // scale = length of lines connecting epicenters from spawn>checkpoints>goal
-    let scale = simGlobals.scale_statistics['scale'];
+    // let scale = simGlobals.scale_statistics['scale'];
 
     // calc/set distance_to_goal && fitness
     let total_fitness = 0.00;
@@ -1895,7 +1897,7 @@ async function runGeneration(new_generation) {
 
         // here, we set checkpoints[i].distance_to_goal 
         // should this only be done on iteration #1???
-        calcDistanceToGoalCheckpoints();
+        // calcDistanceToGoalCheckpoints(); turning off to make sure sure initially
 
         // get previous, current, and next checkpoints for current generation
         let checkpoint_data = getFarthestCheckpointReached(organisms);
@@ -1912,7 +1914,7 @@ async function runGeneration(new_generation) {
 
         // this function will set each organism's distance_to_goal and fitness attributes
         // it also updates average_fitness
-        average_fitness = calcPopulationFitnessBounds(remaining_distance, organisms);
+        average_fitness = calcPopulationFitnessBounds(remaining_distance, organisms, simGlobals.custom_boundary.scale_statistics.scale);
 
         console.log(`Average Fitness: ${average_fitness}`);
     }
@@ -2122,69 +2124,6 @@ function drawNextCheckpoint(index) {
     }
 }
 
-function setScale() {
-    // compute the lengths of lines connecting epicenters from spawn to checkpoints to goal
-    // store the individual line lengths in data structure for future reference
-    // consider recursion here? base case = i === 0
-
-    let scale = 0.00;
-
-    // will store length of checkpoint to the next checkpoint
-    let checkpoint_to_checkpoint_lengths = [];
-
-    for (let i = 1; i < simGlobals.custom_boundary.checkpoints.length; i++) {
-        // compute distance from last checkpoint to current
-        let horizontal_distance_squared = (
-            simGlobals.custom_boundary.checkpoints[i].coordinates[0] - 
-            simGlobals.custom_boundary.checkpoints[i-1].coordinates[0]) ** 2;
-        
-        let vertical_distance_squared = (
-            simGlobals.custom_boundary.checkpoints[i].coordinates[1] - 
-            simGlobals.custom_boundary.checkpoints[i-1].coordinates[1]) ** 2;
-        
-        let distance_squared = horizontal_distance_squared + vertical_distance_squared;
-        let distance_from_previous_checkpoint_to_current = Math.sqrt(distance_squared);
-
-        // store length 
-        // when storing value as i-1, value represents distance from checkpoint to next
-        // checkpoint_to_checkpoint_lengths[0] = distance from boundary.checkpoints[0] to boundary.checkpoints[1]
-        checkpoint_to_checkpoint_lengths[i-1] = distance_from_previous_checkpoint_to_current;
-
-        // update scale
-        scale += distance_from_previous_checkpoint_to_current;
-    }
-
-    // add distance from spawn to checkpoint[0] to scale
-    let horizontal_distance_squared = (simGlobals.INITIAL_X_BOUND - simGlobals.custom_boundary.checkpoints[0].coordinates[0]) ** 2;
-    let vertical_distance_squared = (simGlobals.INITIAL_Y_BOUND - simGlobals.custom_boundary.checkpoints[0].coordinates[1]) ** 2;
-    let distance_squared = horizontal_distance_squared + vertical_distance_squared;
-    let distance_from_spawn_to_first_checkpoint = Math.sqrt(distance_squared);
-
-    // update scale
-    scale += distance_from_spawn_to_first_checkpoint;
-
-    // add distance from final checkpoint to goal to scale
-    let final_to_goal_horizontal_distance_squared = (
-        simGlobals.custom_boundary.checkpoints[simGlobals.custom_boundary.checkpoints.length - 1].coordinates[0] - simGlobals.GOAL_X_POS_BOUNDS) ** 2;
-    let final_to_goal_vertical_distance_squared = (
-        simGlobals.custom_boundary.checkpoints[simGlobals.custom_boundary.checkpoints.length - 1].coordinates[1] - simGlobals.GOAL_Y_POS_BOUNDS) ** 2;
-
-    let distance_squared_to_goal = final_to_goal_horizontal_distance_squared + final_to_goal_vertical_distance_squared;
-
-    let distance_from_final_checkpoint_to_goal = Math.sqrt(distance_squared_to_goal);
-
-    scale += distance_from_final_checkpoint_to_goal;
-
-    console.log(`final scale: ${scale}`);
-
-    return {
-        'scale': scale,
-        'checkpoint_lengths': checkpoint_to_checkpoint_lengths,
-        'spawn_to_checkpoint_0_length': distance_from_spawn_to_first_checkpoint,
-        'last_checkpoint_to_goal_length': distance_from_final_checkpoint_to_goal
-    }
-}
-
 // getPixel() functions only used by enterBoundaryCreationMode.draw() and UpdateAndMoveOrganismsBounds()
 function getPixel(canvas_data, index) {
     let i = index * 4;
@@ -2202,30 +2141,6 @@ function getPixelXY(canvas_data, x, y) {
     // reading left to right, pixel at (2, 2) is pixel #2002 ?
 
     return getPixel(canvas_data, index);
-}
-
-// boundary method?
-function calcDistanceToGoalCheckpoints() {
-    let scale = simGlobals.scale_statistics['scale'];
-    let checkpoint_to_checkpoint_lengths = simGlobals.scale_statistics['checkpoint_lengths'];
-    let spawn_to_checkpoint_0_length = simGlobals.scale_statistics['spawn_to_checkpoint_0_length'];
-    let last_checkpoint_to_goal_length = simGlobals.scale_statistics['last_checkpoint_to_goal_length']; // keep for comparison
-
-    let adjusted_scale;
-
-    // checkpoint_to_checkpoint_lengths[0] = checkpoints[0] distance to next checkpoint
-    for (let i = 0; i < simGlobals.custom_boundary.checkpoints.length; i++) {
-        if (i === 0) {
-            // distance to goal for first checkpoint = scale - distance_from_spawn_to_first_checkpoint
-            adjusted_scale = scale - spawn_to_checkpoint_0_length;
-            simGlobals.custom_boundary.checkpoints[i].distance_to_goal = adjusted_scale;
-        }
-        else {
-            // i-1 will give us the length of the previous checkpoint to the current
-            adjusted_scale -= checkpoint_to_checkpoint_lengths[i-1];
-            simGlobals.custom_boundary.checkpoints[i].distance_to_goal = adjusted_scale;
-        }
-    }
 }
 
 // boundary method?
