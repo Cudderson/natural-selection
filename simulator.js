@@ -5,17 +5,20 @@ import * as BoundaryUtils from "./modules/boundary_utils.js";
 
 // ===== vars =====
 
-window.simGlobals = {};
+window.simGlobals = {
+    // spawn/goal coordinates for both sim types
+    INITIAL_X: 500,
+    INITIAL_Y: 500,
+    INITIAL_X_BOUND: 50,
+    INITIAL_Y_BOUND: 550,
+    GOAL_X_POS: 500,
+    GOAL_Y_POS: 50,
+    GOAL_X_POS_BOUNDS: 925,
+    GOAL_Y_POS_BOUNDS: 50,
 
-// *** Check box of variable that is okay to be in simSettings
-
-// [x] factor simulation_succeeded out of simGlobals and into generation resolution package
-
-// starting coordinates for organisms and goal
-simGlobals.INITIAL_X = 500; // [x] 
-simGlobals.INITIAL_Y = 500; // [x]
-simGlobals.GOAL_X_POS = 500; // [x]
-simGlobals.GOAL_Y_POS = 50; // [x]
+    // frame rate
+    FPS: 30,
+};
 
 // organism global default settings
 simGlobals.TOTAL_ORGANISMS = 100; // [x]
@@ -25,40 +28,23 @@ simGlobals.MIN_GENE = -5; // [x]
 simGlobals.MAX_GENE = 5; // [x]
 // for boundary sims
 simGlobals.RESILIENCE = 1.00; // [x]
-// starts at perfect resilience
 simGlobals.dialogue = false; // [x]
 
-// boundary simulations start organisms/goal at different location
-simGlobals.INITIAL_X_BOUND = 50; // [x]
-simGlobals.INITIAL_Y_BOUND = 550; // [x]
-simGlobals.GOAL_X_POS_BOUNDS = 925; // [x]
-simGlobals.GOAL_Y_POS_BOUNDS = 50; // [x]
-
-// boundary globals
+// boundary globals (maybe make window object?)
 simGlobals.custom_boundary; // [] (one drawing: drawBoundary())
-simGlobals.scale_statistics; // [] // this is/should be only computed once (boundary doesn't change)
 
 // flags
 simGlobals.sim_type; // [x]
 simGlobals.simulation_started = false; // [x]
 
-// track total generations
+// track total generations (could be passed in new_generation)
 simGlobals.generation_count = 0; // [x]
 
-// canvas & drawing context
-// reconsider how these are used
-window.canvas = document.getElementById("main-canvas"); // [x]
-window.ctx = canvas.getContext("2d"); // [x]
-
-// testing background canvas for better performance
-window.canvas2 = document.getElementById("background-canvas"); // [x]
-window.ctx2 = canvas2.getContext("2d"); // [x]
-
-// frame rate
-simGlobals.FPS = 30; // [x]
-
-// Stores the position of the cursor
-simGlobals.coordinates = {'x':0 , 'y':0}; // []
+// attach canvas & drawing context to window
+window.canvas = document.getElementById("main-canvas");
+window.ctx = canvas.getContext("2d");
+window.canvas2 = document.getElementById("background-canvas");
+window.ctx2 = canvas2.getContext("2d");
 
 
 // ===================
@@ -487,7 +473,7 @@ function finishApplyingSettings() {
 // ===== BOUNDARY =====
 // ====================
 
-function applyBoundaryModeStyles() {
+function applyInitialBoundaryStyles() {
     // turn off settings, turn on canvas
     document.getElementsByClassName("canvas-container")[0].style.display = 'block';
     document.getElementsByClassName("settings-container")[0].style.display = 'none';
@@ -508,13 +494,8 @@ function applyBoundaryModeStyles() {
     stop_btn.style.display = "block";
 }
 
-
-
 // this function will be refactored/cleaned
-// it's not super bad, just need to decide how functions will be handled
-// not converting var >> let here yet
-// rename at end to beginBoundaryCreation() or createNewBoundary()
-function enterBoundaryCreationMode() {
+function createNewBoundary() {
 
     // =============================================================================================
     // === this is the first appearance of Boundary, and where the module will be first required ===
@@ -529,8 +510,10 @@ function enterBoundaryCreationMode() {
     var allowed_to_draw = false; // could be method of Paintbrush
     var boundary_step = "bottom-boundary"; // could be attribute of Boundary? idk..
 
-    // this function name doesn't fit well anymore, rename
-    applyBoundaryModeStyles();
+    // Stores the position of the cursor
+    simGlobals.coordinates = {'x':0 , 'y':0}; // []
+
+    applyInitialBoundaryStyles();
 
     Drawings.drawBoundaryDrawingHelpText("Step 1");
 
@@ -736,14 +719,9 @@ function enterBoundaryCreationMode() {
 
         // ===== here (all working)=====
 
-        // still using custom_boundary global, I don't like it ==!CHANGE!==
+        // could make global here, then pass locally in runSimulation()?
+        // this seems like the best idea, otherwise we'd have to pass boundary through all of settings
         simGlobals.custom_boundary = new_boundary;
-
-        // update global scale_statistics
-        // should only need to be called once here, right?
-        // should be a Boundary attribute
-        // moved to prepareBoundaryForSimulation
-        // simGlobals.scale_statistics = setScale();
 
         // return to settings
 
@@ -930,7 +908,7 @@ function turnOnBoundaryIntroductionTwoListeners() {
         next_btn.style.display = 'none';
 
         // go to next screen
-        enterBoundaryCreationMode();
+        createNewBoundary();
     })    
 
     document.addEventListener('keydown', function checkKeystroke(event) {
@@ -943,7 +921,7 @@ function turnOnBoundaryIntroductionTwoListeners() {
 
             // go to next screen
             // just a placeholder test
-            enterBoundaryCreationMode();
+            createNewBoundary();
         }
     })
 }
@@ -1262,8 +1240,6 @@ function calcPopulationFitness (organisms) {
 }
 
 function calcPopulationFitnessBounds(remaining_distance, organisms, scale) {
-    // scale = length of lines connecting epicenters from spawn>checkpoints>goal
-    // let scale = simGlobals.scale_statistics['scale'];
 
     // calc/set distance_to_goal && fitness
     let total_fitness = 0.00;
@@ -1513,7 +1489,6 @@ function crossover(parents_to_crossover) {
     return crossover_genes;
 }
 
-// [] works
 async function runCrossoverAnimations() {
     await paintbrush.fadeToNewColor(Drawings.drawCrossoverPhaseEntryText, .02);
     await paintbrush.fadeIn(Drawings.drawCrossoverDescriptionText, .025);
@@ -2059,72 +2034,7 @@ function stopSimulation() {
 // ===== EXTRAS / UNKNOWN =====
 // ============================
 
-// this trio of drawings isn't used, but is useful for debugging. Keep til the end
-
-// *DRAWING* 1
-function drawCurrentCheckpoint(index) {
-    // draw farthest checkpoint reached
-    ctx.strokeStyle = 'white';
-    ctx.strokeWidth = 1;
-    ctx.beginPath();
-    ctx.arc(
-        custom_boundary.checkpoints[index].coordinates[0], 
-        custom_boundary.checkpoints[index].coordinates[1],
-        custom_boundary.checkpoints[index].size, 0, Math.PI*2, false
-    );
-    ctx.stroke();
-    ctx.closePath();
-}
-
-// *DRAWING* 2
-function drawPreviousCheckpoint(index) {
-    // draw checkpoint_reached - 1 or spawn point
-    if (index === 'spawn') {
-        // highlight spawn point
-        console.log("highlighting spawn point green");
-        ctx.strokeStyle = 'rgb(155, 245, 0)';
-        ctx.strokeWidth = 3;
-        ctx.beginPath();
-        ctx.arc(INITIAL_X_BOUND, INITIAL_Y_BOUND, 10, 0, Math.PI*2, false);
-        ctx.stroke();
-        ctx.closePath();
-    }
-    else {
-        // highlight k-1
-        console.log("highlighting k-1 checkpoint green");
-        ctx.strokeStyle = 'rgb(155, 245, 0)';
-        ctx.beginPath();
-        ctx.arc(
-            custom_boundary.checkpoints[index].coordinates[0],
-            custom_boundary.checkpoints[index].coordinates[1],
-            custom_boundary.checkpoints[index].size, 0, Math.PI*2, false
-        );
-        ctx.stroke();
-        ctx.closePath();
-    }
-}
-
-// *DRAWING* 3
-function drawNextCheckpoint(index) {
-    // draw next checkpoint not yet reached
-    if (index === 'goal') {
-        // goal is the checkpoint, should circle goal
-        console.log("k = custom_boundary.checkpoints.length - 1, no checkpoint set!!!!!! (need to finish)");
-    }
-    else {
-        ctx.strokeStyle = 'darkred';
-        ctx.beginPath();
-        ctx.arc(
-            custom_boundary.checkpoints[index].coordinates[0],
-            custom_boundary.checkpoints[index].coordinates[1],
-            custom_boundary.checkpoints[index].size, 0, Math.PI*2, false 
-        );
-        ctx.stroke();
-        ctx.closePath;
-    }
-}
-
-// getPixel() functions only used by enterBoundaryCreationMode.draw() and UpdateAndMoveOrganismsBounds()
+// getPixel() functions only used by createNewBoundary.draw() and UpdateAndMoveOrganismsBounds()
 function getPixel(canvas_data, index) {
     let i = index * 4;
     let data = canvas_data.data;

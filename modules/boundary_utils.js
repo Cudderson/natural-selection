@@ -605,4 +605,68 @@ function updateMousePosition(event) {
     simGlobals.coordinates['y'] = Math.floor(event.clientY - rect.top);
 }
 
+// this trio of drawings isn't used, but is useful for debugging. Keep til the end
+// *DRAWING* 1
+function drawCurrentCheckpoint(index) {
+    // draw farthest checkpoint reached
+    ctx.strokeStyle = 'white';
+    ctx.strokeWidth = 1;
+    ctx.beginPath();
+    ctx.arc(
+        simGlobals.custom_boundary.checkpoints[index].coordinates[0], 
+        simGlobals.custom_boundary.checkpoints[index].coordinates[1],
+        simGlobals.custom_boundary.checkpoints[index].size, 0, Math.PI*2, false
+    );
+    ctx.stroke();
+    ctx.closePath();
+}
+
+// *DRAWING* 2
+function drawPreviousCheckpoint(index) {
+    // draw checkpoint_reached - 1 or spawn point
+    if (index === 'spawn') {
+        // highlight spawn point
+        console.log("highlighting spawn point green");
+        ctx.strokeStyle = 'rgb(155, 245, 0)';
+        ctx.strokeWidth = 3;
+        ctx.beginPath();
+        ctx.arc(INITIAL_X_BOUND, INITIAL_Y_BOUND, 10, 0, Math.PI*2, false);
+        ctx.stroke();
+        ctx.closePath();
+    }
+    else {
+        // highlight k-1
+        console.log("highlighting k-1 checkpoint green");
+        ctx.strokeStyle = 'rgb(155, 245, 0)';
+        ctx.beginPath();
+        ctx.arc(
+            simGlobals.custom_boundary.checkpoints[index].coordinates[0],
+            simGlobals.custom_boundary.checkpoints[index].coordinates[1],
+            simGlobals.custom_boundary.checkpoints[index].size, 0, Math.PI*2, false
+        );
+        ctx.stroke();
+        ctx.closePath();
+    }
+}
+
+// *DRAWING* 3
+function drawNextCheckpoint(index) {
+    // draw next checkpoint not yet reached
+    if (index === 'goal') {
+        // goal is the checkpoint, should circle goal
+        console.log("k = custom_boundary.checkpoints.length - 1, no checkpoint set!!!!!! (need to finish)");
+    }
+    else {
+        ctx.strokeStyle = 'darkred';
+        ctx.beginPath();
+        ctx.arc(
+            simGlobals.custom_boundary.checkpoints[index].coordinates[0],
+            simGlobals.custom_boundary.checkpoints[index].coordinates[1],
+            simGlobals.custom_boundary.checkpoints[index].size, 0, Math.PI*2, false 
+        );
+        ctx.stroke();
+        ctx.closePath;
+    }
+}
+
 export { Boundary, updateMousePosition }
