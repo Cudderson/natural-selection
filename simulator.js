@@ -1900,7 +1900,7 @@ async function runGeneration(new_generation) {
         // calcDistanceToGoalCheckpoints(); turning off to make sure sure initially
 
         // get previous, current, and next checkpoints for current generation
-        let checkpoint_data = getFarthestCheckpointReached(organisms);
+        let checkpoint_data = simGlobals.custom_boundary.getFarthestCheckpointReached(organisms);
 
         // this will set each organism's distance_to_next_checkpoint attribute
         // *** i think the problem lies here
@@ -2141,91 +2141,6 @@ function getPixelXY(canvas_data, x, y) {
     // reading left to right, pixel at (2, 2) is pixel #2002 ?
 
     return getPixel(canvas_data, index);
-}
-
-// boundary method?
-function getFarthestCheckpointReached(organisms) {
-    // !!!!! consider passing the previous gen's farthest checkpoint reached as a minimum-value !!!!!
-
-    // **NOTE: this function doesn't handle when 0 checkpoints are reached yet !!** (it might now..)
-
-    // we should loop over checkpoints, check all organisms, rather than loop over all organisms, check every checkpoint
-    // this will allow us to stop once an organism is found (backwards loop)
-
-    let previous_checkpoint;
-    let current_checkpoint;
-    let next_checkpoint;
-    let reached_checkpoint = false;
-
-    for (let k = simGlobals.custom_boundary.checkpoints.length - 1; k >= 0; k--) {
-        console.log("k-loop iteration started");
-        if (reached_checkpoint) {
-            console.log("breaking out of k-loop, checkpoint was reached");
-            break;
-        }
-        for (let j = 0; j < organisms.length; j++) {
-            console.log("j-loop iteration started");
-            // determine if organism is within the perimeter of the current checkpoint being checked
-            // !!! [] don't define these every iteration, define it in outer-loop (checkpoint loop)
-            let x_lower_bound = (simGlobals.custom_boundary.checkpoints[k].coordinates[0]) - simGlobals.custom_boundary.checkpoints[k].size;
-            let x_upper_bound = (simGlobals.custom_boundary.checkpoints[k].coordinates[0]) + simGlobals.custom_boundary.checkpoints[k].size;
-            let y_lower_bound = (simGlobals.custom_boundary.checkpoints[k].coordinates[1]) - simGlobals.custom_boundary.checkpoints[k].size;
-            let y_upper_bound = (simGlobals.custom_boundary.checkpoints[k].coordinates[1]) + simGlobals.custom_boundary.checkpoints[k].size;
-
-            // can replace vars with definitions once confident working
-            // check if organism within x && y bounds of checkpoint we're checking
-            if (organisms[j].x > x_lower_bound && organisms[j].x < x_upper_bound) {
-                if (organisms[j].y > y_lower_bound && organisms[j].y < y_upper_bound) {
-
-                    console.log("We have reached a checkpoint.");
-
-                    reached_checkpoint = true;
-                    current_checkpoint = k;
-
-                    if (k === simGlobals.custom_boundary.checkpoints.length - 1) {
-                        // final checkpoint was reached:
-                        // previous = k-1, next = goal
-                        previous_checkpoint = k - 1;
-                        next_checkpoint = 'goal';
-                    } 
-                    else if (k >= 1) {
-                        // at least second checkpoint was reached:
-                        // previous = k-1, next = k+1
-                        previous_checkpoint = k - 1;
-                        next_checkpoint = k + 1;
-                    }
-                    else {
-                        // k = 0, first checkpoint reached:
-                        // previous: spawn point, next: k+1
-                        previous_checkpoint = 'spawn';
-                        next_checkpoint = k + 1;
-                    }
-
-                    console.log("breaking");
-                    break;
-                }
-            }
-        }
-    }
-
-    if (!reached_checkpoint) {
-        // set first checkpoint as next checkpoint if none reached
-        previous_checkpoint = null;
-        current_checkpoint = 'spawn';
-        next_checkpoint = 0;
-    }
-
-    console.log("break successful. returning previous, current, and next checkpoints");
-    console.log('checkpoint data (previous, current, next) :');
-    console.log(previous_checkpoint);
-    console.log(current_checkpoint);
-    console.log(next_checkpoint);
-
-    return {
-        'previous': previous_checkpoint,
-        'current': current_checkpoint,
-        'next': next_checkpoint
-    }
 }
 
 function checkPulse(organisms) {
