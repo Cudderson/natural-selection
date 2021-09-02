@@ -18,6 +18,9 @@ window.simGlobals = {
 
     // frame rate
     FPS: 30,
+
+    // sim type
+    sim_type: null,
 };
 
 // organism global default settings
@@ -32,13 +35,6 @@ simGlobals.dialogue = false; // [x]
 
 // boundary globals (maybe make window object?)
 simGlobals.custom_boundary; // [] (one drawing: drawBoundary())
-
-// flags
-simGlobals.sim_type; // [x]
-simGlobals.simulation_started = false; // [x]
-
-// track total generations (could be passed in new_generation)
-simGlobals.generation_count = 0; // [x]
 
 // attach canvas & drawing context to window
 window.canvas = document.getElementById("main-canvas");
@@ -1148,7 +1144,7 @@ async function runEvaluationAnimation(organisms, stats) {
         ctx2.clearRect(700, 510, 350, 120);
         Drawings.drawStatsStatic(ctx, stats);
 
-        if (simGlobals.generation_count === 0 && !simGlobals.dialogue) {
+        if (stats.generation_count === 0 && !simGlobals.dialogue) {
             await paintbrush.fadeIn(Drawings.drawBoundary, .01);
             ctx2.globalAlpha = 1;
         }
@@ -1640,7 +1636,7 @@ function createTitleScreenOrganisms() {
     return title_organisms;
 }
 
-// [] make sure function up to date
+// [] make sure function up to date (rAF)
 function fadeInTitleAnimation(title_organisms) {
     let opacity = 0.00;
     let opacity_tracker = 0.00;
@@ -1672,7 +1668,7 @@ function fadeInTitleAnimation(title_organisms) {
 
     return new Promise(resolve => {
         function animateTitle() {
-            if (!finished && !simGlobals.simulation_started) {
+            if (!finished) {
 
                 // respond to event listener flag
                 if (start_button_pressed) {
@@ -1787,13 +1783,14 @@ async function runGeneration(new_generation) {
     let stats = {
         'organism_count': organisms.length,
         'average_fitness': new_generation.average_fitness,
+        'generation_count': new_generation.generation_count,
     }
 
     // intentional var to increase scope access
     // once turned on, this is never turned off
     var simulation_succeeded = new_generation.simulation_succeeded;
 
-    if (simGlobals.generation_count != 0) {
+    if (stats.generation_count != 0) {
         if (simGlobals.dialogue) {
             await paintbrush.fadeIn(Drawings.drawStats, .02, stats);
             await sleep(500);
@@ -1959,6 +1956,7 @@ async function runGeneration(new_generation) {
 
         await runMutationAnimations();
 
+        // maybe add generation_count here
         let gen_summary_stats = {
             'offspring_organisms': offspring_organisms,
             'average_fitness': average_fitness,
@@ -1968,13 +1966,17 @@ async function runGeneration(new_generation) {
     }
 
     // prepare for next generation with necessary data
+    // increment generation_count before resetting object
+    let next_generation_count = new_generation.generation_count += 1;
+
+    // maybe this should be called 'next_generation'?
     new_generation = {};
+    new_generation.generation_count = next_generation_count;
     new_generation.new_population = offspring_organisms;
     new_generation.average_fitness = average_fitness; // this actually represents the previous generation's average fitness, keep in mind.
     new_generation.simulation_succeeded = simulation_succeeded;
 
     return new Promise(resolve => {
-        simGlobals.generation_count++;
         resolve(new_generation);
     })
 }
@@ -1996,8 +1998,6 @@ async function runSimulation () {
         stopSimulation();
     });
 
-    simGlobals.simulation_started = true;
-
     console.log("Running Simulation with these settings:");
     console.log(`Total Organisms: ${simGlobals.TOTAL_ORGANISMS}`);
     console.log(`Gene Count: ${simGlobals.GENE_COUNT}`);
@@ -2018,11 +2018,12 @@ async function runSimulation () {
     new_generation.new_population = initial_population;
     new_generation.average_fitness = 0.00;
     new_generation.simulation_succeeded = false;
+    new_generation.generation_count = 0;
 
     do {
         new_generation = await runGeneration(new_generation);
-        // console.log(result);
-    } while (simGlobals.generation_count < 1000);
+        console.log(new_generation.generation_count);
+    } while (new_generation.generation_count < 1000);
 }
 
 function stopSimulation() {

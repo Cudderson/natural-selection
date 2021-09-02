@@ -92,7 +92,7 @@ function drawStats(opacity, stats) {
     ctx2.fillStyle = `rgba(155, 245, 0, ${opacity})`;
     ctx2.font = "22px arial";
     ctx2.fillText('Generation:', 740, 535);
-    ctx2.fillText(simGlobals.generation_count.toString(), 940, 535); // keeping global until decision
+    ctx2.fillText(stats.generation_count.toString(), 940, 535);
     ctx2.fillText('Population Size:', 740, 560);
     ctx2.fillText(stats.organism_count.toString(), 940, 560);
     ctx2.fillText('Average Fitness:', 740, 585);
@@ -106,7 +106,7 @@ function drawStatsStatic(context, stats) {
     context.fillStyle = `rgba(155, 245, 0, 1)`;
     context.font = "22px arial";
     context.fillText('Generation:', 740, 535);
-    context.fillText(simGlobals.generation_count.toString(), 940, 535);
+    context.fillText(stats.generation_count.toString(), 940, 535);
     context.fillText('Population Size:', 740, 560);
     context.fillText(stats.organism_count.toString(), 940, 560);
     context.fillText('Average Fitness:', 740, 585);
@@ -464,8 +464,9 @@ function drawCreateNewGenPhaseEntryText(opacity, old_opacity) {
     ctx2.fillText("Create New Generation", 10, 30);
 } 
 
+// still need to pas gen count here
 function drawGenerationSummaryText(opacity, gen_summary_stats) {
-    let generation_summary_text = `Generation ${simGlobals.generation_count} Summary:`;
+    let generation_summary_text = `Generation ${gen_summary_stats.generation_count} Summary:`;
     let generation_average_fitness_preface = 'Average Fitness:';
     let generation_offspring_reproduced_preface = 'Offspring Reproduced:';
 
@@ -640,8 +641,8 @@ function drawBoundary(opacity) {
 }
 
 // win/lose scenarios
-
-function drawSuccessMessage(opacity) {
+// still need to pass generation_count from caller
+function drawSuccessMessage(opacity, generation_count) {
 
     ctx.font = '44px arial';
     ctx.fillStyle = 'black';
@@ -651,9 +652,9 @@ function drawSuccessMessage(opacity) {
 
     ctx.font = '30px arial';
     ctx.fillStyle = 'black';
-    ctx.fillText(`Generations: ${simGlobals.generation_count}`, 420, 340);
+    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(`Generations: ${simGlobals.generation_count}`, 420, 340);
+    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
 
     ctx.font = '26px arial';
     ctx.fillStyle = 'black';
