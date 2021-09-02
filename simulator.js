@@ -1,6 +1,10 @@
 document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
 import * as Drawings from "./modules/drawings.js";
+import * as BoundaryUtils from "./modules/boundary_utils.js";
+
+// testing boundary module
+BoundaryUtils.testMod(777);
 
 // ===== vars =====
 
