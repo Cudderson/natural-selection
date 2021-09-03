@@ -4,8 +4,6 @@ import * as Drawings from "./modules/drawings.js";
 import * as BoundaryUtils from "./modules/boundary_utils.js";
 import * as SettingsUtils from "./modules/settings_utils.js";
 
-SettingsUtils.testSettingsMod();
-
 // ===== vars =====
 
 window.simGlobals = {
@@ -251,224 +249,8 @@ class Paintbrush {
 
 // converting settings to module
 
-function displaySettingsForm() {
 
-    // ensure only settings button showing
-    document.getElementsByClassName("settings-btn")[0].style.display = 'block';
-    document.getElementsByClassName("run-btn")[0].style.display = 'none';
-    document.getElementsByClassName("stop-btn")[0].style.display = 'none';
-    document.getElementsByClassName("save-boundaries-btn")[0].style.display = 'none';
 
-    // turn off canvas, turn on settings
-    document.getElementsByClassName("canvas-container")[0].style.display = 'none';
-    document.getElementsByClassName("settings-container")[0].style.display = 'block';
-
-    if (simGlobals.sim_type === 'classic') {
-        // display classic settings (no death/resilience)
-        document.getElementsByClassName("resilience-setting-label")[0].style.display = 'none';
-        document.getElementsByClassName("resilience-input")[0].style.display = 'none';
-    }
-
-    // movement setting helper (move/abstract)
-    let movement_speed_setting = document.getElementById("move-speed");
-    let error_message = document.getElementsByClassName("error-message")[0];
-
-    movement_speed_setting.addEventListener('focusin', function() {
-        error_message.style.color = "var(--closest_organism_gold)";
-        error_message.innerHTML = "Movement Speed Range: 1 - 7";
-        movement_speed_setting.addEventListener('focusout', function() {
-            error_message.style.color = 'var(--mother-pink)';
-            error_message.innerHTML = "";
-        })
-    })
-
-    movement_speed_setting.addEventListener('keydown', function(event) {
-        // function blocks keystrokes not within the acceptable range for movement speed
-        let keystroke = preValidateMovementSetting(event);
-        if (keystroke === 1) {
-            event.preventDefault();
-        }
-    });
-
-    // turn on listener for apply button
-    document.getElementById("apply-form").addEventListener('submit', function submitForm(event) {
-        // don't submit form
-        event.preventDefault();
-    
-        validateSettingsForm();
-    });
-
-}
-
-// [] should stop title screen animation when settings is called
-function validateSettingsForm() {
-
-    let error_message = document.getElementsByClassName("error-message")[0];
-
-    // clear error message on call
-    error_message.style.color = "var(--mother-pink)";
-    error_message.innerHTML = "";
-
-    let settings_manager = {};
-
-    // returns error message or "valid"
-    settings_manager['organisms_setting'] = validateTotalOrganismsSetting();
-    settings_manager['movement_setting'] = validateMovementSetting();
-    settings_manager['gene_setting'] = validateGeneCountSetting();
-    settings_manager['mutation_setting'] = validateMutationRateSetting();
-    settings_manager['resilience_setting'] = validateResilienceSetting();
-
-    // should make value red too, and change to green on keystroke
-    for (let message in settings_manager) {
-        if (settings_manager[message] != "valid") {
-            error_message.innerHTML = settings_manager[message];
-            return false;
-        }
-    }
-
-    // dialogue
-    let dialogue_setting = document.getElementById("dialogue-checkbox");
-    if (dialogue_setting.checked) {
-        simGlobals.dialogue = true;
-    }
-    else {
-        simGlobals.dialogue = false;
-    }
-
-    // turns off settings form, turns on canvas and run-btn + listener
-    finishApplyingSettings();
-
-    // restart animation ===
-    // here, we should instead bring user to a screen that tells them their simulation is
-    // ready to run, and present a button/cue to begin simulation
-
-    // playTitleScreenAnimation();
-    Drawings.prepareToRunSimulation();
-
-    // don't submit the form
-    return false;
-}
-
-function validateTotalOrganismsSetting() {
-    let total_organisms_setting = document.getElementById("total-organisms");
-
-    if (typeof parseInt(total_organisms_setting.value) === 'number' && parseInt(total_organisms_setting.value) > 0) {
-        if (parseInt(total_organisms_setting.value > 9999)) {
-            simGlobals.TOTAL_ORGANISMS = 9999;
-        }
-        else {
-            simGlobals.TOTAL_ORGANISMS = Math.abs(parseInt(total_organisms_setting.value));
-        }
-        total_organisms_setting.style.borderBottom = '2px solid var(--custom-green)';
-        return 'valid';
-    }
-    else {
-        total_organisms_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        return '* Invalid number of organisms. Please input a positive number.';
-    }
-}
-
-function validateGeneCountSetting() {
-    let gene_count_setting = document.getElementById("gene-count");
-
-    if (typeof parseInt(gene_count_setting.value) === 'number' && parseInt(gene_count_setting.value) > 0) {
-        if (parseInt(gene_count_setting.value) > 1000) {
-            simGlobals.GENE_COUNT = 1000;
-        }
-        else {
-            simGlobals.GENE_COUNT = Math.abs(parseInt(gene_count_setting.value));
-        }
-        gene_count_setting.style.borderBottom = '2px solid var(--custom-green)';
-        return "valid";
-    }
-    else {
-        gene_count_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        return "* Invalid gene count. Please input a positive number.";
-    }
-}
-
-function validateMutationRateSetting() {
-    let mutation_rate_setting = document.getElementById("mutation-rate");
-
-    // consider allowing float here
-    if (typeof parseInt(mutation_rate_setting.value) === 'number' && parseInt(mutation_rate_setting.value) > 0) {
-        if (parseInt(mutation_rate_setting.value) > 100) {
-            simGlobals.MUTATION_RATE = 1;
-        }
-        else {
-            simGlobals.MUTATION_RATE = parseInt(mutation_rate_setting.value) / 100;
-        }
-        mutation_rate_setting.style.borderBottom = '2px solid var(--custom-green)';
-        return "valid";
-    }
-    else {
-        mutation_rate_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        return "Invalid mutation rate. Please input a positive percentage value. (3 = 3%)";
-    }
-}
-
-function preValidateMovementSetting(event) {
-
-    // prevent keystrokes that aren't === 1-7 || Backspace, <, > 
-    let movement_key = event.key;
-    if (movement_key > "0" && movement_key <= "7") {
-        return 0;
-    }
-    else if (movement_key === "Backspace" || movement_key === "ArrowLeft" || movement_key === "ArrowRight") {
-        return 0;
-    }
-    else {
-        return 1;
-    }
-}
-
-function validateMovementSetting() {
-    let movement_speed_setting = document.getElementById("move-speed");
-
-    // create max and min genes from movement speed
-    // pre-validated in preValidateMovementSetting();
-    if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 7) {
-        simGlobals.MIN_GENE = parseInt(movement_speed_setting.value) * -1;
-        simGlobals.MAX_GENE = parseInt(movement_speed_setting.value);
-        movement_speed_setting.style.borderBottom = "2px solid var(--custom-green)";
-        return "valid";
-    } 
-    else {
-        movement_speed_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        return "Invalid movement speed. Please input a positive number between 1 - 7.";
-    }   
-}
-
-function validateResilienceSetting() {
-    // we want to only allow numbers from 0 - 100 inclusive
-
-    let resilience_setting = document.getElementById("resilience");
-
-    if (parseInt(resilience_setting.value) >= 0 && parseInt(resilience_setting.value) <= 100 && typeof parseInt(resilience_setting.value) === 'number') {
-        simGlobals.RESILIENCE = parseInt(resilience_setting.value) / 100;
-        resilience_setting.style.borderBottom = "2px solid var(--custom-green)";
-        return "valid";
-    } 
-    else {
-        resilience_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        return "Invalid resilience value. Please input a positive number between 0 - 100";
-    } 
-}
-
-// needs better name
-function finishApplyingSettings() {
-    // make html changes before function returns
-    document.getElementsByClassName("canvas-container")[0].style.display = 'block';
-    document.getElementsByClassName("settings-container")[0].style.display = 'none';
-
-    let start_btn = document.getElementsByClassName("run-btn")[0];
-    start_btn.style.display = 'block';
-
-    // allow btn-click to runSimulation()
-    start_btn.addEventListener("click", runSimulation);
-
-    return 0;
-}
 
 // ====================
 // ===== BOUNDARY =====
@@ -718,19 +500,17 @@ function createNewBoundary() {
         // creates checkpoints, sets scale attribute
         new_boundary.prepareBoundaryForSimulation();
 
-        // ===== here (all working)=====
-
-        // could make global here, then pass locally in runSimulation()?
-        // this seems like the best idea, otherwise we'd have to pass boundary through all of settings
+        // make boundary global
         simGlobals.custom_boundary = new_boundary;
 
-        // return to settings
+        // turn off listeners
+        canvas.removeEventListener('mouseenter', BoundaryUtils.updateMousePosition);
+        canvas.removeEventListener('mousedown', requestDrawingPermission);
+        canvas.removeEventListener('mousemove', draw);
+        canvas.removeEventListener('mouseup', validateBoundaryConnection);
 
-        // should we turn off all listeners here???
-        // - not yet. user could choose to redraw boundary?
-
-        // ===== this should display boundary version of settings form =====
-        displaySettingsForm();
+        // set global sim settings
+        SettingsUtils.configureSettings();
     });
 }
 
@@ -927,7 +707,7 @@ function turnOnBoundaryIntroductionTwoListeners() {
     })
 }
 
-function applySimType() {
+async function applySimType() {
 
     // turn off listeners and hide buttons
     turnOffSimTypeSelectionEventListeners();
@@ -935,8 +715,12 @@ function applySimType() {
     document.getElementsByClassName("sim-type-classic")[0].style.display = 'none';
     document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
 
+    // allow btn-click to runSimulation() (still hidden)
+    document.getElementsByClassName("run-btn")[0].addEventListener("click", runSimulation);
+
     if (simGlobals.sim_type === 'classic') {
-        displaySettingsForm();
+        // set global sim settings
+        SettingsUtils.configureSettings();
     }
     else if (simGlobals.sim_type === 'boundary') {
         // user must create boundary before settings configuration
