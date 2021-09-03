@@ -73,37 +73,19 @@ function validateTotalOrganismsSetting() {
     }
 }
 
-function validateGeneCountSetting() {
-    let gene_count_setting = document.getElementById("gene-count");
-    let valid_setting;
-
-    if (typeof parseInt(gene_count_setting.value) === 'number' && parseInt(gene_count_setting.value) > 0) {
-        if (parseInt(gene_count_setting.value) > 1000) {
-            // simGlobals.GENE_COUNT = 1000;
-            valid_setting = 1000;
-        }
-
-        else {
-            // simGlobals.GENE_COUNT = Math.abs(parseInt(gene_count_setting.value));
-            valid_setting = Math.abs(parseInt(gene_count_setting.value));
-        }
-
-        gene_count_setting.style.borderBottom = '2px solid var(--custom-green)';
-
-        return {
-            'status': 'valid',
-            'value': valid_setting
-        }
+// must be called after settings submitted
+function calculateGeneCount() {
+    // we need:
+    // scale (boundary only) which is global via window.custom_boundary
+    let gene_count;
+    if (simGlobals.sim_type === 'classic') {
+        gene_count = 1250 / simGlobals.MAX_GENE;
+    }
+    else if (simGlobals.sim_type === 'boundary') {
+        gene_count = (simGlobals.custom_boundary.scale_statistics.scale * 3) / simGlobals.MAX_GENE;
     }
 
-    else {
-        gene_count_setting.style.borderBottom = '2px solid var(--mother-pink)';
-
-        return {
-            'status': 'invalid',
-            'value': "* Invalid gene count. Please input a positive number."
-        }
-    }
+    return gene_count;
 }
 
 function validateMutationRateSetting() {
@@ -227,7 +209,7 @@ function validateSettingsForm() {
 
     settings_manager.organisms_setting = validateTotalOrganismsSetting();
     settings_manager.movement_setting = validateMovementSetting();
-    settings_manager.gene_setting = validateGeneCountSetting();
+    // settings_manager.gene_setting = validateGeneCountSetting();
     settings_manager.mutation_setting = validateMutationRateSetting();
     settings_manager.resilience_setting = validateResilienceSetting();
 
@@ -268,8 +250,9 @@ function applyValidSettings(settings_manager) {
     simGlobals.TOTAL_ORGANISMS = settings_manager.organisms_setting.value;
     simGlobals.MIN_GENE = settings_manager.movement_setting.value * -1;
     simGlobals.MAX_GENE = settings_manager.movement_setting.value;
-    simGlobals.GENE_COUNT = settings_manager.gene_setting.value;
+    // simGlobals.GENE_COUNT = settings_manager.gene_setting.value;
     simGlobals.MUTATION_RATE = settings_manager.mutation_setting.value;
+    simGlobals.GENE_COUNT = calculateGeneCount();
 
     if (simGlobals.sim_type === 'boundary') {
         simGlobals.RESILIENCE = settings_manager.resilience_setting.value;
@@ -288,7 +271,7 @@ function applyValidSettings(settings_manager) {
     return false;
 }
 
-// this function will receive valid settings to be applied to global simSettings/simGlobals
+// this function triggers settings form display and creates listener for submitted form
 function configureSettings() {
 
     // turn on listener for apply button
@@ -304,8 +287,8 @@ function configureSettings() {
 
 export {
     displaySettingsForm, validateTotalOrganismsSetting,
-    validateGeneCountSetting, validateMutationRateSetting,
-    preValidateMovementSetting, validateMovementSetting,
-    validateResilienceSetting, validateSettingsForm,
-    configureSettings,
+    validateMutationRateSetting, preValidateMovementSetting,
+    validateMovementSetting, validateResilienceSetting,
+    validateSettingsForm, configureSettings,
+    calculateGeneCount,
 }

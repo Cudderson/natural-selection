@@ -68,18 +68,12 @@ body {
 
 .organisms-setting-label,
 .movement-setting-label,
-.gene-setting-label,
 .mutation-setting-label,
 .resilience-setting-label {
     grid-column: 1 / 2;
     font-size: 40px;
     color: var(--custom-green);
 }
-
-/* #total-organisms, #move-speed,
-#gene-count, #mutation-rate {
-    display: none;
-} */
 
 .dialogue-setting-span {
     font-size: 40px;
