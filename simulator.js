@@ -24,6 +24,7 @@ window.simGlobals = {
     MIN_GENE: -5,
     MAX_GENE: 5,
     RESILIENCE: 1.00,
+    POP_GROWTH: 'constant', // testing new setting (other value: 'fluctuate')
     
     dialogue: false,
 
@@ -1096,6 +1097,8 @@ function beginSelectionProcess(organisms) {
 
 function selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length) {
 
+    // this function creates parent couples === length of organisms / 2
+
     // example
     // var parents = [
     //     [mother0, father0],
@@ -1287,11 +1290,21 @@ async function runMutationAnimations() {
 // =================================
 
 function determineOffspringCount() {
-    // this shouldn't be declared every call.. (fix)
-    let possible_offspring_counts = [0, 0, 1, 1, 2, 2, 2, 3, 4, 5]; // sum = 20, 20/10items = 2avg
 
-    let offspring_count_index = Math.floor(Math.random() * possible_offspring_counts.length);
-    let offspring_count = possible_offspring_counts[offspring_count_index];
+    let offspring_count;
+
+    if (simGlobals.POP_GROWTH === 'fluctuate') {
+        // this shouldn't be declared every call.. (fix)
+        let possible_offspring_counts = [0, 0, 1, 1, 2, 2, 2, 3, 4, 5]; // sum = 20, 20/10 items = 2avg
+
+        let offspring_count_index = Math.floor(Math.random() * possible_offspring_counts.length);
+        offspring_count = possible_offspring_counts[offspring_count_index];
+    }
+    else if (simGlobals.POP_GROWTH === 'constant') {
+        // each couple will produce 2 offspring
+        offspring_count = 2; 
+    }
+
     return offspring_count;
 }
 
@@ -1340,11 +1353,7 @@ function reproduceNewGeneration(parents) {
             offspring_organisms.push(offspring);
         }
     }
-    // set offspring_organisms as next generation of organisms
-    // simGlobals.organisms = simGlobals.offspring_organisms;
-    // simGlobals.offspring_organisms = [];
 
-    // let's return organisms / offspring_organisms
     return offspring_organisms;
 }
 
@@ -1726,6 +1735,13 @@ async function runGeneration(new_generation) {
     // this function pushes new gen organisms to offspring_organisms[]
     // get next generation of organisms
     let offspring_organisms = reproduceNewGeneration(parents);
+
+    // trim-off 1 organism to keep pop. size constant for odd number of organisms (reproduceNewGeneration() can only produce even number of organisms (constant-sims only))
+    if (simGlobals.POP_GROWTH === 'constant') {
+        if (offspring_organisms.length === organisms.length + 1) {
+            offspring_organisms.pop();
+        }
+    }
 
     // we are done with organisms
     organisms = [];
