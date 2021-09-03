@@ -16,17 +16,13 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="manifest" href="/site.webmanifest">
-
-  <!--testing loading fonts from html so canvas can use them right away-->
-  <style>
-    html {
-      font-family: 'Cairo', 'Roboto', sans-serif;
-      font-family: 'Roboto', sans-serif;
-    }
-  </style>
 </head>
 
 <body>
+  <!--testing loading fonts with DOM by assigning them to an element (seems to be working)-->
+  <span style="font-family: Roboto">.</span>
+  <span style="font-family: Cairo">.</span>
+
   <img id="logo" src="natural_selection_sim_logo.png">
   <img id="press-start" src="press_start_text.png">
   <img id="classic-example" src="classic_example.png">
