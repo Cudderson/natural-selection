@@ -6,6 +6,10 @@
     --custom-green: rgba(155, 245, 0, 1);
 }
 
+html {
+    font-family: 'Cairo', sans-serif;
+}
+
 body {
     background: black;
 }

@@ -4,11 +4,11 @@ function drawSimulationSettings(opacity, content) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.font = "30px arial";
+    ctx.font = "30px Cairo";
     ctx.fillText("Simulation Settings", 300, 195);
     ctx.fillRect(300, 197, 260, 1);
 
-    ctx.font = "24px arial";
+    ctx.font = "24px Cairo";
     ctx.fillText(`Initial Population:`, 300, 250);
     ctx.fillText(`Gene Count:`, 300, 290);
     ctx.fillText(`Movement Speed:`, 300, 330);
@@ -90,7 +90,7 @@ function drawStats(opacity, stats) {
     ctx2.clearRect(700, 510, 350, 120);
 
     ctx2.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx2.font = "22px arial";
+    ctx2.font = "22px Cairo";
     ctx2.fillText('Generation:', 740, 535);
     ctx2.fillText(stats.generation_count.toString(), 940, 535);
     ctx2.fillText('Population Size:', 740, 560);
@@ -104,7 +104,7 @@ function drawStatsStatic(context, stats) {
     context.clearRect(700, 510, 350, 120);
 
     context.fillStyle = `rgba(155, 245, 0, 1)`;
-    context.font = "22px arial";
+    context.font = "22px Cairo";
     context.fillText('Generation:', 740, 535);
     context.fillText(stats.generation_count.toString(), 940, 535);
     context.fillText('Population Size:', 740, 560);
@@ -117,7 +117,7 @@ function drawStatsStatic(context, stats) {
 function drawPhases(opacity) {
     ctx2.clearRect(0, 0, 245, 150);
 
-    ctx2.font = "20px arial";
+    ctx2.font = "20px Cairo";
 
     ctx2.fillStyle = `rgba(100, 100, 100, ${opacity})`;
     ctx2.fillText("Create New Generation", 10, 30);
@@ -139,7 +139,7 @@ function drawPhases(opacity) {
 function drawEvaluationPhaseEntryText(opacity, old_opacity) {
     ctx2.clearRect(10, 40, 180, 20);
 
-    ctx2.font = "20px arial";
+    ctx2.font = "20px Cairo";
 
     ctx2.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
     ctx2.fillText("Evaluate Individuals", 10, 60);
@@ -152,7 +152,7 @@ function drawEvaluationPhaseEntryText(opacity, old_opacity) {
 function drawEvaluationPhaseExitText(opacity, old_opacity) {
     ctx2.clearRect(10, 40, 180, 20);
 
-    ctx2.font = "20px arial";
+    ctx2.font = "20px Cairo";
     ctx2.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
     ctx2.fillText("Evaluate Individuals", 10, 60);
 
@@ -163,7 +163,7 @@ function drawEvaluationPhaseExitText(opacity, old_opacity) {
 function drawStaticEvaluationPhaseText(context) {
     context.clearRect(0, 0, 245, 150);
 
-    context.font = "20px arial";
+    context.font = "20px Cairo";
 
     context.fillStyle = `rgba(100, 100, 100, 1)`;
     context.fillText("Create New Generation", 10, 30);
@@ -185,7 +185,7 @@ function drawStaticEvaluationPhaseText(context) {
 function drawStaticSelectionPhaseText(context) {
     context.clearRect(0, 0, 245, 150);
 
-    context.font = "20px arial";
+    context.font = "20px Cairo";
 
     context.fillStyle = `rgba(100, 100, 100, 1)`;
     context.fillText("Create New Generation", 10, 30);
@@ -207,7 +207,7 @@ function drawStaticSelectionPhaseText(context) {
 function drawSelectionPhaseEntryText(opacity, old_opacity) {
     ctx2.clearRect(10, 70, 245, 20);
 
-    ctx2.font = "20px arial";
+    ctx2.font = "20px Cairo";
 
     ctx2.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
     ctx2.fillText("Select Most-Fit Individuals", 10, 90);
@@ -219,7 +219,7 @@ function drawSelectionPhaseEntryText(opacity, old_opacity) {
 function drawClosestOrganismText(opacity) {
     ctx.clearRect(750, 450, 275, 20);
 
-    ctx.font = "20px arial";
+    ctx.font = "20px Cairo";
     ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
     ctx.fillText("Most-Fit Individual", 800, 470);   
 }
@@ -241,7 +241,7 @@ function drawClosestOrganismNatural(opacity) {
 function drawMothersText(opacity) {
     ctx.clearRect(750, 480, 275, 20);
     
-    ctx.font = "20px arial";
+    ctx.font = "20px Cairo";
     ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
     ctx.fillText("Females Selected", 800, 500);
 }
@@ -249,7 +249,7 @@ function drawMothersText(opacity) {
 function drawFathersText(opacity) {
     ctx.clearRect(750, 510, 275, 20);
 
-    ctx.font = "20px arial";
+    ctx.font = "20px Cairo";
     ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
     ctx.fillText("Males Selected", 800, 530);
 }
@@ -293,7 +293,7 @@ function drawFathersNatural(opacity) {
 function drawNotChosenText(opacity) {
     ctx.clearRect(750, 540, 275, 20);
 
-    ctx.font = "20px arial";
+    ctx.font = "20px Cairo";
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.fillText("Not Selected", 800, 560);
 }
@@ -301,7 +301,7 @@ function drawNotChosenText(opacity) {
 function drawAllSelectedOrganismsText(opacity) {
     ctx.clearRect(750, 480, 275, 100);
 
-    ctx.font = "20px arial";
+    ctx.font = "20px Cairo";
     ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
     ctx.fillText("Females Selected", 800, 500);
 
@@ -365,7 +365,7 @@ function drawDeceasedOrganisms(opacity, deceased_organisms) {
 function drawSelectionPhaseExitText(opacity, old_opacity) {
     ctx2.clearRect(10, 70, 245, 20);
 
-    ctx2.font = "20px arial";
+    ctx2.font = "20px Cairo";
 
     ctx2.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
     ctx2.fillText("Select Most-Fit Individuals", 10, 90);
@@ -378,7 +378,7 @@ function drawSelectionPhaseExitText(opacity, old_opacity) {
 function drawCrossoverPhaseEntryText(opacity, old_opacity) {
     ctx2.clearRect(10, 100, 200, 20);
 
-    ctx2.font = "20px arial";
+    ctx2.font = "20px Cairo";
 
     ctx2.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
     ctx2.fillText("Crossover", 10, 120);
@@ -392,7 +392,7 @@ function drawCrossoverDescriptionText(opacity) {
 
     var description = "Genes of the selected parent couples are combined to create new offspring.";
 
-    ctx.font = "20px arial";
+    ctx.font = "20px Cairo";
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.fillText(description, 200, 300);
 }
@@ -401,7 +401,7 @@ function drawCrossoverDescriptionText(opacity) {
 function drawCrossoverPhaseExitText(opacity, old_opacity) {
     ctx2.clearRect(10, 100, 100, 20);
 
-    ctx2.font = "20px arial";
+    ctx2.font = "20px Cairo";
 
     ctx2.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
     ctx2.fillText("Crossover", 10, 120);
@@ -414,7 +414,7 @@ function drawCrossoverPhaseExitText(opacity, old_opacity) {
 function drawMutationPhaseEntryText(opacity, old_opacity) {
     ctx2.clearRect(10, 130, 200, 20);
 
-    ctx2.font = "20px arial";
+    ctx2.font = "20px Cairo";
 
     ctx2.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
     ctx2.fillText("Mutate", 10, 150);
@@ -429,11 +429,11 @@ function drawMutationDescriptionText(opacity) {
     var description = "To maintain genetic diversity, a small percentage of random genes are mutated";
     var mutation_rate_text = `Mutation Rate: ${(simGlobals.MUTATION_RATE * 100).toFixed(2)}%`.toString();
 
-    ctx.font = "20px arial";
+    ctx.font = "20px Cairo";
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.fillText(description, 190, 300);
 
-    ctx.font = "22px arial";
+    ctx.font = "22px Cairo";
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
     ctx.fillText(mutation_rate_text, 420, 350);
 }
@@ -442,7 +442,7 @@ function drawMutationDescriptionText(opacity) {
 function drawMutationPhaseExitText(opacity, old_opacity) {
     ctx2.clearRect(10, 130, 100, 20);
 
-    ctx2.font = "20px arial";
+    ctx2.font = "20px Cairo";
 
     ctx2.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
     ctx2.fillText("Mutate", 10, 150);
@@ -455,7 +455,7 @@ function drawMutationPhaseExitText(opacity, old_opacity) {
 function drawCreateNewGenPhaseEntryText(opacity, old_opacity) {
     ctx2.clearRect(10, 10, 250, 20);
 
-    ctx2.font = "20px arial";
+    ctx2.font = "20px Cairo";
 
     ctx2.fillStyle = `rgba(100, 100, 100, ${old_opacity})`;
     ctx2.fillText("Create New Generation", 10, 30);
@@ -472,11 +472,11 @@ function drawGenerationSummaryText(opacity, gen_summary_stats) {
 
     ctx.clearRect(100, 250, 800, 200);
 
-    ctx.font = "22px arial";
+    ctx.font = "22px Cairo";
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.fillText(generation_summary_text, 380, 280);
 
-    ctx.font = "20px arial";
+    ctx.font = "20px Cairo";
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.fillText(generation_average_fitness_preface, 380, 330);
 
@@ -494,7 +494,7 @@ function drawGenerationSummaryText(opacity, gen_summary_stats) {
 function drawCreateNewGenPhaseExitText(opacity, old_opacity) {
     ctx2.clearRect(10, 10, 215, 20);
 
-    ctx2.font = "20px arial";
+    ctx2.font = "20px Cairo";
 
     ctx2.fillStyle = `rgba(155, 245, 0, ${old_opacity})`;
     ctx2.fillText("Create New Generation", 10, 30);
@@ -564,7 +564,7 @@ function drawBoundaryCreationIntroductionTwo() {
 function drawBoundaryDrawingHelpText(step) {
 
     ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font= "24px arial";
+    ctx.font= "24px Cairo";
     ctx.fillText(step, 80, 40);
 
     ctx.font = '18px arial';
@@ -580,7 +580,7 @@ function drawBoundaryDrawingHelpText(step) {
 
 function drawBoundaryValidationHelpText() {
     ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font= "24px arial";
+    ctx.font= "24px Cairo";
     ctx.fillText("Validation", 70, 40);
 
     ctx.font = '18px arial';
@@ -688,7 +688,7 @@ function drawExtinctionMessage() {
     ctx.font = '50px arial';
     ctx.fillText("Simulation Failed", 310, 250);
 
-    ctx.font = "30px arial";
+    ctx.font = "30px Cairo";
     ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
 
     ctx.font = '22px arial';
@@ -699,10 +699,10 @@ function drawExtinctionMessage() {
     ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
     ctx.fillText("Simulation Failed", 310, 250);
 
-    ctx.font = "22px arial";
+    ctx.font = "22px Cairo";
     ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
 
-    ctx.font = "30px arial";
+    ctx.font = "30px Cairo";
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
 }
@@ -827,9 +827,9 @@ function drawInitialSimSelectionScreen() {
 
     // could turn this initial drawing into a function too
     ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.font = '50px arial';
+    ctx.font = '50px Cairo';
     ctx.fillText("Select Simulation Type", 240, 80);
-    ctx.font = '30px arial';
+    ctx.font = '30px Cairo';
     ctx.fillText("Classic", 190, 500);
     ctx.fillText("Boundary", 690, 500);
 
