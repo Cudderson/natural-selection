@@ -17,22 +17,22 @@ window.simGlobals = {
     GOAL_X_POS_BOUNDS: 925,
     GOAL_Y_POS_BOUNDS: 50,
 
+    // population/species defaults (consider leaving blank until user chooses)
+    TOTAL_ORGANISMS: 100,
+    GENE_COUNT: 250,
+    MUTATION_RATE: 0.03,
+    MIN_GENE: -5,
+    MAX_GENE: 5,
+    RESILIENCE: 1.00,
+    
+    dialogue: false,
+
     // frame rate
     FPS: 30,
 
     // sim type
     sim_type: null,
 };
-
-// organism global default settings
-simGlobals.TOTAL_ORGANISMS = 100; // [x]
-simGlobals.GENE_COUNT = 250; // [x]
-simGlobals.MUTATION_RATE = 0.03; // [x]
-simGlobals.MIN_GENE = -5; // [x]
-simGlobals.MAX_GENE = 5; // [x]
-// for boundary sims
-simGlobals.RESILIENCE = 1.00; // [x]
-simGlobals.dialogue = false; // [x]
 
 // boundary globals (maybe make window object?)
 simGlobals.custom_boundary; // [] (one drawing: drawBoundary())
@@ -242,15 +242,6 @@ class Paintbrush {
         }) 
     }
 }
-
-// =======================
-// ===== SETTINGS =====
-// =======================
-
-// converting settings to module
-
-
-
 
 // ====================
 // ===== BOUNDARY =====
@@ -651,6 +642,7 @@ function handleSimTypeSelectionKeyPress(event) {
     }  
 }
 
+// boundary class methods? (could import boundary drawings required to boundary_utils.js)
 function turnOnBoundaryIntroductionOneListeners() {
     let next_btn = document.getElementsByClassName("next-btn")[0];
     next_btn.style.display = 'block';
@@ -1425,7 +1417,6 @@ function createTitleScreenOrganisms() {
     return title_organisms;
 }
 
-// [] make sure function up to date (rAF)
 function fadeInTitleAnimation(title_organisms) {
     let opacity = 0.00;
     let opacity_tracker = 0.00;
@@ -1436,6 +1427,8 @@ function fadeInTitleAnimation(title_organisms) {
     let logo = document.getElementById("logo");
     let press_start_text = document.getElementById("press-start");
     let start_btn = document.getElementsByClassName("start-btn")[0];
+
+    let frame_id;
 
     start_btn.addEventListener("click", function updateStartBtnFlagOnClick() {
         console.log("Start Button Clicked");
@@ -1521,7 +1514,7 @@ function fadeInTitleAnimation(title_organisms) {
                 // FPS is an example of a variable that doesn't need to be global ( in window )
                 sleep(750 / simGlobals.FPS); // control drawing FPS for organisms
                 // var????? why
-                var frame_id = requestAnimationFrame(animateTitle);
+                frame_id = requestAnimationFrame(animateTitle);
             }
             else {
                 // resolves every n cycles to prevent overflow
@@ -1558,7 +1551,6 @@ async function playTitleScreenAnimation() {
 // ===== MAIN =====
 // ================
 
-// maybe async ruins this functions performance?
 // not converted var >> let yet
 async function runGeneration(new_generation) {
 
