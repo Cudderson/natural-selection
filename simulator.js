@@ -1,63 +1,48 @@
 document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
 
 import * as Drawings from "./modules/drawings.js";
+import * as BoundaryUtils from "./modules/boundary_utils.js";
+import * as SettingsUtils from "./modules/settings_utils.js";
 
 // ===== vars =====
 
-window.simGlobals = {};
+window.simGlobals = {
+    // spawn/goal coordinates for both sim types
+    INITIAL_X: 500,
+    INITIAL_Y: 500,
+    INITIAL_X_BOUND: 50,
+    INITIAL_Y_BOUND: 550,
+    GOAL_X_POS: 500,
+    GOAL_Y_POS: 50,
+    GOAL_X_POS_BOUNDS: 925,
+    GOAL_Y_POS_BOUNDS: 50,
 
-// *** Check box of variable that is okay to be in simSettings
+    // population/species defaults (consider leaving blank until user chooses)
+    TOTAL_ORGANISMS: 100,
+    GENE_COUNT: 250,
+    MUTATION_RATE: 0.03,
+    MIN_GENE: -5,
+    MAX_GENE: 5,
+    RESILIENCE: 1.00,
+    POP_GROWTH: 'constant', // testing new setting (other value: 'fluctuate')
+    
+    dialogue: false,
 
-// [x] factor simulation_succeeded out of simGlobals and into generation resolution package
+    // frame rate
+    FPS: 30,
 
-// starting coordinates for organisms and goal
-simGlobals.INITIAL_X = 500; // [x] 
-simGlobals.INITIAL_Y = 500; // [x]
-simGlobals.GOAL_X_POS = 500; // [x]
-simGlobals.GOAL_Y_POS = 50; // [x]
+    // sim type
+    sim_type: null,
+};
 
-// organism global default settings
-simGlobals.TOTAL_ORGANISMS = 100; // [x]
-simGlobals.GENE_COUNT = 250; // [x]
-simGlobals.MUTATION_RATE = 0.03; // [x]
-simGlobals.MIN_GENE = -5; // [x]
-simGlobals.MAX_GENE = 5; // [x]
-// for boundary sims
-simGlobals.RESILIENCE = 1.00; // [x]
-// starts at perfect resilience
-simGlobals.dialogue = false; // [x]
-
-// boundary simulations start organisms/goal at different location
-simGlobals.INITIAL_X_BOUND = 50; // [x]
-simGlobals.INITIAL_Y_BOUND = 550; // [x]
-simGlobals.GOAL_X_POS_BOUNDS = 925; // [x]
-simGlobals.GOAL_Y_POS_BOUNDS = 50; // [x]
-
-// boundary globals
+// boundary globals (maybe make window object?)
 simGlobals.custom_boundary; // [] (one drawing: drawBoundary())
-simGlobals.scale_statistics; // [] // this is/should be only computed once (boundary doesn't change)
 
-// flags
-simGlobals.sim_type; // [x]
-simGlobals.simulation_started = false; // [x]
-
-// track total generations
-simGlobals.generation_count = 0; // [x]
-
-// canvas & drawing context
-// reconsider how these are used
-window.canvas = document.getElementById("main-canvas"); // [x]
-window.ctx = canvas.getContext("2d"); // [x]
-
-// testing background canvas for better performance
-window.canvas2 = document.getElementById("background-canvas"); // [x]
-window.ctx2 = canvas2.getContext("2d"); // [x]
-
-// frame rate
-simGlobals.FPS = 30; // [x]
-
-// Stores the position of the cursor
-simGlobals.coordinates = {'x':0 , 'y':0}; // []
+// attach canvas & drawing context to window
+window.canvas = document.getElementById("main-canvas");
+window.ctx = canvas.getContext("2d");
+window.canvas2 = document.getElementById("background-canvas");
+window.ctx2 = canvas2.getContext("2d");
 
 
 // ===================
@@ -147,406 +132,6 @@ class Goal {
         this.x = x;
         this.y = y;
         this.size = size;
-    }
-}
-
-class Boundary {
-    constructor() {
-        this.top_boundary = new Image();
-        this.bottom_boundary = new Image();
-        this.full_boundary = new Image();
-        this.top_boundary_coordinates = [];
-        this.bottom_boundary_coordinates = [];
-        // this.checkpoints = {'coordinates': [], 'size': null};
-        this.checkpoints = []; // push dictionaries containing coordinates, halfway_point, distance_to_goal, and size
-    }
-
-    save(boundary_type) {
-        
-        var canvas = document.getElementById("main-canvas"); // do we need to declare these?
-        var ctx = canvas.getContext('2d');
-
-        // remove help text
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, 230, 150);
-        ctx.fillRect(760, 450, 225, 200);
-
-        if (boundary_type === 'bottom') {
-            console.log("saving bottom-boundary");
-            this.bottom_boundary.src = canvas.toDataURL("image/png");
-        }
-        else if (boundary_type === 'top') {
-            console.log("saving top boundary");
-            this.top_boundary.src = canvas.toDataURL("image/png");
-        }
-        else if (boundary_type === 'full') {
-            // save full
-            console.log("saving full boundary");
-            Drawings.drawBoundaryBoilerplate();
-
-            ctx.drawImage(this.top_boundary, 0, 0, canvas.width, canvas.height);
-
-            Drawings.eraseIllegalDrawingZones();
-    
-            // remove white dot and revert goal color
-            ctx.fillStyle = 'rgb(155, 245, 0)';
-            ctx.fillRect(925, 50, 20, 20);
-    
-            ctx.fillStyle = 'black';
-            ctx.beginPath();
-            ctx.arc(80, 510, 12, 0, Math.PI*2, false);
-            ctx.fill();
-
-            // save image as full-boundary
-            this.full_boundary.src = canvas.toDataURL("image/png");
-        }
-    }
-
-    validateBottom(event) {
-        console.log("validating bottom boundary...");
-
-        updateMousePosition(event);
-
-        // check if boundary ended on endpoint
-        // endpoint: ctx.fillRect(950, 150, 50, 20);
-        if (simGlobals.coordinates['x'] >= 950 && simGlobals.coordinates['y'] >= 150 && simGlobals.coordinates['y'] <= 200) {
-            // valid, update boundary step
-            console.log("valid boundary");
-
-            // make connectors green (maybe draw this after returns true)
-            ctx.fillStyle = 'rgb(155, 245, 0)';
-            ctx.fillRect(950, 150, 50, 20);
-            ctx.fillRect(150, 550, 20, 50);
-
-            return true;
-        }
-        else {
-            // invalid
-            console.log("Invalid boundary.");
-
-            // error message (not written yet);
-            return false;
-        }   
-    }
-
-    validateTop(event) {
-        console.log("validating top-boundary...");
-
-        updateMousePosition(event);
-
-        // check if boundary on endpoint
-        // endpoint: (ctx.fillRect(830, 0, 20, 50))
-        if (simGlobals.coordinates['x'] >= 830 && simGlobals.coordinates['x'] <= 850 && simGlobals.coordinates['y'] <= 50) {
-            // valid, update boundary step
-            console.log("valid boundary");
-
-            // make top-boundary connectors green
-            ctx.fillStyle = 'rgb(155, 245, 0)';
-            ctx.fillRect(830, 0, 20, 50);
-            ctx.fillRect(0, 430, 50, 20);
-
-            // draw white dot for next step
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(80, 510, 10, 0, Math.PI*2, false);
-            ctx.fill();
-
-            // make goal new color (can be a flag in drawBoundaryBoilerplate())
-            ctx.fillStyle = 'rgb(232, 0, 118)';
-            ctx.fillRect(925, 50, 20, 20);
-
-            // update canvas data (not sure if I need to do this)
-            canvas = document.getElementById("main-canvas");
-            ctx = canvas.getContext("2d");
-            // simGlobals.canvas_data_bad_practice = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-            return true;
-        }
-        else {
-            // invalid
-            console.log("Invalid boundary.");
-
-            // error message (not written yet)
-            return false;
-        }
-    }
-
-    validateFull() {
-        // check if user ended line on goal
-        // Goal(925, 50, 20, ctx);
-        if (simGlobals.coordinates['x'] >= 925 && simGlobals.coordinates['x'] <= 945 &&
-            simGlobals.coordinates['y'] >= 50 && simGlobals.coordinates['y'] <= 70) {
-
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
-    determineLongestBoundary() {
-        // determine which boundary has more coordinates
-        let longest_text;
-        let longest_boundary;
-        let target_length;
-
-        if (this.top_boundary_coordinates.length > this.bottom_boundary_coordinates.length) {
-            // top longer
-            longest_text = 'top';
-            longest_boundary = this.top_boundary_coordinates;
-            target_length = this.bottom_boundary_coordinates.length;
-        }
-        else if (this.bottom_boundary_coordinates.length > this.top_boundary_coordinates.length) {
-            // bottom longer
-            longest_text = 'bottom';
-            longest_boundary = this.bottom_boundary_coordinates;
-            target_length = this.top_boundary_coordinates.length;
-        }
-        else {
-            longest_text = 'neither';
-        }
-
-        return [longest_text, longest_boundary, target_length];
-    }
-
-    trimLongestBoundaryCoordinates(longest_boundary_coordinates, target_length) {
-        let num_coords_to_remove = longest_boundary_coordinates.length - target_length;
-        let percent_of_coords_to_remove = num_coords_to_remove / longest_boundary_coordinates.length;
-        let coords_removed = 0;
-        let coords_kept = 0;
-        let random_percentage;
-
-        console.log(`# of coordinates we need to remove: ${num_coords_to_remove}`);
-        console.log(`which is ${percent_of_coords_to_remove}% of ${longest_boundary_coordinates.length}`);
-
-        console.log(`Starting loop`);
-
-        // since splicing changes array size, preserve the length here so that we can evaluate all coordinates
-        let preserved_longest_length = longest_boundary_coordinates.length;
-
-        for (let i = 0; i < preserved_longest_length; i++) {
-            random_percentage = Math.random();
-
-            if (random_percentage < percent_of_coords_to_remove) {
-                // remove
-                console.log(`removed coordinate ${i}: ${random_percentage}`);
-
-                // need to remember the amount coords_removed so that we remove the correct coord from the changing array
-                longest_boundary_coordinates.splice((i - coords_removed), 1);
-                coords_removed++;
-            }
-            else {
-                console.log(`kept coordinate ${i}: ${random_percentage}`);
-                coords_kept++;
-            }
-
-            if (longest_boundary_coordinates.length === target_length) {
-                console.log("BREAKING");
-                break;
-            }
-        }
-
-        console.log("Loop finished.");
-        console.log("Total coordinates removed: " + coords_removed);
-        console.log(`Total coordinates kept: ${coords_kept}`);
-
-        console.log(`% coordinates removed (desired): ${percent_of_coords_to_remove}`);
-        console.log(`% coordinates removed (actual): ${coords_removed / preserved_longest_length}`);
-
-        console.log(`Longest boundary new size: ${longest_boundary_coordinates.length}`);
-        console.log(`Target Length (length of shortest boundary): ${target_length}`);
-
-        // at this point, the longest_coordinate set is either the same size as the shortest, or slightly larger
-        // let's trim off the extra if there is any
-        if (longest_boundary_coordinates.length !== target_length) {
-            console.log("Trimming extra coordinates")
-            do {
-                // remove a random coordinate
-                let coordinate_to_remove = Math.floor(Math.random() * longest_boundary_coordinates.length);
-                longest_boundary_coordinates.splice(coordinate_to_remove, 1);
-            }
-            while (longest_boundary_coordinates.length !== target_length);
-        }
-
-        console.log("We should now have to coordinate sets of the same length");
-        console.log(`Longest Boundary Length: ${longest_boundary_coordinates.length}`);
-        console.log(`Shortest Boundary Length: ${target_length}`);
-
-        return longest_boundary_coordinates;
-    }
-
-    prepareBoundaryForCheckpoints() {
-        console.log("preparing boundary for checkpoints...");
-
-        // console.log(`Coordinates for Bottom Boundary: `);
-        // // this allows us to view coords as 2d arrays
-        // for (let k = 0; k < this.bottom_boundary_coordinates.length; k++) {
-        //     console.log(this.bottom_boundary_coordinates[k]);
-        // }
-
-        console.log("Initial Boundary Lengths:");
-        console.log(`bottom: ${this.bottom_boundary_coordinates.length}, top: ${this.top_boundary_coordinates.length}`);
-
-        // Identify longest boundary for trimming (target_length = length of shortest boundary)
-        let longest_boundary_and_target = this.determineLongestBoundary();
-
-        let longest_text = longest_boundary_and_target[0];
-        let longest_boundary_coordinates = longest_boundary_and_target[1];
-        let target_length = longest_boundary_and_target[2];
-
-        // execute if boundary coordinate array lengths are not same size
-        if (longest_text !== 'neither') {
-
-            // trim longest boundary coordiantes to length of shortest boundary coordinates
-            let trimmed_coordinates = this.trimLongestBoundaryCoordinates(longest_boundary_coordinates, target_length);
-
-            // save trimmed coordinates to boundary
-            if (longest_text === 'top') {
-                //save top
-                this.top_boundary_coordinates = trimmed_coordinates;
-            }
-            else if (longest_text === 'bottom') {
-                //save bottom
-                this.bottom_boundary_coordinates = trimmed_coordinates;
-            }
-        }
-    }
-
-    // too long, needs refactoring once all put together
-    createCheckpoints() {
-        // step 1: loop over all coordinates in both arrays
-        ctx.fillStyle = 'white';
-        ctx.strokeWidth = 1;
-        ctx.lineCap = 'round';
-        let step = Math.ceil(this.top_boundary_coordinates.length / 10);
-        let line_counter = 0;
-
-        for (let i = 0; i < this.top_boundary_coordinates.length; i++) {
-            // step 2: draw a line from top[coordinate] to bottom[coordinate]
-            // let's say, for now, that we want just 10 lines drawn
-            // we could divide the total by 10, 243 / 10 = 24.3
-            // if i % Math.ceil(24.3) === 0: draw line
-            if (i % step === 0) {
-                // * keep drawings just in case *
-                // ctx.beginPath();
-                // ctx.moveTo(this.top_boundary_coordinates[i][0], this.top_boundary_coordinates[i][1])
-                // ctx.lineTo(this.bottom_boundary_coordinates[i][0], this.bottom_boundary_coordinates[i][1]);
-                // ctx.stroke();
-                // ctx.closePath();
-                line_counter++;
-
-                // draw dot on middle of each line (distance between x's - distance between y's)
-                let mid_x = Math.floor((this.top_boundary_coordinates[i][0] + this.bottom_boundary_coordinates[i][0]) / 2); 
-                let mid_y = Math.floor((this.top_boundary_coordinates[i][1] + this.bottom_boundary_coordinates[i][1]) / 2);
-
-                // * keep drawings just in case *
-                // ctx.beginPath();
-                // ctx.arc(mid_x, mid_y, 2, 0, Math.PI*2, false);
-                // ctx.fill();
-
-                // store checkpoint coordinates
-                this.checkpoints.push({'coordinates': [mid_x, mid_y]});
-            }
-        }
-
-        // console.log("Line drawing complete");
-        // console.log(`Should be 10 lines: ${line_counter}`);
-
-
-        // *** improving checkpoints ***
-        // we also want to store some information about a checkpoint's size, so drawing will require no extra calculations
-        // Ultimately, we just want a checkpoint to cover the largest calulable area on the path without overlapping another.
-
-        // step 1: draw line connecting each checkpoint (we can maybe do in within loop after working)
-        for (let i = 0; i < this.checkpoints.length - 1; i++) {
-            // * keep drawings just in case *
-            // ctx.beginPath();
-            // ctx.moveTo(this.checkpoints[j].coordinates[0], this.checkpoints[j].coordinates[1]);
-            // ctx.lineTo(this.checkpoints[j+1].coordinates[0], this.checkpoints[j+1].coordinates[1]);
-            // ctx.stroke();
-            // ctx.closePath();
-
-            // let's now mark the halfway point between each line drawn
-            let path_mid_x = Math.floor((this.checkpoints[i].coordinates[0] + this.checkpoints[i+1].coordinates[0]) / 2);
-            let path_mid_y = Math.floor((this.checkpoints[i].coordinates[1] + this.checkpoints[i+1].coordinates[1]) / 2);
-
-            // * keep drawings just in case *
-            // ctx.fillStyle = 'orange';
-            // ctx.beginPath();
-            // ctx.arc(path_mid_x, path_mid_y, 5, 0, Math.PI*2, false);
-            // ctx.fill();
-            // ctx.closePath();
-
-            // store checkpoint's halfway point to the next checkpoint as 'halfway_point': [x, y]
-            this.checkpoints[i].halfway_point = [path_mid_x, path_mid_y];
-        }
-
-        // determine size using halfway points (loop from 1 to 8 (skips first and last checkpoint))
-        for (let i = 1; i < this.checkpoints.length - 1; i++) {
-            // determine length from checkpoint to previous checkpoints halfway point
-            let current_location = this.checkpoints[i].coordinates;
-            let previous_halfway_point = this.checkpoints[i-1].halfway_point;
-
-            // c^2 = a^2 + b^2
-            let distance_to_previous_halfway_point_squared = (
-                (current_location[0] - previous_halfway_point[0]) ** 2) + ((current_location[1] - previous_halfway_point[1]) ** 2
-            );
-            let distance_to_previous_halfway_point = Math.sqrt(distance_to_previous_halfway_point_squared);
-
-
-            // now determine distance to OWN halfway point
-            let own_halfway_point = this.checkpoints[i].halfway_point;
-
-            // c^2 = a^2 + b^2
-            let distance_to_own_halfway_point_squared = (
-                (current_location[0] - own_halfway_point[0]) ** 2) + ((current_location[1] - own_halfway_point[1]) ** 2
-            );
-            let distance_to_own_halfway_point = Math.sqrt(distance_to_own_halfway_point_squared);
-
-            // determine shortest distance and store as size
-            if (distance_to_previous_halfway_point < distance_to_own_halfway_point) {
-                console.log(`For checkpoint ${i}, the distance to PREVIOUS halfway point is shortest.`);
-                console.log(`previous: ${distance_to_previous_halfway_point}`);
-                console.log(`own: ${distance_to_own_halfway_point}`);
-
-                this.checkpoints[i].size = Math.floor(distance_to_previous_halfway_point);
-            }
-            else {
-                console.log(`For checkpoint ${i}, the distance to OWN halfway point is shortest.`);
-                console.log(`previous: ${distance_to_previous_halfway_point}`);
-                console.log(`own: ${distance_to_own_halfway_point}`);
-
-                this.checkpoints[i].size = Math.floor(distance_to_own_halfway_point);
-            }
-
-            // this is all working. checkpoint[0] doesn't check for previous halfway point, and checkpoint[9] doesn't check for own!
-        }
-
-        // console.log('num of checkpoints: (if 10, code should work)');
-        // console.log(this.checkpoints.length);
-
-        // maybe we remove first/last checkpoints at this stage??
-        // for now, let's just assign them arbitrary sizes
-        this.checkpoints[0].size = 20;
-        this.checkpoints[this.checkpoints.length - 1].size = 20;
-
-        // to confirm, display sizes for each checkpoint
-        for (let i = 0; i < this.checkpoints.length; i++) {
-            console.log(`Size of checkpoint ${i}: ${this.checkpoints[i].size}`);
-            console.log(`coords of checkpoint: ${this.checkpoints[i].coordinates}`);
-        }
-
-        // complete! checkpoints can be drawn with appropriate sizes now.
-    }
-
-    drawCheckpoints() {
-        // === Draw Checkpoints ===
-        for (let i = 0; i < this.checkpoints.length; i++) {
-            ctx.beginPath();
-            ctx.arc(this.checkpoints[i].coordinates[0], this.checkpoints[i].coordinates[1], this.checkpoints[i].size, 0, Math.PI*2, false);
-            ctx.stroke();
-            ctx.closePath();
-        }
     }
 }
 
@@ -659,234 +244,11 @@ class Paintbrush {
     }
 }
 
-// =======================
-// ===== SETTINGS =====
-// =======================
-
-function displaySettingsForm() {
-
-    // ensure only settings button showing
-    document.getElementsByClassName("settings-btn")[0].style.display = 'block';
-    document.getElementsByClassName("run-btn")[0].style.display = 'none';
-    document.getElementsByClassName("stop-btn")[0].style.display = 'none';
-    document.getElementsByClassName("save-boundaries-btn")[0].style.display = 'none';
-
-    // turn off canvas, turn on settings
-    document.getElementsByClassName("canvas-container")[0].style.display = 'none';
-    document.getElementsByClassName("settings-container")[0].style.display = 'block';
-
-    if (simGlobals.sim_type === 'classic') {
-        // display classic settings (no death/resilience)
-        document.getElementsByClassName("resilience-setting-label")[0].style.display = 'none';
-        document.getElementsByClassName("resilience-input")[0].style.display = 'none';
-    }
-
-    // movement setting helper (move/abstract)
-    let movement_speed_setting = document.getElementById("move-speed");
-    let error_message = document.getElementsByClassName("error-message")[0];
-
-    movement_speed_setting.addEventListener('focusin', function() {
-        error_message.style.color = "var(--closest_organism_gold)";
-        error_message.innerHTML = "Movement Speed Range: 1 - 7";
-        movement_speed_setting.addEventListener('focusout', function() {
-            error_message.style.color = 'var(--mother-pink)';
-            error_message.innerHTML = "";
-        })
-    })
-
-    movement_speed_setting.addEventListener('keydown', function(event) {
-        // function blocks keystrokes not within the acceptable range for movement speed
-        let keystroke = preValidateMovementSetting(event);
-        if (keystroke === 1) {
-            event.preventDefault();
-        }
-    });
-
-    // turn on listener for apply button
-    document.getElementById("apply-form").addEventListener('submit', function submitForm(event) {
-        // don't submit form
-        event.preventDefault();
-    
-        validateSettingsForm();
-    });
-
-}
-
-// [] should stop title screen animation when settings is called
-function validateSettingsForm() {
-
-    let error_message = document.getElementsByClassName("error-message")[0];
-
-    // clear error message on call
-    error_message.style.color = "var(--mother-pink)";
-    error_message.innerHTML = "";
-
-    let settings_manager = {};
-
-    // returns error message or "valid"
-    settings_manager['organisms_setting'] = validateTotalOrganismsSetting();
-    settings_manager['movement_setting'] = validateMovementSetting();
-    settings_manager['gene_setting'] = validateGeneCountSetting();
-    settings_manager['mutation_setting'] = validateMutationRateSetting();
-    settings_manager['resilience_setting'] = validateResilienceSetting();
-
-    // should make value red too, and change to green on keystroke
-    for (let message in settings_manager) {
-        if (settings_manager[message] != "valid") {
-            error_message.innerHTML = settings_manager[message];
-            return false;
-        }
-    }
-
-    // dialogue
-    let dialogue_setting = document.getElementById("dialogue-checkbox");
-    if (dialogue_setting.checked) {
-        simGlobals.dialogue = true;
-    }
-    else {
-        simGlobals.dialogue = false;
-    }
-
-    // turns off settings form, turns on canvas and run-btn + listener
-    finishApplyingSettings();
-
-    // restart animation ===
-    // here, we should instead bring user to a screen that tells them their simulation is
-    // ready to run, and present a button/cue to begin simulation
-
-    // playTitleScreenAnimation();
-    Drawings.prepareToRunSimulation();
-
-    // don't submit the form
-    return false;
-}
-
-function validateTotalOrganismsSetting() {
-    let total_organisms_setting = document.getElementById("total-organisms");
-
-    if (typeof parseInt(total_organisms_setting.value) === 'number' && parseInt(total_organisms_setting.value) > 0) {
-        if (parseInt(total_organisms_setting.value > 9999)) {
-            simGlobals.TOTAL_ORGANISMS = 9999;
-        }
-        else {
-            simGlobals.TOTAL_ORGANISMS = Math.abs(parseInt(total_organisms_setting.value));
-        }
-        total_organisms_setting.style.borderBottom = '2px solid var(--custom-green)';
-        return 'valid';
-    }
-    else {
-        total_organisms_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        return '* Invalid number of organisms. Please input a positive number.';
-    }
-}
-
-function validateGeneCountSetting() {
-    let gene_count_setting = document.getElementById("gene-count");
-
-    if (typeof parseInt(gene_count_setting.value) === 'number' && parseInt(gene_count_setting.value) > 0) {
-        if (parseInt(gene_count_setting.value) > 1000) {
-            simGlobals.GENE_COUNT = 1000;
-        }
-        else {
-            simGlobals.GENE_COUNT = Math.abs(parseInt(gene_count_setting.value));
-        }
-        gene_count_setting.style.borderBottom = '2px solid var(--custom-green)';
-        return "valid";
-    }
-    else {
-        gene_count_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        return "* Invalid gene count. Please input a positive number.";
-    }
-}
-
-function validateMutationRateSetting() {
-    let mutation_rate_setting = document.getElementById("mutation-rate");
-
-    // consider allowing float here
-    if (typeof parseInt(mutation_rate_setting.value) === 'number' && parseInt(mutation_rate_setting.value) > 0) {
-        if (parseInt(mutation_rate_setting.value) > 100) {
-            simGlobals.MUTATION_RATE = 1;
-        }
-        else {
-            simGlobals.MUTATION_RATE = parseInt(mutation_rate_setting.value) / 100;
-        }
-        mutation_rate_setting.style.borderBottom = '2px solid var(--custom-green)';
-        return "valid";
-    }
-    else {
-        mutation_rate_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        return "Invalid mutation rate. Please input a positive percentage value. (3 = 3%)";
-    }
-}
-
-function preValidateMovementSetting(event) {
-
-    // prevent keystrokes that aren't === 1-7 || Backspace, <, > 
-    let movement_key = event.key;
-    if (movement_key > "0" && movement_key <= "7") {
-        return 0;
-    }
-    else if (movement_key === "Backspace" || movement_key === "ArrowLeft" || movement_key === "ArrowRight") {
-        return 0;
-    }
-    else {
-        return 1;
-    }
-}
-
-function validateMovementSetting() {
-    let movement_speed_setting = document.getElementById("move-speed");
-
-    // create max and min genes from movement speed
-    // pre-validated in preValidateMovementSetting();
-    if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 7) {
-        simGlobals.MIN_GENE = parseInt(movement_speed_setting.value) * -1;
-        simGlobals.MAX_GENE = parseInt(movement_speed_setting.value);
-        movement_speed_setting.style.borderBottom = "2px solid var(--custom-green)";
-        return "valid";
-    } 
-    else {
-        movement_speed_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        return "Invalid movement speed. Please input a positive number between 1 - 7.";
-    }   
-}
-
-function validateResilienceSetting() {
-    // we want to only allow numbers from 0 - 100 inclusive
-
-    let resilience_setting = document.getElementById("resilience");
-
-    if (parseInt(resilience_setting.value) >= 0 && parseInt(resilience_setting.value) <= 100 && typeof parseInt(resilience_setting.value) === 'number') {
-        simGlobals.RESILIENCE = parseInt(resilience_setting.value) / 100;
-        resilience_setting.style.borderBottom = "2px solid var(--custom-green)";
-        return "valid";
-    } 
-    else {
-        resilience_setting.style.borderBottom = '2px solid var(--mother-pink)';
-        return "Invalid resilience value. Please input a positive number between 0 - 100";
-    } 
-}
-
-// needs better name
-function finishApplyingSettings() {
-    // make html changes before function returns
-    document.getElementsByClassName("canvas-container")[0].style.display = 'block';
-    document.getElementsByClassName("settings-container")[0].style.display = 'none';
-
-    let start_btn = document.getElementsByClassName("run-btn")[0];
-    start_btn.style.display = 'block';
-
-    // allow btn-click to runSimulation()
-    start_btn.addEventListener("click", runSimulation);
-
-    return 0;
-}
-
 // ====================
 // ===== BOUNDARY =====
 // ====================
 
-function applyBoundaryModeStyles() {
+function applyInitialBoundaryStyles() {
     // turn off settings, turn on canvas
     document.getElementsByClassName("canvas-container")[0].style.display = 'block';
     document.getElementsByClassName("settings-container")[0].style.display = 'none';
@@ -907,30 +269,26 @@ function applyBoundaryModeStyles() {
     stop_btn.style.display = "block";
 }
 
-// this function must remain outside closure, as Boundary calls it (unless boundary creation mode becomes a class method?)
-// also rethink rect variable here
-function updateMousePosition(event) {
-    let rect = canvas.getBoundingClientRect(); // do i want to call this every time? ||| do I need to pass canvas here?
-
-    // store current mouse position
-    simGlobals.coordinates['x'] = Math.floor(event.clientX - rect.left);
-    simGlobals.coordinates['y'] = Math.floor(event.clientY - rect.top);
-}
-
 // this function will be refactored/cleaned
-// it's not super bad, just need to decide how functions will be handled
-// not converting var >> let here yet
-function enterBoundaryCreationMode() {
+function createNewBoundary() {
+
+    // =============================================================================================
+    // === this is the first appearance of Boundary, and where the module will be first required ===
+    // =============================================================================================
+
+    // instantiate class Boundary instance
+    var new_boundary = new BoundaryUtils.Boundary();
+
+    new_boundary.testClassMethod(); // works
 
     // drawing flag and step tracker
     var allowed_to_draw = false; // could be method of Paintbrush
     var boundary_step = "bottom-boundary"; // could be attribute of Boundary? idk..
 
-    // create new boundary
-    var new_boundary = new Boundary();
+    // Stores the position of the cursor
+    simGlobals.coordinates = {'x':0 , 'y':0}; // []
 
-    // this function name doesn't fit well anymore, rename
-    applyBoundaryModeStyles();
+    applyInitialBoundaryStyles();
 
     Drawings.drawBoundaryDrawingHelpText("Step 1");
 
@@ -942,7 +300,7 @@ function enterBoundaryCreationMode() {
 
         ctx.beginPath();
         ctx.moveTo(simGlobals.coordinates['x'], simGlobals.coordinates['y']);
-        updateMousePosition(event);
+        BoundaryUtils.updateMousePosition(event);
 
         // draw different line depending on boundary_step
         if (boundary_step === 'full-boundary') {
@@ -990,7 +348,7 @@ function enterBoundaryCreationMode() {
         // users ability to draw if legal
         console.log("User would like to draw.");
         
-        updateMousePosition(event);
+        BoundaryUtils.updateMousePosition(event);
 
         if (boundary_step === 'bottom-boundary') {
             // check that user is trying to draw from first connector (ctx.fillRect(150, 550, 20, 50))
@@ -1114,7 +472,7 @@ function enterBoundaryCreationMode() {
     }
     
     // respond to each event individually (pass event for mouse position)
-    canvas.addEventListener('mouseenter', updateMousePosition);
+    canvas.addEventListener('mouseenter', BoundaryUtils.updateMousePosition);
     canvas.addEventListener('mousedown', requestDrawingPermission);
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', validateBoundaryConnection);
@@ -1125,36 +483,26 @@ function enterBoundaryCreationMode() {
     save_bounds_btn.addEventListener("click", function() {
         console.log("Saving Custom Boundaries");
 
+        // draw Boundary as it will appear in simulation
+        Drawings.drawFinalBoundary(new_boundary.top_boundary);
+
         // save full boundary
         new_boundary.save('full');
 
-        // ** This whole execution flow could be own function such as: 'prepareBoundaryForSimulation()'
+        // creates checkpoints, sets scale attribute
+        new_boundary.prepareBoundaryForSimulation();
 
-        // normalize boundary coordinate array sizes
-        new_boundary.prepareBoundaryForCheckpoints();
-
-        // let's make sure the boundaries are same length and not the same values
-        // console.log(custom_boundary.top_boundary_coordinates.length, custom_boundary.bottom_boundary_coordinates.length);
-        // console.log(custom_boundary.top_boundary_coordinates, custom_boundary.bottom_boundary_coordinates);
-
-        // ===== here =====
-        // next, we'll create the checkpoints to be used by our fitness function
-        new_boundary.createCheckpoints();
-
-        // still using custom_boundary global, I don't like it ==!CHANGE!==
+        // make boundary global
         simGlobals.custom_boundary = new_boundary;
 
-        // update global scale_statistics
-        // should only need to be called once here, right?
-        simGlobals.scale_statistics = setScale();
+        // turn off listeners
+        canvas.removeEventListener('mouseenter', BoundaryUtils.updateMousePosition);
+        canvas.removeEventListener('mousedown', requestDrawingPermission);
+        canvas.removeEventListener('mousemove', draw);
+        canvas.removeEventListener('mouseup', validateBoundaryConnection);
 
-        // return to settings
-
-        // should we turn off all listeners here???
-        // - not yet. user could choose to redraw boundary?
-
-        // ===== this should display boundary version of settings form =====
-        displaySettingsForm();
+        // set global sim settings
+        SettingsUtils.configureSettings();
     });
 }
 
@@ -1227,10 +575,12 @@ function selectSimulationType() {
 function handleSimTypeBtnMouseover(event) {
     console.log(event.target.className);
     if (event.target.className === 'sim-type-classic') {
-        simGlobals.sim_type = Drawings.highlightClassicSimType();
+        simGlobals.sim_type = 'classic';
+        Drawings.highlightClassicSimType();
     }
     else if (event.target.className === 'sim-type-boundary') {
-        simGlobals.sim_type = Drawings.highlightBoundarySimType();
+        simGlobals.sim_type = 'boundary';
+        Drawings.highlightBoundarySimType();
     }
 }
 
@@ -1273,13 +623,13 @@ function turnOffSimTypeSelectionEventListeners() {
 function handleSimTypeSelectionKeyPress(event) {
     switch(event.key) {
         case "ArrowLeft":
-            // the solution is to sync this variable with the sim_type var that runSimulation()/checkSimType() checks
-            // i'll do that now. set sim_type here
-            simGlobals.sim_type = Drawings.highlightClassicSimType();
+            simGlobals.sim_type = 'classic';
+            Drawings.highlightClassicSimType();
             break;
 
         case "ArrowRight":
-            simGlobals.sim_type = Drawings.highlightBoundarySimType();
+            simGlobals.sim_type = 'boundary';
+            Drawings.highlightBoundarySimType();
             break;
         
         case "Enter":
@@ -1293,6 +643,7 @@ function handleSimTypeSelectionKeyPress(event) {
     }  
 }
 
+// boundary class methods? (could import boundary drawings required to boundary_utils.js)
 function turnOnBoundaryIntroductionOneListeners() {
     let next_btn = document.getElementsByClassName("next-btn")[0];
     next_btn.style.display = 'block';
@@ -1331,7 +682,7 @@ function turnOnBoundaryIntroductionTwoListeners() {
         next_btn.style.display = 'none';
 
         // go to next screen
-        enterBoundaryCreationMode();
+        createNewBoundary();
     })    
 
     document.addEventListener('keydown', function checkKeystroke(event) {
@@ -1344,12 +695,12 @@ function turnOnBoundaryIntroductionTwoListeners() {
 
             // go to next screen
             // just a placeholder test
-            enterBoundaryCreationMode();
+            createNewBoundary();
         }
     })
 }
 
-function applySimType() {
+async function applySimType() {
 
     // turn off listeners and hide buttons
     turnOffSimTypeSelectionEventListeners();
@@ -1357,8 +708,12 @@ function applySimType() {
     document.getElementsByClassName("sim-type-classic")[0].style.display = 'none';
     document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
 
+    // allow btn-click to runSimulation() (still hidden)
+    document.getElementsByClassName("run-btn")[0].addEventListener("click", runSimulation);
+
     if (simGlobals.sim_type === 'classic') {
-        displaySettingsForm();
+        // set global sim settings
+        SettingsUtils.configureSettings();
     }
     else if (simGlobals.sim_type === 'boundary') {
         // user must create boundary before settings configuration
@@ -1571,7 +926,7 @@ async function runEvaluationAnimation(organisms, stats) {
         ctx2.clearRect(700, 510, 350, 120);
         Drawings.drawStatsStatic(ctx, stats);
 
-        if (simGlobals.generation_count === 0 && !simGlobals.dialogue) {
+        if (stats.generation_count === 0 && !simGlobals.dialogue) {
             await paintbrush.fadeIn(Drawings.drawBoundary, .01);
             ctx2.globalAlpha = 1;
         }
@@ -1662,9 +1017,7 @@ function calcPopulationFitness (organisms) {
     })
 }
 
-function calcPopulationFitnessBounds(remaining_distance, organisms) {
-    // scale = length of lines connecting epicenters from spawn>checkpoints>goal
-    let scale = simGlobals.scale_statistics['scale'];
+function calcPopulationFitnessBounds(remaining_distance, organisms, scale) {
 
     // calc/set distance_to_goal && fitness
     let total_fitness = 0.00;
@@ -1743,6 +1096,8 @@ function beginSelectionProcess(organisms) {
 }
 
 function selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length) {
+
+    // this function creates parent couples === length of organisms / 2
 
     // example
     // var parents = [
@@ -1914,7 +1269,6 @@ function crossover(parents_to_crossover) {
     return crossover_genes;
 }
 
-// [] works
 async function runCrossoverAnimations() {
     await paintbrush.fadeToNewColor(Drawings.drawCrossoverPhaseEntryText, .02);
     await paintbrush.fadeIn(Drawings.drawCrossoverDescriptionText, .025);
@@ -1936,11 +1290,21 @@ async function runMutationAnimations() {
 // =================================
 
 function determineOffspringCount() {
-    // this shouldn't be declared every call.. (fix)
-    let possible_offspring_counts = [0, 0, 1, 1, 2, 2, 2, 3, 4, 5]; // sum = 20, 20/10items = 2avg
 
-    let offspring_count_index = Math.floor(Math.random() * possible_offspring_counts.length);
-    let offspring_count = possible_offspring_counts[offspring_count_index];
+    let offspring_count;
+
+    if (simGlobals.POP_GROWTH === 'fluctuate') {
+        // this shouldn't be declared every call.. (fix)
+        let possible_offspring_counts = [0, 0, 1, 1, 2, 2, 2, 3, 4, 5]; // sum = 20, 20/10 items = 2avg
+
+        let offspring_count_index = Math.floor(Math.random() * possible_offspring_counts.length);
+        offspring_count = possible_offspring_counts[offspring_count_index];
+    }
+    else if (simGlobals.POP_GROWTH === 'constant') {
+        // each couple will produce 2 offspring
+        offspring_count = 2; 
+    }
+
     return offspring_count;
 }
 
@@ -1989,11 +1353,7 @@ function reproduceNewGeneration(parents) {
             offspring_organisms.push(offspring);
         }
     }
-    // set offspring_organisms as next generation of organisms
-    // simGlobals.organisms = simGlobals.offspring_organisms;
-    // simGlobals.offspring_organisms = [];
 
-    // let's return organisms / offspring_organisms
     return offspring_organisms;
 }
 
@@ -2066,7 +1426,6 @@ function createTitleScreenOrganisms() {
     return title_organisms;
 }
 
-// make sure function up to date
 function fadeInTitleAnimation(title_organisms) {
     let opacity = 0.00;
     let opacity_tracker = 0.00;
@@ -2078,6 +1437,8 @@ function fadeInTitleAnimation(title_organisms) {
     let press_start_text = document.getElementById("press-start");
     let start_btn = document.getElementsByClassName("start-btn")[0];
 
+    let frame_id;
+
     start_btn.addEventListener("click", function updateStartBtnFlagOnClick() {
         console.log("Start Button Clicked");
         start_button_pressed = true;
@@ -2088,7 +1449,7 @@ function fadeInTitleAnimation(title_organisms) {
 
     document.addEventListener('keydown', function updateStartBtnFlagOnEnter(event) {
         if (event.key === "Enter") {
-            console.log("Start Button Pressed");
+            console.log("Enter Pressed");
             start_button_pressed = true;
 
             // remove eventListener after flag set
@@ -2098,13 +1459,13 @@ function fadeInTitleAnimation(title_organisms) {
 
     return new Promise(resolve => {
         function animateTitle() {
-            if (!finished && !simGlobals.simulation_started) {
+            if (!finished) {
 
                 // respond to event listener flag
                 if (start_button_pressed) {
                     // cancel and resolve
                     cancelAnimationFrame(frame_id);
-                    return resolve("Display Sim Types");
+                    return resolve("Select Sim Type");
                 }
 
                 ctx.fillStyle = 'black';
@@ -2162,7 +1523,7 @@ function fadeInTitleAnimation(title_organisms) {
                 // FPS is an example of a variable that doesn't need to be global ( in window )
                 sleep(750 / simGlobals.FPS); // control drawing FPS for organisms
                 // var????? why
-                var frame_id = requestAnimationFrame(animateTitle);
+                frame_id = requestAnimationFrame(animateTitle);
             }
             else {
                 // resolves every n cycles to prevent overflow
@@ -2188,26 +1549,17 @@ async function playTitleScreenAnimation() {
 
         let status = await fadeInTitleAnimation(title_organisms);
 
-        if (status === "Display Sim Types") {
-            console.log("start button pressed. displaying sim types");
-            // call here!
+        if (status === 'Select Sim Type') {
             selectSimulationType();
         }
-        // not sure if this is called from here anymore?
-        else if (status === "TEST BOUNDARY MODE") {
-            console.log("Entering Boundary Mode");
-            enterBoundaryCreationMode();
-        }
-        
     }
-    while (simGlobals.simulation_started === false && status === "Keep Playing");
+    while (status === "Keep Playing");
 }
 
 // ================
 // ===== MAIN =====
 // ================
 
-// maybe async ruins this functions performance?
 // not converted var >> let yet
 async function runGeneration(new_generation) {
 
@@ -2221,13 +1573,14 @@ async function runGeneration(new_generation) {
     let stats = {
         'organism_count': organisms.length,
         'average_fitness': new_generation.average_fitness,
+        'generation_count': new_generation.generation_count,
     }
 
     // intentional var to increase scope access
     // once turned on, this is never turned off
     var simulation_succeeded = new_generation.simulation_succeeded;
 
-    if (simGlobals.generation_count != 0) {
+    if (stats.generation_count != 0) {
         if (simGlobals.dialogue) {
             await paintbrush.fadeIn(Drawings.drawStats, .02, stats);
             await sleep(500);
@@ -2293,7 +1646,7 @@ async function runGeneration(new_generation) {
         console.log(`before checkPulse(): ${organisms.length}`);
 
         // returns array of living and deceased organisms
-        let organized_organisms = checkPulse(organisms);
+        let organized_organisms = simGlobals.custom_boundary.checkPulse(organisms);
 
         // re-assign array to be only the living organisms
         organisms = organized_organisms['living_organisms'];
@@ -2306,10 +1659,10 @@ async function runGeneration(new_generation) {
 
         // here, we set checkpoints[i].distance_to_goal 
         // should this only be done on iteration #1???
-        calcDistanceToGoalCheckpoints();
+        // calcDistanceToGoalCheckpoints(); turning off to make sure sure initially
 
         // get previous, current, and next checkpoints for current generation
-        let checkpoint_data = getFarthestCheckpointReached(organisms);
+        let checkpoint_data = simGlobals.custom_boundary.getFarthestCheckpointReached(organisms);
 
         // this will set each organism's distance_to_next_checkpoint attribute
         // *** i think the problem lies here
@@ -2323,7 +1676,7 @@ async function runGeneration(new_generation) {
 
         // this function will set each organism's distance_to_goal and fitness attributes
         // it also updates average_fitness
-        average_fitness = calcPopulationFitnessBounds(remaining_distance, organisms);
+        average_fitness = calcPopulationFitnessBounds(remaining_distance, organisms, simGlobals.custom_boundary.scale_statistics.scale);
 
         console.log(`Average Fitness: ${average_fitness}`);
     }
@@ -2383,6 +1736,13 @@ async function runGeneration(new_generation) {
     // get next generation of organisms
     let offspring_organisms = reproduceNewGeneration(parents);
 
+    // trim-off 1 organism to keep pop. size constant for odd number of organisms (reproduceNewGeneration() can only produce even number of organisms (constant-sims only))
+    if (simGlobals.POP_GROWTH === 'constant') {
+        if (offspring_organisms.length === organisms.length + 1) {
+            offspring_organisms.pop();
+        }
+    }
+
     // we are done with organisms
     organisms = [];
 
@@ -2393,6 +1753,7 @@ async function runGeneration(new_generation) {
 
         await runMutationAnimations();
 
+        // maybe add generation_count here
         let gen_summary_stats = {
             'offspring_organisms': offspring_organisms,
             'average_fitness': average_fitness,
@@ -2402,13 +1763,17 @@ async function runGeneration(new_generation) {
     }
 
     // prepare for next generation with necessary data
+    // increment generation_count before resetting object
+    let next_generation_count = new_generation.generation_count += 1;
+
+    // maybe this should be called 'next_generation'?
     new_generation = {};
+    new_generation.generation_count = next_generation_count;
     new_generation.new_population = offspring_organisms;
     new_generation.average_fitness = average_fitness; // this actually represents the previous generation's average fitness, keep in mind.
     new_generation.simulation_succeeded = simulation_succeeded;
 
     return new Promise(resolve => {
-        simGlobals.generation_count++;
         resolve(new_generation);
     })
 }
@@ -2430,8 +1795,6 @@ async function runSimulation () {
         stopSimulation();
     });
 
-    simGlobals.simulation_started = true;
-
     console.log("Running Simulation with these settings:");
     console.log(`Total Organisms: ${simGlobals.TOTAL_ORGANISMS}`);
     console.log(`Gene Count: ${simGlobals.GENE_COUNT}`);
@@ -2452,11 +1815,12 @@ async function runSimulation () {
     new_generation.new_population = initial_population;
     new_generation.average_fitness = 0.00;
     new_generation.simulation_succeeded = false;
+    new_generation.generation_count = 0;
 
     do {
         new_generation = await runGeneration(new_generation);
-        // console.log(result);
-    } while (simGlobals.generation_count < 1000);
+        console.log(new_generation.generation_count);
+    } while (new_generation.generation_count < 1000);
 }
 
 function stopSimulation() {
@@ -2468,134 +1832,7 @@ function stopSimulation() {
 // ===== EXTRAS / UNKNOWN =====
 // ============================
 
-// this trio of drawings isn't used, but is useful for debugging. Keep til the end
-
-// *DRAWING* 1
-function drawCurrentCheckpoint(index) {
-    // draw farthest checkpoint reached
-    ctx.strokeStyle = 'white';
-    ctx.strokeWidth = 1;
-    ctx.beginPath();
-    ctx.arc(
-        custom_boundary.checkpoints[index].coordinates[0], 
-        custom_boundary.checkpoints[index].coordinates[1],
-        custom_boundary.checkpoints[index].size, 0, Math.PI*2, false
-    );
-    ctx.stroke();
-    ctx.closePath();
-}
-
-// *DRAWING* 2
-function drawPreviousCheckpoint(index) {
-    // draw checkpoint_reached - 1 or spawn point
-    if (index === 'spawn') {
-        // highlight spawn point
-        console.log("highlighting spawn point green");
-        ctx.strokeStyle = 'rgb(155, 245, 0)';
-        ctx.strokeWidth = 3;
-        ctx.beginPath();
-        ctx.arc(INITIAL_X_BOUND, INITIAL_Y_BOUND, 10, 0, Math.PI*2, false);
-        ctx.stroke();
-        ctx.closePath();
-    }
-    else {
-        // highlight k-1
-        console.log("highlighting k-1 checkpoint green");
-        ctx.strokeStyle = 'rgb(155, 245, 0)';
-        ctx.beginPath();
-        ctx.arc(
-            custom_boundary.checkpoints[index].coordinates[0],
-            custom_boundary.checkpoints[index].coordinates[1],
-            custom_boundary.checkpoints[index].size, 0, Math.PI*2, false
-        );
-        ctx.stroke();
-        ctx.closePath();
-    }
-}
-
-// *DRAWING* 3
-function drawNextCheckpoint(index) {
-    // draw next checkpoint not yet reached
-    if (index === 'goal') {
-        // goal is the checkpoint, should circle goal
-        console.log("k = custom_boundary.checkpoints.length - 1, no checkpoint set!!!!!! (need to finish)");
-    }
-    else {
-        ctx.strokeStyle = 'darkred';
-        ctx.beginPath();
-        ctx.arc(
-            custom_boundary.checkpoints[index].coordinates[0],
-            custom_boundary.checkpoints[index].coordinates[1],
-            custom_boundary.checkpoints[index].size, 0, Math.PI*2, false 
-        );
-        ctx.stroke();
-        ctx.closePath;
-    }
-}
-
-function setScale() {
-    // compute the lengths of lines connecting epicenters from spawn to checkpoints to goal
-    // store the individual line lengths in data structure for future reference
-    // consider recursion here? base case = i === 0
-
-    let scale = 0.00;
-
-    // will store length of checkpoint to the next checkpoint
-    let checkpoint_to_checkpoint_lengths = [];
-
-    for (let i = 1; i < simGlobals.custom_boundary.checkpoints.length; i++) {
-        // compute distance from last checkpoint to current
-        let horizontal_distance_squared = (
-            simGlobals.custom_boundary.checkpoints[i].coordinates[0] - 
-            simGlobals.custom_boundary.checkpoints[i-1].coordinates[0]) ** 2;
-        
-        let vertical_distance_squared = (
-            simGlobals.custom_boundary.checkpoints[i].coordinates[1] - 
-            simGlobals.custom_boundary.checkpoints[i-1].coordinates[1]) ** 2;
-        
-        let distance_squared = horizontal_distance_squared + vertical_distance_squared;
-        let distance_from_previous_checkpoint_to_current = Math.sqrt(distance_squared);
-
-        // store length 
-        // when storing value as i-1, value represents distance from checkpoint to next
-        // checkpoint_to_checkpoint_lengths[0] = distance from boundary.checkpoints[0] to boundary.checkpoints[1]
-        checkpoint_to_checkpoint_lengths[i-1] = distance_from_previous_checkpoint_to_current;
-
-        // update scale
-        scale += distance_from_previous_checkpoint_to_current;
-    }
-
-    // add distance from spawn to checkpoint[0] to scale
-    let horizontal_distance_squared = (simGlobals.INITIAL_X_BOUND - simGlobals.custom_boundary.checkpoints[0].coordinates[0]) ** 2;
-    let vertical_distance_squared = (simGlobals.INITIAL_Y_BOUND - simGlobals.custom_boundary.checkpoints[0].coordinates[1]) ** 2;
-    let distance_squared = horizontal_distance_squared + vertical_distance_squared;
-    let distance_from_spawn_to_first_checkpoint = Math.sqrt(distance_squared);
-
-    // update scale
-    scale += distance_from_spawn_to_first_checkpoint;
-
-    // add distance from final checkpoint to goal to scale
-    let final_to_goal_horizontal_distance_squared = (
-        simGlobals.custom_boundary.checkpoints[simGlobals.custom_boundary.checkpoints.length - 1].coordinates[0] - simGlobals.GOAL_X_POS_BOUNDS) ** 2;
-    let final_to_goal_vertical_distance_squared = (
-        simGlobals.custom_boundary.checkpoints[simGlobals.custom_boundary.checkpoints.length - 1].coordinates[1] - simGlobals.GOAL_Y_POS_BOUNDS) ** 2;
-
-    let distance_squared_to_goal = final_to_goal_horizontal_distance_squared + final_to_goal_vertical_distance_squared;
-
-    let distance_from_final_checkpoint_to_goal = Math.sqrt(distance_squared_to_goal);
-
-    scale += distance_from_final_checkpoint_to_goal;
-
-    console.log(`final scale: ${scale}`);
-
-    return {
-        'scale': scale,
-        'checkpoint_lengths': checkpoint_to_checkpoint_lengths,
-        'spawn_to_checkpoint_0_length': distance_from_spawn_to_first_checkpoint,
-        'last_checkpoint_to_goal_length': distance_from_final_checkpoint_to_goal
-    }
-}
-
+// getPixel() functions only used by createNewBoundary.draw() and UpdateAndMoveOrganismsBounds()
 function getPixel(canvas_data, index) {
     let i = index * 4;
     let data = canvas_data.data;
@@ -2612,133 +1849,6 @@ function getPixelXY(canvas_data, x, y) {
     // reading left to right, pixel at (2, 2) is pixel #2002 ?
 
     return getPixel(canvas_data, index);
-}
-
-// boundary method?
-function calcDistanceToGoalCheckpoints() {
-    let scale = simGlobals.scale_statistics['scale'];
-    let checkpoint_to_checkpoint_lengths = simGlobals.scale_statistics['checkpoint_lengths'];
-    let spawn_to_checkpoint_0_length = simGlobals.scale_statistics['spawn_to_checkpoint_0_length'];
-    let last_checkpoint_to_goal_length = simGlobals.scale_statistics['last_checkpoint_to_goal_length']; // keep for comparison
-
-    let adjusted_scale;
-
-    // checkpoint_to_checkpoint_lengths[0] = checkpoints[0] distance to next checkpoint
-    for (let i = 0; i < simGlobals.custom_boundary.checkpoints.length; i++) {
-        if (i === 0) {
-            // distance to goal for first checkpoint = scale - distance_from_spawn_to_first_checkpoint
-            adjusted_scale = scale - spawn_to_checkpoint_0_length;
-            simGlobals.custom_boundary.checkpoints[i].distance_to_goal = adjusted_scale;
-        }
-        else {
-            // i-1 will give us the length of the previous checkpoint to the current
-            adjusted_scale -= checkpoint_to_checkpoint_lengths[i-1];
-            simGlobals.custom_boundary.checkpoints[i].distance_to_goal = adjusted_scale;
-        }
-    }
-}
-
-// boundary method?
-function getFarthestCheckpointReached(organisms) {
-    // !!!!! consider passing the previous gen's farthest checkpoint reached as a minimum-value !!!!!
-
-    // **NOTE: this function doesn't handle when 0 checkpoints are reached yet !!** (it might now..)
-
-    // we should loop over checkpoints, check all organisms, rather than loop over all organisms, check every checkpoint
-    // this will allow us to stop once an organism is found (backwards loop)
-
-    let previous_checkpoint;
-    let current_checkpoint;
-    let next_checkpoint;
-    let reached_checkpoint = false;
-
-    for (let k = simGlobals.custom_boundary.checkpoints.length - 1; k >= 0; k--) {
-        console.log("k-loop iteration started");
-        if (reached_checkpoint) {
-            console.log("breaking out of k-loop, checkpoint was reached");
-            break;
-        }
-        for (let j = 0; j < organisms.length; j++) {
-            console.log("j-loop iteration started");
-            // determine if organism is within the perimeter of the current checkpoint being checked
-            // !!! [] don't define these every iteration, define it in outer-loop (checkpoint loop)
-            let x_lower_bound = (simGlobals.custom_boundary.checkpoints[k].coordinates[0]) - simGlobals.custom_boundary.checkpoints[k].size;
-            let x_upper_bound = (simGlobals.custom_boundary.checkpoints[k].coordinates[0]) + simGlobals.custom_boundary.checkpoints[k].size;
-            let y_lower_bound = (simGlobals.custom_boundary.checkpoints[k].coordinates[1]) - simGlobals.custom_boundary.checkpoints[k].size;
-            let y_upper_bound = (simGlobals.custom_boundary.checkpoints[k].coordinates[1]) + simGlobals.custom_boundary.checkpoints[k].size;
-
-            // can replace vars with definitions once confident working
-            // check if organism within x && y bounds of checkpoint we're checking
-            if (organisms[j].x > x_lower_bound && organisms[j].x < x_upper_bound) {
-                if (organisms[j].y > y_lower_bound && organisms[j].y < y_upper_bound) {
-
-                    console.log("We have reached a checkpoint.");
-
-                    reached_checkpoint = true;
-                    current_checkpoint = k;
-
-                    if (k === simGlobals.custom_boundary.checkpoints.length - 1) {
-                        // final checkpoint was reached:
-                        // previous = k-1, next = goal
-                        previous_checkpoint = k - 1;
-                        next_checkpoint = 'goal';
-                    } 
-                    else if (k >= 1) {
-                        // at least second checkpoint was reached:
-                        // previous = k-1, next = k+1
-                        previous_checkpoint = k - 1;
-                        next_checkpoint = k + 1;
-                    }
-                    else {
-                        // k = 0, first checkpoint reached:
-                        // previous: spawn point, next: k+1
-                        previous_checkpoint = 'spawn';
-                        next_checkpoint = k + 1;
-                    }
-
-                    console.log("breaking");
-                    break;
-                }
-            }
-        }
-    }
-
-    if (!reached_checkpoint) {
-        // set first checkpoint as next checkpoint if none reached
-        previous_checkpoint = null;
-        current_checkpoint = 'spawn';
-        next_checkpoint = 0;
-    }
-
-    console.log("break successful. returning previous, current, and next checkpoints");
-    console.log('checkpoint data (previous, current, next) :');
-    console.log(previous_checkpoint);
-    console.log(current_checkpoint);
-    console.log(next_checkpoint);
-
-    return {
-        'previous': previous_checkpoint,
-        'current': current_checkpoint,
-        'next': next_checkpoint
-    }
-}
-
-function checkPulse(organisms) {
-
-    let deceased_organisms = [];
-
-    for (let i = 0; i < organisms.length; i++) {
-        if (!organisms[i].is_alive) {
-            // make sure this is correct
-            deceased_organisms.push(organisms[i]);
-            organisms.splice(i, 1);
-        }
-    }
-
-    return {
-        'living_organisms': organisms,
-        'deceased_organisms': deceased_organisms
-    }
 }
 
 function sleep(milliseconds) {

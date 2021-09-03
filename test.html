@@ -32,24 +32,12 @@
   
           <label class="movement-setting-label" for="move-speed">Movement Speed</label>
           <input class="setting-input" id="move-speed" type="text" value="5" autocomplete="off" maxlength="1">
-  
-          <label class="gene-setting-label" for="gene-count">Gene Count</label>
-          <input class="setting-input" id="gene-count" type="text" value="250" autocomplete="off" maxlength="4">
 
           <label class="resilience-setting-label">Resilience</label>
           <input class="setting-input resilience-input" id="resilience" value="95" autocomplete="off" maxlength="3">
   
           <label class="mutation-setting-label" for="mutation-rate">Mutation Rate (%)</label>
           <input class="setting-input" id="mutation-rate" type="text" value="3" autocomplete="off" maxlength="2">
-
-          <!-- checkbox option now, will have to change to make dynamic -->
-          <!-- <span class="death-setting-span">Death</span>
-          <div class="death-container">
-            <label class="dialogue-setting-label">
-              <input id="death-checkbox" type="checkbox">
-              <span class="checkmark"></span>
-            </label>
-          </div>           -->
 
           <span class="dialogue-setting-span">Dialogue</span>
           <div class="dialogue-container">
@@ -58,15 +46,6 @@
               <span class="checkmark"></span>
             </label>
           </div>
-          <!--boundary setting (uses dialogue class styling)-->
-          <!-- hiding for now -->
-          <!-- <span class="dialogue-setting-span">Custom Boundaries</span>
-          <div class="dialogue-container">
-            <label class="dialogue-setting-label">
-              <input id="boundary-checkbox" type="checkbox">
-              <span class="checkmark"></span>
-            </label>
-          </div> -->
         </div>
         <!-- these are beneath the grid -->
         <input class="setting-submit" type="submit" value="Apply">
@@ -90,7 +69,9 @@
     <button class="settings-btn">Settings</button>
     <button class="stop-btn">Stop Simulation</button>
   </div>
+    <script type="module" src="modules/settings_utils.js"></script>
     <script type="module" src="modules/drawings.js"></script>
+    <script type="module" src="modules/boundary_utils.js"></script>
     <script type="module" src="simulator.js"></script>
 </body>
 
