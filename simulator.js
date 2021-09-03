@@ -44,7 +44,6 @@ window.ctx = canvas.getContext("2d");
 window.canvas2 = document.getElementById("background-canvas");
 window.ctx2 = canvas2.getContext("2d");
 
-
 // ===================
 // ===== CLASSES =====
 // ===================
@@ -1438,6 +1437,14 @@ function fadeInTitleAnimation(title_organisms) {
     let start_btn = document.getElementsByClassName("start-btn")[0];
 
     let frame_id;
+
+    // make sure our fonts are loaded by drawing invisible text
+    ctx.fillStyle = 'black';
+    ctx.font = '20px Cairo';
+    ctx.fillText("loading fonts..", 0, 0);
+    ctx.font = '20px Roboto';
+    ctx.fillText("loading fonts..", 0, 25);
+
 
     start_btn.addEventListener("click", function updateStartBtnFlagOnClick() {
         console.log("Start Button Clicked");

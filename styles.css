@@ -6,9 +6,11 @@
     --custom-green: rgba(155, 245, 0, 1);
 }
 
-html {
-    font-family: 'Cairo', sans-serif;
-}
+/* currently in <head> html */
+/* html {
+    font-family: 'Cairo', 'Roboto', sans-serif;
+    font-family: 'Roboto', sans-serif;
+} */
 
 body {
     background: black;
@@ -76,11 +78,13 @@ body {
 .resilience-setting-label {
     grid-column: 1 / 2;
     font-size: 40px;
+    font-family: 'Cairo';
     color: var(--custom-green);
 }
 
 .dialogue-setting-span {
     font-size: 40px;
+    font-family: 'Cairo';
     color: var(--custom-green);
 }
 

@@ -40,11 +40,11 @@ function drawSimulationIntro(opacity) {
     ctx.clearRect(0, 75, canvas.width, 500);
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.font = '28px arial';
+    ctx.font = '28px Roboto';
     ctx.fillText(`${simGlobals.TOTAL_ORGANISMS} organisms were created with completely random genes.`, 125, 290);
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.font = '22px arial';
+    ctx.font = '22px Roboto';
     ctx.fillText("This society of organisms needs to reach the goal if it wants to survive.", 150, 330);
 }
 
@@ -829,7 +829,7 @@ function drawInitialSimSelectionScreen() {
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.font = '50px Cairo';
     ctx.fillText("Select Simulation Type", 240, 80);
-    ctx.font = '30px Cairo';
+    ctx.font = '30px Roboto';
     ctx.fillText("Classic", 190, 500);
     ctx.fillText("Boundary", 690, 500);
 
