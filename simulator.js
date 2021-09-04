@@ -255,7 +255,7 @@ function applyInitialBoundaryStyles() {
     Drawings.drawBoundaryBoilerplate();
 
     // hide buttons
-    document.getElementsByClassName("settings-btn")[0].style.display = 'none';
+    // document.getElementsByClassName("setting-submit")[0].style.display = 'none'; I believe setting-submit already display=none
     document.getElementsByClassName("run-btn")[0].style.display = 'none';
     document.getElementsByClassName("sim-type-classic")[0].style.display = 'none';
     document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
@@ -1784,7 +1784,7 @@ async function runSimulation () {
 
     // hide start/settings buttons
     document.getElementsByClassName("run-btn")[0].style.display = 'none';
-    document.getElementsByClassName("settings-btn")[0].style.display = 'none';
+    // document.getElementsByClassName("setting-submit")[0].style.display = 'none'; // i believe this is already turned off by this point?
 
     // display stop simulation button & add its listener
     let stop_sim_btn = document.getElementsByClassName("stop-btn")[0];

@@ -843,7 +843,7 @@ function prepareToRunSimulation() {
     // clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    document.getElementsByClassName("settings-btn")[0].style.display = 'none';
+    document.getElementsByClassName("setting-submit")[0].style.display = 'none';
 
     ctx.fillStyle = 'rgb(155, 245, 0)';
     ctx.font = '50px Cairo';

@@ -4,7 +4,7 @@ import { prepareToRunSimulation } from "./drawings.js";
 function displaySettingsForm() {
 
     // ensure only settings button showing
-    document.getElementsByClassName("settings-btn")[0].style.display = 'block';
+    // document.getElementsByClassName("settings-btn")[0].style.display = 'block';
     document.getElementsByClassName("run-btn")[0].style.display = 'none';
     document.getElementsByClassName("stop-btn")[0].style.display = 'none';
     document.getElementsByClassName("save-boundaries-btn")[0].style.display = 'none';
@@ -274,11 +274,18 @@ function applyValidSettings(settings_manager) {
 // this function triggers settings form display and creates listener for submitted form
 function configureSettings() {
 
+    document.getElementsByClassName("setting-submit")[0].style.display = 'block';
+
     // turn on listener for apply button
-    document.getElementById("apply-form").addEventListener('submit', function submitForm(event) {
-        // don't submit form
-        event.preventDefault();
+    // document.getElementById("apply-form").addEventListener('submit', function submitForm(event) {
+    //     // don't submit form
+    //     event.preventDefault();
     
+    //     validateSettingsForm();
+    // });
+
+    // not a submitted form anymore, now listen for click on Apply btn
+    document.getElementsByClassName("setting-submit")[0].addEventListener("click", function submitForm(event) {
         validateSettingsForm();
     });
 

@@ -105,15 +105,16 @@ body {
 }
 
 .setting-submit {
-    display: block;
-    margin: 0 auto;
-    margin-top: 2rem;
+    display: none;
+    grid-column: 3 / 4;
+    margin-left: auto;
+    /* margin-top: 2rem; */
     border: 2px solid var(--custom-green);
     border-radius: 3px;
     padding: .75rem 2rem;
     background-color: black;
     color: var(--custom-green);
-    font-size: 30px;
+    font-size: 26px;
     transition: .25s;
 }
 
@@ -211,9 +212,11 @@ body {
     grid-template-columns: 1fr 1fr 1fr;
 }
 
-.start-btn, .sim-type-classic, .sim-type-boundary, .run-btn, 
-.stop-btn, .settings-btn, .sim-type-classic, .sim-type-boundary,
-.next-btn, .save-boundaries-btn {
+.start-btn, .sim-type-classic,
+.sim-type-boundary, .run-btn,
+.stop-btn, .sim-type-classic,
+.sim-type-boundary, .next-btn,
+.save-boundaries-btn {
     padding: .5rem 1rem;
     border: none;
     border-radius: 2px;
@@ -279,18 +282,6 @@ body {
 .stop-btn:hover {
     background-color: var(--mother-pink);
     transition: .5s;
-}
-
-.settings-btn {
-    display: none;
-    grid-column: 3 / 4;
-    margin-left: auto;
-    background-color: rgba(148, 0, 211, 1);
-    color: rgba(155, 245, 0, 1);
-}
-
-.settings-btn:hover {
-    color: rgba(255, 215, 0, 1);
 }
 
 .next-btn {
