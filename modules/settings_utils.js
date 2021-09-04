@@ -20,26 +20,26 @@ function displaySettingsForm() {
         document.getElementsByClassName("setting-caption-resilience")[0].style.display = 'none';
     }
 
-    // movement setting helper (move/abstract)
-    let movement_speed_setting = document.getElementById("move-speed");
-    let error_message = document.getElementsByClassName("error-message")[0];
+    // // movement setting helper (move/abstract)
+    // let movement_speed_setting = document.getElementById("move-speed");
+    // let error_message = document.getElementsByClassName("error-message")[0];
 
-    movement_speed_setting.addEventListener('focusin', function() {
-        error_message.style.color = "var(--closest_organism_gold)";
-        error_message.innerHTML = "Movement Speed Range: 1 - 7";
-        movement_speed_setting.addEventListener('focusout', function() {
-            error_message.style.color = 'var(--mother-pink)';
-            error_message.innerHTML = "";
-        })
-    })
+    // movement_speed_setting.addEventListener('focusin', function() {
+    //     error_message.style.color = "var(--closest_organism_gold)";
+    //     error_message.innerHTML = "Movement Speed Range: 1 - 7";
+    //     movement_speed_setting.addEventListener('focusout', function() {
+    //         error_message.style.color = 'var(--mother-pink)';
+    //         error_message.innerHTML = "";
+    //     })
+    // })
 
-    movement_speed_setting.addEventListener('keydown', function(event) {
-        // function blocks keystrokes not within the acceptable range for movement speed
-        let keystroke = preValidateMovementSetting(event);
-        if (keystroke === 1) {
-            event.preventDefault();
-        }
-    });
+    // movement_speed_setting.addEventListener('keydown', function(event) {
+    //     // function blocks keystrokes not within the acceptable range for movement speed
+    //     let keystroke = preValidateMovementSetting(event);
+    //     if (keystroke === 1) {
+    //         event.preventDefault();
+    //     }
+    // });
 
     // POP_GROWTH toggle button listener (move/abstract/make 'toggleGrowthBtn' function) 
     let growth_toggle_btn = document.getElementsByClassName("growth-toggle-btn")[0];
@@ -212,12 +212,6 @@ function validateResilienceSetting() {
 
 function validateSettingsForm() {
 
-    let error_message = document.getElementsByClassName("error-message")[0];
-
-    // clear error message on call
-    error_message.style.color = "var(--mother-pink)";
-    error_message.innerHTML = "";
-
     let settings_manager = {};
 
     settings_manager.organisms_setting = validateTotalOrganismsSetting();
@@ -230,32 +224,13 @@ function validateSettingsForm() {
 
     let all_settings_valid = true;
 
+    // !!!!! this is where to place the alerts !!!!!
     settings.forEach((setting => {
         if (setting.status != 'valid') {
-            error_message.innerHTML = setting.value;
+            alert(setting.value);
             all_settings_valid = false;
         }
     }));
-
-    // ===== dialogue & growth applications should be moved to applyValidSettings() =====
-
-    // dialogue
-    let dialogue_setting = document.getElementById("dialogue-checkbox");
-    if (dialogue_setting.checked) {
-        simGlobals.dialogue = true;
-    }
-    else {
-        simGlobals.dialogue = false;
-    }
-
-    // population growth
-    // check inner html of button
-    if (document.getElementsByClassName("growth-toggle-btn")[0].innerHTML === 'Constant') {
-        simGlobals.POP_GROWTH = 'constant';
-    }
-    else {
-        simGlobals.POP_GROWTH = 'fluctuate';
-    }
 
     if (all_settings_valid) {
         // turns off settings form, turns on canvas and run-btn
@@ -278,6 +253,23 @@ function applyValidSettings(settings_manager) {
     simGlobals.MUTATION_RATE = settings_manager.mutation_setting.value;
     simGlobals.GENE_COUNT = calculateGeneCount();
 
+    // dialogue
+    if (document.getElementById("dialogue-checkbox").checked) {
+        simGlobals.dialogue = true;
+    }
+    else {
+        simGlobals.dialogue = false;
+    }
+
+    // population growth
+    if (document.getElementsByClassName("growth-toggle-btn")[0].innerHTML === 'Constant') {
+        simGlobals.POP_GROWTH = 'constant';
+    }
+    else {
+        simGlobals.POP_GROWTH = 'fluctuate';
+    }
+
+    // resilience
     if (simGlobals.sim_type === 'boundary') {
         simGlobals.RESILIENCE = settings_manager.resilience_setting.value;
     }

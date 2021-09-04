@@ -40,6 +40,7 @@
           <span class="settings-header">Simulation Settings</span>
 
           <!--could make 'value' dynamic from js-->
+          <!--make this 'Initial Population' at end-->
           <label class="organisms-setting-label" for="total-organisms">Total Organisms</label>
           <input class="setting-input" id="total-organisms" type="text" value="100" autocomplete="off" maxlength="4">
           <span class="setting-caption">[insert caption text here describing the setting]</span>
@@ -57,7 +58,9 @@
           <span class="setting-caption">[insert caption text here describing the setting]</span>
 
           <label class="growth-setting-label" for="growth">Population Growth</label>
-          <button class="growth-toggle-btn" type="button">Constant</button>
+          <div class="growth-div">
+            <button class="growth-toggle-btn" type="button">Constant</button>
+          </div>
           <span class="setting-caption setting-caption-resilience">[insert caption text here describing the setting]</span>
 
           <label class="dialogue-setting-span">Dialogue</label>
@@ -70,9 +73,6 @@
           <span class="setting-caption">[insert caption text here describing the setting]</span>
         </div>
       </form>
-      <div class="error-container">
-        <span class="error-message"></span>
-      </div>
     </div>
   </div>
   <div class="btn-container">

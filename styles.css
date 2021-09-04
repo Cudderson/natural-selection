@@ -78,7 +78,7 @@ body {
 .growth-setting-label,
 .resilience-setting-label {
     grid-column: 1 / 2;
-    font-size: 20px;
+    font-size: 22px;
     font-family: 'Cairo';
     color: var(--custom-green);
 }
@@ -121,10 +121,18 @@ body {
     transition: .25s;
 }
 
+.growth-div {
+    position: relative;
+}
+
 .growth-toggle-btn {
+    position: absolute;
+    top: 15px;
+    left: 0;
     width: 100px;
     border: 1px solid var(--custom-green);
-    padding: none;
+    padding: .4rem 1rem;
+    font-size: 14px;
 }
 
 .growth-toggle-btn:hover {
@@ -146,18 +154,6 @@ body {
     background-color: var(--custom-green);
     color: black;
     transition: .25s;
-}
-
-.error-container {
-    margin-top: 1rem;
-}
-
-/* consider using a better red color */
-.error-message {
-    display: block;
-    color: var(--mother-pink);
-    text-align: center;
-    font-size: 24px;
 }
 
 /* custom checkbox */
