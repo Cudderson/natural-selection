@@ -52,9 +52,9 @@ body {
 }
 
 #apply-form {
-    width: 750px;
+    width: 900px;
     margin: 0 auto;
-    margin-top: 50px;
+    margin-top: 25px;
 }
 
 .settings-grid {
@@ -67,9 +67,16 @@ body {
 .settings-header {
     grid-column: 1 / 3;
     display: block;
-    margin-bottom: 1rem;
+    margin-bottom: 1.2rem;
     font-size: 30px;
+    /* color: var(--custom-green); */
     color: var(--darkviolet);
+}
+
+.apply-help-message {
+    margin-left: 250px;
+    color: darkviolet;
+    font-size: 18px;
 }
 
 .organisms-setting-label,
@@ -78,7 +85,7 @@ body {
 .growth-setting-label,
 .resilience-setting-label {
     grid-column: 1 / 2;
-    font-size: 22px;
+    font-size: 24px;
     font-family: 'Cairo';
     color: var(--custom-green);
 }
@@ -86,12 +93,17 @@ body {
 .setting-caption {
     display: block;
     color: var(--darkviolet);
+    font-size: 16px;
+}
+
+.setting-caption-growth {
+    font-size: 13px;
 }
 
 .dialogue-setting-span {
     display: block;
     grid-column: 1 / 2;
-    font-size: 20px;
+    font-size: 24px;
     font-family: 'Cairo';
     color: var(--custom-green);
 }
@@ -104,11 +116,12 @@ body {
 
 .setting-input {
     width: 50%;
+    margin-left: auto;
     border: none;
     border-bottom: 2px solid var(--custom-green);
     text-align: right;
     font-family: 'Cairo';
-    font-size: 24px;
+    font-size: 22px;
     background-color: black;
     color: var(--custom-green);
     outline: none;
@@ -123,16 +136,17 @@ body {
 
 .growth-div {
     position: relative;
+    margin-left: auto;
 }
 
 .growth-toggle-btn {
     position: absolute;
-    top: 15px;
-    left: 0;
+    top: 20px;
+    right: 0;
     width: 100px;
     border: 1px solid var(--custom-green);
     padding: .4rem 1rem;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .growth-toggle-btn:hover {
@@ -142,8 +156,8 @@ body {
 
 .setting-submit {
     display: none;
-    grid-column: 3 / 4;
-    margin-left: auto;
+    grid-column: 2 / 3;
+    margin: 0 auto;
     padding: .75rem 2rem;
     border: 2px solid var(--custom-green);
     font-size: 26px;
@@ -183,7 +197,7 @@ body {
   .checkmark {
     position: absolute;
     top: 0;
-    left: 0;
+    right: 28px;
     height: 40px;
     width: 40px;
     border: 1px solid var(--custom-green);

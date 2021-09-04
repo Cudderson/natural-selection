@@ -37,31 +37,34 @@
       <form id="apply-form">
 
         <div class="settings-grid">
-          <span class="settings-header">Simulation Settings</span>
+          <span class="settings-header">Simulation Settings<span class="apply-help-message">Press 'Apply' to finish configuring your simulation!</span></span>
 
           <!--could make 'value' dynamic from js-->
           <!--make this 'Initial Population' at end-->
           <label class="organisms-setting-label" for="total-organisms">Total Organisms</label>
           <input class="setting-input" id="total-organisms" type="text" value="100" autocomplete="off" maxlength="4">
-          <span class="setting-caption">[insert caption text here describing the setting]</span>
+          <span class="setting-caption">Number of organisms to create for first generation of simulation (&#60;10000)</span>
   
           <label class="movement-setting-label" for="move-speed">Movement Speed</label>
           <input class="setting-input" id="move-speed" type="text" value="5" autocomplete="off" maxlength="1">
-          <span class="setting-caption">[insert caption text here describing the setting]</span>
-
-          <label class="resilience-setting-label">Resilience (%)</label>
-          <input class="setting-input resilience-input" id="resilience" value="95" autocomplete="off" maxlength="3">
-          <span class="setting-caption setting-caption-resilience">[insert caption text here describing the setting]</span>
+          <span class="setting-caption">Relative-maximum distance an organism can travel in one movement (1-5)</span>
   
           <label class="mutation-setting-label" for="mutation-rate">Mutation Rate (%)</label>
           <input class="setting-input" id="mutation-rate" type="text" value="3" autocomplete="off" maxlength="2">
-          <span class="setting-caption">[insert caption text here describing the setting]</span>
+          <span class="setting-caption">Target percentage of genes that will be mutated in offspring organisms</span>
+
+          <label class="resilience-setting-label">Resilience (%)</label>
+          <input class="setting-input resilience-input" id="resilience" value="95" autocomplete="off" maxlength="3">
+          <span class="setting-caption setting-caption-resilience">Percent chance an organism will survive if boundary touched</span>
 
           <label class="growth-setting-label" for="growth">Population Growth</label>
           <div class="growth-div">
             <button class="growth-toggle-btn" type="button">Constant</button>
           </div>
-          <span class="setting-caption setting-caption-resilience">[insert caption text here describing the setting]</span>
+          <span class="setting-caption setting-caption-growth">
+            'Constant' = parent organisms always reproduce offspring equal to the initial population size<br>
+            'Fluctuate' = population sizes may vary from generation to generation
+          </span>
 
           <label class="dialogue-setting-span">Dialogue</label>
           <div class="dialogue-container">
@@ -70,7 +73,7 @@
               <span class="checkmark"></span>
             </label>
           </div>
-          <span class="setting-caption">[insert caption text here describing the setting]</span>
+          <span class="setting-caption">Un-check to run simulation without additional descriptions / animations</span>
         </div>
       </form>
     </div>

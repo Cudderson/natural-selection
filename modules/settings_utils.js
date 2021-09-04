@@ -14,36 +14,22 @@ function displaySettingsForm() {
     document.getElementsByClassName("settings-container")[0].style.display = 'block';
 
     if (simGlobals.sim_type === 'classic') {
-        // display classic settings (no death/resilience)
-        document.getElementsByClassName("resilience-setting-label")[0].style.display = 'none';
-        document.getElementsByClassName("resilience-input")[0].style.display = 'none';
-        document.getElementsByClassName("setting-caption-resilience")[0].style.display = 'none';
+
+        let resilience_input = document.getElementsByClassName("resilience-input")[0];
+        let resilience_caption = document.getElementsByClassName("setting-caption-resilience")[0];
+
+        document.getElementsByClassName("resilience-setting-label")[0].style.color = '#333';
+        resilience_input.style.pointerEvents = 'none';
+        resilience_input.style.color = '#333';
+        resilience_input.style.borderBottom = '2px solid #333';
+        resilience_input.value = "n/a";
+        resilience_caption.style.color = '#333';
+        resilience_caption.innerHTML = 'for boundary simulation type only';
+
     }
-
-    // // movement setting helper (move/abstract)
-    // let movement_speed_setting = document.getElementById("move-speed");
-    // let error_message = document.getElementsByClassName("error-message")[0];
-
-    // movement_speed_setting.addEventListener('focusin', function() {
-    //     error_message.style.color = "var(--closest_organism_gold)";
-    //     error_message.innerHTML = "Movement Speed Range: 1 - 7";
-    //     movement_speed_setting.addEventListener('focusout', function() {
-    //         error_message.style.color = 'var(--mother-pink)';
-    //         error_message.innerHTML = "";
-    //     })
-    // })
-
-    // movement_speed_setting.addEventListener('keydown', function(event) {
-    //     // function blocks keystrokes not within the acceptable range for movement speed
-    //     let keystroke = preValidateMovementSetting(event);
-    //     if (keystroke === 1) {
-    //         event.preventDefault();
-    //     }
-    // });
 
     // POP_GROWTH toggle button listener (move/abstract/make 'toggleGrowthBtn' function) 
     let growth_toggle_btn = document.getElementsByClassName("growth-toggle-btn")[0];
-
     growth_toggle_btn.addEventListener('click', function toggle() {
         if (growth_toggle_btn.innerHTML === 'Constant') {
             growth_toggle_btn.innerHTML = 'Fluctuate';
@@ -60,11 +46,9 @@ function validateTotalOrganismsSetting() {
 
     if (typeof parseInt(total_organisms_setting.value) === 'number' && parseInt(total_organisms_setting.value) > 0) {
         if (parseInt(total_organisms_setting.value > 9999)) {
-            // simGlobals.TOTAL_ORGANISMS = 9999;
             valid_setting = 9999;
         }
         else {
-            // simGlobals.TOTAL_ORGANISMS = Math.abs(parseInt(total_organisms_setting.value));
             valid_setting = Math.abs(parseInt(total_organisms_setting.value));
         }
 
@@ -108,12 +92,10 @@ function validateMutationRateSetting() {
     // consider allowing float here
     if (typeof parseInt(mutation_rate_setting.value) === 'number' && parseInt(mutation_rate_setting.value) > 0) {
         if (parseInt(mutation_rate_setting.value) > 100) {
-            // simGlobals.MUTATION_RATE = 1;
             valid_setting = 1;
         }
 
         else {
-            // simGlobals.MUTATION_RATE = parseInt(mutation_rate_setting.value) / 100;
             valid_setting = parseInt(mutation_rate_setting.value) / 100;
         }
 
@@ -140,12 +122,8 @@ function validateMovementSetting() {
     let valid_setting;
 
     // create max and min genes from movement speed
-    // pre-validated in preValidateMovementSetting();
     if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 5) {
 
-        // do this logic after validated
-        // simGlobals.MIN_GENE = parseInt(movement_speed_setting.value) * -1;
-        // simGlobals.MAX_GENE = parseInt(movement_speed_setting.value);
         valid_setting = parseInt(movement_speed_setting.value);
 
         movement_speed_setting.style.borderBottom = "2px solid var(--custom-green)";
@@ -174,7 +152,6 @@ function validateResilienceSetting() {
 
     if (parseInt(resilience_setting.value) >= 0 && parseInt(resilience_setting.value) <= 100 && typeof parseInt(resilience_setting.value) === 'number') {
 
-        // simGlobals.RESILIENCE = parseInt(resilience_setting.value) / 100;
         valid_setting = parseInt(resilience_setting.value) / 100;
 
         resilience_setting.style.borderBottom = "2px solid var(--custom-green)";
@@ -201,15 +178,17 @@ function validateSettingsForm() {
 
     settings_manager.organisms_setting = validateTotalOrganismsSetting();
     settings_manager.movement_setting = validateMovementSetting();
-    // settings_manager.gene_setting = validateGeneCountSetting();
     settings_manager.mutation_setting = validateMutationRateSetting();
-    settings_manager.resilience_setting = validateResilienceSetting();
+
+    if (simGlobals.sim_type === 'boundary') {
+        settings_manager.resilience_setting = validateResilienceSetting();
+    }
 
     let settings = Object.values(settings_manager);
 
     let all_settings_valid = true;
 
-    // !!!!! this is where to place the alerts !!!!!
+    // alert user of invalid setting value
     settings.forEach((setting => {
         if (setting.status != 'valid') {
             alert(setting.value);
