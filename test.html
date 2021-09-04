@@ -42,25 +42,32 @@
           <!--could make 'value' dynamic from js-->
           <label class="organisms-setting-label" for="total-organisms">Total Organisms</label>
           <input class="setting-input" id="total-organisms" type="text" value="100" autocomplete="off" maxlength="4">
-          <span style="color: blue">[insert caption text here describing the setting]</span>
+          <span class="setting-caption">[insert caption text here describing the setting]</span>
   
           <label class="movement-setting-label" for="move-speed">Movement Speed</label>
           <input class="setting-input" id="move-speed" type="text" value="5" autocomplete="off" maxlength="1">
-          <span style="color: blue">[insert caption text here describing the setting]</span>
+          <span class="setting-caption">[insert caption text here describing the setting]</span>
 
-          <label class="resilience-setting-label">Resilience</label>
+          <label class="resilience-setting-label">Resilience (%)</label>
           <input class="setting-input resilience-input" id="resilience" value="95" autocomplete="off" maxlength="3">
+          <span class="setting-caption setting-caption-resilience">[insert caption text here describing the setting]</span>
   
           <label class="mutation-setting-label" for="mutation-rate">Mutation Rate (%)</label>
           <input class="setting-input" id="mutation-rate" type="text" value="3" autocomplete="off" maxlength="2">
+          <span class="setting-caption">[insert caption text here describing the setting]</span>
 
-          <span class="dialogue-setting-span">Dialogue</span>
+          <label class="growth-setting-label" for="growth">Population Growth</label>
+          <button class="growth-toggle-btn" type="button">Constant</button>
+          <span class="setting-caption setting-caption-resilience">[insert caption text here describing the setting]</span>
+
+          <label class="dialogue-setting-span">Dialogue</label>
           <div class="dialogue-container">
             <label class="dialogue-setting-label">
               <input id="dialogue-checkbox" type="checkbox" checked="checked">
               <span class="checkmark"></span>
             </label>
           </div>
+          <span class="setting-caption">[insert caption text here describing the setting]</span>
         </div>
       </form>
       <div class="error-container">

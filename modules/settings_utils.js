@@ -17,6 +17,7 @@ function displaySettingsForm() {
         // display classic settings (no death/resilience)
         document.getElementsByClassName("resilience-setting-label")[0].style.display = 'none';
         document.getElementsByClassName("resilience-input")[0].style.display = 'none';
+        document.getElementsByClassName("setting-caption-resilience")[0].style.display = 'none';
     }
 
     // movement setting helper (move/abstract)
@@ -37,6 +38,18 @@ function displaySettingsForm() {
         let keystroke = preValidateMovementSetting(event);
         if (keystroke === 1) {
             event.preventDefault();
+        }
+    });
+
+    // POP_GROWTH toggle button listener (move/abstract/make 'toggleGrowthBtn' function) 
+    let growth_toggle_btn = document.getElementsByClassName("growth-toggle-btn")[0];
+
+    growth_toggle_btn.addEventListener('click', function toggle() {
+        if (growth_toggle_btn.innerHTML === 'Constant') {
+            growth_toggle_btn.innerHTML = 'Fluctuate';
+        }
+        else {
+            growth_toggle_btn.innerHTML = 'Constant';
         }
     });
 }
@@ -224,6 +237,8 @@ function validateSettingsForm() {
         }
     }));
 
+    // ===== dialogue & growth applications should be moved to applyValidSettings() =====
+
     // dialogue
     let dialogue_setting = document.getElementById("dialogue-checkbox");
     if (dialogue_setting.checked) {
@@ -231,6 +246,15 @@ function validateSettingsForm() {
     }
     else {
         simGlobals.dialogue = false;
+    }
+
+    // population growth
+    // check inner html of button
+    if (document.getElementsByClassName("growth-toggle-btn")[0].innerHTML === 'Constant') {
+        simGlobals.POP_GROWTH = 'constant';
+    }
+    else {
+        simGlobals.POP_GROWTH = 'fluctuate';
     }
 
     if (all_settings_valid) {
