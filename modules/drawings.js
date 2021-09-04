@@ -65,7 +65,7 @@ function drawSimulationExplanation(opacity) {
     ctx.clearRect(0, 100, canvas.width, canvas.height);
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.font = '22px arial';
+    ctx.font = '22px Roboto';
     ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
     ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
     ctx.fillText("until they succeed or fail to survive.", 350, 350);
@@ -75,7 +75,7 @@ function drawExplanationAndGoal(opacity) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.font = '22px arial';
+    ctx.font = '22px Roboto';
     ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
     ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
     ctx.fillText("until they succeed or fail to survive.", 350, 350);
@@ -264,7 +264,7 @@ function drawMothersHighlighted(opacity) {
 }
 
 function drawMothersNatural(opacity) {
-    for (var i = 0; i < paintbrush.subject.length; i++) {
+    for (let i = 0; i < paintbrush.subject.length; i++) {
         ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
         ctx.beginPath();
         ctx.arc(paintbrush.subject[i][0].x, paintbrush.subject[i][0].y, paintbrush.subject[i][0].radius, 0, Math.PI*2, false);
@@ -273,7 +273,7 @@ function drawMothersNatural(opacity) {
 }
 
 function drawFathersHighlighted(opacity) {
-    for (var i = 0; i < paintbrush.subject.length; i++) {
+    for (let i = 0; i < paintbrush.subject.length; i++) {
         ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
         ctx.beginPath();
         ctx.arc(paintbrush.subject[i][1].x, paintbrush.subject[i][1].y, paintbrush.subject[i][1].radius, 0, Math.PI*2, false);
@@ -282,7 +282,7 @@ function drawFathersHighlighted(opacity) {
 }
 
 function drawFathersNatural(opacity) {
-    for (var i = 0; i < paintbrush.subject.length; i++) {
+    for (let i = 0; i < paintbrush.subject.length; i++) {
         ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
         ctx.beginPath();
         ctx.arc(paintbrush.subject[i][1].x, paintbrush.subject[i][1].y, paintbrush.subject[i][1].radius, 0, Math.PI*2, false);
@@ -541,11 +541,11 @@ function drawBoundaryCreationIntroductionOne() {
     ctx.fillRect(720, 420, 300, 200);
 
     // introduction
-    ctx.font = '40px arial';
+    ctx.font = '40px Cairo';
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.fillText("Create Your Boundary", 330, 280);
 
-    ctx.font = '28px arial';
+    ctx.font = '28px Cairo';
     ctx.fillText("Press 'Enter' or click 'Continue'", 300, 360);
 } 
 
@@ -553,11 +553,11 @@ function drawBoundaryCreationIntroductionTwo() {
 
     drawBoundaryBoilerplate();
 
-    ctx.font = '28px arial';
+    ctx.font = '28px Cairo';
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.fillText("These areas will be used for dialogue throughout the simulation.", 100, 270);
     ctx.fillText("For best results, avoid drawing over them.", 200, 330);  
-    ctx.font = '24px arial'; 
+    ctx.font = '24px Cairo'; 
     ctx.fillText("Press 'Enter' or click 'Continue'", 300, 420);
 }
 
@@ -567,12 +567,12 @@ function drawBoundaryDrawingHelpText(step) {
     ctx.font= "24px Cairo";
     ctx.fillText(step, 80, 40);
 
-    ctx.font = '18px arial';
+    ctx.font = '18px Cairo';
     ctx.fillText("Draw a line connecting", 25, 75)
     ctx.fillText("the red endpoints from", 25, 95);
     ctx.fillText("bottom to top", 25, 115);
 
-    ctx.font = '20px arial';
+    ctx.font = '20px Cairo';
     ctx.fillText("For best results, draw", 770, 505);
     ctx.fillText("a slow, continuous,", 770, 530);
     ctx.fillText("non-overlapping line", 770, 555);
@@ -583,7 +583,7 @@ function drawBoundaryValidationHelpText() {
     ctx.font= "24px Cairo";
     ctx.fillText("Validation", 70, 40);
 
-    ctx.font = '18px arial';
+    ctx.font = '18px Cairo';
     ctx.fillText("To verify that the goal", 25, 70)
     ctx.fillText("is reachable, draw a line", 25, 90);
     ctx.fillText("connecting the white dot", 25, 110);
@@ -592,12 +592,6 @@ function drawBoundaryValidationHelpText() {
     // no bottom black square on this one
     ctx.fillStyle = 'black';
     ctx.fillRect(730, 440, 280, 220);
-
-    // not using, keep just in case
-    // ctx.font = '20px arial';
-    // ctx.fillText("For best results, draw", 770, 505);
-    // ctx.fillText("a slow, continuous,", 770, 530);
-    // ctx.fillText("non-overlapping line", 770, 555);
 }
 
 function drawBoundaryValidationScreen(boundary) {
@@ -617,13 +611,13 @@ function drawBoundaryCompletionHelpText() {
     ctx.strokeStyle = 'rgb(148, 0, 211)';
     ctx.strokeRect(736, 445, 272, 200);
 
-    ctx.font = '24px arial';
+    ctx.font = '24px Cairo';
     ctx.fillStyle = 'rgb(155, 245, 0)';
     ctx.fillText("Complete!", 805, 490);
     // still determining what to say at this point
 
     // ctx.fillText("For best results, draw", 770, 505);
-    ctx.font = '20px arial';
+    ctx.font = '20px Roboto';
     ctx.fillText("[ need text here ]", 770, 530);
     // ctx.fillText("non-overlapping line", 770, 555);
 }
@@ -644,25 +638,25 @@ function drawBoundary(opacity) {
 // still need to pass generation_count from caller
 function drawSuccessMessage(opacity, generation_count) {
 
-    ctx.font = '44px arial';
+    ctx.font = '44px Cairo';
     ctx.fillStyle = 'black';
     ctx.fillText("Your Simulation Succeeded!", 235, 275);
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
     ctx.fillText("Your Simulation Succeeded!", 235, 275);
 
-    ctx.font = '30px arial';
+    ctx.font = '30px Cairo';
     ctx.fillStyle = 'black';
     ctx.fillText(`Generations: ${generation_count}`, 420, 340);
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
     ctx.fillText(`Generations: ${generation_count}`, 420, 340);
 
-    ctx.font = '26px arial';
+    ctx.font = '26px Cairo';
     ctx.fillStyle = 'black';
     ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
     ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
     ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
 
-    ctx.font = '26px arial';
+    ctx.font = '26px Cairo';
     ctx.fillStyle = 'black';
     ctx.fillText("Press 'Q' to Quit", 420, 450);
     ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
@@ -680,26 +674,26 @@ function redrawOrganisms() {
     }
 }
 
-// untested
+// untested (needs work)
 function drawExtinctionMessage() {
     // clears
     ctx.fillStyle = 'black';
 
-    ctx.font = '50px arial';
+    ctx.font = '50px Cairo';
     ctx.fillText("Simulation Failed", 310, 250);
 
-    ctx.font = "30px Cairo";
+    ctx.font = "30px Roboto";
     ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
 
-    ctx.font = '22px arial';
+    ctx.font = '22px Cairo';
     ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
 
     // animations
-    ctx.font = '50px arial';
+    ctx.font = '50px Cairo';
     ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
     ctx.fillText("Simulation Failed", 310, 250);
 
-    ctx.font = "22px Cairo";
+    ctx.font = "22px Roboto";
     ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
 
     ctx.font = "30px Cairo";
@@ -740,7 +734,7 @@ function highlightClassicSimType() {
     // redraw 'classic' text highlighted
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font = '30px arial';
+    ctx.font = '30px Cairo';
     ctx.fillText("Classic", 190, 500);
 
     // redraw 'boundary' border normal
@@ -787,7 +781,7 @@ function highlightBoundarySimType() {
     // redraw 'boundary' text highlighted
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font = '30px arial';
+    ctx.font = '30px Cairo';
     ctx.fillText("Boundary", 690, 500);
 
     // redraw 'classic' border normal
@@ -829,7 +823,7 @@ function drawInitialSimSelectionScreen() {
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.font = '50px Cairo';
     ctx.fillText("Select Simulation Type", 240, 80);
-    ctx.font = '30px Roboto';
+    ctx.font = '30px Cairo';
     ctx.fillText("Classic", 190, 500);
     ctx.fillText("Boundary", 690, 500);
 
@@ -852,9 +846,9 @@ function prepareToRunSimulation() {
     document.getElementsByClassName("settings-btn")[0].style.display = 'none';
 
     ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font = '50px arial';
+    ctx.font = '50px Cairo';
     ctx.fillText("Simulation Ready", 300, 270);
-    ctx.font = '28px arial'
+    ctx.font = '28px Cairo'
     ctx.fillText("Press 'Run Simulation'", 350, 400);
 }
 

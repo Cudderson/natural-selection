@@ -1438,14 +1438,6 @@ function fadeInTitleAnimation(title_organisms) {
 
     let frame_id;
 
-    // make sure our fonts are loaded by drawing invisible text
-    ctx.fillStyle = 'black';
-    ctx.font = '20px Cairo';
-    ctx.fillText("loading fonts..", 0, 0);
-    ctx.font = '20px Roboto';
-    ctx.fillText("loading fonts..", 0, 25);
-
-
     start_btn.addEventListener("click", function updateStartBtnFlagOnClick() {
         console.log("Start Button Clicked");
         start_button_pressed = true;
