@@ -60,8 +60,6 @@ class Boundary {
         else {
             // invalid
             console.log("Invalid boundary.");
-
-            // error message (not written yet);
             return false;
         }   
     }
@@ -102,8 +100,6 @@ class Boundary {
         else {
             // invalid
             console.log("Invalid boundary.");
-
-            // error message (not written yet)
             return false;
         }
     }

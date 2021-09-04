@@ -81,7 +81,7 @@ function validateTotalOrganismsSetting() {
 
         return {
             'status': 'invalid',
-            'value': '* Invalid number of organisms. Please input a positive number.',
+            'value': '* Invalid Initial Population *\nPlease input a positive number less than 10,000',
         }
     }
 }
@@ -130,23 +130,8 @@ function validateMutationRateSetting() {
 
         return {
             'status': 'invalid',
-            'value': "Invalid mutation rate. Please input a positive percentage value. (3 = 3%)"
+            'value': "* Invalid mutation rate value *\nPlease input a positive percentage value. (3 = 3%)"
         }
-    }
-}
-
-function preValidateMovementSetting(event) {
-
-    // prevent keystrokes that aren't === 1-7 || Backspace, <, > 
-    let movement_key = event.key;
-    if (movement_key > "0" && movement_key <= "7") {
-        return 0;
-    }
-    else if (movement_key === "Backspace" || movement_key === "ArrowLeft" || movement_key === "ArrowRight") {
-        return 0;
-    }
-    else {
-        return 1;
     }
 }
 
@@ -156,7 +141,7 @@ function validateMovementSetting() {
 
     // create max and min genes from movement speed
     // pre-validated in preValidateMovementSetting();
-    if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 7) {
+    if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 5) {
 
         // do this logic after validated
         // simGlobals.MIN_GENE = parseInt(movement_speed_setting.value) * -1;
@@ -176,7 +161,7 @@ function validateMovementSetting() {
 
         return {
             'status': 'invalid',
-            'value': "Invalid movement speed. Please input a positive number between 1 - 7."
+            'value': "* Invalid movement speed value *\nPlease input a positive number between 1 - 5 (inclusive)."
         }
     }   
 }
@@ -205,7 +190,7 @@ function validateResilienceSetting() {
 
         return {
             'status': 'invalid',
-            'value': "Invalid resilience value. Please input a positive number between 0 - 100"
+            'value': "* Invalid resilience value *\nPlease input a positive number between 0 - 100 (inclusive)"
         }
     } 
 }
@@ -292,15 +277,7 @@ function configureSettings() {
 
     document.getElementsByClassName("setting-submit")[0].style.display = 'block';
 
-    // turn on listener for apply button
-    // document.getElementById("apply-form").addEventListener('submit', function submitForm(event) {
-    //     // don't submit form
-    //     event.preventDefault();
-    
-    //     validateSettingsForm();
-    // });
-
-    // not a submitted form anymore, now listen for click on Apply btn
+    // listen for click on Apply btn
     document.getElementsByClassName("setting-submit")[0].addEventListener("click", function submitForm(event) {
         validateSettingsForm();
     });
@@ -310,8 +287,7 @@ function configureSettings() {
 
 export {
     displaySettingsForm, validateTotalOrganismsSetting,
-    validateMutationRateSetting, preValidateMovementSetting,
-    validateMovementSetting, validateResilienceSetting,
-    validateSettingsForm, configureSettings,
-    calculateGeneCount,
+    validateMutationRateSetting, validateMovementSetting,
+    validateResilienceSetting, validateSettingsForm,
+    configureSettings, calculateGeneCount,
 }
