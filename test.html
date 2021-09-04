@@ -42,9 +42,11 @@
           <!--could make 'value' dynamic from js-->
           <label class="organisms-setting-label" for="total-organisms">Total Organisms</label>
           <input class="setting-input" id="total-organisms" type="text" value="100" autocomplete="off" maxlength="4">
+          <span style="color: blue">[insert caption text here describing the setting]</span>
   
           <label class="movement-setting-label" for="move-speed">Movement Speed</label>
           <input class="setting-input" id="move-speed" type="text" value="5" autocomplete="off" maxlength="1">
+          <span style="color: blue">[insert caption text here describing the setting]</span>
 
           <label class="resilience-setting-label">Resilience</label>
           <input class="setting-input resilience-input" id="resilience" value="95" autocomplete="off" maxlength="3">
@@ -61,6 +63,7 @@
           </div>
         </div>
         <!-- these are beneath the grid -->
+        <!-- this should now be in btn-container to allow more room on settings form -->
         <input class="setting-submit" type="submit" value="Apply">
       </form>
       <div class="error-container">

@@ -52,9 +52,9 @@ body {
 }
 
 #apply-form {
-    width: 600px;
+    width: 750px;
     margin: 0 auto;
-    margin-top: 100px;
+    margin-top: 50px;
 }
 
 .settings-grid {
@@ -76,13 +76,13 @@ body {
 .mutation-setting-label,
 .resilience-setting-label {
     grid-column: 1 / 2;
-    font-size: 40px;
+    font-size: 20px;
     font-family: 'Cairo';
     color: var(--custom-green);
 }
 
 .dialogue-setting-span {
-    font-size: 40px;
+    font-size: 20px;
     font-family: 'Cairo';
     color: var(--custom-green);
 }
@@ -97,7 +97,8 @@ body {
     border: none;
     border-bottom: 2px solid var(--custom-green);
     text-align: right;
-    font-size: 30px;
+    font-family: 'Cairo';
+    font-size: 20px;
     background-color: black;
     color: var(--custom-green);
     outline: none;
