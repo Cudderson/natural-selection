@@ -1,5 +1,7 @@
 // This module will hold all things boundary-related (besides drawing functions)
 
+// import { drawSimulationSettings } from "./drawings";
+
 class Boundary {
     constructor() {
         this.top_boundary = new Image();
@@ -44,16 +46,12 @@ class Boundary {
 
         updateMousePosition(event);
 
-        // check if boundary ended on endpoint
-        // endpoint: ctx.fillRect(950, 150, 50, 20);
-        if (simGlobals.coordinates['x'] >= 950 && simGlobals.coordinates['y'] >= 150 && simGlobals.coordinates['y'] <= 200) {
-            // valid, update boundary step
-            console.log("valid boundary");
+        // check if boundary ended on endpoint     ctx.arc(950, 170, 10, 0, Math.PI*2, false);
+        
+        if (simGlobals.coordinates['x'] >= 940 && simGlobals.coordinates['x'] <= 960 &&
+            simGlobals.coordinates['y'] >= 160 && simGlobals.coordinates['y'] <= 180) {
 
-            // make connectors green (maybe draw this after returns true)
-            ctx.fillStyle = 'rgb(155, 245, 0)';
-            ctx.fillRect(950, 150, 50, 20);
-            ctx.fillRect(150, 550, 20, 50);
+            console.log("valid boundary");
 
             return true;
         }
@@ -70,25 +68,11 @@ class Boundary {
         updateMousePosition(event);
 
         // check if boundary on endpoint
-        // endpoint: (ctx.fillRect(830, 0, 20, 50))
-        if (simGlobals.coordinates['x'] >= 830 && simGlobals.coordinates['x'] <= 850 && simGlobals.coordinates['y'] <= 50) {
+        // endpoint:     ctx.arc(830, 50, 10, 0, Math.PI*2, false)
+        if (simGlobals.coordinates['x'] >= 820 && simGlobals.coordinates['x'] <= 840 &&
+            simGlobals.coordinates['y'] >= 40 && simGlobals.coordinates['y'] <= 60) {
             // valid, update boundary step
             console.log("valid boundary");
-
-            // make top-boundary connectors green
-            ctx.fillStyle = 'rgb(155, 245, 0)';
-            ctx.fillRect(830, 0, 20, 50);
-            ctx.fillRect(0, 430, 50, 20);
-
-            // draw white dot for next step
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(80, 510, 10, 0, Math.PI*2, false);
-            ctx.fill();
-
-            // make goal new color (can be a flag in drawBoundaryBoilerplate())
-            ctx.fillStyle = 'rgb(232, 0, 118)';
-            ctx.fillRect(925, 50, 20, 20);
 
             // update canvas data (not sure if I need to do this)
             canvas = document.getElementById("main-canvas");

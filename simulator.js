@@ -291,6 +291,9 @@ function createNewBoundary() {
 
     Drawings.drawBoundaryDrawingHelpText("Step 1");
 
+    // draw bottom-boundary connectors red
+    Drawings.drawBottomBoundaryEndpointsRed();
+
     function draw(event) {
         if (event.buttons !== 1 || !allowed_to_draw) {
             // return if left-mouse button not pressed or if user not allowed to draw
@@ -333,7 +336,6 @@ function createNewBoundary() {
                 // save to top coords
                 new_boundary.top_boundary_coordinates.push([simGlobals.coordinates['x'], simGlobals.coordinates['y']]);
             }
-
         }
 
         ctx.lineCap = 'round';
@@ -352,7 +354,8 @@ function createNewBoundary() {
         if (boundary_step === 'bottom-boundary') {
             // check that user is trying to draw from first connector (ctx.fillRect(150, 550, 20, 50))
             // make helper function eventually
-            if (simGlobals.coordinates['x'] >= 150 && simGlobals.coordinates['x'] <= 170 && simGlobals.coordinates['y'] >= 550) {
+            if (simGlobals.coordinates['x'] >= 160 && simGlobals.coordinates['x'] <= 180 && 
+                simGlobals.coordinates['y'] >= 540 && simGlobals.coordinates['y'] <= 560) {
                 console.log("You clicked on the connector!");
                 allowed_to_draw = true;
             }
@@ -363,8 +366,9 @@ function createNewBoundary() {
             }
         }
         else if (boundary_step === 'top-boundary') {
-            // check that user is trying to draw from the first connector (ctx.fillRect(0, 430, 50, 20))
-            if (simGlobals.coordinates['x'] >= 0 && simGlobals.coordinates['x'] <= 50 && simGlobals.coordinates['y'] >= 430 && simGlobals.coordinates['y'] <= 450) {
+            // check that user is trying to draw from the first connector     ctx.arc(50, 430, 10, 0, Math.PI*2, false);
+            if (simGlobals.coordinates['x'] >= 40 && simGlobals.coordinates['x'] <= 60 &&
+                simGlobals.coordinates['y'] >= 420 && simGlobals.coordinates['y'] <= 440) {
                 allowed_to_draw = true;
             }
             else {
@@ -384,7 +388,6 @@ function createNewBoundary() {
                 console.log("You missed the white dot...");
                 allowed_to_draw = false;
             } 
-
         }
         else if (boundary_step === 'confirmation') {
             // don't allow user to draw in confirmation phase
@@ -403,10 +406,14 @@ function createNewBoundary() {
 
                 // could make own function for this condition
                 if (bottom_boundary_is_valid) {
+
+                    Drawings.drawBottomBoundaryGatesAndConnectorsGreen();
+
                     // update step and store boundary
                     new_boundary.save('bottom');
                     boundary_step = "top-boundary";
                     Drawings.drawBoundaryDrawingHelpText("Step 2");
+                    Drawings.drawTopBoundaryEndpointsRed();
                 }
                 else {
                     // erase bottom-boundary coords when illegal line drawn
@@ -415,6 +422,7 @@ function createNewBoundary() {
                     // redraw boilerplate & help text
                     Drawings.drawBoundaryBoilerplate();
                     Drawings.drawBoundaryDrawingHelpText("Step 1");
+                    Drawings.drawBottomBoundaryEndpointsRed();
                 }
             }
             else if (boundary_step === "top-boundary") {
@@ -422,6 +430,19 @@ function createNewBoundary() {
 
                 // could make own function for this condition
                 if (top_boundary_is_valid) {
+
+                    Drawings.drawTopBoundaryGatesAndConnectorsGreen();
+
+                    // draw white dot for next step
+                    ctx.fillStyle = 'white';
+                    ctx.beginPath();
+                    ctx.arc(80, 510, 10, 0, Math.PI*2, false);
+                    ctx.fill();
+
+                    // make goal new color (can be a flag in drawBoundaryBoilerplate())
+                    ctx.fillStyle = 'rgb(232, 0, 118)';
+                    ctx.fillRect(925, 50, 20, 20);
+
                     // update step and store boundary
                     // store top-boundary
                     new_boundary.save('top');
@@ -441,6 +462,7 @@ function createNewBoundary() {
                     ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
 
                     Drawings.drawBoundaryDrawingHelpText("Step 2");
+                    Drawings.drawTopBoundaryEndpointsRed();
                 }
             }
             else if (boundary_step === 'full-boundary') {

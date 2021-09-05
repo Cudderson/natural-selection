@@ -511,15 +511,38 @@ function drawBoundaryBoilerplate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // draw start/end points of boundary
+    ctx.fillStyle = '#333';
+
     // top
-    ctx.fillStyle = 'red';
-    ctx.fillRect(830, 0, 20, 50);
-    ctx.fillRect(950, 150, 50, 20);
+    ctx.fillRect(820, 0, 20, 50);
+    ctx.fillRect(950, 160, 50, 20);
 
     // bottom
-    ctx.fillStyle = 'red';
-    ctx.fillRect(0, 430, 50, 20);
-    ctx.fillRect(150, 550, 20, 50);
+    ctx.fillRect(0, 420, 50, 20);
+    ctx.fillRect(160, 550, 20, 50);
+
+    // draw tips of endpoints/connectors
+    // top tips
+    ctx.beginPath();
+    ctx.arc(830, 50, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.arc(50, 430, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+
+    // bottom tips
+    ctx.beginPath();
+    ctx.arc(170, 550, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.arc(950, 170, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
 
     // placeholder goal
     drawFakeGoalBounds();
@@ -530,6 +553,72 @@ function drawBoundaryBoilerplate() {
     ctx.strokeStyle = 'rgb(148, 0, 211)';
     ctx.strokeRect(736, 445, 272, 200);
     ctx.strokeRect(-4, -4, 252, 157);
+}
+
+function drawBottomBoundaryEndpointsRed() {
+    ctx.fillStyle = 'rgb(200, 0, 0)';
+
+    ctx.beginPath();
+    ctx.arc(170, 550, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.arc(950, 170, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+}
+
+function drawTopBoundaryEndpointsRed() {
+    ctx.fillStyle = 'rgb(200, 0, 0)';
+
+    ctx.beginPath();
+    ctx.arc(830, 50, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.arc(50, 430, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+}
+
+function drawBottomBoundaryGatesAndConnectorsGreen() {
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+
+    // gates
+    ctx.fillRect(160, 550, 20, 50);
+    ctx.fillRect(950, 160, 50, 20);
+
+    // connectors
+    ctx.beginPath();
+    ctx.arc(170, 550, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.arc(950, 170, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+}
+
+function drawTopBoundaryGatesAndConnectorsGreen() {
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+
+    // gates
+    ctx.fillRect(820, 0, 20, 50);
+    ctx.fillRect(0, 420, 50, 20);
+
+    // connectors
+    ctx.beginPath();
+    ctx.arc(830, 50, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.arc(50, 430, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
 }
 
 function drawBoundaryCreationIntroductionOne() {
@@ -547,11 +636,21 @@ function drawBoundaryCreationIntroductionOne() {
 
     ctx.font = '28px Cairo';
     ctx.fillText("Press 'Enter' or click 'Continue'", 300, 360);
+
+    // show user where organisms spawn
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.font = "18px Cairo";
+    ctx.fillText("Spawn", 54, 537);
 } 
 
 function drawBoundaryCreationIntroductionTwo() {
 
     drawBoundaryBoilerplate();
+
+    // show user where organisms spawn
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.font = "18px Cairo";
+    ctx.fillText("Spawn", 54, 537);
 
     ctx.font = '28px Cairo';
     ctx.fillStyle = 'rgb(148, 0, 211)';
@@ -904,4 +1003,6 @@ export {
     drawBoundary, drawStaticSelectionPhaseText,
     drawStatsStatic, drawBoundaryValidationScreen,
     drawGoal, drawFinalBoundary,
+    drawBottomBoundaryEndpointsRed, drawTopBoundaryEndpointsRed,
+    drawBottomBoundaryGatesAndConnectorsGreen, drawTopBoundaryGatesAndConnectorsGreen,
 }
