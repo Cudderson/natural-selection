@@ -515,9 +515,16 @@ function createPaintbrush() {
 
 async function runPreSimAnimations() {
 
-    // *** pre-sim animations will vary slightly (death, boundary), depending on sim type ***
+    // show skip-btn and add listener
+    let skip = false;
+    let skip_btn = document.getElementsByClassName("skip-btn")[0];
 
-    // (only with dialogue on!)
+    skip_btn.style.display = 'block';
+
+    skip_btn.addEventListener("click", function() {
+        skip = true;
+        skip_btn.innerHTML = 'Skipping...';
+    }, {once: true});
 
     let pre_sim_stats = {};
 
@@ -528,21 +535,28 @@ async function runPreSimAnimations() {
     // pre_sim_stats.mutation_rate = document.getElementById("mutation-rate").value;
     // pre_sim_stats.dialogue = document.getElementById("dialogue-checkbox").checked;
 
-    await paintbrush.fadeIn(Drawings.drawSimulationSettings, .01, pre_sim_stats);
+    if (!skip) {
+        await paintbrush.fadeIn(Drawings.drawSimulationSettings, .01, pre_sim_stats);
+        await sleep(2000);
+        await paintbrush.fadeOut(Drawings.drawSimulationSettings, .02, pre_sim_stats);
+    }
 
-    await sleep(2000);
-    await paintbrush.fadeOut(Drawings.drawSimulationSettings, .02, pre_sim_stats);
+    if (!skip) {
+        await paintbrush.fadeIn(Drawings.drawSimulationIntro, .01);
+        await sleep(2000);
+        await paintbrush.fadeIn(Drawings.drawFakeGoal, .01); // *** this will need to be changed for boundary sims
+        await paintbrush.fadeOut(Drawings.drawSimulationIntro, .02);
+    }
 
-    await paintbrush.fadeIn(Drawings.drawSimulationIntro, .01);
-    await sleep(2000);
+    if (!skip) {
+        await paintbrush.fadeIn(Drawings.drawSimulationExplanation, .01);
+        await sleep(4000);
+        await paintbrush.fadeOut(Drawings.drawExplanationAndGoal, .02);
+        await sleep(1000);
+    }
 
-    await paintbrush.fadeIn(Drawings.drawFakeGoal, .01); // *** this will need to be changed for boundary sims
-    await paintbrush.fadeOut(Drawings.drawSimulationIntro, .02);
-    await paintbrush.fadeIn(Drawings.drawSimulationExplanation, .01);
-    await sleep(4000);
-
-    await paintbrush.fadeOut(Drawings.drawExplanationAndGoal, .02);
-    await sleep(1000);
+    // code below this will be executed even if skip === true
+    skip_btn.style.display = 'none';
 
     // add content for drawStats()
     pre_sim_stats.generation_count = 0;
@@ -552,6 +566,7 @@ async function runPreSimAnimations() {
     await paintbrush.fadeIn(Drawings.drawStats, .02, pre_sim_stats);
     await sleep(500);
 
+    // maybe this should be moved to next function (skip intro would then trigger this)
     if (simGlobals.dialogue) {
         await paintbrush.fadeIn(Drawings.drawPhases, .02);
         await sleep(500);
@@ -559,9 +574,6 @@ async function runPreSimAnimations() {
     }
 
     return new Promise(resolve => {
-        // clear content to ensure no variable cross-up
-        console.log("making null");
-        pre_sim_stats = null;
         resolve("pre-sim animations complete!");
     })
 }
@@ -1802,7 +1814,7 @@ async function runSimulation () {
     console.log(`Min/Max Gene: [${simGlobals.MIN_GENE}, ${simGlobals.MAX_GENE}]`);
     console.log(`Dialogue: ${simGlobals.dialogue}`);
 
-    // pre-sim animations *****
+    // pre-sim animations
     await runPreSimAnimations();
 
     /// PHASE: CREATE NEW GENERATION/POPULATION

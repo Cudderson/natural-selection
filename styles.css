@@ -346,3 +346,18 @@ body {
     color: var(--custom-green);
     transition: .25s;
 }
+
+.skip-btn {
+    display: none;
+    grid-column: 2 / 3;
+    background-color: var(--darkviolet);
+    border: none;
+    border-radius: 2px;
+    transition: .25s;
+    font-size: 18px;
+}
+
+.skip-btn:hover {
+    color: var(--custom-green);
+    transition: .25s;
+}
