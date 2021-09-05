@@ -7,9 +7,22 @@
 
   <title>TEST Natural Selection Simulator</title>
   <link rel="stylesheet" href="styles.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo&family=Roboto:ital@1&display=swap" rel="stylesheet">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
 </head>
 
 <body>
+  <!--testing loading fonts with DOM by assigning them to an element (seems to be working)-->
+  <span style="font-family: Roboto">.</span>
+  <span style="font-family: Cairo">.</span>
+
   <img id="logo" src="natural_selection_sim_logo.png">
   <img id="press-start" src="press_start_text.png">
   <img id="classic-example" src="classic_example.png">
@@ -24,35 +37,45 @@
       <form id="apply-form">
 
         <div class="settings-grid">
-          <span class="settings-header">Simulation Settings</span>
+          <span class="settings-header">Simulation Settings<span class="apply-help-message">Press 'Apply' to finish configuring your simulation!</span></span>
 
           <!--could make 'value' dynamic from js-->
+          <!--make this 'Initial Population' at end-->
           <label class="organisms-setting-label" for="total-organisms">Total Organisms</label>
           <input class="setting-input" id="total-organisms" type="text" value="100" autocomplete="off" maxlength="4">
+          <span class="setting-caption">Number of organisms to create for first generation of simulation (&#60;10000)</span>
   
           <label class="movement-setting-label" for="move-speed">Movement Speed</label>
           <input class="setting-input" id="move-speed" type="text" value="5" autocomplete="off" maxlength="1">
-
-          <label class="resilience-setting-label">Resilience</label>
-          <input class="setting-input resilience-input" id="resilience" value="95" autocomplete="off" maxlength="3">
+          <span class="setting-caption">Relative-maximum distance an organism can travel in one movement (1-5)</span>
   
           <label class="mutation-setting-label" for="mutation-rate">Mutation Rate (%)</label>
           <input class="setting-input" id="mutation-rate" type="text" value="3" autocomplete="off" maxlength="2">
+          <span class="setting-caption">Target percentage of genes that will be mutated in offspring organisms</span>
 
-          <span class="dialogue-setting-span">Dialogue</span>
+          <label class="resilience-setting-label">Resilience (%)</label>
+          <input class="setting-input resilience-input" id="resilience" value="95" autocomplete="off" maxlength="3">
+          <span class="setting-caption setting-caption-resilience">Percent chance an organism will survive if boundary touched</span>
+
+          <label class="growth-setting-label" for="growth">Population Growth</label>
+          <div class="growth-div">
+            <button class="growth-toggle-btn" type="button">Constant</button>
+          </div>
+          <span class="setting-caption setting-caption-growth">
+            'Constant' = parent organisms always reproduce offspring equal to the initial population size<br>
+            'Fluctuate' = population sizes may vary from generation to generation
+          </span>
+
+          <label class="dialogue-setting-span">Dialogue</label>
           <div class="dialogue-container">
             <label class="dialogue-setting-label">
               <input id="dialogue-checkbox" type="checkbox" checked="checked">
               <span class="checkmark"></span>
             </label>
           </div>
+          <span class="setting-caption">Un-check to run simulation without additional descriptions / animations</span>
         </div>
-        <!-- these are beneath the grid -->
-        <input class="setting-submit" type="submit" value="Apply">
       </form>
-      <div class="error-container">
-        <span class="error-message"></span>
-      </div>
     </div>
   </div>
   <div class="btn-container">
@@ -64,9 +87,11 @@
     <!--boundary creation-->
     <button class="next-btn">Continue</button>
     <button class="save-boundaries-btn">Apply Boundary</button>
-    <!--run/stop sim, settings-->
+    <!--settings / skip intro-->
+    <button class="setting-submit">Apply</button>
+    <button class="skip-btn">Skip Introduction</button>
+    <!--run/stop sim-->
     <button class="run-btn">Run Simulation</button>
-    <button class="settings-btn">Settings</button>
     <button class="stop-btn">Stop Simulation</button>
   </div>
     <script type="module" src="modules/settings_utils.js"></script>
