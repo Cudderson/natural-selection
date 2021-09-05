@@ -250,7 +250,7 @@ function drawFathersText(opacity) {
     ctx.clearRect(750, 510, 275, 20);
 
     ctx.font = "20px Cairo";
-    ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
+    ctx.fillStyle = `rgba(0, 146, 255, ${opacity})`;
     ctx.fillText("Males Selected", 800, 530);
 }
 
@@ -274,7 +274,7 @@ function drawMothersNatural(opacity) {
 
 function drawFathersHighlighted(opacity) {
     for (let i = 0; i < paintbrush.subject.length; i++) {
-        ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
+        ctx.fillStyle = `rgba(0, 146, 255, ${opacity})`;
         ctx.beginPath();
         ctx.arc(paintbrush.subject[i][1].x, paintbrush.subject[i][1].y, paintbrush.subject[i][1].radius, 0, Math.PI*2, false);
         ctx.fill();
@@ -305,7 +305,7 @@ function drawAllSelectedOrganismsText(opacity) {
     ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
     ctx.fillText("Females Selected", 800, 500);
 
-    ctx.fillStyle = `rgba(36, 0, 129, ${opacity})`;
+    ctx.fillStyle = `rgba(0, 146, 255, ${opacity})`;
     ctx.fillText("Males Selected", 800, 530);
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
