@@ -853,7 +853,9 @@ function updateAndMoveOrganismsBounds(organisms) {
                                 }
                                 else {
                                     organisms[i].is_alive = false;
-                                    ctx.fillStyle = 'red';
+                                    // ctx.fillStyle = 'red';
+                                    // changing deceased color to gray (mother pink is too close)
+                                    ctx.fillStyle = '#333';
                                     ctx.beginPath();
                                     ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
                                     ctx.fill();
@@ -866,7 +868,7 @@ function updateAndMoveOrganismsBounds(organisms) {
                         }
                         else {
                             // draw deceased organism
-                            ctx.fillStyle = 'red';
+                            ctx.fillStyle = '#333';
                             ctx.beginPath();
                             ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
                             ctx.fill();
@@ -1828,6 +1830,7 @@ async function runSimulation () {
     // display stop simulation button & add its listener
     let stop_sim_btn = document.getElementsByClassName("stop-btn")[0];
     stop_sim_btn.style.display = 'block';
+    stop_sim_btn.innerHTML = 'Quit';
 
     stop_sim_btn.addEventListener('click', function stopSim() {
         stopSimulation();

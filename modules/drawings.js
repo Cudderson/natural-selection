@@ -330,11 +330,16 @@ function drawBothParentTypesNatural(opacity) {
 // used in multiple places
 function drawOrganisms(opacity, organisms) {
 
+    // / test just clearing the rect 
+    // *** doesn't work, clears deceased_organisms
+    // to fix, we should combine arrays and fade out all organisms at once for boundary sims 
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     for (let i = 0; i < organisms.length; i++) {
-        ctx.fillStyle = 'black';
-        ctx.beginPath();
-        ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-        ctx.fill();
+        // ctx.fillStyle = 'black';
+        // ctx.beginPath();
+        // ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+        // ctx.fill();
 
         ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
         ctx.beginPath();
