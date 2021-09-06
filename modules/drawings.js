@@ -818,6 +818,7 @@ function updateSuccessfulOrganism(organism) {
     ctx.fill();
 }
 
+// could be cleaned (same with highlightBoundarySimType)
 function highlightClassicSimType() {
     console.log("left arrow pressed");
 
@@ -844,8 +845,8 @@ function highlightClassicSimType() {
     // redraw 'classic' text highlighted
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font = '30px Cairo';
-    ctx.fillText("Classic", 200, 420);
+    ctx.font = '36px Cairo';
+    ctx.fillText("Classic", 190, 430);
 
     // redraw 'boundary' border normal
     ctx.strokeStyle = 'rgb(148, 0, 211)';
@@ -856,7 +857,22 @@ function highlightClassicSimType() {
     // redraw boundary text normal
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("Boundary", 690, 420);
+    ctx.fillText("Boundary", 680, 430);
+
+    // === descriptions ===
+    // redraw 'classic; description highlighted
+    ctx.font = "20px Roboto";
+    // ctx.fillStyle = 'rgb(155, 245, 0)'; might look better in purple
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("Configure your own species of organisms", 70, 480);
+    ctx.fillText("and watch them attempt to reach the goal", 70, 505);
+    ctx.fillText("over generations of natural selection", 85, 530);
+
+    // redraw boundary description normal
+    ctx.fillStyle = "#333";
+    ctx.fillText("Create your own path and watch your species", 550, 480);
+    ctx.fillText("of organisms attempt to reach the goal and", 550, 505);
+    ctx.fillText("survive while avoiding your boundary", 590, 530);
 
     // redraw example images scaled to 300x300
     let classic_example = document.getElementById("classic-example");
@@ -891,8 +907,8 @@ function highlightBoundarySimType() {
     // redraw 'boundary' text highlighted
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font = '30px Cairo';
-    ctx.fillText("Boundary", 690, 420);
+    ctx.font = '36px Cairo';
+    ctx.fillText("Boundary", 680, 430);
 
     // redraw 'classic' border normal
     ctx.strokeStyle = 'rgb(148, 0, 211)';
@@ -903,13 +919,28 @@ function highlightBoundarySimType() {
     // redraw 'classic' text normal
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("Classic", 200, 420);
+    ctx.fillText("Classic", 190, 430);
 
     // redraw example images scaled to 300x300
     let classic_example = document.getElementById("classic-example");
     let boundary_example = document.getElementById("boundary-example");
     ctx.drawImage(classic_example, 135, 150, 225, 225);
     ctx.drawImage(boundary_example, 635, 150, 225, 225); 
+
+    // === descriptions ===
+    // redraw boundary description highlighted
+    ctx.font = "20px Roboto";
+    // ctx.fillStyle = 'rgb(155, 245, 0)'; might look better in purple
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("Create your own path and watch your species", 550, 480);
+    ctx.fillText("of organisms attempt to reach the goal and", 550, 505);
+    ctx.fillText("survive while avoiding your boundary", 590, 530);
+
+    // redraw classic description normal
+    ctx.fillStyle = "#333";
+    ctx.fillText("Configure your own species of organisms", 70, 480);
+    ctx.fillText("and watch them attempt to reach the goal", 70, 505);
+    ctx.fillText("over generations of natural selection", 85, 530);
 }
 
 // example images not final. consider more zoomed-in images
@@ -935,9 +966,26 @@ function drawInitialSimSelectionScreen() {
     ctx.font = '50px Cairo';
     ctx.fillText("Select Simulation Type", 250, 80);
 
-    ctx.font = '30px Cairo';
-    ctx.fillText("Classic", 200, 420);
-    ctx.fillText("Boundary", 690, 420);
+    ctx.font = '36px Cairo';
+    ctx.fillText("Classic", 190, 430);
+    ctx.fillText("Boundary", 680, 430);
+
+    // we now want to write some descriptions below each sim type
+    // (these will be highlighted same as image and text)
+    ctx.font = "20px Roboto";
+    ctx.fillStyle = "#333";
+
+    // Classic
+    // Configure your own species of organisms and watch them attempt to reach the goal over generations of natural selection
+    ctx.fillText("Configure your own species of organisms", 70, 480);
+    ctx.fillText("and watch them attempt to reach the goal", 70, 505);
+    ctx.fillText("over generations of natural selection", 85, 530);
+
+    // Boundary
+    // Create your own path and watch your species of organisms attempt to reach the goal and survive while avoiding your boundary
+    ctx.fillText("Create your own path and watch your species", 550, 480);
+    ctx.fillText("of organisms attempt to reach the goal and", 550, 505);
+    ctx.fillText("survive while avoiding your boundary", 590, 530);
 
     // glow effect behind images
     ctx.strokeStyle = 'rgb(148, 0, 211)';
@@ -951,9 +999,7 @@ function drawInitialSimSelectionScreen() {
     // We want to probably shrink the images a bit to allow for description text beneath
     // [] maybe round corners too? 
     ctx.drawImage(classic_example, 135, 150, 225, 225);
-    ctx.drawImage(boundary_example, 635, 150, 225, 225); 
-
-
+    ctx.drawImage(boundary_example, 635, 150, 225, 225);
 }
 
 function prepareToRunSimulation() {
