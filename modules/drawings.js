@@ -964,7 +964,11 @@ function drawInitialSimSelectionScreen() {
 
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.font = '50px Cairo';
-    ctx.fillText("Select Simulation Type", 250, 80);
+    ctx.fillText("Select Simulation Type", 255, 80);
+
+    // let user know how to navigate
+    ctx.font = '20px Roboto';
+    ctx.fillText("(use mouse or arrow keys + enter to select)", 305, 110);
 
     ctx.font = '36px Cairo';
     ctx.fillText("Classic", 190, 430);
