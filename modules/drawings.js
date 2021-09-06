@@ -839,30 +839,30 @@ function highlightClassicSimType() {
     ctx.strokeStyle = 'rgb(155, 245, 0)';
     ctx.shadowColor = 'rgb(155, 245, 0)';
     ctx.shadowBlur = 10;
-    ctx.strokeRect(100, 150, 300, 300);
+    ctx.strokeRect(135, 150, 225, 225);
 
     // redraw 'classic' text highlighted
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgb(155, 245, 0)';
     ctx.font = '30px Cairo';
-    ctx.fillText("Classic", 190, 500);
+    ctx.fillText("Classic", 200, 420);
 
     // redraw 'boundary' border normal
     ctx.strokeStyle = 'rgb(148, 0, 211)';
     ctx.shadowColor = 'rgb(148, 0, 211)';
     ctx.shadowBlur = 10;
-    ctx.strokeRect(600, 150, 300, 300);
+    ctx.strokeRect(635, 150, 225, 225);
 
     // redraw boundary text normal
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("Boundary", 690, 500);
+    ctx.fillText("Boundary", 690, 420);
 
     // redraw example images scaled to 300x300
     let classic_example = document.getElementById("classic-example");
     let boundary_example = document.getElementById("boundary-example");
-    ctx.drawImage(classic_example, 100, 150, 300, 300);
-    ctx.drawImage(boundary_example, 600, 150, 300, 300);  
+    ctx.drawImage(classic_example, 135, 150, 225, 225);
+    ctx.drawImage(boundary_example, 635, 150, 225, 225);  
 }
 
 function highlightBoundarySimType() {
@@ -886,30 +886,30 @@ function highlightBoundarySimType() {
     ctx.strokeStyle = 'rgb(155, 245, 0)';
     ctx.shadowColor = 'rgb(155, 245, 0)';
     ctx.shadowBlur = 10;
-    ctx.strokeRect(600, 150, 300, 300);
+    ctx.strokeRect(635, 150, 225, 225);
 
     // redraw 'boundary' text highlighted
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgb(155, 245, 0)';
     ctx.font = '30px Cairo';
-    ctx.fillText("Boundary", 690, 500);
+    ctx.fillText("Boundary", 690, 420);
 
     // redraw 'classic' border normal
     ctx.strokeStyle = 'rgb(148, 0, 211)';
     ctx.shadowColor = 'rgb(148, 0, 211)';
     ctx.shadowBlur = 10;
-    ctx.strokeRect(100, 150, 300, 300);
+    ctx.strokeRect(135, 150, 225, 225);
 
     // redraw 'classic' text normal
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("Classic", 190, 500);
+    ctx.fillText("Classic", 200, 420);
 
     // redraw example images scaled to 300x300
     let classic_example = document.getElementById("classic-example");
     let boundary_example = document.getElementById("boundary-example");
-    ctx.drawImage(classic_example, 100, 150, 300, 300);
-    ctx.drawImage(boundary_example, 600, 150, 300, 300); 
+    ctx.drawImage(classic_example, 135, 150, 225, 225);
+    ctx.drawImage(boundary_example, 635, 150, 225, 225); 
 }
 
 // example images not final. consider more zoomed-in images
@@ -929,24 +929,31 @@ function drawInitialSimSelectionScreen() {
     document.getElementsByClassName("sim-type-classic")[0].style.display = "block";
     document.getElementsByClassName("sim-type-boundary")[0].style.display = "block";
 
-    // could turn this initial drawing into a function too
+    // ===== rebuilding sim selection screen =====
+
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.font = '50px Cairo';
-    ctx.fillText("Select Simulation Type", 240, 80);
-    ctx.font = '30px Cairo';
-    ctx.fillText("Classic", 190, 500);
-    ctx.fillText("Boundary", 690, 500);
+    ctx.fillText("Select Simulation Type", 250, 80);
 
+    ctx.font = '30px Cairo';
+    ctx.fillText("Classic", 200, 420);
+    ctx.fillText("Boundary", 690, 420);
+
+    // glow effect behind images
     ctx.strokeStyle = 'rgb(148, 0, 211)';
     ctx.lineWidth = 4;
     ctx.shadowColor = 'rgb(148, 0, 211)';
     ctx.shadowBlur = 10;
-    ctx.strokeRect(100, 150, 300, 300);
-    ctx.strokeRect(600, 150, 300, 300);
+    ctx.strokeRect(135, 150, 225, 225);
+    ctx.strokeRect(635, 150, 225, 225);
 
-    // draw images scaled to 300x300
-    ctx.drawImage(classic_example, 100, 150, 300, 300);
-    ctx.drawImage(boundary_example, 600, 150, 300, 300);   
+    // for now, we'll use the same images, and simply replace them with the new ones at the end
+    // We want to probably shrink the images a bit to allow for description text beneath
+    // [] maybe round corners too? 
+    ctx.drawImage(classic_example, 135, 150, 225, 225);
+    ctx.drawImage(boundary_example, 635, 150, 225, 225); 
+
+
 }
 
 function prepareToRunSimulation() {
