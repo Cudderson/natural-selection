@@ -706,7 +706,7 @@ function turnOnBoundaryIntroductionTwoListeners() {
     
     // change text
     let next_btn = document.getElementsByClassName("next-btn")[0];
-    next_btn.innerHTML = 'Okay';
+    next_btn.innerHTML = 'Continue';
 
     next_btn.addEventListener('click', function finishBoundaryIntroduction() {
         // remove listener

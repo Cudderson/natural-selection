@@ -87,30 +87,30 @@ function drawExplanationAndGoal(opacity) {
 
 // may need to be updated for resilience
 function drawStats(opacity, stats) {
-    ctx2.clearRect(700, 510, 350, 120);
+    ctx2.clearRect(740, 510, 350, 120);
 
     ctx2.fillStyle = `rgba(155, 245, 0, ${opacity})`;
     ctx2.font = "22px Cairo";
     ctx2.fillText('Generation:', 740, 535);
-    ctx2.fillText(stats.generation_count.toString(), 940, 535);
+    ctx2.fillText(stats.generation_count.toString(), 930, 535);
     ctx2.fillText('Population Size:', 740, 560);
-    ctx2.fillText(stats.organism_count.toString(), 940, 560);
+    ctx2.fillText(stats.organism_count.toString(), 930, 560);
     ctx2.fillText('Average Fitness:', 740, 585);
-    ctx2.fillText(stats.average_fitness.toString(), 940, 585);
+    ctx2.fillText(stats.average_fitness.toString(), 930, 585);
 }
 
 // for preserving drawing on canvas during animations
 function drawStatsStatic(context, stats) {
-    context.clearRect(700, 510, 350, 120);
+    context.clearRect(740, 510, 350, 120);
 
     context.fillStyle = `rgba(155, 245, 0, 1)`;
     context.font = "22px Cairo";
     context.fillText('Generation:', 740, 535);
-    context.fillText(stats.generation_count.toString(), 940, 535);
+    context.fillText(stats.generation_count.toString(), 930, 535);
     context.fillText('Population Size:', 740, 560);
-    context.fillText(stats.organism_count.toString(), 940, 560);
+    context.fillText(stats.organism_count.toString(), 930, 560);
     context.fillText('Average Fitness:', 740, 585);
-    context.fillText(stats.average_fitness.toString(), 940, 585);
+    context.fillText(stats.average_fitness.toString(), 930, 585);
 }
 
 // phase module
@@ -630,12 +630,18 @@ function drawBoundaryCreationIntroductionOne() {
     ctx.fillRect(720, 420, 300, 200);
 
     // introduction
-    ctx.font = '40px Cairo';
-    ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("Create Your Boundary", 330, 280);
+    ctx.font = '50px Cairo';
+    ctx.fillStyle = "rgb(155, 245, 0)";
+    ctx.fillText("Create Your Boundary", 270, 180);
 
-    ctx.font = '28px Cairo';
-    ctx.fillText("Press 'Enter' or click 'Continue'", 300, 360);
+    ctx.font = '26px Roboto';
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("Using your mouse or touchpad, you will draw walls to create your", 130, 310);
+    ctx.fillText("own path to the goal for your species of organisms to travel", 158, 345);
+
+    ctx.font = '26px Cairo';
+    ctx.fillStyle = "rgb(155, 245, 0)";
+    ctx.fillText("Press 'Enter' or click 'Continue'", 335, 460);
 
     // show user where organisms spawn
     ctx.fillStyle = 'rgb(148, 0, 211)';
@@ -654,10 +660,12 @@ function drawBoundaryCreationIntroductionTwo() {
 
     ctx.font = '28px Cairo';
     ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("These areas will be used for dialogue throughout the simulation.", 100, 270);
-    ctx.fillText("For best results, avoid drawing over them.", 200, 330);  
-    ctx.font = '24px Cairo'; 
-    ctx.fillText("Press 'Enter' or click 'Continue'", 300, 420);
+    ctx.fillText("These areas will be used for dialogue throughout the simulation.", 115, 290);
+    ctx.fillText("For best results, avoid drawing over them.", 250, 350);  
+
+    ctx.font = '26px Cairo';
+    ctx.fillStyle = "rgb(155, 245, 0)";
+    ctx.fillText("Press 'Enter' or click 'Continue'", 335, 460);
 }
 
 function drawBoundaryDrawingHelpText(step) {
@@ -700,9 +708,8 @@ function drawBoundaryValidationScreen(boundary) {
 }
 
 function drawBoundaryCompletionHelpText() {
-    // remove upper-left text area
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, 300, 200);
+    // remove upper-right text area
+    ctx.clearRect(0, 0, 251, 156);
 
     // redraw bottom-left text area
     ctx.lineWidth = 4;
@@ -713,12 +720,11 @@ function drawBoundaryCompletionHelpText() {
     ctx.font = '24px Cairo';
     ctx.fillStyle = 'rgb(155, 245, 0)';
     ctx.fillText("Complete!", 805, 490);
-    // still determining what to say at this point
 
-    // ctx.fillText("For best results, draw", 770, 505);
-    ctx.font = '20px Roboto';
-    ctx.fillText("[ need text here ]", 770, 530);
-    // ctx.fillText("non-overlapping line", 770, 555);
+    ctx.font = '18px Roboto';
+    ctx.fillText("Press 'Confirm' to save", 770, 530);
+    ctx.fillText("boundary and proceed", 770, 550);
+    ctx.fillText("to simulation settings", 770, 570);
 }
 
 function eraseIllegalDrawingZones() {
