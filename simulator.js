@@ -264,8 +264,13 @@ function applyInitialBoundaryStyles() {
 
     stop_btn.style.gridColumn = "1 / 2";
     stop_btn.style.width = "75%";
-    stop_btn.innerHTML = "Back";
+    stop_btn.innerHTML = "Reset";
     stop_btn.style.display = "block";
+
+    // restart boundary drawing if user desires
+    stop_btn.addEventListener("click", function() {
+        createNewBoundary();
+    }, {once: true});
 }
 
 // this function will be refactored/cleaned
