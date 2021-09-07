@@ -217,7 +217,7 @@ function drawSelectionPhaseEntryText(opacity, old_opacity) {
 }
 
 function drawClosestOrganismText(opacity) {
-    ctx.clearRect(750, 450, 275, 20);
+    ctx.clearRect(750, 450, 275, 30);
 
     ctx.font = "20px Cairo";
     ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;

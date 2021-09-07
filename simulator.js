@@ -1209,7 +1209,6 @@ async function runChosenParentsAnimations(parents, organisms) {
     }
 
     // highlight fathers
-    // !!! change fathers color to a lighter blue
     await paintbrush.fadeIn(Drawings.drawFathersText, .02);
 
     for (let i = 0; i <= 2; i++) {
@@ -1238,7 +1237,7 @@ async function runChosenParentsAnimations(parents, organisms) {
     })
 }
 
-async function runSelectionAnimations(closest_organism, parents, organisms, deceased_organisms) {
+async function runSelectionAnimations(closest_organism, parents, organisms) {
     console.log("Called runSelectionAnimations()");
     // maybe model other phases after this one
     await runClosestOrganismAnimations(closest_organism); // finished
@@ -1246,7 +1245,6 @@ async function runSelectionAnimations(closest_organism, parents, organisms, dece
     
     // make own function
     if (simGlobals.sim_type === 'boundary') {
-        await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .02, deceased_organisms);
 
         // fade out boundary
         // we should draw a static selection phase on canvas1, and erase that area on canvas2
@@ -1748,22 +1746,24 @@ async function runGeneration(new_generation) {
     }
 
     let parents = selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length);
+
+    // we need to combine organisms + deceased organisms for organism fade out (boundary only)
+
+    // at this point, 'parents' is the only array of organisms we still need
+    // combine both organisms arrays for organisms fade-out animation
+    if (simGlobals.sim_type === 'boundary') {
+        organisms = organisms.concat(deceased_organisms);
+    }
     
     if (simGlobals.dialogue) {
-        await runSelectionAnimations(closest_organism, parents, organisms, deceased_organisms);
+        await runSelectionAnimations(closest_organism, parents, organisms);
 
         await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseExitText, .01);
     }
     else {
         console.log(organisms);
         await paintbrush.fadeOut(Drawings.drawOrganisms, .02, organisms);
-
-        if (simGlobals.sim_type === 'boundary') {
-            await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .02, deceased_organisms);            
-        }
     }
-
-    // starting here ===
 
     // this function handles crossover, mutation and reproduction
     // this function pushes new gen organisms to offspring_organisms[]
@@ -1779,6 +1779,7 @@ async function runGeneration(new_generation) {
 
     // we are done with organisms
     organisms = [];
+    deceased_organisms = [];
 
     // PHASE: CROSSOVER / MUTATE / REPRODUCE
     if (simGlobals.dialogue) {
