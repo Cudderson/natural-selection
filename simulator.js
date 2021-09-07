@@ -1786,6 +1786,7 @@ async function runGeneration(new_generation) {
         let gen_summary_stats = {
             'offspring_organisms': offspring_organisms,
             'average_fitness': average_fitness,
+            'generation_count': new_generation.generation_count,
         }
 
         await runNewGenAnimations(gen_summary_stats);

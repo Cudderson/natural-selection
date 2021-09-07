@@ -369,11 +369,6 @@ function drawDeceasedOrganisms(opacity, deceased_organisms) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let i = 0; i < deceased_organisms.length; i++) {
-        // ctx.fillStyle = 'black';
-        // ctx.beginPath();
-        // ctx.arc(simGlobals.deceased_organisms[i].x, simGlobals.deceased_organisms[i].y, simGlobals.deceased_organisms[i].radius, 0, Math.PI*2, false);
-        // ctx.fill();
-
         ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
         ctx.beginPath();
         ctx.arc(deceased_organisms[i].x, deceased_organisms[i].y, deceased_organisms[i].radius, 0, Math.PI*2, false);
@@ -412,9 +407,9 @@ function drawCrossoverDescriptionText(opacity) {
 
     var description = "Genes of the selected parent couples are combined to create new offspring.";
 
-    ctx.font = "20px Cairo";
+    ctx.font = "26px Cairo";
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.fillText(description, 200, 300);
+    ctx.fillText(description, 100, 325);
 }
 
 // phase module
@@ -449,13 +444,13 @@ function drawMutationDescriptionText(opacity) {
     var description = "To maintain genetic diversity, a small percentage of random genes are mutated";
     var mutation_rate_text = `Mutation Rate: ${(simGlobals.MUTATION_RATE * 100).toFixed(2)}%`.toString();
 
-    ctx.font = "20px Cairo";
+    ctx.font = "24px Cairo";
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.fillText(description, 190, 300);
+    ctx.fillText(description, 100, 300);
 
-    ctx.font = "22px Cairo";
+    ctx.font = "24px Cairo";
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(mutation_rate_text, 420, 350);
+    ctx.fillText(mutation_rate_text, 410, 350);
 }
 
 // phase module
@@ -484,7 +479,6 @@ function drawCreateNewGenPhaseEntryText(opacity, old_opacity) {
     ctx2.fillText("Create New Generation", 10, 30);
 } 
 
-// still need to pas gen count here
 function drawGenerationSummaryText(opacity, gen_summary_stats) {
     let generation_summary_text = `Generation ${gen_summary_stats.generation_count} Summary:`;
     let generation_average_fitness_preface = 'Average Fitness:';
