@@ -87,30 +87,30 @@ function drawExplanationAndGoal(opacity) {
 
 // may need to be updated for resilience
 function drawStats(opacity, stats) {
-    ctx2.clearRect(700, 510, 350, 120);
+    ctx2.clearRect(740, 510, 350, 120);
 
     ctx2.fillStyle = `rgba(155, 245, 0, ${opacity})`;
     ctx2.font = "22px Cairo";
     ctx2.fillText('Generation:', 740, 535);
-    ctx2.fillText(stats.generation_count.toString(), 940, 535);
+    ctx2.fillText(stats.generation_count.toString(), 930, 535);
     ctx2.fillText('Population Size:', 740, 560);
-    ctx2.fillText(stats.organism_count.toString(), 940, 560);
+    ctx2.fillText(stats.organism_count.toString(), 930, 560);
     ctx2.fillText('Average Fitness:', 740, 585);
-    ctx2.fillText(stats.average_fitness.toString(), 940, 585);
+    ctx2.fillText(stats.average_fitness.toString(), 930, 585);
 }
 
 // for preserving drawing on canvas during animations
 function drawStatsStatic(context, stats) {
-    context.clearRect(700, 510, 350, 120);
+    context.clearRect(740, 510, 350, 120);
 
     context.fillStyle = `rgba(155, 245, 0, 1)`;
     context.font = "22px Cairo";
     context.fillText('Generation:', 740, 535);
-    context.fillText(stats.generation_count.toString(), 940, 535);
+    context.fillText(stats.generation_count.toString(), 930, 535);
     context.fillText('Population Size:', 740, 560);
-    context.fillText(stats.organism_count.toString(), 940, 560);
+    context.fillText(stats.organism_count.toString(), 930, 560);
     context.fillText('Average Fitness:', 740, 585);
-    context.fillText(stats.average_fitness.toString(), 940, 585);
+    context.fillText(stats.average_fitness.toString(), 930, 585);
 }
 
 // phase module
@@ -217,7 +217,7 @@ function drawSelectionPhaseEntryText(opacity, old_opacity) {
 }
 
 function drawClosestOrganismText(opacity) {
-    ctx.clearRect(750, 450, 275, 20);
+    ctx.clearRect(750, 450, 275, 30);
 
     ctx.font = "20px Cairo";
     ctx.fillStyle = `rgb(255, 215, 0, ${opacity})`;
@@ -330,11 +330,16 @@ function drawBothParentTypesNatural(opacity) {
 // used in multiple places
 function drawOrganisms(opacity, organisms) {
 
+    // / test just clearing the rect 
+    // *** doesn't work, clears deceased_organisms
+    // to fix, we should combine arrays and fade out all organisms at once for boundary sims 
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     for (let i = 0; i < organisms.length; i++) {
-        ctx.fillStyle = 'black';
-        ctx.beginPath();
-        ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-        ctx.fill();
+        // ctx.fillStyle = 'black';
+        // ctx.beginPath();
+        // ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+        // ctx.fill();
 
         ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
         ctx.beginPath();
@@ -511,15 +516,38 @@ function drawBoundaryBoilerplate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // draw start/end points of boundary
+    ctx.fillStyle = '#333';
+
     // top
-    ctx.fillStyle = 'red';
-    ctx.fillRect(830, 0, 20, 50);
-    ctx.fillRect(950, 150, 50, 20);
+    ctx.fillRect(820, 0, 20, 50);
+    ctx.fillRect(950, 160, 50, 20);
 
     // bottom
-    ctx.fillStyle = 'red';
-    ctx.fillRect(0, 430, 50, 20);
-    ctx.fillRect(150, 550, 20, 50);
+    ctx.fillRect(0, 420, 50, 20);
+    ctx.fillRect(160, 550, 20, 50);
+
+    // draw tips of endpoints/connectors
+    // top tips
+    ctx.beginPath();
+    ctx.arc(830, 50, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.arc(50, 430, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+
+    // bottom tips
+    ctx.beginPath();
+    ctx.arc(170, 550, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.arc(950, 170, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
 
     // placeholder goal
     drawFakeGoalBounds();
@@ -532,6 +560,72 @@ function drawBoundaryBoilerplate() {
     ctx.strokeRect(-4, -4, 252, 157);
 }
 
+function drawBottomBoundaryEndpointsRed() {
+    ctx.fillStyle = 'rgb(200, 0, 0)';
+
+    ctx.beginPath();
+    ctx.arc(170, 550, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.arc(950, 170, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+}
+
+function drawTopBoundaryEndpointsRed() {
+    ctx.fillStyle = 'rgb(200, 0, 0)';
+
+    ctx.beginPath();
+    ctx.arc(830, 50, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.arc(50, 430, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+}
+
+function drawBottomBoundaryGatesAndConnectorsGreen() {
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+
+    // gates
+    ctx.fillRect(160, 550, 20, 50);
+    ctx.fillRect(950, 160, 50, 20);
+
+    // connectors
+    ctx.beginPath();
+    ctx.arc(170, 550, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.arc(950, 170, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+}
+
+function drawTopBoundaryGatesAndConnectorsGreen() {
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+
+    // gates
+    ctx.fillRect(820, 0, 20, 50);
+    ctx.fillRect(0, 420, 50, 20);
+
+    // connectors
+    ctx.beginPath();
+    ctx.arc(830, 50, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.arc(50, 430, 10, 0, Math.PI*2, false);
+    ctx.fill();
+    ctx.closePath();
+}
+
 function drawBoundaryCreationIntroductionOne() {
     drawBoundaryBoilerplate();
 
@@ -541,24 +635,42 @@ function drawBoundaryCreationIntroductionOne() {
     ctx.fillRect(720, 420, 300, 200);
 
     // introduction
-    ctx.font = '40px Cairo';
-    ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("Create Your Boundary", 330, 280);
+    ctx.font = '50px Cairo';
+    ctx.fillStyle = "rgb(155, 245, 0)";
+    ctx.fillText("Create Your Boundary", 270, 180);
 
-    ctx.font = '28px Cairo';
-    ctx.fillText("Press 'Enter' or click 'Continue'", 300, 360);
+    ctx.font = '26px Roboto';
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("Using your mouse or touchpad, you will draw walls to create your", 130, 310);
+    ctx.fillText("own path to the goal for your species of organisms to travel", 158, 345);
+
+    ctx.font = '26px Cairo';
+    ctx.fillStyle = "rgb(155, 245, 0)";
+    ctx.fillText("Press 'Enter' or click 'Continue'", 335, 460);
+
+    // show user where organisms spawn
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.font = "18px Cairo";
+    ctx.fillText("Spawn", 54, 537);
 } 
 
 function drawBoundaryCreationIntroductionTwo() {
 
     drawBoundaryBoilerplate();
 
+    // show user where organisms spawn
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.font = "18px Cairo";
+    ctx.fillText("Spawn", 54, 537);
+
     ctx.font = '28px Cairo';
     ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("These areas will be used for dialogue throughout the simulation.", 100, 270);
-    ctx.fillText("For best results, avoid drawing over them.", 200, 330);  
-    ctx.font = '24px Cairo'; 
-    ctx.fillText("Press 'Enter' or click 'Continue'", 300, 420);
+    ctx.fillText("These areas will be used for dialogue throughout the simulation.", 115, 290);
+    ctx.fillText("For best results, avoid drawing over them.", 250, 350);  
+
+    ctx.font = '26px Cairo';
+    ctx.fillStyle = "rgb(155, 245, 0)";
+    ctx.fillText("Press 'Enter' or click 'Continue'", 335, 460);
 }
 
 function drawBoundaryDrawingHelpText(step) {
@@ -601,9 +713,8 @@ function drawBoundaryValidationScreen(boundary) {
 }
 
 function drawBoundaryCompletionHelpText() {
-    // remove upper-left text area
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, 300, 200);
+    // remove upper-right text area
+    ctx.clearRect(0, 0, 251, 156);
 
     // redraw bottom-left text area
     ctx.lineWidth = 4;
@@ -614,12 +725,11 @@ function drawBoundaryCompletionHelpText() {
     ctx.font = '24px Cairo';
     ctx.fillStyle = 'rgb(155, 245, 0)';
     ctx.fillText("Complete!", 805, 490);
-    // still determining what to say at this point
 
-    // ctx.fillText("For best results, draw", 770, 505);
-    ctx.font = '20px Roboto';
-    ctx.fillText("[ need text here ]", 770, 530);
-    // ctx.fillText("non-overlapping line", 770, 555);
+    ctx.font = '18px Roboto';
+    ctx.fillText("Press 'Confirm' to save", 770, 530);
+    ctx.fillText("boundary and proceed", 770, 550);
+    ctx.fillText("to simulation settings", 770, 570);
 }
 
 function eraseIllegalDrawingZones() {
@@ -708,6 +818,7 @@ function updateSuccessfulOrganism(organism) {
     ctx.fill();
 }
 
+// could be cleaned (same with highlightBoundarySimType)
 function highlightClassicSimType() {
     console.log("left arrow pressed");
 
@@ -729,30 +840,45 @@ function highlightClassicSimType() {
     ctx.strokeStyle = 'rgb(155, 245, 0)';
     ctx.shadowColor = 'rgb(155, 245, 0)';
     ctx.shadowBlur = 10;
-    ctx.strokeRect(100, 150, 300, 300);
+    ctx.strokeRect(135, 150, 225, 225);
 
     // redraw 'classic' text highlighted
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font = '30px Cairo';
-    ctx.fillText("Classic", 190, 500);
+    ctx.font = '36px Cairo';
+    ctx.fillText("Classic", 190, 430);
 
     // redraw 'boundary' border normal
     ctx.strokeStyle = 'rgb(148, 0, 211)';
     ctx.shadowColor = 'rgb(148, 0, 211)';
     ctx.shadowBlur = 10;
-    ctx.strokeRect(600, 150, 300, 300);
+    ctx.strokeRect(635, 150, 225, 225);
 
     // redraw boundary text normal
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("Boundary", 690, 500);
+    ctx.fillText("Boundary", 680, 430);
+
+    // === descriptions ===
+    // redraw 'classic; description highlighted
+    ctx.font = "20px Roboto";
+    // ctx.fillStyle = 'rgb(155, 245, 0)'; might look better in purple
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("Configure your own species of organisms", 70, 480);
+    ctx.fillText("and watch them attempt to reach the goal", 70, 505);
+    ctx.fillText("over generations of natural selection", 85, 530);
+
+    // redraw boundary description normal
+    ctx.fillStyle = "#333";
+    ctx.fillText("Create your own path and watch your species", 550, 480);
+    ctx.fillText("of organisms attempt to reach the goal and", 550, 505);
+    ctx.fillText("survive while avoiding your boundary", 590, 530);
 
     // redraw example images scaled to 300x300
     let classic_example = document.getElementById("classic-example");
     let boundary_example = document.getElementById("boundary-example");
-    ctx.drawImage(classic_example, 100, 150, 300, 300);
-    ctx.drawImage(boundary_example, 600, 150, 300, 300);  
+    ctx.drawImage(classic_example, 135, 150, 225, 225);
+    ctx.drawImage(boundary_example, 635, 150, 225, 225);  
 }
 
 function highlightBoundarySimType() {
@@ -776,30 +902,45 @@ function highlightBoundarySimType() {
     ctx.strokeStyle = 'rgb(155, 245, 0)';
     ctx.shadowColor = 'rgb(155, 245, 0)';
     ctx.shadowBlur = 10;
-    ctx.strokeRect(600, 150, 300, 300);
+    ctx.strokeRect(635, 150, 225, 225);
 
     // redraw 'boundary' text highlighted
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font = '30px Cairo';
-    ctx.fillText("Boundary", 690, 500);
+    ctx.font = '36px Cairo';
+    ctx.fillText("Boundary", 680, 430);
 
     // redraw 'classic' border normal
     ctx.strokeStyle = 'rgb(148, 0, 211)';
     ctx.shadowColor = 'rgb(148, 0, 211)';
     ctx.shadowBlur = 10;
-    ctx.strokeRect(100, 150, 300, 300);
+    ctx.strokeRect(135, 150, 225, 225);
 
     // redraw 'classic' text normal
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("Classic", 190, 500);
+    ctx.fillText("Classic", 190, 430);
 
     // redraw example images scaled to 300x300
     let classic_example = document.getElementById("classic-example");
     let boundary_example = document.getElementById("boundary-example");
-    ctx.drawImage(classic_example, 100, 150, 300, 300);
-    ctx.drawImage(boundary_example, 600, 150, 300, 300); 
+    ctx.drawImage(classic_example, 135, 150, 225, 225);
+    ctx.drawImage(boundary_example, 635, 150, 225, 225); 
+
+    // === descriptions ===
+    // redraw boundary description highlighted
+    ctx.font = "20px Roboto";
+    // ctx.fillStyle = 'rgb(155, 245, 0)'; might look better in purple
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillText("Create your own path and watch your species", 550, 480);
+    ctx.fillText("of organisms attempt to reach the goal and", 550, 505);
+    ctx.fillText("survive while avoiding your boundary", 590, 530);
+
+    // redraw classic description normal
+    ctx.fillStyle = "#333";
+    ctx.fillText("Configure your own species of organisms", 70, 480);
+    ctx.fillText("and watch them attempt to reach the goal", 70, 505);
+    ctx.fillText("over generations of natural selection", 85, 530);
 }
 
 // example images not final. consider more zoomed-in images
@@ -819,24 +960,50 @@ function drawInitialSimSelectionScreen() {
     document.getElementsByClassName("sim-type-classic")[0].style.display = "block";
     document.getElementsByClassName("sim-type-boundary")[0].style.display = "block";
 
-    // could turn this initial drawing into a function too
+    // ===== rebuilding sim selection screen =====
+
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.font = '50px Cairo';
-    ctx.fillText("Select Simulation Type", 240, 80);
-    ctx.font = '30px Cairo';
-    ctx.fillText("Classic", 190, 500);
-    ctx.fillText("Boundary", 690, 500);
+    ctx.fillText("Select Simulation Type", 255, 80);
 
+    // let user know how to navigate
+    ctx.font = '20px Roboto';
+    ctx.fillText("(use mouse or arrow keys + enter to select)", 305, 110);
+
+    ctx.font = '36px Cairo';
+    ctx.fillText("Classic", 190, 430);
+    ctx.fillText("Boundary", 680, 430);
+
+    // we now want to write some descriptions below each sim type
+    // (these will be highlighted same as image and text)
+    ctx.font = "20px Roboto";
+    ctx.fillStyle = "#333";
+
+    // Classic
+    // Configure your own species of organisms and watch them attempt to reach the goal over generations of natural selection
+    ctx.fillText("Configure your own species of organisms", 70, 480);
+    ctx.fillText("and watch them attempt to reach the goal", 70, 505);
+    ctx.fillText("over generations of natural selection", 85, 530);
+
+    // Boundary
+    // Create your own path and watch your species of organisms attempt to reach the goal and survive while avoiding your boundary
+    ctx.fillText("Create your own path and watch your species", 550, 480);
+    ctx.fillText("of organisms attempt to reach the goal and", 550, 505);
+    ctx.fillText("survive while avoiding your boundary", 590, 530);
+
+    // glow effect behind images
     ctx.strokeStyle = 'rgb(148, 0, 211)';
     ctx.lineWidth = 4;
     ctx.shadowColor = 'rgb(148, 0, 211)';
     ctx.shadowBlur = 10;
-    ctx.strokeRect(100, 150, 300, 300);
-    ctx.strokeRect(600, 150, 300, 300);
+    ctx.strokeRect(135, 150, 225, 225);
+    ctx.strokeRect(635, 150, 225, 225);
 
-    // draw images scaled to 300x300
-    ctx.drawImage(classic_example, 100, 150, 300, 300);
-    ctx.drawImage(boundary_example, 600, 150, 300, 300);   
+    // for now, we'll use the same images, and simply replace them with the new ones at the end
+    // We want to probably shrink the images a bit to allow for description text beneath
+    // [] maybe round corners too? 
+    ctx.drawImage(classic_example, 135, 150, 225, 225);
+    ctx.drawImage(boundary_example, 635, 150, 225, 225);
 }
 
 function prepareToRunSimulation() {
@@ -904,4 +1071,6 @@ export {
     drawBoundary, drawStaticSelectionPhaseText,
     drawStatsStatic, drawBoundaryValidationScreen,
     drawGoal, drawFinalBoundary,
+    drawBottomBoundaryEndpointsRed, drawTopBoundaryEndpointsRed,
+    drawBottomBoundaryGatesAndConnectorsGreen, drawTopBoundaryGatesAndConnectorsGreen,
 }

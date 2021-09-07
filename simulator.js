@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
+document.addEventListener("DOMContentLoaded", playTitleScreenAnimation, {once: true});
 
 import * as Drawings from "./modules/drawings.js";
 import * as BoundaryUtils from "./modules/boundary_utils.js";
@@ -264,8 +264,13 @@ function applyInitialBoundaryStyles() {
 
     stop_btn.style.gridColumn = "1 / 2";
     stop_btn.style.width = "75%";
-    stop_btn.innerHTML = "Back";
+    stop_btn.innerHTML = "Reset";
     stop_btn.style.display = "block";
+
+    // restart boundary drawing if user desires
+    stop_btn.addEventListener("click", function() {
+        createNewBoundary();
+    }, {once: true});
 }
 
 // this function will be refactored/cleaned
@@ -290,6 +295,9 @@ function createNewBoundary() {
     applyInitialBoundaryStyles();
 
     Drawings.drawBoundaryDrawingHelpText("Step 1");
+
+    // draw bottom-boundary connectors red
+    Drawings.drawBottomBoundaryEndpointsRed();
 
     function draw(event) {
         if (event.buttons !== 1 || !allowed_to_draw) {
@@ -333,7 +341,6 @@ function createNewBoundary() {
                 // save to top coords
                 new_boundary.top_boundary_coordinates.push([simGlobals.coordinates['x'], simGlobals.coordinates['y']]);
             }
-
         }
 
         ctx.lineCap = 'round';
@@ -352,7 +359,8 @@ function createNewBoundary() {
         if (boundary_step === 'bottom-boundary') {
             // check that user is trying to draw from first connector (ctx.fillRect(150, 550, 20, 50))
             // make helper function eventually
-            if (simGlobals.coordinates['x'] >= 150 && simGlobals.coordinates['x'] <= 170 && simGlobals.coordinates['y'] >= 550) {
+            if (simGlobals.coordinates['x'] >= 160 && simGlobals.coordinates['x'] <= 180 && 
+                simGlobals.coordinates['y'] >= 540 && simGlobals.coordinates['y'] <= 560) {
                 console.log("You clicked on the connector!");
                 allowed_to_draw = true;
             }
@@ -363,8 +371,9 @@ function createNewBoundary() {
             }
         }
         else if (boundary_step === 'top-boundary') {
-            // check that user is trying to draw from the first connector (ctx.fillRect(0, 430, 50, 20))
-            if (simGlobals.coordinates['x'] >= 0 && simGlobals.coordinates['x'] <= 50 && simGlobals.coordinates['y'] >= 430 && simGlobals.coordinates['y'] <= 450) {
+            // check that user is trying to draw from the first connector     ctx.arc(50, 430, 10, 0, Math.PI*2, false);
+            if (simGlobals.coordinates['x'] >= 40 && simGlobals.coordinates['x'] <= 60 &&
+                simGlobals.coordinates['y'] >= 420 && simGlobals.coordinates['y'] <= 440) {
                 allowed_to_draw = true;
             }
             else {
@@ -384,7 +393,6 @@ function createNewBoundary() {
                 console.log("You missed the white dot...");
                 allowed_to_draw = false;
             } 
-
         }
         else if (boundary_step === 'confirmation') {
             // don't allow user to draw in confirmation phase
@@ -403,10 +411,14 @@ function createNewBoundary() {
 
                 // could make own function for this condition
                 if (bottom_boundary_is_valid) {
+
+                    Drawings.drawBottomBoundaryGatesAndConnectorsGreen();
+
                     // update step and store boundary
                     new_boundary.save('bottom');
                     boundary_step = "top-boundary";
                     Drawings.drawBoundaryDrawingHelpText("Step 2");
+                    Drawings.drawTopBoundaryEndpointsRed();
                 }
                 else {
                     // erase bottom-boundary coords when illegal line drawn
@@ -415,6 +427,7 @@ function createNewBoundary() {
                     // redraw boilerplate & help text
                     Drawings.drawBoundaryBoilerplate();
                     Drawings.drawBoundaryDrawingHelpText("Step 1");
+                    Drawings.drawBottomBoundaryEndpointsRed();
                 }
             }
             else if (boundary_step === "top-boundary") {
@@ -422,6 +435,19 @@ function createNewBoundary() {
 
                 // could make own function for this condition
                 if (top_boundary_is_valid) {
+
+                    Drawings.drawTopBoundaryGatesAndConnectorsGreen();
+
+                    // draw white dot for next step
+                    ctx.fillStyle = 'white';
+                    ctx.beginPath();
+                    ctx.arc(80, 510, 10, 0, Math.PI*2, false);
+                    ctx.fill();
+
+                    // make goal new color (can be a flag in drawBoundaryBoilerplate())
+                    ctx.fillStyle = 'rgb(232, 0, 118)';
+                    ctx.fillRect(925, 50, 20, 20);
+
                     // update step and store boundary
                     // store top-boundary
                     new_boundary.save('top');
@@ -441,6 +467,7 @@ function createNewBoundary() {
                     ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
 
                     Drawings.drawBoundaryDrawingHelpText("Step 2");
+                    Drawings.drawTopBoundaryEndpointsRed();
                 }
             }
             else if (boundary_step === 'full-boundary') {
@@ -502,7 +529,7 @@ function createNewBoundary() {
 
         // set global sim settings
         SettingsUtils.configureSettings();
-    });
+    }, {once: true});
 }
 
 // ======================
@@ -660,41 +687,38 @@ function turnOnBoundaryIntroductionOneListeners() {
     next_btn.style.display = 'block';
 
     next_btn.addEventListener('click', function continueIntroduction() {
-        // remove listener
-        next_btn.removeEventListener('click', continueIntroduction);
 
         // go to next screen
         Drawings.drawBoundaryCreationIntroductionTwo();
         turnOnBoundaryIntroductionTwoListeners();
-    })
+
+    }, {once: true});
 
     document.addEventListener('keydown', function checkKeystroke(event) {
         if (event.key === 'Enter') {
-            // destroy listeners
-            document.removeEventListener('keydown', checkKeystroke);
 
             // go to next screen
             Drawings.drawBoundaryCreationIntroductionTwo();
             turnOnBoundaryIntroductionTwoListeners();
+        
         }
-    })
+    }, {once: true});
 }
 
 function turnOnBoundaryIntroductionTwoListeners() {
     
     // change text
     let next_btn = document.getElementsByClassName("next-btn")[0];
-    next_btn.innerHTML = 'Okay';
+    next_btn.innerHTML = 'Continue';
 
     next_btn.addEventListener('click', function finishBoundaryIntroduction() {
-        // remove listener
-        next_btn.removeEventListener('click', finishBoundaryIntroduction);
 
         next_btn.style.display = 'none';
 
         // go to next screen
         createNewBoundary();
-    })    
+
+    }, {once: true});    
 
     document.addEventListener('keydown', function checkKeystroke(event) {
         if (event.key === 'Enter') {
@@ -720,7 +744,7 @@ async function applySimType() {
     document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
 
     // allow btn-click to runSimulation() (still hidden)
-    document.getElementsByClassName("run-btn")[0].addEventListener("click", runSimulation);
+    document.getElementsByClassName("run-btn")[0].addEventListener("click", runSimulation, {once: true});
 
     if (simGlobals.sim_type === 'classic') {
         // set global sim settings
@@ -826,7 +850,9 @@ function updateAndMoveOrganismsBounds(organisms) {
                                 }
                                 else {
                                     organisms[i].is_alive = false;
-                                    ctx.fillStyle = 'red';
+                                    // ctx.fillStyle = 'red';
+                                    // changing deceased color to gray (mother pink is too close)
+                                    ctx.fillStyle = '#333';
                                     ctx.beginPath();
                                     ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
                                     ctx.fill();
@@ -839,7 +865,7 @@ function updateAndMoveOrganismsBounds(organisms) {
                         }
                         else {
                             // draw deceased organism
-                            ctx.fillStyle = 'red';
+                            ctx.fillStyle = '#333';
                             ctx.beginPath();
                             ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
                             ctx.fill();
@@ -1183,7 +1209,6 @@ async function runChosenParentsAnimations(parents, organisms) {
     }
 
     // highlight fathers
-    // !!! change fathers color to a lighter blue
     await paintbrush.fadeIn(Drawings.drawFathersText, .02);
 
     for (let i = 0; i <= 2; i++) {
@@ -1212,7 +1237,7 @@ async function runChosenParentsAnimations(parents, organisms) {
     })
 }
 
-async function runSelectionAnimations(closest_organism, parents, organisms, deceased_organisms) {
+async function runSelectionAnimations(closest_organism, parents, organisms) {
     console.log("Called runSelectionAnimations()");
     // maybe model other phases after this one
     await runClosestOrganismAnimations(closest_organism); // finished
@@ -1220,7 +1245,6 @@ async function runSelectionAnimations(closest_organism, parents, organisms, dece
     
     // make own function
     if (simGlobals.sim_type === 'boundary') {
-        await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .02, deceased_organisms);
 
         // fade out boundary
         // we should draw a static selection phase on canvas1, and erase that area on canvas2
@@ -1453,10 +1477,7 @@ function fadeInTitleAnimation(title_organisms) {
     start_btn.addEventListener("click", function updateStartBtnFlagOnClick() {
         console.log("Start Button Clicked");
         start_button_pressed = true;
-
-        // remove eventListener after flag set
-        start_btn.removeEventListener("click", updateStartBtnFlagOnClick);
-    });
+    }, {once: true});
 
     document.addEventListener('keydown', function updateStartBtnFlagOnEnter(event) {
         if (event.key === "Enter") {
@@ -1558,7 +1579,7 @@ async function playTitleScreenAnimation() {
     do {
         console.log("Starting Title Animation");
 
-        let status = await fadeInTitleAnimation(title_organisms);
+        var status = await fadeInTitleAnimation(title_organisms);
 
         if (status === 'Select Sim Type') {
             selectSimulationType();
@@ -1725,22 +1746,24 @@ async function runGeneration(new_generation) {
     }
 
     let parents = selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length);
+
+    // we need to combine organisms + deceased organisms for organism fade out (boundary only)
+
+    // at this point, 'parents' is the only array of organisms we still need
+    // combine both organisms arrays for organisms fade-out animation
+    if (simGlobals.sim_type === 'boundary') {
+        organisms = organisms.concat(deceased_organisms);
+    }
     
     if (simGlobals.dialogue) {
-        await runSelectionAnimations(closest_organism, parents, organisms, deceased_organisms);
+        await runSelectionAnimations(closest_organism, parents, organisms);
 
         await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseExitText, .01);
     }
     else {
         console.log(organisms);
         await paintbrush.fadeOut(Drawings.drawOrganisms, .02, organisms);
-
-        if (simGlobals.sim_type === 'boundary') {
-            await paintbrush.fadeOut(Drawings.drawDeceasedOrganisms, .02, deceased_organisms);            
-        }
     }
-
-    // starting here ===
 
     // this function handles crossover, mutation and reproduction
     // this function pushes new gen organisms to offspring_organisms[]
@@ -1756,6 +1779,7 @@ async function runGeneration(new_generation) {
 
     // we are done with organisms
     organisms = [];
+    deceased_organisms = [];
 
     // PHASE: CROSSOVER / MUTATE / REPRODUCE
     if (simGlobals.dialogue) {
@@ -1801,10 +1825,11 @@ async function runSimulation () {
     // display stop simulation button & add its listener
     let stop_sim_btn = document.getElementsByClassName("stop-btn")[0];
     stop_sim_btn.style.display = 'block';
+    stop_sim_btn.innerHTML = 'Quit';
 
     stop_sim_btn.addEventListener('click', function stopSim() {
         stopSimulation();
-    });
+    }, {once: true});
 
     console.log("Running Simulation with these settings:");
     console.log(`Total Organisms: ${simGlobals.TOTAL_ORGANISMS}`);
@@ -1881,7 +1906,7 @@ function getUserDecision() {
         document.addEventListener('keydown', function(event) {
             let key = event.key;
             resolve(key);
-        });
+        }, {once: true});
     })
 }
 
