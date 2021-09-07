@@ -591,6 +591,7 @@ async function runPreSimAnimations() {
         await paintbrush.fadeIn(Drawings.drawPhases, .02);
         await sleep(500);
         await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .02);
+        await paintbrush.fadeIn(Drawings.drawFakeGoal, .02);
     }
 
     return new Promise(resolve => {
