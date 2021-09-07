@@ -49,15 +49,15 @@ window.ctx2 = canvas2.getContext("2d");
 // ===================
 
 class Organism {
-    constructor (gender, x, y, ctx) {
+    constructor (gender, x, y) {
         this.gender = gender;
         this.x = x;
         this.y = y;
-        this.radius = 5; // always the same
+        this.radius = 5;
         this.index = 0;
         this.genes = [];
         this.distance_to_goal; // for normal and boundary sim types
-        this.distance_to_next_checkpoint; //for boundary sim type
+        this.distance_to_next_checkpoint; //for boundary sim type only
         this.fitness;
         this.reached_goal = false;
         // for boundary animations

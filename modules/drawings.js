@@ -1028,10 +1028,15 @@ function prepareToRunSimulation() {
     document.getElementsByClassName("setting-submit")[0].style.display = 'none';
 
     ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font = '50px Cairo';
-    ctx.fillText("Simulation Ready", 300, 270);
+    ctx.font = '55px Cairo';
+    ctx.fillText("Simulation Ready", 300, 300);
+
     ctx.font = '28px Cairo'
-    ctx.fillText("Press 'Run Simulation'", 350, 400);
+    ctx.fillText("Press 'Run Simulation'", 365, 360);
+
+    // draw thin line between text
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillRect(250, 320, 500, 3);
 }
 
 function drawGoal(goal) {
@@ -1088,5 +1093,4 @@ export {
     drawGoal, drawFinalBoundary,
     drawBottomBoundaryEndpointsRed, drawTopBoundaryEndpointsRed,
     drawBottomBoundaryGatesAndConnectorsGreen, drawTopBoundaryGatesAndConnectorsGreen,
-
 }
