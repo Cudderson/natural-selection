@@ -259,7 +259,7 @@ function configureSettings() {
     // listen for click on Apply btn
     document.getElementsByClassName("setting-submit")[0].addEventListener("click", function submitForm(event) {
         validateSettingsForm();
-    });
+    }, {once: true});
 
     displaySettingsForm();
 }

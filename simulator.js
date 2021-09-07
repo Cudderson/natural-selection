@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", playTitleScreenAnimation);
+document.addEventListener("DOMContentLoaded", playTitleScreenAnimation, {once: true});
 
 import * as Drawings from "./modules/drawings.js";
 import * as BoundaryUtils from "./modules/boundary_utils.js";
@@ -529,7 +529,7 @@ function createNewBoundary() {
 
         // set global sim settings
         SettingsUtils.configureSettings();
-    });
+    }, {once: true});
 }
 
 // ======================
@@ -687,24 +687,22 @@ function turnOnBoundaryIntroductionOneListeners() {
     next_btn.style.display = 'block';
 
     next_btn.addEventListener('click', function continueIntroduction() {
-        // remove listener
-        next_btn.removeEventListener('click', continueIntroduction);
 
         // go to next screen
         Drawings.drawBoundaryCreationIntroductionTwo();
         turnOnBoundaryIntroductionTwoListeners();
-    })
+
+    }, {once: true});
 
     document.addEventListener('keydown', function checkKeystroke(event) {
         if (event.key === 'Enter') {
-            // destroy listeners
-            document.removeEventListener('keydown', checkKeystroke);
 
             // go to next screen
             Drawings.drawBoundaryCreationIntroductionTwo();
             turnOnBoundaryIntroductionTwoListeners();
+        
         }
-    })
+    }, {once: true});
 }
 
 function turnOnBoundaryIntroductionTwoListeners() {
@@ -714,14 +712,13 @@ function turnOnBoundaryIntroductionTwoListeners() {
     next_btn.innerHTML = 'Continue';
 
     next_btn.addEventListener('click', function finishBoundaryIntroduction() {
-        // remove listener
-        next_btn.removeEventListener('click', finishBoundaryIntroduction);
 
         next_btn.style.display = 'none';
 
         // go to next screen
         createNewBoundary();
-    })    
+
+    }, {once: true});    
 
     document.addEventListener('keydown', function checkKeystroke(event) {
         if (event.key === 'Enter') {
@@ -747,7 +744,7 @@ async function applySimType() {
     document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
 
     // allow btn-click to runSimulation() (still hidden)
-    document.getElementsByClassName("run-btn")[0].addEventListener("click", runSimulation);
+    document.getElementsByClassName("run-btn")[0].addEventListener("click", runSimulation, {once: true});
 
     if (simGlobals.sim_type === 'classic') {
         // set global sim settings
@@ -1482,10 +1479,7 @@ function fadeInTitleAnimation(title_organisms) {
     start_btn.addEventListener("click", function updateStartBtnFlagOnClick() {
         console.log("Start Button Clicked");
         start_button_pressed = true;
-
-        // remove eventListener after flag set
-        start_btn.removeEventListener("click", updateStartBtnFlagOnClick);
-    });
+    }, {once: true});
 
     document.addEventListener('keydown', function updateStartBtnFlagOnEnter(event) {
         if (event.key === "Enter") {
@@ -1587,7 +1581,7 @@ async function playTitleScreenAnimation() {
     do {
         console.log("Starting Title Animation");
 
-        let status = await fadeInTitleAnimation(title_organisms);
+        var status = await fadeInTitleAnimation(title_organisms);
 
         if (status === 'Select Sim Type') {
             selectSimulationType();
@@ -1834,7 +1828,7 @@ async function runSimulation () {
 
     stop_sim_btn.addEventListener('click', function stopSim() {
         stopSimulation();
-    });
+    }, {once: true});
 
     console.log("Running Simulation with these settings:");
     console.log(`Total Organisms: ${simGlobals.TOTAL_ORGANISMS}`);
@@ -1911,7 +1905,7 @@ function getUserDecision() {
         document.addEventListener('keydown', function(event) {
             let key = event.key;
             resolve(key);
-        });
+        }, {once: true});
     })
 }
 
