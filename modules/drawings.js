@@ -38,18 +38,30 @@ function drawSimulationIntro(opacity) {
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.font = '22px Roboto';
-    ctx.fillText("This society of organisms needs to reach the goal if it wants to survive.", 150, 330);
+    ctx.fillText("This species of organisms needs to reach the goal if it wants to survive.", 150, 330);
 }
 
 function drawFakeGoal(opacity) {
-    ctx.clearRect(500, 50, 20, 20);
+    // make dynamic to sim type
+    if (simGlobals.sim_type === 'classic') {
+        ctx.clearRect(500, 50, 20, 20);
     
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillRect(500, 50, 20, 20);
+        ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+        ctx.fillRect(500, 50, 20, 20);
+    }
+    else {
+        ctx.clearRect(925, 50, 20, 20);
+
+        ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+        ctx.fillRect(925, 50, 20, 20);
+    }
+
 }
 
-// cannot be animated right now
+// for boundary creation
 function drawFakeGoalBounds() {
+    ctx.clearRect(925, 50, 20, 20);
+
     ctx.fillStyle = `rgba(155, 245, 0, 1)`;
     ctx.fillRect(925, 50, 20, 20);
 }
@@ -74,8 +86,18 @@ function drawExplanationAndGoal(opacity) {
     ctx.fillText("until they succeed or fail to survive.", 350, 350);
 
     // fake goal
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillRect(500, 50, 20, 20);
+    if (simGlobals.sim_type === 'classic') {
+        ctx.clearRect(500, 50, 20, 20);
+    
+        ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+        ctx.fillRect(500, 50, 20, 20);
+    }
+    else {
+        ctx.clearRect(925, 50, 20, 20);
+
+        ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+        ctx.fillRect(925, 50, 20, 20);
+    }
 }
 
 // may need to be updated for resilience
@@ -1066,4 +1088,5 @@ export {
     drawGoal, drawFinalBoundary,
     drawBottomBoundaryEndpointsRed, drawTopBoundaryEndpointsRed,
     drawBottomBoundaryGatesAndConnectorsGreen, drawTopBoundaryGatesAndConnectorsGreen,
+
 }

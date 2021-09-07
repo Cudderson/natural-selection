@@ -553,19 +553,6 @@ async function runPreSimAnimations() {
         skip_btn.innerHTML = 'Skipping...';
     }, {once: true});
 
-    let pre_sim_stats = {};
-
-    // these will probably be global, won't need to grab like this
-    // pre_sim_stats.total_organisms = document.getElementById("total-organisms").value;
-    // pre_sim_stats.gene_count = document.getElementById("gene-count").value;
-    // pre_sim_stats.movement_speed = document.getElementById("move-speed").value;
-    // pre_sim_stats.mutation_rate = document.getElementById("mutation-rate").value;
-    // pre_sim_stats.dialogue = document.getElementById("dialogue-checkbox").checked;
-
-    // i dont really need to make a new object just to hold global values
-    // i may not even need to pass anything
-    // [] replace presimstats with global grabs 
-
     if (!skip) {
         await paintbrush.fadeIn(Drawings.drawSimulationSettings, .01);
         await sleep(2000);
@@ -575,7 +562,9 @@ async function runPreSimAnimations() {
     if (!skip) {
         await paintbrush.fadeIn(Drawings.drawSimulationIntro, .01);
         await sleep(2000);
-        await paintbrush.fadeIn(Drawings.drawFakeGoal, .01); // *** this will need to be changed for boundary sims
+
+        await paintbrush.fadeIn(Drawings.drawFakeGoal, .01);
+
         await paintbrush.fadeOut(Drawings.drawSimulationIntro, .02);
     }
 
@@ -590,6 +579,7 @@ async function runPreSimAnimations() {
     skip_btn.style.display = 'none';
 
     // add content for drawStats()
+    let pre_sim_stats = {};
     pre_sim_stats.generation_count = 0;
     pre_sim_stats.average_fitness = '0.00';
     pre_sim_stats.organism_count = document.getElementById("total-organisms").value;
@@ -597,7 +587,6 @@ async function runPreSimAnimations() {
     await paintbrush.fadeIn(Drawings.drawStats, .02, pre_sim_stats);
     await sleep(500);
 
-    // maybe this should be moved to next function (skip intro would then trigger this)
     if (simGlobals.dialogue) {
         await paintbrush.fadeIn(Drawings.drawPhases, .02);
         await sleep(500);
