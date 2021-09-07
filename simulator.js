@@ -562,10 +562,14 @@ async function runPreSimAnimations() {
     // pre_sim_stats.mutation_rate = document.getElementById("mutation-rate").value;
     // pre_sim_stats.dialogue = document.getElementById("dialogue-checkbox").checked;
 
+    // i dont really need to make a new object just to hold global values
+    // i may not even need to pass anything
+    // [] replace presimstats with global grabs 
+
     if (!skip) {
-        await paintbrush.fadeIn(Drawings.drawSimulationSettings, .01, pre_sim_stats);
+        await paintbrush.fadeIn(Drawings.drawSimulationSettings, .01);
         await sleep(2000);
-        await paintbrush.fadeOut(Drawings.drawSimulationSettings, .02, pre_sim_stats);
+        await paintbrush.fadeOut(Drawings.drawSimulationSettings, .02);
     }
 
     if (!skip) {
@@ -1820,7 +1824,6 @@ async function runSimulation () {
 
     // hide start/settings buttons
     document.getElementsByClassName("run-btn")[0].style.display = 'none';
-    // document.getElementsByClassName("setting-submit")[0].style.display = 'none'; // i believe this is already turned off by this point?
 
     // display stop simulation button & add its listener
     let stop_sim_btn = document.getElementsByClassName("stop-btn")[0];
@@ -1832,12 +1835,7 @@ async function runSimulation () {
     }, {once: true});
 
     console.log("Running Simulation with these settings:");
-    console.log(`Total Organisms: ${simGlobals.TOTAL_ORGANISMS}`);
-    console.log(`Gene Count: ${simGlobals.GENE_COUNT}`);
-    console.log(`Resilience: ${simGlobals.RESILIENCE}`);
-    console.log(`Mutation Rate: ${simGlobals.MUTATION_RATE}`);
-    console.log(`Min/Max Gene: [${simGlobals.MIN_GENE}, ${simGlobals.MAX_GENE}]`);
-    console.log(`Dialogue: ${simGlobals.dialogue}`);
+    console.log(simGlobals);
 
     // pre-sim animations
     await runPreSimAnimations();

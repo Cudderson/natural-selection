@@ -1,34 +1,27 @@
 // ===== drawings for simulator.js =====
-function drawSimulationSettings(opacity, content) {
+function drawSimulationSettings(opacity) {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.font = "30px Cairo";
     ctx.fillText("Simulation Settings", 300, 195);
-    ctx.fillRect(300, 197, 260, 1);
+    ctx.fillRect(300, 197, 245, 1);
 
     ctx.font = "24px Cairo";
     ctx.fillText(`Initial Population:`, 300, 250);
-    ctx.fillText(`Gene Count:`, 300, 290);
-    ctx.fillText(`Movement Speed:`, 300, 330);
-    ctx.fillText(`Mutation Rate:`, 300, 370);
+    ctx.fillText(`Movement Speed:`, 300, 290);
+    ctx.fillText(`Mutation Rate:`, 300, 330);
+    ctx.fillText("Resilience", 300, 370);
     ctx.fillText(`Dialogue:`, 300, 410);
     
-    // ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    // ctx.fillText(`${simGlobals.TOTAL_ORGANISMS}`, 600, 250);
-    // ctx.fillText(`${simGlobals.GENE_COUNT}`, 600, 290);
-    // ctx.fillText(`${simGlobals.MAX_GENE}`, 600, 330);
-    // ctx.fillText(`${simGlobals.MUTATION_RATE}`, 600, 370);
-
-    // testing content (still need resilience incorporation)
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(`${content.total_organisms}`, 600, 250);
-    ctx.fillText(`${content.gene_count}`, 600, 290);
-    ctx.fillText(`${content.movement_speed}`, 600, 330);
-    ctx.fillText(`${content.mutation_rate}`, 600, 370);
+    ctx.fillText(`${simGlobals.TOTAL_ORGANISMS}`, 600, 250);
+    ctx.fillText(`${simGlobals.MAX_GENE}`, 600, 290);
+    ctx.fillText(`${simGlobals.MUTATION_RATE}`, 600, 330);
+    ctx.fillText(`${simGlobals.RESILIENCE}`, 600, 370);
 
-    if (content.dialogue === false) {
+    if (simGlobals.dialogue === false) {
         ctx.fillText(`Disabled`, 600, 410);
     }
     else {
@@ -834,7 +827,7 @@ function highlightClassicSimType() {
     // clear rects
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'black';
-    ctx.fillRect(70, 120, 870, 450);
+    ctx.fillRect(70, 120, 875, 450);
 
     // redraw 'classic' border highlighted
     ctx.strokeStyle = 'rgb(155, 245, 0)';
@@ -896,7 +889,7 @@ function highlightBoundarySimType() {
     // clear rects
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'black';
-    ctx.fillRect(70, 120, 870, 450);
+    ctx.fillRect(70, 120, 875, 450);
 
     // redraw 'boundary' border highlighted
     ctx.strokeStyle = 'rgb(155, 245, 0)';
