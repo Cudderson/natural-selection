@@ -935,7 +935,6 @@ function hasReachedGoal(organism, goal) {
     }
 }
 
-// not converted var >> let yet
 async function runEvaluationAnimation(organisms, stats) {
 
     // need to draw goal at location depending on sim type
@@ -958,12 +957,12 @@ async function runEvaluationAnimation(organisms, stats) {
         Drawings.drawStatsStatic(ctx, stats);
 
         if (stats.generation_count === 0 && !simGlobals.dialogue) {
-            await paintbrush.fadeIn(Drawings.drawBoundary, .01);
+            await paintbrush.fadeIn(Drawings.drawBoundary, .015);
             ctx2.globalAlpha = 1;
         }
 
         if (simGlobals.dialogue) {
-            await paintbrush.fadeIn(Drawings.drawBoundary, .01);
+            await paintbrush.fadeIn(Drawings.drawBoundary, .015);
             ctx2.globalAlpha = 1;
 
             // clear canvas1 and redraw eval text and stats on canvas2
@@ -1171,15 +1170,14 @@ async function runClosestOrganismAnimations (closest_organism) {
     paintbrush.subject = closest_organism;
 
     // highlight most-fit organism 
-    for (let i = 0; i <= 2; i++) {
-        await paintbrush.fadeIn(Drawings.drawClosestOrganismNatural, .04);
-        await paintbrush.fadeIn(Drawings.drawClosestOrganismHighlighted, .04);
-    }
-    await sleep(1000);
+    await paintbrush.fadeIn(Drawings.drawClosestOrganismHighlighted, .03);
+    await paintbrush.fadeIn(Drawings.drawClosestOrganismNatural, .03);
+    await paintbrush.fadeIn(Drawings.drawClosestOrganismHighlighted, .03);
+    await sleep(200);
 
     // fade out text, return organism to natural color
-    await paintbrush.fadeOut(Drawings.drawClosestOrganismText, .02);
-    await paintbrush.fadeIn(Drawings.drawClosestOrganismNatural, .04);
+    await paintbrush.fadeIn(Drawings.drawClosestOrganismNatural, .02);
+    await paintbrush.fadeOut(Drawings.drawClosestOrganismText, .04);
 
     // done drawing closet organism
     paintbrush.subject = null;
@@ -1195,33 +1193,32 @@ async function runChosenParentsAnimations(parents, organisms) {
     paintbrush.subject = parents;
 
     // highlight mothers
-    await paintbrush.fadeIn(Drawings.drawMothersText, .02);
+    await paintbrush.fadeIn(Drawings.drawMothersText, .04);
+    await sleep(500);
 
-    for (let i = 0; i <= 2; i++) {
-        await paintbrush.fadeIn(Drawings.drawMothersHighlighted, .03);
-        await paintbrush.fadeIn(Drawings.drawMothersNatural, .03);
-    }
+    await paintbrush.fadeIn(Drawings.drawMothersHighlighted, .03);
+    await paintbrush.fadeIn(Drawings.drawMothersNatural, .03);
+    await paintbrush.fadeIn(Drawings.drawMothersHighlighted, .03);
+    await sleep(500);
 
     // highlight fathers
-    await paintbrush.fadeIn(Drawings.drawFathersText, .02);
+    await paintbrush.fadeIn(Drawings.drawFathersText, .04);
+    await sleep(500);
 
-    for (let i = 0; i <= 2; i++) {
-        await paintbrush.fadeIn(Drawings.drawFathersHighlighted, .03);
-        await paintbrush.fadeIn(Drawings.drawFathersNatural, .03);
-    }
-    await sleep(1000);
+    await paintbrush.fadeIn(Drawings.drawFathersHighlighted, .03);
+    await paintbrush.fadeIn(Drawings.drawFathersNatural, .03);
+    await paintbrush.fadeIn(Drawings.drawFathersHighlighted, .03);
+    await sleep(500);
 
     // highlight all
-    await paintbrush.fadeIn(Drawings.drawMothersHighlighted, .03);
-    await paintbrush.fadeIn(Drawings.drawFathersHighlighted, .03);
-    await paintbrush.fadeIn(Drawings.drawNotChosenText, .02);
+    await paintbrush.fadeIn(Drawings.drawNotChosenText, .03);
     await sleep(1000); 
 
     // fade out all
-    await paintbrush.fadeOut(Drawings.drawAllSelectedOrganismsText, .02);
-    await paintbrush.fadeIn(Drawings.drawBothParentTypesNatural, .02);
+    await paintbrush.fadeOut(Drawings.drawAllSelectedOrganismsText, .04);
+    await paintbrush.fadeIn(Drawings.drawBothParentTypesNatural, .04);
     await paintbrush.fadeOut(Drawings.drawOrganisms, .02, organisms);
-    await sleep(1000);
+    await sleep(200);
 
     // done with parents
     paintbrush.subject = null;
@@ -1246,7 +1243,7 @@ async function runSelectionAnimations(closest_organism, parents, organisms) {
         Drawings.drawStaticSelectionPhaseText(ctx);
 
         // fade out boundary and reset globalAlpha
-        await paintbrush.fadeOut(Drawings.drawBoundary, .01);
+        await paintbrush.fadeOut(Drawings.drawBoundary, .02);
         ctx2.globalAlpha = 1;
 
         // next, we should erase the drawing on canvas1 and redraw on canvas2 (all working)
@@ -1608,9 +1605,9 @@ async function runGeneration(new_generation) {
 
     if (stats.generation_count != 0) {
         if (simGlobals.dialogue) {
-            await paintbrush.fadeIn(Drawings.drawStats, .02, stats);
+            await paintbrush.fadeIn(Drawings.drawStats, .04, stats);
+            await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .04);
             await sleep(500);
-            await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .02);
         }
         else {
             // untested
@@ -1645,10 +1642,10 @@ async function runGeneration(new_generation) {
     }
 
     if (simGlobals.dialogue) {
-        await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseExitText, .02);
+        await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseExitText, .01);
 
-        await paintbrush.fadeOut(Drawings.drawStats, .015, stats); // put here to fade out stats before average fitness updated
-        await sleep(1000);
+        await paintbrush.fadeOut(Drawings.drawStats, .02, stats); // put here to fade out stats before average fitness updated
+        // await sleep(1000);
     }
 
     // store length of organisms array before deceased organisms filtered out for reproduction (boundary sims)
@@ -1711,7 +1708,7 @@ async function runGeneration(new_generation) {
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     if (simGlobals.dialogue) {
-        await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseEntryText, .02);
+        await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseEntryText, .03);
     }
 
     // this phase includes: beginSelectionProcess(), selectParentsForReproduction()
@@ -1749,10 +1746,10 @@ async function runGeneration(new_generation) {
         organisms = organisms.concat(deceased_organisms);
     }
     
-    if (simGlobals.dialogue) {
+    if (simGlobals.dialogue) { // here
         await runSelectionAnimations(closest_organism, parents, organisms);
 
-        await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseExitText, .01);
+        await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseExitText, .02);
     }
     else {
         console.log(organisms);
