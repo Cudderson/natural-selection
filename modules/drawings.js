@@ -754,33 +754,25 @@ function drawBoundary(opacity) {
 }
 
 // win/lose scenarios
-// still need to pass generation_count from caller
 function drawSuccessMessage(opacity, generation_count) {
+    ctx.clearRect(270, 240, 430, 300);
 
     ctx.font = '44px Cairo';
-    ctx.fillStyle = 'black';
-    ctx.fillText("Your Simulation Succeeded!", 235, 275);
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText("Your Simulation Succeeded!", 235, 275);
+    ctx.fillText("Simulation Success!", 315, 275);
 
     ctx.font = '30px Cairo';
-    ctx.fillStyle = 'black';
-    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
+    ctx.fillText(`Generations: ${generation_count}`, 410, 340);
 
     ctx.font = '26px Cairo';
-    ctx.fillStyle = 'black';
-    ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
     ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-    ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
+    ctx.fillText("Press 'Enter' to Resume Simulation", 300, 440);
+    ctx.fillText("Press 'Q' to Quit", 410, 480);
 
-    ctx.font = '26px Cairo';
-    ctx.fillStyle = 'black';
-    ctx.fillText("Press 'Q' to Quit", 420, 450);
-    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-    ctx.fillText("Press 'Q' to Quit", 420, 450);
-
+    // line divider
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillRect(275, 295, 440, 3);
 }
 
 function redrawOrganisms() {
@@ -793,31 +785,23 @@ function redrawOrganisms() {
     }
 }
 
-// untested (needs work)
-function drawExtinctionMessage() {
-    // clears
-    ctx.fillStyle = 'black';
+function drawExtinctionMessage(opacity) {
+    ctx.clearRect(200, 180, 565, 300);
 
-    ctx.font = '50px Cairo';
-    ctx.fillText("Simulation Failed", 310, 250);
-
-    ctx.font = "30px Roboto";
-    ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
-
-    ctx.font = '22px Cairo';
-    ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
-
-    // animations
     ctx.font = '50px Cairo';
     ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-    ctx.fillText("Simulation Failed", 310, 250);
+    ctx.fillText("Simulation Failed", 310, 230);
 
-    ctx.font = "22px Roboto";
-    ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
+    // red divider lines
+    ctx.fillRect(250, 250, 480, 3);
+    ctx.fillRect(250, 385, 480, 3);
+
+    ctx.font = "24px Cairo";
+    ctx.fillText("Press 'Q' to exit the simulation.", 340, 440);
 
     ctx.font = "30px Cairo";
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
+    ctx.fillText("Your species of organisms has gone extinct.", 215, 325);
 }
 
 function updateSuccessfulOrganism(organism) {
