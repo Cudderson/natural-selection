@@ -650,8 +650,13 @@ function drawBoundaryCreationIntroductionOne() {
 
     ctx.font = '26px Roboto';
     ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("Using your mouse or touchpad, you will draw walls to create your", 130, 310);
-    ctx.fillText("own path to the goal for your species of organisms to travel", 158, 345);
+    ctx.fillText("Using your mouse or touchpad, you will draw walls to create your", 130, 290);
+    ctx.fillText("own path to the goal for your species of organisms to travel", 158, 325);
+
+    // warn user that boundary is potentially deadly
+    ctx.font = '20px Roboto';
+    ctx.fillStyle = 'rgb(232, 0, 118, 1)';
+    ctx.fillText("(Be cautious, organisms that touch your boundary may not survive!)", 210, 370);
 
     ctx.font = '26px Cairo';
     ctx.fillStyle = "rgb(155, 245, 0)";
