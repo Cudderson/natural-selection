@@ -72,10 +72,10 @@ function calculateGeneCount() {
     // scale (boundary only) which is global via window.custom_boundary
     let gene_count;
     if (simGlobals.sim_type === 'classic') {
-        gene_count = 1250 / simGlobals.MAX_GENE;
+        gene_count = 1300 / simGlobals.MAX_GENE;
     }
     else if (simGlobals.sim_type === 'boundary') {
-        gene_count = (simGlobals.custom_boundary.scale_statistics.scale * 3) / simGlobals.MAX_GENE;
+        gene_count = (simGlobals.custom_boundary.scale_statistics.scale * 3.5) / simGlobals.MAX_GENE;
     }
 
     return gene_count;
