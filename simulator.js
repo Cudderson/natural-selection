@@ -1595,7 +1595,7 @@ async function runGeneration(new_generation) {
     // for drawStats()
     let stats = {
         'organism_count': organisms.length,
-        'average_fitness': new_generation.average_fitness,
+        'average_fitness': new_generation.average_fitness.toFixed(2),
         'generation_count': new_generation.generation_count,
     }
 
