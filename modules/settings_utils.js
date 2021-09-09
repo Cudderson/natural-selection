@@ -45,12 +45,8 @@ function validateTotalOrganismsSetting() {
     let valid_setting;
 
     if (typeof parseInt(total_organisms_setting.value) === 'number' && parseInt(total_organisms_setting.value) > 0) {
-        if (parseInt(total_organisms_setting.value > 9999)) {
-            valid_setting = 9999;
-        }
-        else {
-            valid_setting = Math.abs(parseInt(total_organisms_setting.value));
-        }
+
+        valid_setting = Math.abs(parseInt(total_organisms_setting.value));
 
         total_organisms_setting.style.borderBottom = '2px solid var(--custom-green)';
         
@@ -65,7 +61,7 @@ function validateTotalOrganismsSetting() {
 
         return {
             'status': 'invalid',
-            'value': '* Invalid Initial Population *\nPlease input a positive number less than 10,000',
+            'value': '* Invalid Initial Population *\nPlease input a positive number less than 1,000',
         }
     }
 }
