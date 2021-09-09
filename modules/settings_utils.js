@@ -256,10 +256,10 @@ function configureSettings() {
 
     document.getElementsByClassName("setting-submit")[0].style.display = 'block';
 
-    // listen for click on Apply btn
+    // listen for click on Apply btn (keep active in case user submits an invalid form)
     document.getElementsByClassName("setting-submit")[0].addEventListener("click", function submitForm(event) {
         validateSettingsForm();
-    }, {once: true});
+    });
 
     displaySettingsForm();
 }
