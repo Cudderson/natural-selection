@@ -1040,8 +1040,8 @@ function getShortestDistanceToNextCheckpoint(next_checkpoint, organisms) {
         let distance_to_checkpoint_squared = horizontal_distance_squared + vertical_distance_squared;
 
         organisms[i].distance_to_next_checkpoint = Math.sqrt(distance_to_checkpoint_squared);
-        console.log("Distance to next-closest checkpoint for organism " + i + ":");
-        console.log(organisms[i].distance_to_next_checkpoint);
+        // console.log("Distance to next-closest checkpoint for organism " + i + ":");
+        // console.log(organisms[i].distance_to_next_checkpoint);
 
         if (organisms[i].distance_to_next_checkpoint < shortest_distance_to_checkpoint) {
             shortest_distance_to_checkpoint = organisms[i].distance_to_next_checkpoint;
@@ -1113,6 +1113,31 @@ async function evaluatePopulation(organisms) {
 // =====================
 
 function beginSelectionProcess(organisms) {
+
+    // *** I want to reduce the array sizes created by this algorithm.
+    // When fitness scores increase, organisms are added to the array thousands of times.
+    // Moreso, maybe I just want to add the organism's index to the array, rather than the entire organism
+
+    // My initial idea is to use (fitness * 100) ** 2, which is the current formula, until average fitness reaches a certain threshold, and then convert to
+    // (fitness * 10) ^ 2 to keep array sizes down. (.99 * 10 = 9.9 //  9.9 ** 2 = 98.01)
+
+    // The reason I can't use (fitness * 10) ** 2 right away is because the organisms' fitness scores will be too low to create selection bias
+    // - with (fitness * 10) ** 2, organisms with fitness <= .1 will all have the same selection chance.
+
+    // when fitness = .1, our current formula adds organisms 100 times.
+    // maybe the threshold should be .1
+    // that's a good place to start
+
+    // GOAL:
+    // - Use a selection formula based on the average fitness of the population.
+    // - when average fitness < .1, use ((fitness * 100) ** 2)
+    // - when average fitness > .1, use ((fitness * 10)  ** 2) 
+
+    // we need:
+    // average_fitness
+
+    // start here
+
     // fill array with candidates for reproduction
     let potential_mothers = [];
     let potential_fathers = [];
@@ -1132,8 +1157,8 @@ function beginSelectionProcess(organisms) {
                 potential_fathers.push(organisms[i]);
             }
         }
-        // console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
-        // console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * 100) ** 2)} times.`);
+        console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
+        console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * 100) ** 2)} times.`);
     }
 
     let potential_parents = {
