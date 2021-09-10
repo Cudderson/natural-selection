@@ -802,9 +802,10 @@ function createOrganisms () {
 // updateAndMove() functions will not be converted to module (complex animations)
 // updateAndMove() not converted var >> let yet
 
+// === NEW ===
 function updateAndMoveOrganismsBounds(organisms) {
     return new Promise(resolve => {
-
+        // consider var >> let
         var canvas2_data = ctx2.getImageData(0, 0, canvas.width, canvas.height);
 
         var finished = false;
@@ -812,52 +813,53 @@ function updateAndMoveOrganismsBounds(organisms) {
         var total_moves = 0;
         let frame_id;
 
+        let success_flag = false;
+
         function animateOrganisms() {
-
             if (!finished) {
-                if (total_moves >= simGlobals.GENE_COUNT * organisms.length) {
-                    finished = true;
-                }
-                else {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                    // (FOR TESTING) draw checkpoints
-                    // drawCheckpoints();
+                for (let i = 0; i < organisms.length; i++) {
+                    if (organisms[i].is_alive) {
+                        if (organisms[i].reached_goal === false) {
 
-                    for (let i = 0; i < organisms.length; i++) {
-                        if (organisms[i].is_alive) {
-
+                            // get pixel data
                             position_rgba = getPixelXY(canvas2_data, organisms[i].x, organisms[i].y);
 
-                            if (position_rgba[0] === 155 && position_rgba[1] === 245) { // consider only checking one value for performance
+                            // check if touching green pixel
+                            if (position_rgba[0] === 155 && position_rgba[1] === 245) {
 
-                                let survived = Math.random() < simGlobals.RESILIENCE;
-
-                                if (survived) {
-                                    // instead of update and move, move organism to inverse of last movement, update index
-
-                                    // get inverse of last gene
-                                    let inverse_x_gene = (organisms[i].genes[organisms[i].index - 1][0]) * -1;
-                                    let inverse_y_gene = (organisms[i].genes[organisms[i].index - 1][1]) * -1;
-
-                                    // update
-                                    organisms[i].x += inverse_x_gene;
-                                    organisms[i].y += inverse_y_gene;
-
-                                    // increase index
-                                    organisms[i].index++;
-
-                                    // move
-                                    organisms[i].move();
+                                // check if touching goal
+                                if (organisms[i].x >= simGlobals.GOAL_X_POS_BOUNDS) {
+                                    hasReachedGoalBounds(organisms[i]);
                                 }
+                                // if touching green pixel that isn't goal, organism is touching boundary
                                 else {
-                                    organisms[i].is_alive = false;
-                                    // ctx.fillStyle = 'red';
-                                    // changing deceased color to gray (mother pink is too close)
-                                    ctx.fillStyle = '#333';
-                                    ctx.beginPath();
-                                    ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-                                    ctx.fill();
+                                    let survived = Math.random() < simGlobals.RESILIENCE;
+
+                                    if (survived) {
+                                        // instead of update and move, move organism to inverse of last movement, update index
+
+                                        // get inverse of last gene
+                                        let inverse_x_gene = (organisms[i].genes[organisms[i].index - 1][0]) * -1;
+                                        let inverse_y_gene = (organisms[i].genes[organisms[i].index - 1][1]) * -1;
+
+                                        // update
+                                        organisms[i].x += inverse_x_gene;
+                                        organisms[i].y += inverse_y_gene;
+                                        organisms[i].index++;
+
+                                        // move
+                                        organisms[i].move();
+                                    }
+                                    else {
+                                        // draw organism deceased
+                                        organisms[i].is_alive = false;
+                                        ctx.fillStyle = '#444';
+                                        ctx.beginPath();
+                                        ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+                                        ctx.fill();
+                                    }
                                 }
                             }
                             else {
@@ -866,25 +868,35 @@ function updateAndMoveOrganismsBounds(organisms) {
                             }
                         }
                         else {
-                            // draw deceased organism
-                            ctx.fillStyle = '#333';
-                            ctx.beginPath();
-                            ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-                            ctx.fill();
+                            // update successful organism
+                            // set success flag to true 
+                            Drawings.updateSuccessfulOrganism(organisms[i]);
+                            success_flag = true;
                         }
-                        total_moves++;
                     }
-
+                    else {
+                        // draw deceased organism
+                        organisms[i].is_alive = false;
+                        ctx.fillStyle = '#444';
+                        ctx.beginPath();
+                        ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+                        ctx.fill();
+                    }
+                    total_moves++;
                 }
+
+                // move to top if not working
+                if (total_moves >= simGlobals.GENE_COUNT * organisms.length) {
+                    finished = true;
+                }
+
                 sleep(1000 / simGlobals.FPS); // looks smoother without fps
                 frame_id = requestAnimationFrame(animateOrganisms);
             }
-
             else {
                 //resolve
                 cancelAnimationFrame(frame_id);
-                // ======! resolving 'false' until success logic implemented !======
-                resolve(false);
+                resolve(success_flag);
             }
         }
         requestAnimationFrame(animateOrganisms);
@@ -904,10 +916,10 @@ function updateAndMoveOrganisms(organisms, goal) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 for (let i = 0; i < organisms.length; i++) {
-                    if (organisms[i].reached_goal == false) {
+                    if (!organisms[i].reached_goal) {
                         organisms[i].update();
                         organisms[i].move();
-                        hasReachedGoal(organisms[i], goal);
+                        hasReachedGoal(organisms[i], goal); // maybe this could be conditionally called to reduce load
                     }
                     else {
                         Drawings.updateSuccessfulOrganism(organisms[i]);
@@ -932,11 +944,24 @@ function updateAndMoveOrganisms(organisms, goal) {
     })
 }
 
+// should these hasReached() functions be class methods?
+
 function hasReachedGoal(organism, goal) {
     // check if within y-range 
     if ((organism.y - (organism.radius / 2)) >= goal.y && (organism.y - (organism.radius / 2)) <= (goal.y + goal.size)) {
         // check if within x-range
         if ((organism.x - (organism.radius / 2)) >= goal.x && (organism.x - (organism.radius / 2)) <= (goal.x + goal.size)) {
+            // organism reached goal
+            organism.reached_goal = true;
+        }
+    }
+}
+
+function hasReachedGoalBounds(organism) {
+    // check if within y-range 
+    if ((organism.y - (organism.radius / 2)) >= simGlobals.GOAL_Y_POS_BOUNDS && (organism.y - (organism.radius / 2)) <= (simGlobals.GOAL_Y_POS_BOUNDS + 20)) {
+        // check if within x-range
+        if ((organism.x - (organism.radius / 2)) >= simGlobals.GOAL_X_POS_BOUNDS && (organism.x - (organism.radius / 2)) <= (simGlobals.GOAL_X_POS_BOUNDS + 20)) {
             // organism reached goal
             organism.reached_goal = true;
         }
@@ -985,13 +1010,15 @@ async function runEvaluationAnimation(organisms, stats) {
         var success_flag = await updateAndMoveOrganismsBounds(organisms);
     }
 
+    // should probably just say resolve(success_flag)
     return new Promise((resolve, reject) => {
-        if (success_flag) {
-            resolve(true);
-        }
-        else {
-            resolve(false);
-        }
+        // if (success_flag) {
+        //     resolve(true);
+        // }
+        // else {
+        //     resolve(false);
+        // }
+        resolve(success_flag);
     })
 }
 
@@ -1473,7 +1500,12 @@ async function handleSuccessfulSimDecision() {
     console.log("Key Accepted: " + key_pressed);
 
     await paintbrush.fadeOut(Drawings.drawSuccessMessage, .05);
-    Drawings.redrawOrganisms(); // not tested yet (could try using rAF for one frame to ensure user sees?)
+
+    // this breaks:
+    // drawings.js:353 Uncaught TypeError: Cannot read properties of null (reading 'length')
+    // at drawOrganisms (drawings.js:353)
+    // at drawFrame (simulator.js:160)
+    await paintbrush.fadeIn(Drawings.drawOrganisms, .9); // not tested yet (could try using rAF for one frame to ensure user sees?)
 
     if (key_pressed === 'Enter') {
         console.log("Continuing Simulation.");
@@ -1707,7 +1739,7 @@ async function runGeneration(new_generation) {
             await paintbrush.fadeIn(Drawings.drawSuccessMessage, .02); // untested
 
             // untested
-            handleSuccessfulSimDecision();            
+            await handleSuccessfulSimDecision();            
         }
     }
 
