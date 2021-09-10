@@ -326,14 +326,26 @@ class Boundary {
                 console.log(`previous: ${distance_to_previous_halfway_point}`);
                 console.log(`own: ${distance_to_own_halfway_point}`);
 
-                this.checkpoints[i].size = Math.floor(distance_to_previous_halfway_point);
+                // set minimum checkpoint size to 40
+                if (distance_to_previous_halfway_point < 40) {
+                    this.checkpoints[i].size = 40;
+                }
+                else {
+                    this.checkpoints[i].size = Math.floor(distance_to_previous_halfway_point);
+                }
             }
             else {
                 console.log(`For checkpoint ${i}, the distance to OWN halfway point is shortest.`);
                 console.log(`previous: ${distance_to_previous_halfway_point}`);
                 console.log(`own: ${distance_to_own_halfway_point}`);
 
-                this.checkpoints[i].size = Math.floor(distance_to_own_halfway_point);
+                // set minimum checkpoint size to 40
+                if (distance_to_own_halfway_point < 40) {
+                    this.checkpoints[i].size = 40;
+                }
+                else {
+                    this.checkpoints[i].size = Math.floor(distance_to_own_halfway_point);
+                }
             }
 
             // this is all working. checkpoint[0] doesn't check for previous halfway point, and checkpoint[9] doesn't check for own!
@@ -344,8 +356,8 @@ class Boundary {
 
         // maybe we remove first/last checkpoints at this stage??
         // for now, let's just assign them arbitrary sizes
-        this.checkpoints[0].size = 20;
-        this.checkpoints[this.checkpoints.length - 1].size = 20;
+        this.checkpoints[0].size = 40;
+        this.checkpoints[this.checkpoints.length - 1].size = 40;
 
         // to confirm, display sizes for each checkpoint
         for (let i = 0; i < this.checkpoints.length; i++) {

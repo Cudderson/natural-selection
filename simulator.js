@@ -528,7 +528,13 @@ function createNewBoundary() {
         canvas.removeEventListener('mouseup', validateBoundaryConnection);
 
         // set global sim settings
+
+        // turn back on when done testing checkpoints
         SettingsUtils.configureSettings();
+
+        // testing checkpoints
+        // new_boundary.drawCheckpoints();
+
     }, {once: true});
 }
 
