@@ -93,6 +93,8 @@ class Organism {
         ctx.fill();
     }
 
+    // ** maybe these calc functions shouldn't be class methods? **
+
     calcDistanceToGoal() {
         // c**2 = a**2 + b**2
         let horizontal_distance_squared = (Math.abs(this.x - simGlobals.GOAL_X_POS)) ** 2;
@@ -1112,7 +1114,7 @@ async function evaluatePopulation(organisms) {
 // ===== SELECTION =====
 // =====================
 
-function beginSelectionProcess(organisms) {
+function beginSelectionProcess(organisms, average_fitness) {
 
     // *** I want to reduce the array sizes created by this algorithm.
     // When fitness scores increase, organisms are added to the array thousands of times.
@@ -1137,6 +1139,15 @@ function beginSelectionProcess(organisms) {
     // average_fitness
 
     // start here
+    let selection_factor;
+
+    if (average_fitness < .1) {
+        selection_factor = 100;
+    }
+    else {
+        selection_factor = 10;
+    }
+    console.log(`average fitness: ${average_fitness}, factor: ${selection_factor}`);
 
     // fill array with candidates for reproduction
     let potential_mothers = [];
@@ -1144,12 +1155,14 @@ function beginSelectionProcess(organisms) {
 
     for (let i = 0; i < organisms.length; i++) {
         // Give organisms with negative fitness a chance to reproduce
-        if (organisms[i].fitness < 0) {
-            organisms[i].fitness = 0.01;
-        }
+        // if (organisms[i].fitness < 0) {
+        //     organisms[i].fitness = 0.01;
+        // }
 
-        // I'm going to try this implementation >> (organism.fitness * 100) ** 1.25
-        for (let j = 0; j < Math.ceil((organisms[i].fitness * 100) ** 2); j++) {
+        // TEST
+        // - give organisms with below-average fitness only 1 array spot
+        // - organisms with fitness greater than average will be given proper selection bias
+        if (organisms[i].fitness < average_fitness) {
             if (organisms[i].gender === 'female') {
                 potential_mothers.push(organisms[i]);
             }
@@ -1157,8 +1170,19 @@ function beginSelectionProcess(organisms) {
                 potential_fathers.push(organisms[i]);
             }
         }
+        else {
+            for (let j = 0; j < Math.ceil((organisms[i].fitness * selection_factor) ** 2); j++) {
+                if (organisms[i].gender === 'female') {
+                    potential_mothers.push(organisms[i]);
+                }
+                else if (organisms[i].gender === 'male') {
+                    potential_fathers.push(organisms[i]);
+                }
+            }
+        }
+
         console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
-        console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * 100) ** 2)} times.`);
+        console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * selection_factor) ** 2)} times.`);
     }
 
     let potential_parents = {
@@ -1728,7 +1752,7 @@ async function runGeneration(new_generation) {
 
         // here, we set checkpoints[i].distance_to_goal 
         // should this only be done on iteration #1???
-        // calcDistanceToGoalCheckpoints(); turning off to make sure sure initially
+        // calcDistanceToGoalCheckpoints(); turning off to make sure initially
 
         // get previous, current, and next checkpoints for current generation
         let checkpoint_data = simGlobals.custom_boundary.getFarthestCheckpointReached(organisms);
@@ -1739,7 +1763,14 @@ async function runGeneration(new_generation) {
 
         // distance_to_goal = distance_to_next_checkpoint + next_checkpoint.distance_to_goal
         // 'next' will give us the index in the checkpoints array of the checkpoint we want to measure from
-        let remaining_distance = simGlobals.custom_boundary.checkpoints[checkpoint_data['next']].distance_to_goal;
+        let remaining_distance; 
+
+        if (checkpoint_data['next'] === 'goal') {
+            remaining_distance = 0;
+        }
+        else {
+            remaining_distance = simGlobals.custom_boundary.checkpoints[checkpoint_data['next']].distance_to_goal;
+        }
 
         console.log(remaining_distance);
 
@@ -1758,7 +1789,7 @@ async function runGeneration(new_generation) {
     }
 
     // this phase includes: beginSelectionProcess(), selectParentsForReproduction()
-    let potential_parents = await beginSelectionProcess(organisms); // maybe don't await here
+    let potential_parents = await beginSelectionProcess(organisms, average_fitness); // maybe don't await here
 
     let potential_mothers = potential_parents['potential_mothers'];
     let potential_fathers = potential_parents['potential_fathers'];
