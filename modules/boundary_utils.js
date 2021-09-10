@@ -471,6 +471,7 @@ class Boundary {
         this.calcDistanceToGoalCheckpoints();
     }
 
+    // maybe this shouldn't be a class method of boundary...
     getFarthestCheckpointReached(organisms) {
         // !!!!! consider passing the previous gen's farthest checkpoint reached as a minimum-value !!!!!
     
@@ -555,6 +556,7 @@ class Boundary {
         }
     }
 
+    // maybe this shouldn't be a class method either
     checkPulse(organisms) {
 
         let deceased_organisms = [];

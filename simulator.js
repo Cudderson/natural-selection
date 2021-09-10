@@ -1010,12 +1010,27 @@ function getShortestDistanceToNextCheckpoint(next_checkpoint, organisms) {
     let shortest_distance_to_checkpoint = 10000;
     let closest_organism;
 
+    // BUG: when next_checkpoint === 'goal', we get coordinates error
+    // my fix:
+    // [] *** CHECK WHEN PROVEN WORKING ***
+    let next_checkpoint_x;
+    let next_checkpoint_y;
+
+    if (next_checkpoint === 'goal') {
+        next_checkpoint_x = simGlobals.GOAL_X_POS_BOUNDS;
+        next_checkpoint_y = simGlobals.GOAL_Y_POS_BOUNDS;
+    }
+    else {
+        next_checkpoint_x = simGlobals.custom_boundary.checkpoints[next_checkpoint].coordinates[0];
+        next_checkpoint_y = simGlobals.custom_boundary.checkpoints[next_checkpoint].coordinates[1];
+    }
+
     // calculate distance to closest checkpoint not yet reached
     for (let i = 0; i < organisms.length; i++) {
-        // in future, make sure organism is alive before calculating its distance !!!!!!! (or remove deceased organisms from array)
+
         // distance^2 = a^2 + b^2
-        let horizontal_distance_squared = (organisms[i].x - simGlobals.custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2;
-        let vertical_distance_squared = (organisms[i].y - simGlobals.custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2;
+        let horizontal_distance_squared = (organisms[i].x - next_checkpoint_x) ** 2;
+        let vertical_distance_squared = (organisms[i].y - next_checkpoint_y) ** 2;
         let distance_to_checkpoint_squared = horizontal_distance_squared + vertical_distance_squared;
 
         organisms[i].distance_to_next_checkpoint = Math.sqrt(distance_to_checkpoint_squared);
@@ -1024,10 +1039,10 @@ function getShortestDistanceToNextCheckpoint(next_checkpoint, organisms) {
 
         if (organisms[i].distance_to_next_checkpoint < shortest_distance_to_checkpoint) {
             shortest_distance_to_checkpoint = organisms[i].distance_to_next_checkpoint;
-            closest_organism = organisms[i]; // return only index if works better
+            closest_organism = organisms[i];
         }
     }
-    // we should have each organism's distance the closest checkpoint not yet reached.
+    // we should have each organism's distance to the closest checkpoint not yet reached.
     return closest_organism;
 }
 
