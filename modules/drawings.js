@@ -1,34 +1,27 @@
 // ===== drawings for simulator.js =====
-function drawSimulationSettings(opacity, content) {
+function drawSimulationSettings(opacity) {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.font = "30px Cairo";
     ctx.fillText("Simulation Settings", 300, 195);
-    ctx.fillRect(300, 197, 260, 1);
+    ctx.fillRect(300, 197, 245, 1);
 
     ctx.font = "24px Cairo";
     ctx.fillText(`Initial Population:`, 300, 250);
-    ctx.fillText(`Gene Count:`, 300, 290);
-    ctx.fillText(`Movement Speed:`, 300, 330);
-    ctx.fillText(`Mutation Rate:`, 300, 370);
+    ctx.fillText(`Movement Speed:`, 300, 290);
+    ctx.fillText(`Mutation Rate:`, 300, 330);
+    ctx.fillText("Resilience", 300, 370);
     ctx.fillText(`Dialogue:`, 300, 410);
     
-    // ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    // ctx.fillText(`${simGlobals.TOTAL_ORGANISMS}`, 600, 250);
-    // ctx.fillText(`${simGlobals.GENE_COUNT}`, 600, 290);
-    // ctx.fillText(`${simGlobals.MAX_GENE}`, 600, 330);
-    // ctx.fillText(`${simGlobals.MUTATION_RATE}`, 600, 370);
-
-    // testing content (still need resilience incorporation)
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(`${content.total_organisms}`, 600, 250);
-    ctx.fillText(`${content.gene_count}`, 600, 290);
-    ctx.fillText(`${content.movement_speed}`, 600, 330);
-    ctx.fillText(`${content.mutation_rate}`, 600, 370);
+    ctx.fillText(`${simGlobals.TOTAL_ORGANISMS}`, 600, 250);
+    ctx.fillText(`${simGlobals.MAX_GENE}`, 600, 290);
+    ctx.fillText(`${simGlobals.MUTATION_RATE}`, 600, 330);
+    ctx.fillText(`${simGlobals.RESILIENCE}`, 600, 370);
 
-    if (content.dialogue === false) {
+    if (simGlobals.dialogue === false) {
         ctx.fillText(`Disabled`, 600, 410);
     }
     else {
@@ -45,18 +38,30 @@ function drawSimulationIntro(opacity) {
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.font = '22px Roboto';
-    ctx.fillText("This society of organisms needs to reach the goal if it wants to survive.", 150, 330);
+    ctx.fillText("This species of organisms needs to reach the goal if it wants to survive.", 150, 330);
 }
 
 function drawFakeGoal(opacity) {
-    ctx.clearRect(500, 50, 20, 20);
+    // make dynamic to sim type
+    if (simGlobals.sim_type === 'classic') {
+        ctx.clearRect(500, 50, 20, 20);
     
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillRect(500, 50, 20, 20);
+        ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+        ctx.fillRect(500, 50, 20, 20);
+    }
+    else {
+        ctx.clearRect(925, 50, 20, 20);
+
+        ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+        ctx.fillRect(925, 50, 20, 20);
+    }
+
 }
 
-// cannot be animated right now
+// for boundary creation
 function drawFakeGoalBounds() {
+    ctx.clearRect(925, 50, 20, 20);
+
     ctx.fillStyle = `rgba(155, 245, 0, 1)`;
     ctx.fillRect(925, 50, 20, 20);
 }
@@ -81,8 +86,18 @@ function drawExplanationAndGoal(opacity) {
     ctx.fillText("until they succeed or fail to survive.", 350, 350);
 
     // fake goal
-    ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillRect(500, 50, 20, 20);
+    if (simGlobals.sim_type === 'classic') {
+        ctx.clearRect(500, 50, 20, 20);
+    
+        ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+        ctx.fillRect(500, 50, 20, 20);
+    }
+    else {
+        ctx.clearRect(925, 50, 20, 20);
+
+        ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
+        ctx.fillRect(925, 50, 20, 20);
+    }
 }
 
 // may need to be updated for resilience
@@ -354,11 +369,6 @@ function drawDeceasedOrganisms(opacity, deceased_organisms) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let i = 0; i < deceased_organisms.length; i++) {
-        // ctx.fillStyle = 'black';
-        // ctx.beginPath();
-        // ctx.arc(simGlobals.deceased_organisms[i].x, simGlobals.deceased_organisms[i].y, simGlobals.deceased_organisms[i].radius, 0, Math.PI*2, false);
-        // ctx.fill();
-
         ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
         ctx.beginPath();
         ctx.arc(deceased_organisms[i].x, deceased_organisms[i].y, deceased_organisms[i].radius, 0, Math.PI*2, false);
@@ -397,9 +407,9 @@ function drawCrossoverDescriptionText(opacity) {
 
     var description = "Genes of the selected parent couples are combined to create new offspring.";
 
-    ctx.font = "20px Cairo";
+    ctx.font = "26px Cairo";
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.fillText(description, 200, 300);
+    ctx.fillText(description, 100, 325);
 }
 
 // phase module
@@ -434,13 +444,13 @@ function drawMutationDescriptionText(opacity) {
     var description = "To maintain genetic diversity, a small percentage of random genes are mutated";
     var mutation_rate_text = `Mutation Rate: ${(simGlobals.MUTATION_RATE * 100).toFixed(2)}%`.toString();
 
-    ctx.font = "20px Cairo";
+    ctx.font = "24px Cairo";
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.fillText(description, 190, 300);
+    ctx.fillText(description, 100, 300);
 
-    ctx.font = "22px Cairo";
+    ctx.font = "24px Cairo";
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(mutation_rate_text, 420, 350);
+    ctx.fillText(mutation_rate_text, 410, 350);
 }
 
 // phase module
@@ -469,7 +479,6 @@ function drawCreateNewGenPhaseEntryText(opacity, old_opacity) {
     ctx2.fillText("Create New Generation", 10, 30);
 } 
 
-// still need to pas gen count here
 function drawGenerationSummaryText(opacity, gen_summary_stats) {
     let generation_summary_text = `Generation ${gen_summary_stats.generation_count} Summary:`;
     let generation_average_fitness_preface = 'Average Fitness:';
@@ -511,6 +520,13 @@ function drawCreateNewGenPhaseExitText(opacity, old_opacity) {
 // =====
 // below are boundary drawings (mostly) just in case want to make another module
 // =====
+
+function drawHiddenBoundary() {
+    // hidden box to contain organisms going-off canvas
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.fillRect(-12, 420, 20, 200);
+    ctx.fillRect(-20, 592, 200, 20);
+}
 
 function drawBoundaryBoilerplate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -641,8 +657,13 @@ function drawBoundaryCreationIntroductionOne() {
 
     ctx.font = '26px Roboto';
     ctx.fillStyle = 'rgb(148, 0, 211)';
-    ctx.fillText("Using your mouse or touchpad, you will draw walls to create your", 130, 310);
-    ctx.fillText("own path to the goal for your species of organisms to travel", 158, 345);
+    ctx.fillText("Using your mouse or touchpad, you will draw walls to create your", 130, 290);
+    ctx.fillText("own path to the goal for your species of organisms to travel", 158, 325);
+
+    // warn user that boundary is potentially deadly
+    ctx.font = '20px Roboto';
+    ctx.fillStyle = 'rgb(232, 0, 118, 1)';
+    ctx.fillText("(Be cautious, organisms that touch your boundary may not survive!)", 210, 370);
 
     ctx.font = '26px Cairo';
     ctx.fillStyle = "rgb(155, 245, 0)";
@@ -745,33 +766,30 @@ function drawBoundary(opacity) {
 }
 
 // win/lose scenarios
-// still need to pass generation_count from caller
 function drawSuccessMessage(opacity, generation_count) {
 
+    ctx.clearRect(270, 240, 430, 300);
+
+    // backdrop
+    ctx.fillStyle = `rgba(10, 10, 10, .75)`;
+    ctx.fillRect(225, 200, 540, 325);
+
     ctx.font = '44px Cairo';
-    ctx.fillStyle = 'black';
-    ctx.fillText("Your Simulation Succeeded!", 235, 275);
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText("Your Simulation Succeeded!", 235, 275);
+    ctx.fillText("Simulation Success!", 315, 275);
 
     ctx.font = '30px Cairo';
-    ctx.fillStyle = 'black';
-    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(`Generations: ${generation_count}`, 420, 340);
+    ctx.fillText(`Generations: ${generation_count}`, 370, 340);
 
     ctx.font = '26px Cairo';
-    ctx.fillStyle = 'black';
-    ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
     ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-    ctx.fillText("Press 'ENTER' to Resume Simulation", 300, 410);
+    ctx.fillText("Press 'Enter' to Resume Simulation", 300, 440);
+    ctx.fillText("Press 'Q' to Quit", 410, 480);
 
-    ctx.font = '26px Cairo';
-    ctx.fillStyle = 'black';
-    ctx.fillText("Press 'Q' to Quit", 420, 450);
-    ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-    ctx.fillText("Press 'Q' to Quit", 420, 450);
-
+    // line divider
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillRect(275, 295, 440, 3);
 }
 
 function redrawOrganisms() {
@@ -784,31 +802,27 @@ function redrawOrganisms() {
     }
 }
 
-// untested (needs work)
-function drawExtinctionMessage() {
-    // clears
-    ctx.fillStyle = 'black';
+function drawExtinctionMessage(opacity) {
+    ctx.clearRect(200, 180, 565, 300);
 
-    ctx.font = '50px Cairo';
-    ctx.fillText("Simulation Failed", 310, 250);
+    // backdrop
+    ctx.fillStyle = `rgba(10, 10, 10, .75)`;
+    ctx.fillRect(160, 150, 660, 340);
 
-    ctx.font = "30px Roboto";
-    ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
-
-    ctx.font = '22px Cairo';
-    ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
-
-    // animations
     ctx.font = '50px Cairo';
     ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
-    ctx.fillText("Simulation Failed", 310, 250);
+    ctx.fillText("Simulation Failed", 310, 230);
 
-    ctx.font = "22px Roboto";
-    ctx.fillText("Press 'Q' to exit the simulation.", 350, 425);
+    // red divider lines
+    ctx.fillRect(250, 250, 480, 3);
+    ctx.fillRect(250, 385, 480, 3);
+
+    ctx.font = "24px Cairo";
+    ctx.fillText("Press 'Q' to exit the simulation.", 340, 440);
 
     ctx.font = "30px Cairo";
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.fillText("Your species of organisms has gone extinct.", 225, 350);
+    ctx.fillText("Your species of organisms has gone extinct.", 220, 325);
 }
 
 function updateSuccessfulOrganism(organism) {
@@ -834,7 +848,7 @@ function highlightClassicSimType() {
     // clear rects
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'black';
-    ctx.fillRect(70, 120, 870, 450);
+    ctx.fillRect(70, 120, 875, 450);
 
     // redraw 'classic' border highlighted
     ctx.strokeStyle = 'rgb(155, 245, 0)';
@@ -896,7 +910,7 @@ function highlightBoundarySimType() {
     // clear rects
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'black';
-    ctx.fillRect(70, 120, 870, 450);
+    ctx.fillRect(70, 120, 875, 450);
 
     // redraw 'boundary' border highlighted
     ctx.strokeStyle = 'rgb(155, 245, 0)';
@@ -1013,10 +1027,15 @@ function prepareToRunSimulation() {
     document.getElementsByClassName("setting-submit")[0].style.display = 'none';
 
     ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font = '50px Cairo';
-    ctx.fillText("Simulation Ready", 300, 270);
+    ctx.font = '55px Cairo';
+    ctx.fillText("Simulation Ready", 300, 300);
+
     ctx.font = '28px Cairo'
-    ctx.fillText("Press 'Run Simulation'", 350, 400);
+    ctx.fillText("Press 'Run Simulation'", 365, 360);
+
+    // draw thin line between text
+    ctx.fillStyle = 'rgb(148, 0, 211)';
+    ctx.fillRect(250, 320, 500, 3);
 }
 
 function drawGoal(goal) {
@@ -1040,6 +1059,9 @@ function drawFinalBoundary(final_boundary) {
     ctx.beginPath();
     ctx.arc(80, 510, 12, 0, Math.PI*2, false);
     ctx.fill();
+
+    // draw hidden boundary to prevent organisms escaping canvas
+    drawHiddenBoundary();
 }
 
 export {
@@ -1073,4 +1095,5 @@ export {
     drawGoal, drawFinalBoundary,
     drawBottomBoundaryEndpointsRed, drawTopBoundaryEndpointsRed,
     drawBottomBoundaryGatesAndConnectorsGreen, drawTopBoundaryGatesAndConnectorsGreen,
+    drawHiddenBoundary,
 }

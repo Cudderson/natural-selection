@@ -49,15 +49,15 @@ window.ctx2 = canvas2.getContext("2d");
 // ===================
 
 class Organism {
-    constructor (gender, x, y, ctx) {
+    constructor (gender, x, y) {
         this.gender = gender;
         this.x = x;
         this.y = y;
-        this.radius = 5; // always the same
+        this.radius = 5;
         this.index = 0;
         this.genes = [];
         this.distance_to_goal; // for normal and boundary sim types
-        this.distance_to_next_checkpoint; //for boundary sim type
+        this.distance_to_next_checkpoint; //for boundary sim type only
         this.fitness;
         this.reached_goal = false;
         // for boundary animations
@@ -92,6 +92,8 @@ class Organism {
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2, false);
         ctx.fill();
     }
+
+    // ** maybe these calc functions shouldn't be class methods? **
 
     calcDistanceToGoal() {
         // c**2 = a**2 + b**2
@@ -528,7 +530,13 @@ function createNewBoundary() {
         canvas.removeEventListener('mouseup', validateBoundaryConnection);
 
         // set global sim settings
+
+        // turn back on when done testing checkpoints
         SettingsUtils.configureSettings();
+
+        // testing checkpoints
+        // new_boundary.drawCheckpoints();
+
     }, {once: true});
 }
 
@@ -553,25 +561,18 @@ async function runPreSimAnimations() {
         skip_btn.innerHTML = 'Skipping...';
     }, {once: true});
 
-    let pre_sim_stats = {};
-
-    // these will probably be global, won't need to grab like this
-    // pre_sim_stats.total_organisms = document.getElementById("total-organisms").value;
-    // pre_sim_stats.gene_count = document.getElementById("gene-count").value;
-    // pre_sim_stats.movement_speed = document.getElementById("move-speed").value;
-    // pre_sim_stats.mutation_rate = document.getElementById("mutation-rate").value;
-    // pre_sim_stats.dialogue = document.getElementById("dialogue-checkbox").checked;
-
     if (!skip) {
-        await paintbrush.fadeIn(Drawings.drawSimulationSettings, .01, pre_sim_stats);
+        await paintbrush.fadeIn(Drawings.drawSimulationSettings, .01);
         await sleep(2000);
-        await paintbrush.fadeOut(Drawings.drawSimulationSettings, .02, pre_sim_stats);
+        await paintbrush.fadeOut(Drawings.drawSimulationSettings, .02);
     }
 
     if (!skip) {
         await paintbrush.fadeIn(Drawings.drawSimulationIntro, .01);
         await sleep(2000);
-        await paintbrush.fadeIn(Drawings.drawFakeGoal, .01); // *** this will need to be changed for boundary sims
+
+        await paintbrush.fadeIn(Drawings.drawFakeGoal, .01);
+
         await paintbrush.fadeOut(Drawings.drawSimulationIntro, .02);
     }
 
@@ -586,6 +587,7 @@ async function runPreSimAnimations() {
     skip_btn.style.display = 'none';
 
     // add content for drawStats()
+    let pre_sim_stats = {};
     pre_sim_stats.generation_count = 0;
     pre_sim_stats.average_fitness = '0.00';
     pre_sim_stats.organism_count = document.getElementById("total-organisms").value;
@@ -593,11 +595,11 @@ async function runPreSimAnimations() {
     await paintbrush.fadeIn(Drawings.drawStats, .02, pre_sim_stats);
     await sleep(500);
 
-    // maybe this should be moved to next function (skip intro would then trigger this)
     if (simGlobals.dialogue) {
         await paintbrush.fadeIn(Drawings.drawPhases, .02);
         await sleep(500);
         await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .02);
+        await paintbrush.fadeIn(Drawings.drawFakeGoal, .02);
     }
 
     return new Promise(resolve => {
@@ -800,9 +802,10 @@ function createOrganisms () {
 // updateAndMove() functions will not be converted to module (complex animations)
 // updateAndMove() not converted var >> let yet
 
+// === NEW ===
 function updateAndMoveOrganismsBounds(organisms) {
     return new Promise(resolve => {
-
+        // consider var >> let
         var canvas2_data = ctx2.getImageData(0, 0, canvas.width, canvas.height);
 
         var finished = false;
@@ -810,52 +813,53 @@ function updateAndMoveOrganismsBounds(organisms) {
         var total_moves = 0;
         let frame_id;
 
+        let success_flag = false;
+
         function animateOrganisms() {
-
             if (!finished) {
-                if (total_moves >= simGlobals.GENE_COUNT * organisms.length) {
-                    finished = true;
-                }
-                else {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                    // (FOR TESTING) draw checkpoints
-                    // drawCheckpoints();
+                for (let i = 0; i < organisms.length; i++) {
+                    if (organisms[i].is_alive) {
+                        if (organisms[i].reached_goal === false) {
 
-                    for (let i = 0; i < organisms.length; i++) {
-                        if (organisms[i].is_alive) {
-
+                            // get pixel data
                             position_rgba = getPixelXY(canvas2_data, organisms[i].x, organisms[i].y);
 
-                            if (position_rgba[0] === 155 && position_rgba[1] === 245) { // consider only checking one value for performance
+                            // check if touching green pixel
+                            if (position_rgba[0] === 155 && position_rgba[1] === 245) {
 
-                                let survived = Math.random() < simGlobals.RESILIENCE;
-
-                                if (survived) {
-                                    // instead of update and move, move organism to inverse of last movement, update index
-
-                                    // get inverse of last gene
-                                    let inverse_x_gene = (organisms[i].genes[organisms[i].index - 1][0]) * -1;
-                                    let inverse_y_gene = (organisms[i].genes[organisms[i].index - 1][1]) * -1;
-
-                                    // update
-                                    organisms[i].x += inverse_x_gene;
-                                    organisms[i].y += inverse_y_gene;
-
-                                    // increase index
-                                    organisms[i].index++;
-
-                                    // move
-                                    organisms[i].move();
+                                // check if touching goal
+                                if (organisms[i].x >= simGlobals.GOAL_X_POS_BOUNDS) {
+                                    hasReachedGoalBounds(organisms[i]);
                                 }
+                                // if touching green pixel that isn't goal, organism is touching boundary
                                 else {
-                                    organisms[i].is_alive = false;
-                                    // ctx.fillStyle = 'red';
-                                    // changing deceased color to gray (mother pink is too close)
-                                    ctx.fillStyle = '#333';
-                                    ctx.beginPath();
-                                    ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-                                    ctx.fill();
+                                    let survived = Math.random() < simGlobals.RESILIENCE;
+
+                                    if (survived) {
+                                        // instead of update and move, move organism to inverse of last movement, update index
+
+                                        // get inverse of last gene
+                                        let inverse_x_gene = (organisms[i].genes[organisms[i].index - 1][0]) * -1;
+                                        let inverse_y_gene = (organisms[i].genes[organisms[i].index - 1][1]) * -1;
+
+                                        // update
+                                        organisms[i].x += inverse_x_gene;
+                                        organisms[i].y += inverse_y_gene;
+                                        organisms[i].index++;
+
+                                        // move
+                                        organisms[i].move();
+                                    }
+                                    else {
+                                        // draw organism deceased
+                                        organisms[i].is_alive = false;
+                                        ctx.fillStyle = '#444';
+                                        ctx.beginPath();
+                                        ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+                                        ctx.fill();
+                                    }
                                 }
                             }
                             else {
@@ -864,25 +868,35 @@ function updateAndMoveOrganismsBounds(organisms) {
                             }
                         }
                         else {
-                            // draw deceased organism
-                            ctx.fillStyle = '#333';
-                            ctx.beginPath();
-                            ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
-                            ctx.fill();
+                            // update successful organism
+                            // set success flag to true 
+                            Drawings.updateSuccessfulOrganism(organisms[i]);
+                            success_flag = true;
                         }
-                        total_moves++;
                     }
-
+                    else {
+                        // draw deceased organism
+                        organisms[i].is_alive = false;
+                        ctx.fillStyle = '#444';
+                        ctx.beginPath();
+                        ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
+                        ctx.fill();
+                    }
+                    total_moves++;
                 }
+
+                // move to top if not working
+                if (total_moves >= simGlobals.GENE_COUNT * organisms.length) {
+                    finished = true;
+                }
+
                 sleep(1000 / simGlobals.FPS); // looks smoother without fps
                 frame_id = requestAnimationFrame(animateOrganisms);
             }
-
             else {
                 //resolve
                 cancelAnimationFrame(frame_id);
-                // ======! resolving 'false' until success logic implemented !======
-                resolve(false);
+                resolve(success_flag);
             }
         }
         requestAnimationFrame(animateOrganisms);
@@ -902,10 +916,10 @@ function updateAndMoveOrganisms(organisms, goal) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 for (let i = 0; i < organisms.length; i++) {
-                    if (organisms[i].reached_goal == false) {
+                    if (!organisms[i].reached_goal) {
                         organisms[i].update();
                         organisms[i].move();
-                        hasReachedGoal(organisms[i], goal);
+                        hasReachedGoal(organisms[i], goal); // maybe this could be conditionally called to reduce load
                     }
                     else {
                         Drawings.updateSuccessfulOrganism(organisms[i]);
@@ -930,6 +944,8 @@ function updateAndMoveOrganisms(organisms, goal) {
     })
 }
 
+// should these hasReached() functions be class methods?
+
 function hasReachedGoal(organism, goal) {
     // check if within y-range 
     if ((organism.y - (organism.radius / 2)) >= goal.y && (organism.y - (organism.radius / 2)) <= (goal.y + goal.size)) {
@@ -941,7 +957,17 @@ function hasReachedGoal(organism, goal) {
     }
 }
 
-// not converted var >> let yet
+function hasReachedGoalBounds(organism) {
+    // check if within y-range 
+    if ((organism.y - (organism.radius / 2)) >= simGlobals.GOAL_Y_POS_BOUNDS && (organism.y - (organism.radius / 2)) <= (simGlobals.GOAL_Y_POS_BOUNDS + 20)) {
+        // check if within x-range
+        if ((organism.x - (organism.radius / 2)) >= simGlobals.GOAL_X_POS_BOUNDS && (organism.x - (organism.radius / 2)) <= (simGlobals.GOAL_X_POS_BOUNDS + 20)) {
+            // organism reached goal
+            organism.reached_goal = true;
+        }
+    }
+}
+
 async function runEvaluationAnimation(organisms, stats) {
 
     // need to draw goal at location depending on sim type
@@ -964,12 +990,12 @@ async function runEvaluationAnimation(organisms, stats) {
         Drawings.drawStatsStatic(ctx, stats);
 
         if (stats.generation_count === 0 && !simGlobals.dialogue) {
-            await paintbrush.fadeIn(Drawings.drawBoundary, .01);
+            await paintbrush.fadeIn(Drawings.drawBoundary, .015);
             ctx2.globalAlpha = 1;
         }
 
         if (simGlobals.dialogue) {
-            await paintbrush.fadeIn(Drawings.drawBoundary, .01);
+            await paintbrush.fadeIn(Drawings.drawBoundary, .015);
             ctx2.globalAlpha = 1;
 
             // clear canvas1 and redraw eval text and stats on canvas2
@@ -984,13 +1010,15 @@ async function runEvaluationAnimation(organisms, stats) {
         var success_flag = await updateAndMoveOrganismsBounds(organisms);
     }
 
+    // should probably just say resolve(success_flag)
     return new Promise((resolve, reject) => {
-        if (success_flag) {
-            resolve(true);
-        }
-        else {
-            resolve(false);
-        }
+        // if (success_flag) {
+        //     resolve(true);
+        // }
+        // else {
+        //     resolve(false);
+        // }
+        resolve(success_flag);
     })
 }
 
@@ -1017,24 +1045,39 @@ function getShortestDistanceToNextCheckpoint(next_checkpoint, organisms) {
     let shortest_distance_to_checkpoint = 10000;
     let closest_organism;
 
+    // BUG: when next_checkpoint === 'goal', we get coordinates error
+    // my fix:
+    // [] *** CHECK WHEN PROVEN WORKING ***
+    let next_checkpoint_x;
+    let next_checkpoint_y;
+
+    if (next_checkpoint === 'goal') {
+        next_checkpoint_x = simGlobals.GOAL_X_POS_BOUNDS;
+        next_checkpoint_y = simGlobals.GOAL_Y_POS_BOUNDS;
+    }
+    else {
+        next_checkpoint_x = simGlobals.custom_boundary.checkpoints[next_checkpoint].coordinates[0];
+        next_checkpoint_y = simGlobals.custom_boundary.checkpoints[next_checkpoint].coordinates[1];
+    }
+
     // calculate distance to closest checkpoint not yet reached
     for (let i = 0; i < organisms.length; i++) {
-        // in future, make sure organism is alive before calculating its distance !!!!!!! (or remove deceased organisms from array)
+
         // distance^2 = a^2 + b^2
-        let horizontal_distance_squared = (organisms[i].x - simGlobals.custom_boundary.checkpoints[next_checkpoint].coordinates[0]) ** 2;
-        let vertical_distance_squared = (organisms[i].y - simGlobals.custom_boundary.checkpoints[next_checkpoint].coordinates[1]) ** 2;
+        let horizontal_distance_squared = (organisms[i].x - next_checkpoint_x) ** 2;
+        let vertical_distance_squared = (organisms[i].y - next_checkpoint_y) ** 2;
         let distance_to_checkpoint_squared = horizontal_distance_squared + vertical_distance_squared;
 
         organisms[i].distance_to_next_checkpoint = Math.sqrt(distance_to_checkpoint_squared);
-        console.log("Distance to next-closest checkpoint for organism " + i + ":");
-        console.log(organisms[i].distance_to_next_checkpoint);
+        // console.log("Distance to next-closest checkpoint for organism " + i + ":");
+        // console.log(organisms[i].distance_to_next_checkpoint);
 
         if (organisms[i].distance_to_next_checkpoint < shortest_distance_to_checkpoint) {
             shortest_distance_to_checkpoint = organisms[i].distance_to_next_checkpoint;
-            closest_organism = organisms[i]; // return only index if works better
+            closest_organism = organisms[i];
         }
     }
-    // we should have each organism's distance the closest checkpoint not yet reached.
+    // we should have each organism's distance to the closest checkpoint not yet reached.
     return closest_organism;
 }
 
@@ -1098,19 +1141,55 @@ async function evaluatePopulation(organisms) {
 // ===== SELECTION =====
 // =====================
 
-function beginSelectionProcess(organisms) {
+function beginSelectionProcess(organisms, average_fitness) {
+
+    // *** I want to reduce the array sizes created by this algorithm.
+    // When fitness scores increase, organisms are added to the array thousands of times.
+    // Moreso, maybe I just want to add the organism's index to the array, rather than the entire organism
+
+    // My initial idea is to use (fitness * 100) ** 2, which is the current formula, until average fitness reaches a certain threshold, and then convert to
+    // (fitness * 10) ^ 2 to keep array sizes down. (.99 * 10 = 9.9 //  9.9 ** 2 = 98.01)
+
+    // The reason I can't use (fitness * 10) ** 2 right away is because the organisms' fitness scores will be too low to create selection bias
+    // - with (fitness * 10) ** 2, organisms with fitness <= .1 will all have the same selection chance.
+
+    // when fitness = .1, our current formula adds organisms 100 times.
+    // maybe the threshold should be .1
+    // that's a good place to start
+
+    // GOAL:
+    // - Use a selection formula based on the average fitness of the population.
+    // - when average fitness < .1, use ((fitness * 100) ** 2)
+    // - when average fitness > .1, use ((fitness * 10)  ** 2) 
+
+    // we need:
+    // average_fitness
+
+    // start here
+    let selection_factor;
+
+    if (average_fitness < .1) {
+        selection_factor = 100;
+    }
+    else {
+        selection_factor = 10;
+    }
+    console.log(`average fitness: ${average_fitness}, factor: ${selection_factor}`);
+
     // fill array with candidates for reproduction
     let potential_mothers = [];
     let potential_fathers = [];
 
     for (let i = 0; i < organisms.length; i++) {
         // Give organisms with negative fitness a chance to reproduce
-        if (organisms[i].fitness < 0) {
-            organisms[i].fitness = 0.01;
-        }
+        // if (organisms[i].fitness < 0) {
+        //     organisms[i].fitness = 0.01;
+        // }
 
-        // I'm going to try this implementation >> (organism.fitness * 100) ** 1.25
-        for (let j = 0; j < Math.ceil((organisms[i].fitness * 100) ** 2); j++) {
+        // TEST
+        // - give organisms with below-average fitness only 1 array spot
+        // - organisms with fitness greater than average will be given proper selection bias
+        if (organisms[i].fitness < average_fitness) {
             if (organisms[i].gender === 'female') {
                 potential_mothers.push(organisms[i]);
             }
@@ -1118,8 +1197,19 @@ function beginSelectionProcess(organisms) {
                 potential_fathers.push(organisms[i]);
             }
         }
-        // console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
-        // console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * 100) ** 2)} times.`);
+        else {
+            for (let j = 0; j < Math.ceil((organisms[i].fitness * selection_factor) ** 2); j++) {
+                if (organisms[i].gender === 'female') {
+                    potential_mothers.push(organisms[i]);
+                }
+                else if (organisms[i].gender === 'male') {
+                    potential_fathers.push(organisms[i]);
+                }
+            }
+        }
+
+        console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
+        console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * selection_factor) ** 2)} times.`);
     }
 
     let potential_parents = {
@@ -1177,15 +1267,14 @@ async function runClosestOrganismAnimations (closest_organism) {
     paintbrush.subject = closest_organism;
 
     // highlight most-fit organism 
-    for (let i = 0; i <= 2; i++) {
-        await paintbrush.fadeIn(Drawings.drawClosestOrganismNatural, .04);
-        await paintbrush.fadeIn(Drawings.drawClosestOrganismHighlighted, .04);
-    }
-    await sleep(1000);
+    await paintbrush.fadeIn(Drawings.drawClosestOrganismHighlighted, .03);
+    await paintbrush.fadeIn(Drawings.drawClosestOrganismNatural, .03);
+    await paintbrush.fadeIn(Drawings.drawClosestOrganismHighlighted, .03);
+    await sleep(200);
 
     // fade out text, return organism to natural color
-    await paintbrush.fadeOut(Drawings.drawClosestOrganismText, .02);
-    await paintbrush.fadeIn(Drawings.drawClosestOrganismNatural, .04);
+    await paintbrush.fadeIn(Drawings.drawClosestOrganismNatural, .02);
+    await paintbrush.fadeOut(Drawings.drawClosestOrganismText, .04);
 
     // done drawing closet organism
     paintbrush.subject = null;
@@ -1201,33 +1290,32 @@ async function runChosenParentsAnimations(parents, organisms) {
     paintbrush.subject = parents;
 
     // highlight mothers
-    await paintbrush.fadeIn(Drawings.drawMothersText, .02);
+    await paintbrush.fadeIn(Drawings.drawMothersText, .04);
+    await sleep(500);
 
-    for (let i = 0; i <= 2; i++) {
-        await paintbrush.fadeIn(Drawings.drawMothersHighlighted, .03);
-        await paintbrush.fadeIn(Drawings.drawMothersNatural, .03);
-    }
+    await paintbrush.fadeIn(Drawings.drawMothersHighlighted, .03);
+    await paintbrush.fadeIn(Drawings.drawMothersNatural, .03);
+    await paintbrush.fadeIn(Drawings.drawMothersHighlighted, .03);
+    await sleep(500);
 
     // highlight fathers
-    await paintbrush.fadeIn(Drawings.drawFathersText, .02);
+    await paintbrush.fadeIn(Drawings.drawFathersText, .04);
+    await sleep(500);
 
-    for (let i = 0; i <= 2; i++) {
-        await paintbrush.fadeIn(Drawings.drawFathersHighlighted, .03);
-        await paintbrush.fadeIn(Drawings.drawFathersNatural, .03);
-    }
-    await sleep(1000);
+    await paintbrush.fadeIn(Drawings.drawFathersHighlighted, .03);
+    await paintbrush.fadeIn(Drawings.drawFathersNatural, .03);
+    await paintbrush.fadeIn(Drawings.drawFathersHighlighted, .03);
+    await sleep(500);
 
     // highlight all
-    await paintbrush.fadeIn(Drawings.drawMothersHighlighted, .03);
-    await paintbrush.fadeIn(Drawings.drawFathersHighlighted, .03);
-    await paintbrush.fadeIn(Drawings.drawNotChosenText, .02);
+    await paintbrush.fadeIn(Drawings.drawNotChosenText, .03);
     await sleep(1000); 
 
     // fade out all
-    await paintbrush.fadeOut(Drawings.drawAllSelectedOrganismsText, .02);
-    await paintbrush.fadeIn(Drawings.drawBothParentTypesNatural, .02);
+    await paintbrush.fadeOut(Drawings.drawAllSelectedOrganismsText, .04);
+    await paintbrush.fadeIn(Drawings.drawBothParentTypesNatural, .04);
     await paintbrush.fadeOut(Drawings.drawOrganisms, .02, organisms);
-    await sleep(1000);
+    await sleep(200);
 
     // done with parents
     paintbrush.subject = null;
@@ -1252,7 +1340,7 @@ async function runSelectionAnimations(closest_organism, parents, organisms) {
         Drawings.drawStaticSelectionPhaseText(ctx);
 
         // fade out boundary and reset globalAlpha
-        await paintbrush.fadeOut(Drawings.drawBoundary, .01);
+        await paintbrush.fadeOut(Drawings.drawBoundary, .02);
         ctx2.globalAlpha = 1;
 
         // next, we should erase the drawing on canvas1 and redraw on canvas2 (all working)
@@ -1412,7 +1500,12 @@ async function handleSuccessfulSimDecision() {
     console.log("Key Accepted: " + key_pressed);
 
     await paintbrush.fadeOut(Drawings.drawSuccessMessage, .05);
-    Drawings.redrawOrganisms(); // not tested yet (could try using rAF for one frame to ensure user sees?)
+
+    // this breaks:
+    // drawings.js:353 Uncaught TypeError: Cannot read properties of null (reading 'length')
+    // at drawOrganisms (drawings.js:353)
+    // at drawFrame (simulator.js:160)
+    await paintbrush.fadeIn(Drawings.drawOrganisms, .9); // not tested yet (could try using rAF for one frame to ensure user sees?)
 
     if (key_pressed === 'Enter') {
         console.log("Continuing Simulation.");
@@ -1604,7 +1697,7 @@ async function runGeneration(new_generation) {
     // for drawStats()
     let stats = {
         'organism_count': organisms.length,
-        'average_fitness': new_generation.average_fitness,
+        'average_fitness': new_generation.average_fitness.toFixed(2),
         'generation_count': new_generation.generation_count,
     }
 
@@ -1614,9 +1707,9 @@ async function runGeneration(new_generation) {
 
     if (stats.generation_count != 0) {
         if (simGlobals.dialogue) {
-            await paintbrush.fadeIn(Drawings.drawStats, .02, stats);
+            await paintbrush.fadeIn(Drawings.drawStats, .04, stats);
+            await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .04);
             await sleep(500);
-            await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .02);
         }
         else {
             // untested
@@ -1643,18 +1736,18 @@ async function runGeneration(new_generation) {
 
             // give user time to see their win
             await sleep(1500);
-            await paintbrush.fadeIn(Drawings.drawSuccessMessage, .02); // untested
+            await paintbrush.fadeIn(Drawings.drawSuccessMessage, .02, new_generation.generation_count); // [] untested
 
             // untested
-            handleSuccessfulSimDecision();            
+            await handleSuccessfulSimDecision();            
         }
     }
 
     if (simGlobals.dialogue) {
-        await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseExitText, .02);
+        await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseExitText, .01);
 
-        await paintbrush.fadeOut(Drawings.drawStats, .015, stats); // put here to fade out stats before average fitness updated
-        await sleep(1000);
+        await paintbrush.fadeOut(Drawings.drawStats, .02, stats); // put here to fade out stats before average fitness updated
+        // await sleep(1000);
     }
 
     // store length of organisms array before deceased organisms filtered out for reproduction (boundary sims)
@@ -1691,7 +1784,7 @@ async function runGeneration(new_generation) {
 
         // here, we set checkpoints[i].distance_to_goal 
         // should this only be done on iteration #1???
-        // calcDistanceToGoalCheckpoints(); turning off to make sure sure initially
+        // calcDistanceToGoalCheckpoints(); turning off to make sure initially
 
         // get previous, current, and next checkpoints for current generation
         let checkpoint_data = simGlobals.custom_boundary.getFarthestCheckpointReached(organisms);
@@ -1702,7 +1795,14 @@ async function runGeneration(new_generation) {
 
         // distance_to_goal = distance_to_next_checkpoint + next_checkpoint.distance_to_goal
         // 'next' will give us the index in the checkpoints array of the checkpoint we want to measure from
-        let remaining_distance = simGlobals.custom_boundary.checkpoints[checkpoint_data['next']].distance_to_goal;
+        let remaining_distance; 
+
+        if (checkpoint_data['next'] === 'goal') {
+            remaining_distance = 0;
+        }
+        else {
+            remaining_distance = simGlobals.custom_boundary.checkpoints[checkpoint_data['next']].distance_to_goal;
+        }
 
         console.log(remaining_distance);
 
@@ -1717,11 +1817,11 @@ async function runGeneration(new_generation) {
 
     // PHASE: SELECT MOST-FIT INDIVIDUALS
     if (simGlobals.dialogue) {
-        await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseEntryText, .02);
+        await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseEntryText, .03);
     }
 
     // this phase includes: beginSelectionProcess(), selectParentsForReproduction()
-    let potential_parents = await beginSelectionProcess(organisms); // maybe don't await here
+    let potential_parents = await beginSelectionProcess(organisms, average_fitness); // maybe don't await here
 
     let potential_mothers = potential_parents['potential_mothers'];
     let potential_fathers = potential_parents['potential_fathers'];
@@ -1755,10 +1855,10 @@ async function runGeneration(new_generation) {
         organisms = organisms.concat(deceased_organisms);
     }
     
-    if (simGlobals.dialogue) {
+    if (simGlobals.dialogue) { // here
         await runSelectionAnimations(closest_organism, parents, organisms);
 
-        await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseExitText, .01);
+        await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseExitText, .02);
     }
     else {
         console.log(organisms);
@@ -1792,6 +1892,7 @@ async function runGeneration(new_generation) {
         let gen_summary_stats = {
             'offspring_organisms': offspring_organisms,
             'average_fitness': average_fitness,
+            'generation_count': new_generation.generation_count,
         }
 
         await runNewGenAnimations(gen_summary_stats);
@@ -1820,7 +1921,6 @@ async function runSimulation () {
 
     // hide start/settings buttons
     document.getElementsByClassName("run-btn")[0].style.display = 'none';
-    // document.getElementsByClassName("setting-submit")[0].style.display = 'none'; // i believe this is already turned off by this point?
 
     // display stop simulation button & add its listener
     let stop_sim_btn = document.getElementsByClassName("stop-btn")[0];
@@ -1832,12 +1932,7 @@ async function runSimulation () {
     }, {once: true});
 
     console.log("Running Simulation with these settings:");
-    console.log(`Total Organisms: ${simGlobals.TOTAL_ORGANISMS}`);
-    console.log(`Gene Count: ${simGlobals.GENE_COUNT}`);
-    console.log(`Resilience: ${simGlobals.RESILIENCE}`);
-    console.log(`Mutation Rate: ${simGlobals.MUTATION_RATE}`);
-    console.log(`Min/Max Gene: [${simGlobals.MIN_GENE}, ${simGlobals.MAX_GENE}]`);
-    console.log(`Dialogue: ${simGlobals.dialogue}`);
+    console.log(simGlobals);
 
     // pre-sim animations
     await runPreSimAnimations();
