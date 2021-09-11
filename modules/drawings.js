@@ -521,6 +521,13 @@ function drawCreateNewGenPhaseExitText(opacity, old_opacity) {
 // below are boundary drawings (mostly) just in case want to make another module
 // =====
 
+function drawHiddenBoundary() {
+    // hidden box to contain organisms going-off canvas
+    ctx.fillStyle = 'rgb(155, 245, 0)';
+    ctx.fillRect(-12, 420, 20, 200);
+    ctx.fillRect(-20, 592, 200, 20);
+}
+
 function drawBoundaryBoilerplate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -1052,6 +1059,9 @@ function drawFinalBoundary(final_boundary) {
     ctx.beginPath();
     ctx.arc(80, 510, 12, 0, Math.PI*2, false);
     ctx.fill();
+
+    // draw hidden boundary to prevent organisms escaping canvas
+    drawHiddenBoundary();
 }
 
 export {
@@ -1085,4 +1095,5 @@ export {
     drawGoal, drawFinalBoundary,
     drawBottomBoundaryEndpointsRed, drawTopBoundaryEndpointsRed,
     drawBottomBoundaryGatesAndConnectorsGreen, drawTopBoundaryGatesAndConnectorsGreen,
+    drawHiddenBoundary,
 }

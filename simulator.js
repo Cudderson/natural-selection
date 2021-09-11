@@ -1,6 +1,4 @@
-// document.addEventListener("DOMContentLoaded", playTitleScreenAnimation, {once: true});
-document.addEventListener("DOMContentLoaded", Drawings.drawSuccessMessage);
-
+document.addEventListener("DOMContentLoaded", playTitleScreenAnimation, {once: true});
 
 import * as Drawings from "./modules/drawings.js";
 import * as BoundaryUtils from "./modules/boundary_utils.js";
