@@ -1,4 +1,6 @@
-document.addEventListener("DOMContentLoaded", playTitleScreenAnimation, {once: true});
+// document.addEventListener("DOMContentLoaded", playTitleScreenAnimation, {once: true});
+document.addEventListener("DOMContentLoaded", Drawings.drawSuccessMessage);
+
 
 import * as Drawings from "./modules/drawings.js";
 import * as BoundaryUtils from "./modules/boundary_utils.js";
@@ -1736,7 +1738,7 @@ async function runGeneration(new_generation) {
 
             // give user time to see their win
             await sleep(1500);
-            await paintbrush.fadeIn(Drawings.drawSuccessMessage, .02); // untested
+            await paintbrush.fadeIn(Drawings.drawSuccessMessage, .02, new_generation.generation_count); // [] untested
 
             // untested
             await handleSuccessfulSimDecision();            

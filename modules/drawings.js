@@ -760,7 +760,12 @@ function drawBoundary(opacity) {
 
 // win/lose scenarios
 function drawSuccessMessage(opacity, generation_count) {
+
     ctx.clearRect(270, 240, 430, 300);
+
+    // backdrop
+    ctx.fillStyle = `rgba(10, 10, 10, .75)`;
+    ctx.fillRect(225, 200, 540, 325);
 
     ctx.font = '44px Cairo';
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
@@ -768,7 +773,7 @@ function drawSuccessMessage(opacity, generation_count) {
 
     ctx.font = '30px Cairo';
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(`Generations: ${generation_count}`, 410, 340);
+    ctx.fillText(`Generations: ${generation_count}`, 370, 340);
 
     ctx.font = '26px Cairo';
     ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
@@ -793,6 +798,10 @@ function redrawOrganisms() {
 function drawExtinctionMessage(opacity) {
     ctx.clearRect(200, 180, 565, 300);
 
+    // backdrop
+    ctx.fillStyle = `rgba(10, 10, 10, .75)`;
+    ctx.fillRect(160, 150, 660, 340);
+
     ctx.font = '50px Cairo';
     ctx.fillStyle = `rgba(232, 0, 118, ${opacity})`;
     ctx.fillText("Simulation Failed", 310, 230);
@@ -806,7 +815,7 @@ function drawExtinctionMessage(opacity) {
 
     ctx.font = "30px Cairo";
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.fillText("Your species of organisms has gone extinct.", 215, 325);
+    ctx.fillText("Your species of organisms has gone extinct.", 220, 325);
 }
 
 function updateSuccessfulOrganism(organism) {
