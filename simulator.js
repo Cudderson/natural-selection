@@ -1,10 +1,9 @@
 document.addEventListener("DOMContentLoaded", playTitleScreenAnimation, {once: true});
 
 import * as Drawings from "./modules/drawings.js";
+import * as BoundaryDrawings from "./modules/boundary_drawings.js"
 import * as BoundaryUtils from "./modules/boundary_utils.js";
 import * as SettingsUtils from "./modules/settings_utils.js";
-
-// ===== vars =====
 
 window.simGlobals = {
     // spawn/goal coordinates for both sim types
@@ -254,7 +253,7 @@ function applyInitialBoundaryStyles() {
     document.getElementsByClassName("canvas-container")[0].style.display = 'block';
     document.getElementsByClassName("settings-container")[0].style.display = 'none';
 
-    Drawings.drawBoundaryBoilerplate();
+    BoundaryDrawings.drawBoundaryBoilerplate();
 
     // hide buttons
     // document.getElementsByClassName("setting-submit")[0].style.display = 'none'; I believe setting-submit already display=none
@@ -296,10 +295,10 @@ function createNewBoundary() {
 
     applyInitialBoundaryStyles();
 
-    Drawings.drawBoundaryDrawingHelpText("Step 1");
+    BoundaryDrawings.drawBoundaryDrawingHelpText("Step 1");
 
     // draw bottom-boundary connectors red
-    Drawings.drawBottomBoundaryEndpointsRed();
+    BoundaryDrawings.drawBottomBoundaryEndpointsRed();
 
     function draw(event) {
         if (event.buttons !== 1 || !allowed_to_draw) {
@@ -324,7 +323,7 @@ function createNewBoundary() {
                 allowed_to_draw = false;
                 
                 // reset step
-                Drawings.drawBoundaryValidationScreen(new_boundary.top_boundary);
+                BoundaryDrawings.drawBoundaryValidationScreen(new_boundary.top_boundary);
                 return;
             }
             ctx.strokeStyle = 'white';
@@ -414,22 +413,22 @@ function createNewBoundary() {
                 // could make own function for this condition
                 if (bottom_boundary_is_valid) {
 
-                    Drawings.drawBottomBoundaryGatesAndConnectorsGreen();
+                    BoundaryDrawings.drawBottomBoundaryGatesAndConnectorsGreen();
 
                     // update step and store boundary
                     new_boundary.save('bottom');
                     boundary_step = "top-boundary";
-                    Drawings.drawBoundaryDrawingHelpText("Step 2");
-                    Drawings.drawTopBoundaryEndpointsRed();
+                    BoundaryDrawings.drawBoundaryDrawingHelpText("Step 2");
+                    BoundaryDrawings.drawTopBoundaryEndpointsRed();
                 }
                 else {
                     // erase bottom-boundary coords when illegal line drawn
                     new_boundary.bottom_boundary_coordinates = [];
 
                     // redraw boilerplate & help text
-                    Drawings.drawBoundaryBoilerplate();
-                    Drawings.drawBoundaryDrawingHelpText("Step 1");
-                    Drawings.drawBottomBoundaryEndpointsRed();
+                    BoundaryDrawings.drawBoundaryBoilerplate();
+                    BoundaryDrawings.drawBoundaryDrawingHelpText("Step 1");
+                    BoundaryDrawings.drawBottomBoundaryEndpointsRed();
                 }
             }
             else if (boundary_step === "top-boundary") {
@@ -438,7 +437,7 @@ function createNewBoundary() {
                 // could make own function for this condition
                 if (top_boundary_is_valid) {
 
-                    Drawings.drawTopBoundaryGatesAndConnectorsGreen();
+                    BoundaryDrawings.drawTopBoundaryGatesAndConnectorsGreen();
 
                     // draw white dot for next step
                     ctx.fillStyle = 'white';
@@ -456,20 +455,20 @@ function createNewBoundary() {
                     boundary_step = 'full-boundary';
 
                     // draw next-step text 
-                    Drawings.drawBoundaryValidationHelpText();
+                    BoundaryDrawings.drawBoundaryValidationHelpText();
                 }
                 else {
                     // reset top boundary coords when illegal line drawn
                     new_boundary.top_boundary_coordinates = [];
 
                     // redraw boilerplate and help text (erases illegal user-drawn line)
-                    Drawings.drawBoundaryBoilerplate();
+                    BoundaryDrawings.drawBoundaryBoilerplate();
 
                     // draw valid bottom-boundary
                     ctx.drawImage(new_boundary.bottom_boundary, 0, 0, canvas.width, canvas.height);
 
-                    Drawings.drawBoundaryDrawingHelpText("Step 2");
-                    Drawings.drawTopBoundaryEndpointsRed();
+                    BoundaryDrawings.drawBoundaryDrawingHelpText("Step 2");
+                    BoundaryDrawings.drawTopBoundaryEndpointsRed();
                 }
             }
             else if (boundary_step === 'full-boundary') {
@@ -486,14 +485,14 @@ function createNewBoundary() {
                     ctx.fillRect(925, 50, 20, 20);
 
                     // should display help text on bottom-left area
-                    Drawings.drawBoundaryCompletionHelpText();
+                    BoundaryDrawings.drawBoundaryCompletionHelpText();
 
                     // display button to proceed, hide 'back' btn
                     document.getElementsByClassName("save-boundaries-btn")[0].style.display = 'block';
                     document.getElementsByClassName("stop-btn")[0].style.display = 'none';
                 }
                 else {
-                    Drawings.drawBoundaryValidationScreen(new_boundary.top_boundary);
+                    BoundaryDrawings.drawBoundaryValidationScreen(new_boundary.top_boundary);
                 }
             }
         }
@@ -512,7 +511,7 @@ function createNewBoundary() {
         console.log("Saving Custom Boundaries");
 
         // draw Boundary as it will appear in simulation
-        Drawings.drawFinalBoundary(new_boundary.top_boundary);
+        BoundaryDrawings.drawFinalBoundary(new_boundary.top_boundary);
 
         // save full boundary
         new_boundary.save('full');
@@ -691,7 +690,7 @@ function turnOnBoundaryIntroductionOneListeners() {
     next_btn.addEventListener('click', function continueIntroduction() {
 
         // go to next screen
-        Drawings.drawBoundaryCreationIntroductionTwo();
+        BoundaryDrawings.drawBoundaryCreationIntroductionTwo();
         turnOnBoundaryIntroductionTwoListeners();
 
     }, {once: true});
@@ -700,7 +699,7 @@ function turnOnBoundaryIntroductionOneListeners() {
         if (event.key === 'Enter') {
 
             // go to next screen
-            Drawings.drawBoundaryCreationIntroductionTwo();
+            BoundaryDrawings.drawBoundaryCreationIntroductionTwo();
             turnOnBoundaryIntroductionTwoListeners();
         
         }
@@ -754,7 +753,7 @@ async function applySimType() {
     }
     else if (simGlobals.sim_type === 'boundary') {
         // user must create boundary before settings configuration
-        Drawings.drawBoundaryCreationIntroductionOne();
+        BoundaryDrawings.drawBoundaryCreationIntroductionOne();
         turnOnBoundaryIntroductionOneListeners();
     }
 }
@@ -990,12 +989,12 @@ async function runEvaluationAnimation(organisms, stats) {
         Drawings.drawStatsStatic(ctx, stats);
 
         if (stats.generation_count === 0 && !simGlobals.dialogue) {
-            await paintbrush.fadeIn(Drawings.drawBoundary, .015);
+            await paintbrush.fadeIn(BoundaryDrawings.drawBoundary, .015);
             ctx2.globalAlpha = 1;
         }
 
         if (simGlobals.dialogue) {
-            await paintbrush.fadeIn(Drawings.drawBoundary, .015);
+            await paintbrush.fadeIn(BoundaryDrawings.drawBoundary, .015);
             ctx2.globalAlpha = 1;
 
             // clear canvas1 and redraw eval text and stats on canvas2
@@ -1340,7 +1339,7 @@ async function runSelectionAnimations(closest_organism, parents, organisms) {
         Drawings.drawStaticSelectionPhaseText(ctx);
 
         // fade out boundary and reset globalAlpha
-        await paintbrush.fadeOut(Drawings.drawBoundary, .02);
+        await paintbrush.fadeOut(BoundaryDrawings.drawBoundary, .02);
         ctx2.globalAlpha = 1;
 
         // next, we should erase the drawing on canvas1 and redraw on canvas2 (all working)

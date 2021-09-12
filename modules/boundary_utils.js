@@ -1,7 +1,5 @@
 // This module will hold all things boundary-related (besides drawing functions)
 
-// import { drawSimulationSettings } from "./drawings";
-
 class Boundary {
     constructor() {
         this.top_boundary = new Image();
