@@ -33,7 +33,8 @@ function drawBoundaryBoilerplate() {
     ctx.closePath();
 
     // placeholder goal
-    drawFakeGoalBounds();
+    ctx.fillStyle = `rgba(155, 245, 0, 1)`;
+    ctx.fillRect(925, 50, 20, 20);
 
     // draw instructions zones (no-draw zones)
     ctx.lineWidth = 4;
@@ -141,7 +142,6 @@ function drawBoundaryCreationIntroductionOne() {
 } 
 
 function drawBoundaryCreationIntroductionTwo() {
-
     drawBoundaryBoilerplate();
 
     ctx.fillStyle = 'rgb(148, 0, 211)';
@@ -160,7 +160,7 @@ function drawBoundaryCreationIntroductionTwo() {
 
 function drawBoundaryDrawingHelpText(step) {
     ctx.fillStyle = 'rgb(155, 245, 0)';
-    ctx.font= "24px Cairo";
+    ctx.font = "24px Cairo";
     ctx.fillText(step, 80, 40);
 
     ctx.font = '18px Cairo';
@@ -253,13 +253,6 @@ function drawHiddenBoundary() {
     ctx.fillStyle = 'rgb(155, 245, 0)';
     ctx.fillRect(-12, 420, 20, 200);
     ctx.fillRect(-20, 592, 200, 20);
-}
-
-function drawFakeGoalBounds() {
-    ctx.clearRect(925, 50, 20, 20);
-
-    ctx.fillStyle = `rgba(155, 245, 0, 1)`;
-    ctx.fillRect(925, 50, 20, 20);
 }
 
 export {

@@ -229,7 +229,6 @@ function drawSimulationIntro(opacity) {
     ctx.fillText("This species of organisms needs to reach the goal if it wants to survive.", 150, 330);
 }
 
-// check why this can't be used where drawFakeGoalBounds can
 function drawFakeGoal(opacity) {
     if (simGlobals.sim_type === 'classic') {
         ctx.clearRect(500, 50, 20, 20);
@@ -260,7 +259,7 @@ function drawExplanationAndGoal(opacity) {
     drawFakeGoal(opacity);
 }
 
-// should maybe deprecate this
+// draws goal on canvas2 with full-opacity
 function drawGoal(goal) {
     ctx2.fillStyle = 'rgba(155, 245, 0, 1)';
     ctx2.fillRect(goal.x, goal.y, goal.size, goal.size);

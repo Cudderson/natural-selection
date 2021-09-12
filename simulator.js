@@ -598,8 +598,9 @@ async function runPreSimAnimations() {
         await paintbrush.fadeIn(Drawings.drawPhases, .02);
         await sleep(500);
         await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .02);
-        await paintbrush.fadeIn(Drawings.drawFakeGoal, .02);
     }
+
+    await paintbrush.fadeIn(Drawings.drawFakeGoal, .02);
 
     return new Promise(resolve => {
         resolve("pre-sim animations complete!");
@@ -902,7 +903,7 @@ function updateAndMoveOrganismsBounds(organisms) {
     })
 }
 
-function updateAndMoveOrganisms(organisms, goal) {
+function updateAndMoveOrganisms(organisms) {
     return new Promise(resolve => {
         let total_moves = 0;
         let finished = false;
@@ -918,7 +919,7 @@ function updateAndMoveOrganisms(organisms, goal) {
                     if (!organisms[i].reached_goal) {
                         organisms[i].update();
                         organisms[i].move();
-                        hasReachedGoal(organisms[i], goal); // maybe this could be conditionally called to reduce load
+                        hasReachedGoal(organisms[i]); // maybe this could be conditionally called to reduce load
                     }
                     else {
                         Drawings.updateSuccessfulOrganism(organisms[i]);
@@ -945,11 +946,11 @@ function updateAndMoveOrganisms(organisms, goal) {
 
 // should these hasReached() functions be class methods?
 
-function hasReachedGoal(organism, goal) {
+function hasReachedGoal(organism) {
     // check if within y-range 
-    if ((organism.y - (organism.radius / 2)) >= goal.y && (organism.y - (organism.radius / 2)) <= (goal.y + goal.size)) {
+    if ((organism.y - (organism.radius / 2)) >= simGlobals.GOAL_Y_POS && (organism.y - (organism.radius / 2)) <= (simGlobals.GOAL_Y_POS + 20)) {
         // check if within x-range
-        if ((organism.x - (organism.radius / 2)) >= goal.x && (organism.x - (organism.radius / 2)) <= (goal.x + goal.size)) {
+        if ((organism.x - (organism.radius / 2)) >= simGlobals.GOAL_X_POS && (organism.x - (organism.radius / 2)) <= (simGlobals.GOAL_X_POS + 20)) {
             // organism reached goal
             organism.reached_goal = true;
         }
@@ -971,10 +972,10 @@ async function runEvaluationAnimation(organisms, stats) {
 
     // need to draw goal at location depending on sim type
     if (simGlobals.sim_type === 'classic') {
-        let goal = new Goal(simGlobals.GOAL_X_POS, simGlobals.GOAL_Y_POS, 20);
-        // draw goal on canvas2 (consider fade-in goal on dialogue sims?)
-        Drawings.drawGoal(goal);
-        var success_flag = await updateAndMoveOrganisms(organisms, goal); // still pass in goal for .hasReachedGoal()
+        // draw goal on canvas2
+        Drawings.drawGoal(new Goal(simGlobals.GOAL_X_POS, simGlobals.GOAL_Y_POS, 20));
+
+        var success_flag = await updateAndMoveOrganisms(organisms);
     }
     else if (simGlobals.sim_type === 'boundary') {
         // *** this is super messy ***
@@ -1005,18 +1006,10 @@ async function runEvaluationAnimation(organisms, stats) {
         ctx.clearRect(700, 510, 350, 120);
         Drawings.drawStatsStatic(ctx2, stats);
 
-        // var goal = new Goal(GOAL_X_POS_BOUNDS, GOAL_Y_POS_BOUNDS, 20, ctx); not sure if needed (goal saved in boundary drawing)
         var success_flag = await updateAndMoveOrganismsBounds(organisms);
     }
 
-    // should probably just say resolve(success_flag)
     return new Promise((resolve, reject) => {
-        // if (success_flag) {
-        //     resolve(true);
-        // }
-        // else {
-        //     resolve(false);
-        // }
         resolve(success_flag);
     })
 }
