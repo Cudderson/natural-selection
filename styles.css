@@ -6,8 +6,6 @@
     --custom-green: rgba(155, 245, 0, 1);
 }
 
-/* 0, 146, 255 === new father blue */
-
 html {
     font-family: 'Cairo', 'Roboto', sans-serif;
     font-family: 'Roboto', sans-serif;
@@ -36,10 +34,12 @@ button {
     z-index: -1;
 }
 
+/* images */
 #logo, #press-start, #classic-example, #boundary-example {
     display: none;
 }
 
+/* containers */
 .canvas-container, .btn-container, .settings-container {
     margin: 0 auto;
     width: 1000px;
@@ -49,6 +49,7 @@ button {
     position: relative;
 }
 
+/* settings */
 .settings-container {
     display: none;
     margin-bottom: .25rem;
@@ -67,7 +68,6 @@ button {
     display: grid;
     grid-template-columns: 3fr 1fr;
     grid-template-rows: 1fr repeat(10, .7fr);
-    /* row-gap: 10px; */
 }
 
 .settings-header {
@@ -75,7 +75,6 @@ button {
     display: block;
     margin-bottom: 1.2rem;
     font-size: 30px;
-    /* color: var(--custom-green); */
     color: var(--darkviolet);
 }
 
@@ -89,7 +88,8 @@ button {
 .movement-setting-label,
 .mutation-setting-label,
 .growth-setting-label,
-.resilience-setting-label {
+.resilience-setting-label,
+.dialogue-setting-span {
     grid-column: 1 / 2;
     font-size: 24px;
     font-family: 'Cairo';
@@ -108,10 +108,6 @@ button {
 
 .dialogue-setting-span {
     display: block;
-    grid-column: 1 / 2;
-    font-size: 24px;
-    font-family: 'Cairo';
-    color: var(--custom-green);
 }
 
 .dialogue-container {
@@ -190,7 +186,7 @@ button {
     user-select: none;
   }
   
-  /* Hide the browser default checkbox */
+  /* hide browser default checkbox */
   .dialogue-setting-label input {
     position: absolute;
     opacity: 0;
@@ -199,7 +195,7 @@ button {
     width: 0;
   }
   
-  /* Create a custom checkbox */
+  /* create a custom checkbox */
   .checkmark {
     position: absolute;
     top: 0;
@@ -211,7 +207,7 @@ button {
     background-color: black;
   }
   
-  /* On mouse-over, add darkgray background color */
+  /* on mouse-over, add darkgray background color */
   .dialogue-setting-label:hover input ~ .checkmark {
     background-color: #222;
   }
@@ -228,7 +224,7 @@ button {
     display: none;
   }
   
-  /* Show the checkmark when checked */
+  /* show checkmark when checked */
   .dialogue-setting-label input:checked ~ .checkmark:after {
     display: block;
   }
@@ -247,6 +243,7 @@ button {
   }
 /* end custom checkbox */
 
+/* buttons */
 .btn-container {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -265,7 +262,6 @@ button {
 }
 
 .start-btn {
-    /* display: inline-block; */
     grid-column: 2 / 3;
     margin: 0 auto;
     background-color: var(--custom-green);
@@ -298,7 +294,6 @@ button {
 }
 
 .run-btn {
-    /* display: inline-block; */
     display: none;
     grid-column: 2 / 3;
     margin: 0 auto;
@@ -339,14 +334,12 @@ button {
 .save-boundaries-btn {
     display: none;
     grid-column: 2 / 3;
-    /* width: 75%; */
-    background-color: var(--custom-green);
     border: none;
+    background-color: var(--custom-green);
     font-size: 20px;
     transition: .25s;
 }
 
-/* combine these hover effects at end */
 .save-boundaries-btn:hover {
     background-color: var(--darkviolet);
     color: var(--custom-green);
@@ -356,9 +349,9 @@ button {
 .skip-btn {
     display: none;
     grid-column: 2 / 3;
-    background-color: var(--darkviolet);
     border: none;
     border-radius: 2px;
+    background-color: var(--darkviolet);
     transition: .25s;
     font-size: 18px;
 }
