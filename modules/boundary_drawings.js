@@ -7,7 +7,6 @@ function drawBoundaryBoilerplate() {
     // top
     ctx.fillRect(820, 0, 20, 50);
     ctx.fillRect(950, 160, 50, 20);
-
     // bottom
     ctx.fillRect(0, 420, 50, 20);
     ctx.fillRect(160, 550, 20, 50);
@@ -18,7 +17,6 @@ function drawBoundaryBoilerplate() {
     ctx.arc(830, 50, 10, 0, Math.PI*2, false);
     ctx.fill();
     ctx.closePath();
-
     ctx.beginPath();
     ctx.arc(50, 430, 10, 0, Math.PI*2, false);
     ctx.fill();
@@ -29,7 +27,6 @@ function drawBoundaryBoilerplate() {
     ctx.arc(170, 550, 10, 0, Math.PI*2, false);
     ctx.fill();
     ctx.closePath();
-
     ctx.beginPath();
     ctx.arc(950, 170, 10, 0, Math.PI*2, false);
     ctx.fill();
@@ -120,7 +117,6 @@ function drawBoundaryCreationIntroductionOne() {
     ctx.fillRect(0, 0, 300, 200);
     ctx.fillRect(720, 420, 300, 200);
 
-    // introduction
     ctx.font = '50px Cairo';
     ctx.fillStyle = "rgb(155, 245, 0)";
     ctx.fillText("Create Your Boundary", 270, 180);
@@ -130,7 +126,6 @@ function drawBoundaryCreationIntroductionOne() {
     ctx.fillText("Using your mouse or touchpad, you will draw walls to create your", 130, 290);
     ctx.fillText("own path to the goal for your species of organisms to travel", 158, 325);
 
-    // warn user that boundary is potentially deadly
     ctx.font = '20px Roboto';
     ctx.fillStyle = 'rgb(232, 0, 118, 1)';
     ctx.fillText("(Be cautious, organisms that touch your boundary may not survive!)", 210, 370);
@@ -149,7 +144,6 @@ function drawBoundaryCreationIntroductionTwo() {
 
     drawBoundaryBoilerplate();
 
-    // show user where organisms spawn
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.font = "18px Cairo";
     ctx.fillText("Spawn", 54, 537);
@@ -165,7 +159,6 @@ function drawBoundaryCreationIntroductionTwo() {
 }
 
 function drawBoundaryDrawingHelpText(step) {
-
     ctx.fillStyle = 'rgb(155, 245, 0)';
     ctx.font= "24px Cairo";
     ctx.fillText(step, 80, 40);
@@ -204,7 +197,6 @@ function drawBoundaryValidationScreen(boundary) {
 }
 
 function drawBoundaryCompletionHelpText() {
-    // remove upper-right text area
     ctx.clearRect(0, 0, 251, 156);
 
     // redraw bottom-left text area

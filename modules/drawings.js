@@ -39,10 +39,8 @@ function highlightClassicSimType() {
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.fillText("Boundary", 680, 430);
 
-    // === descriptions ===
-    // redraw 'classic; description highlighted
+    // redraw classic description highlighted
     ctx.font = "20px Roboto";
-    // ctx.fillStyle = 'rgb(155, 245, 0)'; might look better in purple
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.fillText("Configure your own species of organisms", 70, 480);
     ctx.fillText("and watch them attempt to reach the goal", 70, 505);
@@ -107,10 +105,8 @@ function highlightBoundarySimType() {
     ctx.drawImage(classic_example, 135, 150, 225, 225);
     ctx.drawImage(boundary_example, 635, 150, 225, 225); 
 
-    // === descriptions ===
     // redraw boundary description highlighted
     ctx.font = "20px Roboto";
-    // ctx.fillStyle = 'rgb(155, 245, 0)'; might look better in purple
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.fillText("Create your own path and watch your species", 550, 480);
     ctx.fillText("of organisms attempt to reach the goal and", 550, 505);
@@ -124,7 +120,6 @@ function highlightBoundarySimType() {
 }
 
 function drawInitialSimSelectionScreen() {
-    // let's get the dimensions of my screenshots (300x300 needed)
     let classic_example = document.getElementById("classic-example");
     let boundary_example = document.getElementById("boundary-example");
 
@@ -132,20 +127,16 @@ function drawInitialSimSelectionScreen() {
     let start_btn = document.getElementsByClassName("start-btn")[0];
     start_btn.style.display = 'none';
 
-    // ctx.fillStyle = 'black';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // show sim-type buttons 
     document.getElementsByClassName("sim-type-classic")[0].style.display = "block";
     document.getElementsByClassName("sim-type-boundary")[0].style.display = "block";
 
-    // ===== rebuilding sim selection screen =====
-
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.font = '50px Cairo';
     ctx.fillText("Select Simulation Type", 255, 80);
 
-    // let user know how to navigate
     ctx.font = '20px Roboto';
     ctx.fillText("(use mouse or arrow keys + enter to select)", 305, 110);
 
@@ -153,19 +144,16 @@ function drawInitialSimSelectionScreen() {
     ctx.fillText("Classic", 190, 430);
     ctx.fillText("Boundary", 680, 430);
 
-    // we now want to write some descriptions below each sim type
-    // (these will be highlighted same as image and text)
+    // descriptions
     ctx.font = "20px Roboto";
     ctx.fillStyle = "#333";
 
     // Classic
-    // Configure your own species of organisms and watch them attempt to reach the goal over generations of natural selection
     ctx.fillText("Configure your own species of organisms", 70, 480);
     ctx.fillText("and watch them attempt to reach the goal", 70, 505);
     ctx.fillText("over generations of natural selection", 85, 530);
 
     // Boundary
-    // Create your own path and watch your species of organisms attempt to reach the goal and survive while avoiding your boundary
     ctx.fillText("Create your own path and watch your species", 550, 480);
     ctx.fillText("of organisms attempt to reach the goal and", 550, 505);
     ctx.fillText("survive while avoiding your boundary", 590, 530);
@@ -178,16 +166,12 @@ function drawInitialSimSelectionScreen() {
     ctx.strokeRect(135, 150, 225, 225);
     ctx.strokeRect(635, 150, 225, 225);
 
-    // for now, we'll use the same images, and simply replace them with the new ones at the end
-    // We want to probably shrink the images a bit to allow for description text beneath
-    // [] maybe round corners too? 
     ctx.drawImage(classic_example, 135, 150, 225, 225);
     ctx.drawImage(boundary_example, 635, 150, 225, 225);
 }
 
 // === PRE SIM ===
 function prepareToRunSimulation() {
-    // clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     document.getElementsByClassName("setting-submit")[0].style.display = 'none';
@@ -199,13 +183,12 @@ function prepareToRunSimulation() {
     ctx.font = '28px Cairo'
     ctx.fillText("Press 'Run Simulation'", 365, 360);
 
-    // draw thin line between text
+    // thin line between text
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.fillRect(250, 320, 500, 3);
 }
 
 function drawSimulationSettings(opacity) {
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
@@ -246,8 +229,8 @@ function drawSimulationIntro(opacity) {
     ctx.fillText("This species of organisms needs to reach the goal if it wants to survive.", 150, 330);
 }
 
+// check why this can't be used where drawFakeGoalBounds can
 function drawFakeGoal(opacity) {
-    // make dynamic to sim type
     if (simGlobals.sim_type === 'classic') {
         ctx.clearRect(500, 50, 20, 20);
     
@@ -260,7 +243,6 @@ function drawFakeGoal(opacity) {
         ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
         ctx.fillRect(925, 50, 20, 20);
     }
-
 }
 
 function drawSimulationExplanation(opacity) {
@@ -274,29 +256,11 @@ function drawSimulationExplanation(opacity) {
 }
 
 function drawExplanationAndGoal(opacity) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
-    ctx.font = '22px Roboto';
-    ctx.fillText("Using a genetic algorithm based on natural selection, these organisms will undergo", 125, 290);
-    ctx.fillText("generations of reproduction, evaluation, selection, gene crossover and mutation,", 125, 320);
-    ctx.fillText("until they succeed or fail to survive.", 350, 350);
-
-    // fake goal
-    if (simGlobals.sim_type === 'classic') {
-        ctx.clearRect(500, 50, 20, 20);
-    
-        ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-        ctx.fillRect(500, 50, 20, 20);
-    }
-    else {
-        ctx.clearRect(925, 50, 20, 20);
-
-        ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-        ctx.fillRect(925, 50, 20, 20);
-    }
+    drawSimulationExplanation(opacity);
+    drawFakeGoal(opacity);
 }
 
+// should maybe deprecate this
 function drawGoal(goal) {
     ctx2.fillStyle = 'rgba(155, 245, 0, 1)';
     ctx2.fillRect(goal.x, goal.y, goal.size, goal.size);
@@ -546,7 +510,6 @@ function drawOrganisms(opacity, organisms) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let i = 0; i < organisms.length; i++) {
-
         ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
         ctx.beginPath();
         ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
@@ -555,8 +518,6 @@ function drawOrganisms(opacity, organisms) {
 }
 
 function drawDeceasedOrganisms(opacity, deceased_organisms) {
-
-    // test just clearing the rect
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let i = 0; i < deceased_organisms.length; i++) {
@@ -594,7 +555,7 @@ function drawCrossoverPhaseEntryText(opacity, old_opacity) {
 function drawCrossoverDescriptionText(opacity) {
     ctx.clearRect(75, 275, 950, 150);
 
-    var description = "Genes of the selected parent couples are combined to create new offspring.";
+    let description = "Genes of the selected parent couples are combined to create new offspring.";
 
     ctx.font = "26px Cairo";
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
@@ -703,7 +664,6 @@ function drawCreateNewGenPhaseExitText(opacity, old_opacity) {
 
 // WIN/LOSE
 function drawSuccessMessage(opacity, generation_count) {
-
     ctx.clearRect(270, 240, 430, 300);
 
     // backdrop
@@ -732,7 +692,6 @@ function redrawOrganisms(organisms) {
     ctx.fillStyle = 'black';
     ctx.clearRect(235, 231, 550, 235);
 
-    // redraw organisms
     for (let i = 0; i < organisms.length; i++) {
         organisms[i].move();
     }
