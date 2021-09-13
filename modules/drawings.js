@@ -171,7 +171,7 @@ function drawInitialSimSelectionScreen() {
 }
 
 // === PRE SIM ===
-function prepareToRunSimulation() {
+function drawSimReadyScreen() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     document.getElementsByClassName("setting-submit")[0].style.display = 'none';
@@ -504,7 +504,6 @@ function drawBothParentTypesNatural(opacity) {
 }
 
 // similar to redrawOrganisms(), but this function accepts an opacity value to allow fading
-// used in multiple places
 function drawOrganisms(opacity, organisms) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -661,7 +660,7 @@ function drawCreateNewGenPhaseExitText(opacity, old_opacity) {
     ctx2.fillText("Create New Generation", 10, 30);
 }
 
-// WIN/LOSE
+// === WIN/LOSE ===
 function drawSuccessMessage(opacity, generation_count) {
     ctx.clearRect(270, 240, 430, 300);
 
@@ -747,7 +746,7 @@ export {
     redrawOrganisms, drawStaticEvaluationPhaseText,
     updateSuccessfulOrganism, highlightClassicSimType,
     highlightBoundarySimType, drawInitialSimSelectionScreen,
-    prepareToRunSimulation, drawPhases,
+    drawSimReadyScreen, drawPhases,
     drawDeceasedOrganisms, drawStaticSelectionPhaseText,
     drawStatsStatic, drawGoal,
 }
