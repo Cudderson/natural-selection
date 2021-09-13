@@ -284,8 +284,6 @@ function createNewBoundary() {
     // instantiate class Boundary instance
     var new_boundary = new BoundaryUtils.Boundary();
 
-    new_boundary.testClassMethod(); // works
-
     // drawing flag and step tracker
     var allowed_to_draw = false; // could be method of Paintbrush
     var boundary_step = "bottom-boundary"; // could be attribute of Boundary? idk..
@@ -528,13 +526,11 @@ function createNewBoundary() {
         canvas.removeEventListener('mousemove', draw);
         canvas.removeEventListener('mouseup', validateBoundaryConnection);
 
-        // set global sim settings
-
-        // turn back on when done testing checkpoints
+        // initiate settings configuration
         SettingsUtils.configureSettings();
 
         // testing checkpoints
-        // new_boundary.drawCheckpoints();
+        // BoundaryDrawings.drawCheckpoints();
 
     }, {once: true});
 }
@@ -1772,11 +1768,7 @@ async function runGeneration(new_generation) {
         console.log(`after checkPulse(): ${organisms.length}`);
 
         // draw checkpoints for reference
-        // simGlobals.custom_boundary.drawCheckpoints();
-
-        // here, we set checkpoints[i].distance_to_goal 
-        // should this only be done on iteration #1???
-        // calcDistanceToGoalCheckpoints(); turning off to make sure initially
+        // BoundaryDrawings.drawCheckpoints();
 
         // get previous, current, and next checkpoints for current generation
         let checkpoint_data = simGlobals.custom_boundary.getFarthestCheckpointReached(organisms);

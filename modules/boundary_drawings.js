@@ -255,6 +255,20 @@ function drawHiddenBoundary() {
     ctx.fillRect(-20, 592, 200, 20);
 }
 
+function drawCheckpoints() {
+    // === Draw Checkpoints ===
+    for (let i = 0; i < simGlobals.custom_boundary.checkpoints.length; i++) {
+        ctx.beginPath();
+        ctx.arc(
+            simGlobals.custom_boundary.checkpoints[i].coordinates[0],
+            simGlobals.custom_boundary.checkpoints[i].coordinates[1],
+            simGlobals.custom_boundary.checkpoints[i].size, 0, Math.PI*2, false
+        );
+        ctx.stroke();
+        ctx.closePath();
+    }
+}
+
 export {
     drawBoundaryBoilerplate, drawBottomBoundaryEndpointsRed,
     drawTopBoundaryEndpointsRed, drawBottomBoundaryGatesAndConnectorsGreen,
@@ -262,5 +276,5 @@ export {
     drawBoundaryCreationIntroductionTwo, drawBoundaryDrawingHelpText,
     drawBoundaryValidationHelpText, drawBoundaryValidationScreen,
     drawBoundaryCompletionHelpText, drawBoundary,
-    drawFinalBoundary,
+    drawFinalBoundary, drawCheckpoints
 }
