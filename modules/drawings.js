@@ -204,12 +204,12 @@ function drawSimulationSettings(opacity) {
     ctx.fillText(`Dialogue:`, 300, 410);
     
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
-    ctx.fillText(`${simGlobals.TOTAL_ORGANISMS}`, 600, 250);
-    ctx.fillText(`${simGlobals.MAX_GENE}`, 600, 290);
-    ctx.fillText(`${simGlobals.MUTATION_RATE}`, 600, 330);
-    ctx.fillText(`${simGlobals.RESILIENCE}`, 600, 370);
+    ctx.fillText(`${simSettings.TOTAL_ORGANISMS}`, 600, 250);
+    ctx.fillText(`${simSettings.MAX_GENE}`, 600, 290);
+    ctx.fillText(`${simSettings.MUTATION_RATE}`, 600, 330);
+    ctx.fillText(`${simSettings.RESILIENCE}`, 600, 370);
 
-    if (simGlobals.dialogue === false) {
+    if (simSettings.dialogue === false) {
         ctx.fillText(`Disabled`, 600, 410);
     }
     else {
@@ -222,7 +222,7 @@ function drawSimulationIntro(opacity) {
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.font = '28px Roboto';
-    ctx.fillText(`${simGlobals.TOTAL_ORGANISMS} organisms were created with completely random genes.`, 125, 290);
+    ctx.fillText(`${simSettings.TOTAL_ORGANISMS} organisms were created with completely random genes.`, 125, 290);
 
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;
     ctx.font = '22px Roboto';
@@ -230,7 +230,7 @@ function drawSimulationIntro(opacity) {
 }
 
 function drawFakeGoal(opacity) {
-    if (simGlobals.sim_type === 'classic') {
+    if (simSettings.sim_type === 'classic') {
         ctx.clearRect(500, 50, 20, 20);
     
         ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
@@ -260,9 +260,19 @@ function drawExplanationAndGoal(opacity) {
 }
 
 // draws goal on canvas2 with full-opacity
-function drawGoal(goal) {
-    ctx2.fillStyle = 'rgba(155, 245, 0, 1)';
-    ctx2.fillRect(goal.x, goal.y, goal.size, goal.size);
+function drawGoal() {
+    if (simSettings.sim_type === 'classic') {
+        ctx2.clearRect(500, 50, 20, 20);
+    
+        ctx2.fillStyle = `rgba(155, 245, 0, 1)`;
+        ctx2.fillRect(500, 50, 20, 20);
+    }
+    else {
+        ctx2.clearRect(925, 50, 20, 20);
+
+        ctx2.fillStyle = `rgba(155, 245, 0, 1)`;
+        ctx2.fillRect(925, 50, 20, 20);
+    }
 }
 
 // === STATS ===
@@ -588,7 +598,7 @@ function drawMutationDescriptionText(opacity) {
     ctx.clearRect(100, 275, 800, 150);
 
     var description = "To maintain genetic diversity, a small percentage of random genes are mutated";
-    var mutation_rate_text = `Mutation Rate: ${(simGlobals.MUTATION_RATE * 100).toFixed(2)}%`.toString();
+    var mutation_rate_text = `Mutation Rate: ${(simSettings.MUTATION_RATE * 100).toFixed(2)}%`.toString();
 
     ctx.font = "24px Cairo";
     ctx.fillStyle = `rgba(148, 0, 211, ${opacity})`;

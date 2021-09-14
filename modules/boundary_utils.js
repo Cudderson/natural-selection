@@ -39,8 +39,8 @@ class Boundary {
         updateMousePosition(event);
 
         // check if boundary drawing ended on endpoint
-        if (simGlobals.coordinates['x'] >= 940 && simGlobals.coordinates['x'] <= 960 &&
-            simGlobals.coordinates['y'] >= 160 && simGlobals.coordinates['y'] <= 180) {
+        if (simSettings.coordinates['x'] >= 940 && simSettings.coordinates['x'] <= 960 &&
+            simSettings.coordinates['y'] >= 160 && simSettings.coordinates['y'] <= 180) {
 
             console.log("valid boundary");
             return true;
@@ -57,8 +57,8 @@ class Boundary {
         updateMousePosition(event);
 
         // check if boundary drawing ended on endpoint
-        if (simGlobals.coordinates['x'] >= 820 && simGlobals.coordinates['x'] <= 840 &&
-            simGlobals.coordinates['y'] >= 40 && simGlobals.coordinates['y'] <= 60) {
+        if (simSettings.coordinates['x'] >= 820 && simSettings.coordinates['x'] <= 840 &&
+            simSettings.coordinates['y'] >= 40 && simSettings.coordinates['y'] <= 60) {
 
             console.log("valid boundary");
             return true;
@@ -71,8 +71,8 @@ class Boundary {
 
     validateFull() {
         // check if user-drawn line ended on goal
-        if (simGlobals.coordinates['x'] >= 925 && simGlobals.coordinates['x'] <= 945 &&
-            simGlobals.coordinates['y'] >= 50 && simGlobals.coordinates['y'] <= 70) {
+        if (simSettings.coordinates['x'] >= 925 && simSettings.coordinates['x'] <= 945 &&
+            simSettings.coordinates['y'] >= 50 && simSettings.coordinates['y'] <= 70) {
 
             return true;
         }
@@ -361,15 +361,15 @@ class Boundary {
         }
     
         // add distance from spawn to checkpoint[0] to scale
-        let horizontal_distance_squared = (simGlobals.INITIAL_X_BOUND - this.checkpoints[0].coordinates[0]) ** 2;
-        let vertical_distance_squared = (simGlobals.INITIAL_Y_BOUND - this.checkpoints[0].coordinates[1]) ** 2;
+        let horizontal_distance_squared = (simSettings.INITIAL_X_BOUND - this.checkpoints[0].coordinates[0]) ** 2;
+        let vertical_distance_squared = (simSettings.INITIAL_Y_BOUND - this.checkpoints[0].coordinates[1]) ** 2;
         let distance_squared = horizontal_distance_squared + vertical_distance_squared;
         let distance_from_spawn_to_first_checkpoint = Math.sqrt(distance_squared);
         scale += distance_from_spawn_to_first_checkpoint;
     
         // add distance from final checkpoint to goal to scale
-        let final_to_goal_horizontal_distance_squared = (this.checkpoints[this.checkpoints.length - 1].coordinates[0] - simGlobals.GOAL_X_POS_BOUNDS) ** 2;
-        let final_to_goal_vertical_distance_squared = (this.checkpoints[this.checkpoints.length - 1].coordinates[1] - simGlobals.GOAL_Y_POS_BOUNDS) ** 2;
+        let final_to_goal_horizontal_distance_squared = (this.checkpoints[this.checkpoints.length - 1].coordinates[0] - simSettings.GOAL_X_POS_BOUNDS) ** 2;
+        let final_to_goal_vertical_distance_squared = (this.checkpoints[this.checkpoints.length - 1].coordinates[1] - simSettings.GOAL_Y_POS_BOUNDS) ** 2;
     
         let distance_squared_to_goal = final_to_goal_horizontal_distance_squared + final_to_goal_vertical_distance_squared;
     
@@ -492,8 +492,8 @@ function updateMousePosition(event) {
     let rect = canvas.getBoundingClientRect();
 
     // store current mouse position
-    simGlobals.coordinates['x'] = Math.floor(event.clientX - rect.left);
-    simGlobals.coordinates['y'] = Math.floor(event.clientY - rect.top);
+    simSettings.coordinates['x'] = Math.floor(event.clientX - rect.left);
+    simSettings.coordinates['y'] = Math.floor(event.clientY - rect.top);
 }
 
 export { Boundary, updateMousePosition }

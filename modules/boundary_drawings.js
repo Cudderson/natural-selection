@@ -218,7 +218,7 @@ function drawBoundaryCompletionHelpText() {
 function drawBoundary(opacity) {
     ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
     ctx2.globalAlpha = opacity;
-    ctx2.drawImage(simGlobals.custom_boundary.full_boundary, 0, 0, canvas2.width, canvas2.height);
+    ctx2.drawImage(simSettings.custom_boundary.full_boundary, 0, 0, canvas2.width, canvas2.height);
 }
 
 function drawFinalBoundary(final_boundary) {
@@ -257,12 +257,12 @@ function drawHiddenBoundary() {
 
 function drawCheckpoints() {
     // === Draw Checkpoints ===
-    for (let i = 0; i < simGlobals.custom_boundary.checkpoints.length; i++) {
+    for (let i = 0; i < simSettings.custom_boundary.checkpoints.length; i++) {
         ctx.beginPath();
         ctx.arc(
-            simGlobals.custom_boundary.checkpoints[i].coordinates[0],
-            simGlobals.custom_boundary.checkpoints[i].coordinates[1],
-            simGlobals.custom_boundary.checkpoints[i].size, 0, Math.PI*2, false
+            simSettings.custom_boundary.checkpoints[i].coordinates[0],
+            simSettings.custom_boundary.checkpoints[i].coordinates[1],
+            simSettings.custom_boundary.checkpoints[i].size, 0, Math.PI*2, false
         );
         ctx.stroke();
         ctx.closePath();
