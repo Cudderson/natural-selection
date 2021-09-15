@@ -1044,19 +1044,15 @@ function getShortestDistanceToNextCheckpoint(next_checkpoint, organisms) {
 }
 
 function calcPopulationFitness (organisms) {
-    // does this really need to be a promise?
-    return new Promise(resolve => {
-        // reset total_fitness before calculation
-        let total_fitness = 0.00;
+    let total_fitness = 0.00;
 
-        for (let i = 0; i < organisms.length; i++) {
-            organisms[i].calcFitness();
-            total_fitness += organisms[i].fitness;
-        }
+    for (let i = 0; i < organisms.length; i++) {
+        organisms[i].calcFitness();
+        total_fitness += organisms[i].fitness;
+    }
 
-        let average_fitness = total_fitness / organisms.length;
-        resolve(average_fitness);
-    })
+    let average_fitness = total_fitness / organisms.length;
+    return average_fitness;
 }
 
 function calcPopulationFitnessBounds(remaining_distance, organisms, scale) {
@@ -1083,20 +1079,15 @@ function calcPopulationFitnessBounds(remaining_distance, organisms, scale) {
     return average_fitness;
 }
 
-// not converted var >> let yet
-async function evaluatePopulation(organisms) {
-    let closest_organism = await getShortestDistanceToGoal(organisms);
-    let average_fitness = await calcPopulationFitness(organisms);
+// testing removing the awaits from here
+function evaluatePopulation(organisms) {
 
-    // also redundant, fix
     let population_resolution = {
-        'closest_organism': closest_organism,
-        'average_fitness': average_fitness
+        'closest_organism':  getShortestDistanceToGoal(organisms),
+        'average_fitness':  calcPopulationFitness(organisms),
     }
 
-    return new Promise(resolve => {
-        resolve(population_resolution);
-    })
+    return population_resolution;
 }
 
 // =====================
@@ -1652,10 +1643,6 @@ async function runGeneration(new_generation) {
 
     // final refactor of this function starting here ===
 
-    console.log("runGeneration() called");
-    console.log(new_generation.new_population);
-
-    // start with let, upgrade to var if needed
     let organisms = new_generation.new_population;
 
     // for drawStats()
@@ -1665,18 +1652,17 @@ async function runGeneration(new_generation) {
         'generation_count': new_generation.generation_count,
     }
 
-    // intentional var to increase scope access
     // once turned on, this is never turned off
     var simulation_succeeded = new_generation.simulation_succeeded;
 
     if (stats.generation_count != 0) {
+
         if (simSettings.dialogue) {
             await paintbrush.fadeIn(Drawings.drawStats, .04, stats);
             await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseEntryText, .04);
             await sleep(500);
         }
         else {
-            // untested
             Drawings.drawStatsStatic(ctx2, stats);
         }
     }
@@ -1690,10 +1676,7 @@ async function runGeneration(new_generation) {
     else {
         // check if simulation succeeded 
         let success_flag = await runEvaluationAnimation(organisms, stats);
-        console.log(`Success Flag: ${success_flag}`);
 
-        // here, if success flag is true, we can await the success animation
-        // untested
         if (success_flag) {
             // update flag
             simulation_succeeded = true;
@@ -1702,7 +1685,6 @@ async function runGeneration(new_generation) {
             await sleep(1500);
             await paintbrush.fadeIn(Drawings.drawSuccessMessage, .02, new_generation.generation_count); // [] untested
 
-            // untested
             await handleSuccessfulSimDecision();            
         }
     }
@@ -1710,51 +1692,42 @@ async function runGeneration(new_generation) {
     if (simSettings.dialogue) {
         await paintbrush.fadeToNewColor(Drawings.drawEvaluationPhaseExitText, .01);
 
-        await paintbrush.fadeOut(Drawings.drawStats, .02, stats); // put here to fade out stats before average fitness updated
-        // await sleep(1000);
+        await paintbrush.fadeOut(Drawings.drawStats, .02, stats); // fade out stats before average fitness updated
     }
 
     // store length of organisms array before deceased organisms filtered out for reproduction (boundary sims)
-    let next_gen_target_length = organisms.length; 
+    let next_gen_target_length = organisms.length;
+
     let closest_organism;
 
-    // factoring out of global
     let average_fitness;
 
     // for boundary sims
     let deceased_organisms = [];
 
     if (simSettings.sim_type === 'classic') {
-        let population_resolution = await evaluatePopulation(organisms); // maybe don't await here
+
+        let population_resolution = evaluatePopulation(organisms);
+
         closest_organism = population_resolution['closest_organism'];
         average_fitness = population_resolution['average_fitness'];
     }
     else if (simSettings.sim_type === 'boundary') {
 
         // remove deceased organisms from array (organisms array is evaluated multiple times and deceased organisms aren't used)
-        console.log(`before checkPulse(): ${organisms.length}`);
-
-        // returns array of living and deceased organisms
         let organized_organisms = simSettings.custom_boundary.checkPulse(organisms);
 
-        // re-assign array to be only the living organisms
+        // re-assign organisms array to be only the living organisms
         organisms = organized_organisms['living_organisms'];
         deceased_organisms = organized_organisms['deceased_organisms'];
-
-        console.log(`after checkPulse(): ${organisms.length}`);
-
-        // draw checkpoints for reference
-        // BoundaryDrawings.drawCheckpoints();
 
         // get previous, current, and next checkpoints for current generation
         let checkpoint_data = simSettings.custom_boundary.getFarthestCheckpointReached(organisms);
 
-        // this will set each organism's distance_to_next_checkpoint attribute
-        // *** i think the problem lies here
+        // set each organism's distance_to_next_checkpoint attribute
         closest_organism = getShortestDistanceToNextCheckpoint(checkpoint_data['next'], organisms);
 
-        // distance_to_goal = distance_to_next_checkpoint + next_checkpoint.distance_to_goal
-        // 'next' will give us the index in the checkpoints array of the checkpoint we want to measure from
+        // get remaining distance to goal from checkpoint
         let remaining_distance; 
 
         if (checkpoint_data['next'] === 'goal') {
@@ -1764,23 +1737,19 @@ async function runGeneration(new_generation) {
             remaining_distance = simSettings.custom_boundary.checkpoints[checkpoint_data['next']].distance_to_goal;
         }
 
-        console.log(remaining_distance);
-
-        // this function will set each organism's distance_to_goal and fitness attributes
-        // it also updates average_fitness
+        // set each organism's distance_to_goal and fitness attributes
+        // update average_fitness
         average_fitness = calcPopulationFitnessBounds(remaining_distance, organisms, simSettings.custom_boundary.scale_statistics.scale);
-
-        console.log(`Average Fitness: ${average_fitness}`);
     }
 
-    // average_fitness should be integrated up to here. I think the only think left to do is assign it to new_generation for the next-gen stats
+    // Phase: Select Most-Fit Individuals
 
-    // PHASE: SELECT MOST-FIT INDIVIDUALS
     if (simSettings.dialogue) {
         await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseEntryText, .03);
     }
 
-    // this phase includes: beginSelectionProcess(), selectParentsForReproduction()
+    // Starting here, with checking if await is necessary for beginSelectionProcess() ===
+
     let potential_parents = await beginSelectionProcess(organisms, average_fitness); // maybe don't await here
 
     let potential_mothers = potential_parents['potential_mothers'];
