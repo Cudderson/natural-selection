@@ -1096,29 +1096,6 @@ function evaluatePopulation(organisms) {
 
 function beginSelectionProcess(organisms, average_fitness) {
 
-    // *** I want to reduce the array sizes created by this algorithm.
-    // When fitness scores increase, organisms are added to the array thousands of times.
-    // Moreso, maybe I just want to add the organism's index to the array, rather than the entire organism
-
-    // My initial idea is to use (fitness * 100) ** 2, which is the current formula, until average fitness reaches a certain threshold, and then convert to
-    // (fitness * 10) ^ 2 to keep array sizes down. (.99 * 10 = 9.9 //  9.9 ** 2 = 98.01)
-
-    // The reason I can't use (fitness * 10) ** 2 right away is because the organisms' fitness scores will be too low to create selection bias
-    // - with (fitness * 10) ** 2, organisms with fitness <= .1 will all have the same selection chance.
-
-    // when fitness = .1, our current formula adds organisms 100 times.
-    // maybe the threshold should be .1
-    // that's a good place to start
-
-    // GOAL:
-    // - Use a selection formula based on the average fitness of the population.
-    // - when average fitness < .1, use ((fitness * 100) ** 2)
-    // - when average fitness > .1, use ((fitness * 10)  ** 2) 
-
-    // we need:
-    // average_fitness
-
-    // start here
     let selection_factor;
 
     if (average_fitness < .1) {
@@ -1127,19 +1104,14 @@ function beginSelectionProcess(organisms, average_fitness) {
     else {
         selection_factor = 10;
     }
-    console.log(`average fitness: ${average_fitness}, factor: ${selection_factor}`);
 
     // fill array with candidates for reproduction
     let potential_mothers = [];
     let potential_fathers = [];
 
+    // this algorithm is O(n * m), where n is the amount of organisms and m is the amount of times we add each organism to array
     for (let i = 0; i < organisms.length; i++) {
-        // Give organisms with negative fitness a chance to reproduce
-        // if (organisms[i].fitness < 0) {
-        //     organisms[i].fitness = 0.01;
-        // }
 
-        // TEST
         // - give organisms with below-average fitness only 1 array spot
         // - organisms with fitness greater than average will be given proper selection bias
         if (organisms[i].fitness < average_fitness) {
@@ -1160,9 +1132,8 @@ function beginSelectionProcess(organisms, average_fitness) {
                 }
             }
         }
-
-        console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
-        console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * selection_factor) ** 2)} times.`);
+        // console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
+        // console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * selection_factor) ** 2)} times.`);
     }
 
     let potential_parents = {
@@ -1170,9 +1141,7 @@ function beginSelectionProcess(organisms, average_fitness) {
         'potential_fathers': potential_fathers
     }
 
-    return new Promise(resolve => {
-        resolve(potential_parents);
-    })
+    return potential_parents;
 }
 
 function selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length) {
@@ -1417,14 +1386,13 @@ function reproduce(crossover_genes) {
 }
 
 function reproduceNewGeneration(parents) {
-    // holds our new generation of organisms
     let offspring_organisms = [];
 
     for (let i = 0; i < parents.length; i++) {
         let offspring_count = determineOffspringCount();
 
         for (let j = 0; j < offspring_count; j++) {
-            let crossover_genes = crossover(parents[i]); // returns dict
+            let crossover_genes = crossover(parents[i]);
             let offspring = reproduce(crossover_genes);
             offspring_organisms.push(offspring);
         }
@@ -1641,8 +1609,6 @@ async function playTitleScreenAnimation() {
 // not converted var >> let yet
 async function runGeneration(new_generation) {
 
-    // final refactor of this function starting here ===
-
     let organisms = new_generation.new_population;
 
     // for drawStats()
@@ -1652,7 +1618,7 @@ async function runGeneration(new_generation) {
         'generation_count': new_generation.generation_count,
     }
 
-    // once turned on, this is never turned off
+    // once turned on, this can't be turned off
     var simulation_succeeded = new_generation.simulation_succeeded;
 
     if (stats.generation_count != 0) {
@@ -1683,7 +1649,7 @@ async function runGeneration(new_generation) {
 
             // give user time to see their win
             await sleep(1500);
-            await paintbrush.fadeIn(Drawings.drawSuccessMessage, .02, new_generation.generation_count); // [] untested
+            await paintbrush.fadeIn(Drawings.drawSuccessMessage, .02, new_generation.generation_count);
 
             await handleSuccessfulSimDecision();            
         }
@@ -1748,21 +1714,15 @@ async function runGeneration(new_generation) {
         await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseEntryText, .03);
     }
 
-    // Starting here, with checking if await is necessary for beginSelectionProcess() ===
-
-    let potential_parents = await beginSelectionProcess(organisms, average_fitness); // maybe don't await here
+    let potential_parents = beginSelectionProcess(organisms, average_fitness);
 
     let potential_mothers = potential_parents['potential_mothers'];
     let potential_fathers = potential_parents['potential_fathers'];
 
-    // we shouldn't enter the selection phase if there aren't enough organisms to reproduce
-    // this could happen if a population produced all males, then potential_mothers would never get filled, and program fails
-    // check extinction
+    // trigger extinction if not enough mothers and fathers to reproduce a new generation
     if (potential_mothers.length === 0 || potential_fathers.length === 0) {
 
-        // not converting to module yet
-        // await fadeInExtinctionMessage();
-        await paintbrush.fadeIn(drawExtinctionMessage, .05); // untested
+        await paintbrush.fadeIn(drawExtinctionMessage, .05);
 
         await sleep(2000);
         do {
@@ -1776,48 +1736,43 @@ async function runGeneration(new_generation) {
 
     let parents = selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length);
 
-    // we need to combine organisms + deceased organisms for organism fade out (boundary only)
-
-    // at this point, 'parents' is the only array of organisms we still need
-    // combine both organisms arrays for organisms fade-out animation
     if (simSettings.sim_type === 'boundary') {
+        // combine both organisms arrays for organisms fade-out animation
         organisms = organisms.concat(deceased_organisms);
     }
     
-    if (simSettings.dialogue) { // here
+    if (simSettings.dialogue) {
         await runSelectionAnimations(closest_organism, parents, organisms);
-
         await paintbrush.fadeToNewColor(Drawings.drawSelectionPhaseExitText, .02);
     }
     else {
-        console.log(organisms);
         await paintbrush.fadeOut(Drawings.drawOrganisms, .02, organisms);
     }
 
+    // Phase: Crossover / Mutation / Reproduce New Generation
+
     // this function handles crossover, mutation and reproduction
-    // this function pushes new gen organisms to offspring_organisms[]
-    // get next generation of organisms
+    // get/create next generation of organisms
     let offspring_organisms = reproduceNewGeneration(parents);
 
-    // trim-off 1 organism to keep pop. size constant for odd number of organisms (reproduceNewGeneration() can only produce even number of organisms (constant-sims only))
     if (simSettings.POP_GROWTH === 'constant') {
         if (offspring_organisms.length === organisms.length + 1) {
+
+            // trim-off 1 organism to keep pop. size constant for odd number of organisms
             offspring_organisms.pop();
         }
     }
 
-    // we are done with organisms
+    // done with organisms arrays
     organisms = [];
     deceased_organisms = [];
 
-    // PHASE: CROSSOVER / MUTATE / REPRODUCE
     if (simSettings.dialogue) {
 
         await runCrossoverAnimations();
 
         await runMutationAnimations();
 
-        // maybe add generation_count here
         let gen_summary_stats = {
             'offspring_organisms': offspring_organisms,
             'average_fitness': average_fitness,
@@ -1827,15 +1782,14 @@ async function runGeneration(new_generation) {
         await runNewGenAnimations(gen_summary_stats);
     }
 
-    // prepare for next generation with necessary data
     // increment generation_count before resetting object
     let next_generation_count = new_generation.generation_count += 1;
 
-    // maybe this should be called 'next_generation'?
+    // prepare for next generation with necessary data 
     new_generation = {};
     new_generation.generation_count = next_generation_count;
     new_generation.new_population = offspring_organisms;
-    new_generation.average_fitness = average_fitness; // this actually represents the previous generation's average fitness, keep in mind.
+    new_generation.average_fitness = average_fitness;
     new_generation.simulation_succeeded = simulation_succeeded;
 
     return new Promise(resolve => {
