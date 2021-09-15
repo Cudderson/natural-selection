@@ -277,11 +277,11 @@ function createNewBoundary() {
     var new_boundary = new BoundaryUtils.Boundary();
 
     // drawing flag and step tracker
-    var allowed_to_draw = false; // could be method of Paintbrush
-    var boundary_step = "bottom-boundary"; // could be attribute of Boundary? idk..
+    var allowed_to_draw = false;
+    var boundary_step = "bottom-boundary";
 
     // Stores the position of the cursor
-    simSettings.coordinates = {'x':0 , 'y':0}; // []
+    simSettings.coordinates = {'x':0 , 'y':0};
 
     applyInitialBoundaryStyles();
 
@@ -300,12 +300,10 @@ function createNewBoundary() {
         ctx.moveTo(simSettings.coordinates['x'], simSettings.coordinates['y']);
         BoundaryUtils.updateMousePosition(event);
 
-        // draw different line depending on boundary_step
         if (boundary_step === 'full-boundary') {
 
             let canvas_data = ctx.getImageData(0, 0, canvas.width, canvas.height)
 
-            // get pixel color before drawing, reject if green
             let pixel_data = getPixelXY(canvas_data, simSettings.coordinates['x'], simSettings.coordinates['y']);
 
             if (pixel_data[0] == 155) {
@@ -320,10 +318,9 @@ function createNewBoundary() {
             ctx.lineWidth = 1;
         }
         else {
-            ctx.strokeStyle = 'rgb(155, 245, 0)'; //green 
+            ctx.strokeStyle = 'rgb(155, 245, 0)';
             ctx.lineWidth = 20;
 
-            // store coordinates here while drawing boundaries
             if (boundary_step === 'bottom-boundary') {
                 // save to bottom coords
                 new_boundary.bottom_boundary_coordinates.push([simSettings.coordinates['x'], simSettings.coordinates['y']]);
@@ -341,15 +338,12 @@ function createNewBoundary() {
     }
 
     function requestDrawingPermission(event) {
-        // this function is called on mousedown and will update the drawing flag that gives
-        // users ability to draw if legal
-        console.log("User would like to draw.");
+        console.log("User would like to draw...");
         
         BoundaryUtils.updateMousePosition(event);
 
         if (boundary_step === 'bottom-boundary') {
-            // check that user is trying to draw from first connector (ctx.fillRect(150, 550, 20, 50))
-            // make helper function eventually
+            // check that user is trying to draw from first connector
             if (simSettings.coordinates['x'] >= 160 && simSettings.coordinates['x'] <= 180 && 
                 simSettings.coordinates['y'] >= 540 && simSettings.coordinates['y'] <= 560) {
                 console.log("You clicked on the connector!");
@@ -362,9 +356,10 @@ function createNewBoundary() {
             }
         }
         else if (boundary_step === 'top-boundary') {
-            // check that user is trying to draw from the first connector     ctx.arc(50, 430, 10, 0, Math.PI*2, false);
+            // check that user is trying to draw from the first connector
             if (simSettings.coordinates['x'] >= 40 && simSettings.coordinates['x'] <= 60 &&
                 simSettings.coordinates['y'] >= 420 && simSettings.coordinates['y'] <= 440) {
+
                 allowed_to_draw = true;
             }
             else {
@@ -372,9 +367,8 @@ function createNewBoundary() {
                 allowed_to_draw = false;
             }
         }
-        // final step: draw line from spawn to goal
         else if (boundary_step === 'full-boundary') {
-            // check that user is trying to draw from the white dot (ctx.arc(80, 510, 10, 0, Math.PI*2, false))
+            // check that user is trying to draw from the white dot
             if (simSettings.coordinates['x'] >= 70 && simSettings.coordinates['x'] <= 90 && 
                 simSettings.coordinates['y'] >= 500 && simSettings.coordinates['y'] <= 520 ) {
 
@@ -394,13 +388,10 @@ function createNewBoundary() {
     // break this down into smaller function when all working
     // should this whole thing be a class method?
     function validateBoundaryConnection(event) {
-        console.log("mouseup heard");
-        // should make sure that the user was allowed to draw, otherwise return
         if (allowed_to_draw) {
             if (boundary_step === 'bottom-boundary') {
                 let bottom_boundary_is_valid = new_boundary.validateBottom(event);
 
-                // could make own function for this condition
                 if (bottom_boundary_is_valid) {
 
                     BoundaryDrawings.drawBottomBoundaryGatesAndConnectorsGreen();
@@ -424,7 +415,6 @@ function createNewBoundary() {
             else if (boundary_step === "top-boundary") {
                 let top_boundary_is_valid = new_boundary.validateTop(event);
 
-                // could make own function for this condition
                 if (top_boundary_is_valid) {
 
                     BoundaryDrawings.drawTopBoundaryGatesAndConnectorsGreen();
@@ -435,12 +425,11 @@ function createNewBoundary() {
                     ctx.arc(80, 510, 10, 0, Math.PI*2, false);
                     ctx.fill();
 
-                    // make goal new color (can be a flag in drawBoundaryBoilerplate())
+                    // make goal new color
                     ctx.fillStyle = 'rgb(232, 0, 118)';
                     ctx.fillRect(925, 50, 20, 20);
 
                     // update step and store boundary
-                    // store top-boundary
                     new_boundary.save('top');
                     boundary_step = 'full-boundary';
 
@@ -464,7 +453,6 @@ function createNewBoundary() {
             else if (boundary_step === 'full-boundary') {
                 let full_boundary_is_valid = new_boundary.validateFull();
 
-                // could make own function for this condition
                 if (full_boundary_is_valid) {
                     // update step
                     boundary_step = 'confirmation';
@@ -474,7 +462,6 @@ function createNewBoundary() {
                     ctx.fillStyle = 'white';
                     ctx.fillRect(925, 50, 20, 20);
 
-                    // should display help text on bottom-left area
                     BoundaryDrawings.drawBoundaryCompletionHelpText();
 
                     // display button to proceed, hide 'back' btn
@@ -494,7 +481,6 @@ function createNewBoundary() {
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', validateBoundaryConnection);
 
-    // make class method?
     let save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
 
     save_bounds_btn.addEventListener("click", function() {
@@ -570,7 +556,6 @@ async function runPreSimAnimations() {
         await sleep(1000);
     }
 
-    // code below this will be executed even if skip === true
     skip_btn.style.display = 'none';
 
     // add content for drawStats()
@@ -712,14 +697,11 @@ function turnOnBoundaryIntroductionTwoListeners() {
 
     document.addEventListener('keydown', function checkKeystroke(event) {
         if (event.key === 'Enter') {
-            // remove listener
             document.removeEventListener('keydown', checkKeystroke);
 
-            // hide next_btn
             next_btn.style.display = 'none';
 
             // go to next screen
-            // just a placeholder test
             createNewBoundary();
         }
     })
@@ -1668,6 +1650,8 @@ async function playTitleScreenAnimation() {
 // not converted var >> let yet
 async function runGeneration(new_generation) {
 
+    // final refactor of this function starting here ===
+
     console.log("runGeneration() called");
     console.log(new_generation.new_population);
 
@@ -1907,17 +1891,16 @@ async function runSimulation () {
         stopSimulation();
     }, {once: true});
 
-    console.log("Running Simulation with these settings:");
+    console.log("Running simulation with these settings:");
     console.log(simSettings);
 
     // pre-sim animations
     await runPreSimAnimations();
 
-    /// PHASE: CREATE NEW GENERATION/POPULATION
     let initial_population = createOrganisms();
     console.log("Amount of organisms created = " + initial_population.length);
 
-    // could save to global, but I'll try it passing it the same way future gens will first
+    // create initial generation and stats
     let new_generation = {};
     new_generation.new_population = initial_population;
     new_generation.average_fitness = 0.00;
@@ -1926,7 +1909,6 @@ async function runSimulation () {
 
     do {
         new_generation = await runGeneration(new_generation);
-        console.log(new_generation.generation_count);
     } while (new_generation.generation_count < 1000);
 }
 
