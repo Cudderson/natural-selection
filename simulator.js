@@ -240,55 +240,47 @@ class Paintbrush {
 // ===== BOUNDARY =====
 // ====================
 
-function applyInitialBoundaryStyles() {
-    // turn off settings, turn on canvas
-    document.getElementsByClassName("canvas-container")[0].style.display = 'block';
+function applyInitialBoundaryDrawingStyles() {
+    // hide settings container and buttons
     document.getElementsByClassName("settings-container")[0].style.display = 'none';
-
-    BoundaryDrawings.drawBoundaryBoilerplate();
-
-    // hide buttons
-    // document.getElementsByClassName("setting-submit")[0].style.display = 'none'; I believe setting-submit already display=none
     document.getElementsByClassName("run-btn")[0].style.display = 'none';
     document.getElementsByClassName("sim-type-classic")[0].style.display = 'none';
     document.getElementsByClassName("sim-type-boundary")[0].style.display = 'none';
 
-    let stop_btn = document.getElementsByClassName("stop-btn")[0];
+    // show canvas and draw boundary boilerplate
+    document.getElementsByClassName("canvas-container")[0].style.display = 'block';
+    BoundaryDrawings.drawBoundaryBoilerplate();
 
+    // draw initial boundary drawing screen
+    BoundaryDrawings.drawBoundaryDrawingHelpText("Step 1");
+    BoundaryDrawings.drawBottomBoundaryEndpointsRed();
+
+    // create button listener to reset boundary creation
+    let stop_btn = document.getElementsByClassName("stop-btn")[0];
     stop_btn.style.gridColumn = "1 / 2";
     stop_btn.style.width = "75%";
     stop_btn.innerHTML = "Reset";
     stop_btn.style.display = "block";
 
-    // restart boundary drawing if user desires
     stop_btn.addEventListener("click", function() {
         createNewBoundary();
     }, {once: true});
 }
 
-// this function will be refactored/cleaned
 function createNewBoundary() {
 
-    // =============================================================================================
-    // === this is the first appearance of Boundary, and where the module will be first required ===
-    // =============================================================================================
+    // instantiate Boundary (test 'let' if can't get working)
+    let new_boundary = new BoundaryUtils.Boundary();
 
-    // instantiate class Boundary instance
-    var new_boundary = new BoundaryUtils.Boundary();
+    // drawing flags, and step tracker
+    let allowed_to_draw = false;
+    let boundary_touched = false;
+    let boundary_step = "bottom-boundary";
 
-    // drawing flag and step tracker
-    var allowed_to_draw = false;
-    var boundary_step = "bottom-boundary";
-
-    // Stores the position of the cursor
+    // stores the position of the cursor
     simSettings.coordinates = {'x':0 , 'y':0};
 
-    applyInitialBoundaryStyles();
-
-    BoundaryDrawings.drawBoundaryDrawingHelpText("Step 1");
-
-    // draw bottom-boundary connectors red
-    BoundaryDrawings.drawBottomBoundaryEndpointsRed();
+    applyInitialBoundaryDrawingStyles();
 
     function draw(event) {
         if (event.buttons !== 1 || !allowed_to_draw) {
@@ -307,12 +299,8 @@ function createNewBoundary() {
             let pixel_data = getPixelXY(canvas_data, simSettings.coordinates['x'], simSettings.coordinates['y']);
 
             if (pixel_data[0] == 155) {
-                // green touched, reject
-                allowed_to_draw = false;
-                
-                // reset step
-                BoundaryDrawings.drawBoundaryValidationScreen(new_boundary.top_boundary);
-                return;
+                // green touched, set flag for validateBoundaryConnection()
+                boundary_touched = true;
             }
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 1;
@@ -338,20 +326,17 @@ function createNewBoundary() {
     }
 
     function requestDrawingPermission(event) {
-        console.log("User would like to draw...");
-        
+
         BoundaryUtils.updateMousePosition(event);
 
         if (boundary_step === 'bottom-boundary') {
             // check that user is trying to draw from first connector
             if (simSettings.coordinates['x'] >= 160 && simSettings.coordinates['x'] <= 180 && 
                 simSettings.coordinates['y'] >= 540 && simSettings.coordinates['y'] <= 560) {
-                console.log("You clicked on the connector!");
+
                 allowed_to_draw = true;
             }
             else {
-                console.log("Not allowed to draw, mouse not on connector:");
-                console.log(simSettings.coordinates);
                 allowed_to_draw = false;
             }
         }
@@ -363,7 +348,6 @@ function createNewBoundary() {
                 allowed_to_draw = true;
             }
             else {
-                console.log("Not allowed to draw, mouse not on connector.");
                 allowed_to_draw = false;
             }
         }
@@ -375,7 +359,6 @@ function createNewBoundary() {
                 allowed_to_draw = true;
             }
             else {
-                console.log("You missed the white dot...");
                 allowed_to_draw = false;
             } 
         }
@@ -385,8 +368,6 @@ function createNewBoundary() {
         }
     }
 
-    // break this down into smaller function when all working
-    // should this whole thing be a class method?
     function validateBoundaryConnection(event) {
         if (allowed_to_draw) {
             if (boundary_step === 'bottom-boundary') {
@@ -451,25 +432,32 @@ function createNewBoundary() {
                 }
             }
             else if (boundary_step === 'full-boundary') {
-                let full_boundary_is_valid = new_boundary.validateFull();
+                // validate full boundary if boundary was not touched during validation drawing
+                if (!boundary_touched) {
+                    let full_boundary_is_valid = new_boundary.validateFull();
 
-                if (full_boundary_is_valid) {
-                    // update step
-                    boundary_step = 'confirmation';
-                    allowed_to_draw = false;
-                    
-                    // make goal white to show success
-                    ctx.fillStyle = 'white';
-                    ctx.fillRect(925, 50, 20, 20);
-
-                    BoundaryDrawings.drawBoundaryCompletionHelpText();
-
-                    // display button to proceed, hide 'back' btn
-                    document.getElementsByClassName("save-boundaries-btn")[0].style.display = 'block';
-                    document.getElementsByClassName("stop-btn")[0].style.display = 'none';
+                    if (full_boundary_is_valid) {
+                        // update step
+                        boundary_step = 'confirmation';
+                        allowed_to_draw = false;
+                        
+                        // make goal white to show success
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(925, 50, 20, 20);
+    
+                        BoundaryDrawings.drawBoundaryCompletionHelpText();
+    
+                        // display button to proceed, hide 'back' btn
+                        document.getElementsByClassName("save-boundaries-btn")[0].style.display = 'block';
+                        document.getElementsByClassName("stop-btn")[0].style.display = 'none';
+                    }
+                    else {
+                        BoundaryDrawings.drawBoundaryValidationScreen(new_boundary.top_boundary);
+                    }
                 }
                 else {
                     BoundaryDrawings.drawBoundaryValidationScreen(new_boundary.top_boundary);
+                    boundary_touched  = false;
                 }
             }
         }
@@ -495,7 +483,7 @@ function createNewBoundary() {
         // creates checkpoints, sets scale attribute
         new_boundary.prepareBoundaryForSimulation();
 
-        // make boundary global
+        // add boundary to sim settings 
         simSettings.custom_boundary = new_boundary;
 
         // turn off listeners
@@ -507,7 +495,7 @@ function createNewBoundary() {
         // initiate settings configuration
         SettingsUtils.configureSettings();
 
-        // testing checkpoints
+        // testing checkpoints (save for debugging)
         // BoundaryDrawings.drawCheckpoints();
 
     }, {once: true});
