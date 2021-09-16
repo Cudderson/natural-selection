@@ -115,7 +115,12 @@ function validateMovementSetting() {
 
     if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 5) {
 
-        valid_setting = parseInt(movement_speed_setting.value);
+        if (parseInt(movement_speed_setting.value) === 1) {
+            valid_setting = 2;
+        }
+        else {
+            valid_setting = parseInt(movement_speed_setting.value);
+        }
 
         movement_speed_setting.style.borderBottom = "2px solid var(--custom-green)";
 

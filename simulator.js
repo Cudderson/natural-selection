@@ -17,12 +17,12 @@ window.simSettings = {
     GOAL_Y_POS_BOUNDS: 50,
 
     // population/species defaults (consider leaving blank until user chooses)
-    TOTAL_ORGANISMS: 100,
-    GENE_COUNT: 250,
-    MUTATION_RATE: 0.03,
-    MIN_GENE: -5,
-    MAX_GENE: 5,
-    RESILIENCE: 1.00,
+    TOTAL_ORGANISMS: 0,
+    GENE_COUNT: 0,
+    MUTATION_RATE: 0,
+    MIN_GENE: 0,
+    MAX_GENE: 0,
+    RESILIENCE: 0,
     POP_GROWTH: 'constant', // testing new setting (other value: 'fluctuate')
     
     dialogue: false,
@@ -460,6 +460,7 @@ function createNewBoundary() {
                     }
                 }
                 else {
+                    alert("Invalid:\nLine cannot touch boundary!");
                     BoundaryDrawings.drawBoundaryValidationScreen(new_boundary.top_boundary);
                     boundary_touched  = false;
                 }
@@ -902,7 +903,7 @@ async function runEvaluationAnimation(organisms, stats) {
             Drawings.drawStaticEvaluationPhaseText(ctx);
         }
 
-        ctx2.clearRect(700, 510, 350, 120);
+        ctx2.clearRect(740, 510, 350, 120);
         Drawings.drawStatsStatic(ctx, stats);
 
         if (stats.generation_count === 0 && !simSettings.dialogue) {
@@ -919,7 +920,7 @@ async function runEvaluationAnimation(organisms, stats) {
             Drawings.drawStaticEvaluationPhaseText(ctx2);
         }
 
-        ctx.clearRect(700, 510, 350, 120);
+        ctx.clearRect(740, 510, 350, 120);
         Drawings.drawStatsStatic(ctx2, stats);
 
         var success_flag = await updateAndMoveOrganismsBounds(organisms);
@@ -1304,40 +1305,6 @@ function reproduceNewGeneration(parents) {
     return offspring_organisms;
 }
 
-// UNTESTED (probably should move to bottom of file)
-async function handleSuccessfulSimDecision() {
-    let key_pressed;
-
-    do {
-        key_pressed = await getUserDecision();
-        console.log(key_pressed);
-    }
-    while (key_pressed != "Enter" && key_pressed != "q");
-
-    await paintbrush.fadeOut(Drawings.drawSuccessMessage, .05);
-
-    // this breaks:
-    // drawings.js:353 Uncaught TypeError: Cannot read properties of null (reading 'length')
-    // at drawOrganisms (drawings.js:353)
-    // at drawFrame (simulator.js:160)
-    // [] check when works 
-    // (i forgot to add organisms as a parameter, try now)
-    await paintbrush.fadeIn(Drawings.drawOrganisms, .9, organisms);
-
-    if (key_pressed === 'Enter') {
-        console.log("Continuing Simulation.");
-        await sleep(500);
-    }
-    else if (key_pressed === 'q') {
-        console.log("Quitting Simulation.");
-
-        await paintbrush.fadeOut(Drawings.drawOrganisms, .05);
-
-        // possibly fade stats to black here too?
-        stopSimulation();
-    }
-}
-
 async function runNewGenAnimations(gen_summary_stats) {
     await paintbrush.fadeToNewColor(Drawings.drawCreateNewGenPhaseEntryText, .02);
     await paintbrush.fadeIn(Drawings.drawGenerationSummaryText, .025, gen_summary_stats);
@@ -1540,7 +1507,7 @@ async function runGeneration(new_generation) {
             await paintbrush.fadeIn(Drawings.drawSuccessMessage, .02, new_generation.generation_count);
 
             // [] i'll need to pass organisms here or something, check in testing
-            await handleSuccessfulSimDecision();            
+            await handleSuccessfulSimDecision(new_generation.generation_count, organisms);            
         }
     }
 
@@ -1611,11 +1578,10 @@ async function runGeneration(new_generation) {
     // trigger extinction if not enough mothers and fathers to reproduce a new generation
     if (potential_mothers.length === 0 || potential_fathers.length === 0) {
 
-        await paintbrush.fadeIn(drawExtinctionMessage, .05);
+        await paintbrush.fadeIn(Drawings.drawExtinctionMessage, .025);
 
-        await sleep(2000);
         do {
-            let exit_key = await getUserDecision();
+            var exit_key = await getUserDecision();
             console.log(exit_key);
         }
         while (exit_key != "q");
@@ -1629,6 +1595,8 @@ async function runGeneration(new_generation) {
         // combine both organisms arrays for organisms fade-out animation
         organisms = organisms.concat(deceased_organisms);
     }
+
+    await sleep(300);
     
     if (simSettings.dialogue) {
         await runSelectionAnimations(closest_organism, parents, organisms);
@@ -1753,7 +1721,7 @@ function sleep(milliseconds) {
     } 
     while (currentDate - date < milliseconds);
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         resolve();
     })
 }
@@ -1766,6 +1734,32 @@ function getUserDecision() {
             resolve(key);
         }, {once: true});
     })
+}
+
+async function handleSuccessfulSimDecision(generation_count, organisms) {
+    let key_pressed;
+
+    do {
+        key_pressed = await getUserDecision();
+        console.log(key_pressed);
+    }
+    while (key_pressed != "Enter" && key_pressed != "q");
+
+    await paintbrush.fadeOut(Drawings.drawSuccessMessage, .05, generation_count);
+    
+    Drawings.drawOrganisms(1, organisms);
+
+    if (key_pressed === 'Enter') {
+        console.log("Continuing Simulation.");
+        await sleep(500);
+    }
+    else if (key_pressed === 'q') {
+        console.log("Quitting Simulation.");
+
+        await paintbrush.fadeOut(Drawings.drawOrganisms, .05, organisms);
+
+        stopSimulation();
+    }
 }
 
 function getRandomGene(min, max) {
