@@ -1,10 +1,10 @@
-// this module should handle all settings-validation logic and return valid settings to simulator.js
-import { prepareToRunSimulation } from "./drawings.js";
+// handles all settings-validation logic and return valid settings to simulator.js
+
+import { drawSimReadyScreen } from "./drawings.js";
 
 function displaySettingsForm() {
 
     // ensure only settings button showing
-    // document.getElementsByClassName("settings-btn")[0].style.display = 'block';
     document.getElementsByClassName("run-btn")[0].style.display = 'none';
     document.getElementsByClassName("stop-btn")[0].style.display = 'none';
     document.getElementsByClassName("save-boundaries-btn")[0].style.display = 'none';
@@ -13,7 +13,7 @@ function displaySettingsForm() {
     document.getElementsByClassName("canvas-container")[0].style.display = 'none';
     document.getElementsByClassName("settings-container")[0].style.display = 'block';
 
-    if (simGlobals.sim_type === 'classic') {
+    if (simSettings.sim_type === 'classic') {
 
         let resilience_input = document.getElementsByClassName("resilience-input")[0];
         let resilience_caption = document.getElementsByClassName("setting-caption-resilience")[0];
@@ -25,10 +25,9 @@ function displaySettingsForm() {
         resilience_input.value = "n/a";
         resilience_caption.style.color = '#333';
         resilience_caption.innerHTML = 'for boundary simulation type only';
-
     }
 
-    // POP_GROWTH toggle button listener (move/abstract/make 'toggleGrowthBtn' function) 
+    // POP_GROWTH toggle button listener
     let growth_toggle_btn = document.getElementsByClassName("growth-toggle-btn")[0];
     growth_toggle_btn.addEventListener('click', function toggle() {
         if (growth_toggle_btn.innerHTML === 'Constant') {
@@ -55,7 +54,6 @@ function validateTotalOrganismsSetting() {
             'value': valid_setting,
         };
     }
-
     else {
         total_organisms_setting.style.borderBottom = '2px solid var(--mother-pink)';
 
@@ -66,16 +64,15 @@ function validateTotalOrganismsSetting() {
     }
 }
 
-// must be called after settings submitted
 function calculateGeneCount() {
-    // we need:
-    // scale (boundary only) which is global via window.custom_boundary
+    // must be called after settings submitted
     let gene_count;
-    if (simGlobals.sim_type === 'classic') {
-        gene_count = 1300 / simGlobals.MAX_GENE;
+
+    if (simSettings.sim_type === 'classic') {
+        gene_count = 1300 / simSettings.MAX_GENE;
     }
-    else if (simGlobals.sim_type === 'boundary') {
-        gene_count = (simGlobals.custom_boundary.scale_statistics.scale * 3.5) / simGlobals.MAX_GENE;
+    else if (simSettings.sim_type === 'boundary') {
+        gene_count = (simSettings.custom_boundary.scale_statistics.scale * 3.5) / simSettings.MAX_GENE;
     }
 
     return gene_count;
@@ -86,13 +83,13 @@ function validateMutationRateSetting() {
     let valid_setting;
 
     // consider allowing float here
-    if (typeof parseInt(mutation_rate_setting.value) === 'number' && parseInt(mutation_rate_setting.value) > 0) {
-        if (parseInt(mutation_rate_setting.value) > 100) {
+    if (typeof parseInt(mutation_rate_setting.value) === 'number' && parseFloat(mutation_rate_setting.value) > 0) {
+
+        if (parseFloat(mutation_rate_setting.value) > 100) {
             valid_setting = 1;
         }
-
         else {
-            valid_setting = parseInt(mutation_rate_setting.value) / 100;
+            valid_setting = parseFloat((mutation_rate_setting.value / 100).toFixed(3));
         }
 
         mutation_rate_setting.style.borderBottom = '2px solid var(--custom-green)';
@@ -102,7 +99,6 @@ function validateMutationRateSetting() {
             'value': valid_setting,
         }
     }
-
     else {
         mutation_rate_setting.style.borderBottom = '2px solid var(--mother-pink)';
 
@@ -117,7 +113,6 @@ function validateMovementSetting() {
     let movement_speed_setting = document.getElementById("move-speed");
     let valid_setting;
 
-    // create max and min genes from movement speed
     if (parseInt(movement_speed_setting.value) > 0 && parseInt(movement_speed_setting.value) <= 5) {
 
         valid_setting = parseInt(movement_speed_setting.value);
@@ -128,8 +123,7 @@ function validateMovementSetting() {
             'status': 'valid',
             'value': valid_setting
         }
-    } 
-
+    }
     else {
         movement_speed_setting.style.borderBottom = '2px solid var(--mother-pink)';
 
@@ -141,8 +135,6 @@ function validateMovementSetting() {
 }
 
 function validateResilienceSetting() {
-    // we want to only allow numbers from 0 - 100 inclusive
-
     let resilience_setting = document.getElementById("resilience");
     let valid_setting;
 
@@ -157,7 +149,6 @@ function validateResilienceSetting() {
             'value': valid_setting
         }
     }
-
     else {
         resilience_setting.style.borderBottom = '2px solid var(--mother-pink)';
 
@@ -176,7 +167,7 @@ function validateSettingsForm() {
     settings_manager.movement_setting = validateMovementSetting();
     settings_manager.mutation_setting = validateMutationRateSetting();
 
-    if (simGlobals.sim_type === 'boundary') {
+    if (simSettings.sim_type === 'boundary') {
         settings_manager.resilience_setting = validateResilienceSetting();
     }
 
@@ -195,46 +186,42 @@ function validateSettingsForm() {
     if (all_settings_valid) {
         // turns off settings form, turns on canvas and run-btn
         applyValidSettings(settings_manager);
-        prepareToRunSimulation(); // drawing
+        drawSimReadyScreen(); // drawing
     }
 
     // don't submit the form
     return false;
 }
 
-// needs better name
 function applyValidSettings(settings_manager) {
 
     // apply setting to global object
-    simGlobals.TOTAL_ORGANISMS = settings_manager.organisms_setting.value;
-    simGlobals.MIN_GENE = settings_manager.movement_setting.value * -1;
-    simGlobals.MAX_GENE = settings_manager.movement_setting.value;
-    // simGlobals.GENE_COUNT = settings_manager.gene_setting.value;
-    simGlobals.MUTATION_RATE = settings_manager.mutation_setting.value;
-    simGlobals.GENE_COUNT = calculateGeneCount();
+    simSettings.TOTAL_ORGANISMS = settings_manager.organisms_setting.value;
+    simSettings.MIN_GENE = settings_manager.movement_setting.value * -1;
+    simSettings.MAX_GENE = settings_manager.movement_setting.value;
+    simSettings.MUTATION_RATE = settings_manager.mutation_setting.value;
+    simSettings.GENE_COUNT = calculateGeneCount();
 
     // dialogue
     if (document.getElementById("dialogue-checkbox").checked) {
-        simGlobals.dialogue = true;
+        simSettings.dialogue = true;
     }
     else {
-        simGlobals.dialogue = false;
+        simSettings.dialogue = false;
     }
 
     // population growth
     if (document.getElementsByClassName("growth-toggle-btn")[0].innerHTML === 'Constant') {
-        simGlobals.POP_GROWTH = 'constant';
+        simSettings.POP_GROWTH = 'constant';
     }
     else {
-        simGlobals.POP_GROWTH = 'fluctuate';
+        simSettings.POP_GROWTH = 'fluctuate';
     }
 
     // resilience
-    if (simGlobals.sim_type === 'boundary') {
-        simGlobals.RESILIENCE = settings_manager.resilience_setting.value;
+    if (simSettings.sim_type === 'boundary') {
+        simSettings.RESILIENCE = settings_manager.resilience_setting.value;
     }
-
-    console.log(simGlobals);
 
     // make html changes before function returns
     document.getElementsByClassName("canvas-container")[0].style.display = 'block';
@@ -247,13 +234,12 @@ function applyValidSettings(settings_manager) {
     return false;
 }
 
-// this function triggers settings form display and creates listener for submitted form
 function configureSettings() {
 
     document.getElementsByClassName("setting-submit")[0].style.display = 'block';
 
     // listen for click on Apply btn (keep active in case user submits an invalid form)
-    document.getElementsByClassName("setting-submit")[0].addEventListener("click", function submitForm(event) {
+    document.getElementsByClassName("setting-submit")[0].addEventListener("click", function submitForm() {
         validateSettingsForm();
     });
 
