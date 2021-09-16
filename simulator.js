@@ -17,12 +17,12 @@ window.simSettings = {
     GOAL_Y_POS_BOUNDS: 50,
 
     // population/species defaults (consider leaving blank until user chooses)
-    TOTAL_ORGANISMS: 100,
-    GENE_COUNT: 250,
-    MUTATION_RATE: 0.03,
-    MIN_GENE: -5,
-    MAX_GENE: 5,
-    RESILIENCE: 1.00,
+    TOTAL_ORGANISMS: 0,
+    GENE_COUNT: 0,
+    MUTATION_RATE: 0,
+    MIN_GENE: 0,
+    MAX_GENE: 0,
+    RESILIENCE: 0,
     POP_GROWTH: 'constant', // testing new setting (other value: 'fluctuate')
     
     dialogue: false,
@@ -1596,6 +1596,8 @@ async function runGeneration(new_generation) {
         // combine both organisms arrays for organisms fade-out animation
         organisms = organisms.concat(deceased_organisms);
     }
+
+    await sleep(300);
     
     if (simSettings.dialogue) {
         await runSelectionAnimations(closest_organism, parents, organisms);
