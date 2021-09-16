@@ -125,6 +125,30 @@ class Organism {
         let normalized_distance_to_goal = this.distance_to_goal / scale;
         this.fitness = 1 - normalized_distance_to_goal;
     }
+
+    hasReachedGoal() {
+        // check if within y-range 
+        if ((this.y - (this.radius / 2)) >= simSettings.GOAL_Y_POS && (this.y - (this.radius / 2)) <= (simSettings.GOAL_Y_POS + 20)) {
+            // check if within x-range
+            if ((this.x - (this.radius / 2)) >= simSettings.GOAL_X_POS && (this.x - (this.radius / 2)) <= (simSettings.GOAL_X_POS + 20)) {
+                // organism reached goal
+                this.reached_goal = true;
+            }
+        }
+    }
+    
+    hasReachedGoalBounds() {
+        // check if within y-range 
+        if ((this.y - (this.radius / 2)) >= simSettings.GOAL_Y_POS_BOUNDS && (this.y - (this.radius / 2)) <= (simSettings.GOAL_Y_POS_BOUNDS + 20)) {
+            // check if within x-range
+            if ((this.x - (this.radius / 2)) >= simSettings.GOAL_X_POS_BOUNDS && (this.x - (this.radius / 2)) <= (simSettings.GOAL_X_POS_BOUNDS + 20)) {
+                // organism reached goal
+                this.reached_goal = true;
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 // rename to FadingTool ?
@@ -533,7 +557,6 @@ async function runPreSimAnimations() {
         await sleep(2000);
 
         await paintbrush.fadeIn(Drawings.drawFakeGoal, .01);
-
         await paintbrush.fadeOut(Drawings.drawSimulationIntro, .02);
     }
 
@@ -564,8 +587,8 @@ async function runPreSimAnimations() {
     await paintbrush.fadeIn(Drawings.drawFakeGoal, .02);
 
     return new Promise(resolve => {
-        resolve("pre-sim animations complete!");
-    })
+        resolve("pre-sim animations complete");
+    });
 }
 
 function selectSimulationType() {
@@ -644,33 +667,26 @@ function handleSimTypeSelectionKeyPress(event) {
     }  
 }
 
-// boundary class methods? (could import boundary drawings required to boundary_utils.js)
 function turnOnBoundaryIntroductionOneListeners() {
     let next_btn = document.getElementsByClassName("next-btn")[0];
     next_btn.style.display = 'block';
 
     next_btn.addEventListener('click', function continueIntroduction() {
-
         // go to next screen
         BoundaryDrawings.drawBoundaryCreationIntroductionTwo();
         turnOnBoundaryIntroductionTwoListeners();
-
     }, {once: true});
 
     document.addEventListener('keydown', function checkKeystroke(event) {
         if (event.key === 'Enter') {
-
             // go to next screen
             BoundaryDrawings.drawBoundaryCreationIntroductionTwo();
             turnOnBoundaryIntroductionTwoListeners();
-        
         }
     }, {once: true});
 }
 
 function turnOnBoundaryIntroductionTwoListeners() {
-    
-    // change text
     let next_btn = document.getElementsByClassName("next-btn")[0];
     next_btn.innerHTML = 'Continue';
 
@@ -689,14 +705,13 @@ function turnOnBoundaryIntroductionTwoListeners() {
 
             next_btn.style.display = 'none';
 
-            // go to next screen
+            // go to next screen, begin boundary creation
             createNewBoundary();
         }
     })
 }
 
 async function applySimType() {
-
     // turn off listeners and hide buttons
     turnOffSimTypeSelectionEventListeners();
 
@@ -707,7 +722,7 @@ async function applySimType() {
     document.getElementsByClassName("run-btn")[0].addEventListener("click", runSimulation, {once: true});
 
     if (simSettings.sim_type === 'classic') {
-        // set global sim settings
+        // configure simSettings
         SettingsUtils.configureSettings();
     }
     else if (simSettings.sim_type === 'boundary') {
@@ -733,6 +748,7 @@ function createOrganisms () {
     }
 
     // create equal number of males and females
+    // O(n * m), where m is gene_count, or O(n)
     for (let i = 0; i < simSettings.TOTAL_ORGANISMS; i++) {
         if (i % 2) {
             gender = 'male';
@@ -748,7 +764,6 @@ function createOrganisms () {
         organism.setRandomGenes();
         initial_population.push(organism);
     }
-    console.log(`FEMALES CREATED: ${female_count}, MALES CREATED: ${male_count}`);
 
     return initial_population;
 }
@@ -757,18 +772,12 @@ function createOrganisms () {
 // ===== EVALUATION =====
 // ======================
 
-// updateAndMove() functions will not be converted to module (complex animations)
-// updateAndMove() not converted var >> let yet
-
-// === NEW ===
 function updateAndMoveOrganismsBounds(organisms) {
     return new Promise(resolve => {
-        // consider var >> let
         var canvas2_data = ctx2.getImageData(0, 0, canvas.width, canvas.height);
-
-        var finished = false;
-        var position_rgba;
-        var total_moves = 0;
+        let finished = false;
+        let position_rgba;
+        let total_moves = 0;
         let frame_id;
 
         let success_flag = false;
@@ -785,18 +794,14 @@ function updateAndMoveOrganismsBounds(organisms) {
                             position_rgba = getPixelXY(canvas2_data, organisms[i].x, organisms[i].y);
 
                             // check if touching green pixel
-                            if (position_rgba[0] === 155 && position_rgba[1] === 245) {
+                            if (position_rgba[0] === 155) {
 
-                                // check if touching goal
-                                if (organisms[i].x >= simSettings.GOAL_X_POS_BOUNDS) {
-                                    hasReachedGoalBounds(organisms[i]);
-                                }
-                                // if touching green pixel that isn't goal, organism is touching boundary
-                                else {
+                                // if organism hasn't reached goal, execute survival logic
+                                if (!organisms[i].hasReachedGoalBounds()) {
                                     let survived = Math.random() < simSettings.RESILIENCE;
 
                                     if (survived) {
-                                        // instead of update and move, move organism to inverse of last movement, update index
+                                        // move organism to inverse of last movement, update index
 
                                         // get inverse of last gene
                                         let inverse_x_gene = (organisms[i].genes[organisms[i].index - 1][0]) * -1;
@@ -843,12 +848,11 @@ function updateAndMoveOrganismsBounds(organisms) {
                     total_moves++;
                 }
 
-                // move to top if not working
                 if (total_moves >= simSettings.GENE_COUNT * organisms.length) {
                     finished = true;
                 }
 
-                sleep(1000 / simSettings.FPS); // looks smoother without fps
+                sleep(1000 / simSettings.FPS); // looks smoother without fps (but FPS keeps animation consistent)
                 frame_id = requestAnimationFrame(animateOrganisms);
             }
             else {
@@ -869,7 +873,7 @@ function updateAndMoveOrganisms(organisms) {
         let frame_id;
 
         // why is this async?
-        async function animateOrganisms() {
+        function animateOrganisms() {
             if (!finished) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -877,7 +881,11 @@ function updateAndMoveOrganisms(organisms) {
                     if (!organisms[i].reached_goal) {
                         organisms[i].update();
                         organisms[i].move();
-                        hasReachedGoal(organisms[i]); // maybe this could be conditionally called to reduce load
+
+                        // only check if organism has reached goal if his/her y position is approaching the goal 
+                        if (organisms[i].y < (simSettings.GOAL_Y_POS + 30)) {
+                            organisms[i].hasReachedGoal();
+                        }
                     }
                     else {
                         Drawings.updateSuccessfulOrganism(organisms[i]);
@@ -902,29 +910,7 @@ function updateAndMoveOrganisms(organisms) {
     })
 }
 
-// should these hasReached() functions be class methods?
-
-function hasReachedGoal(organism) {
-    // check if within y-range 
-    if ((organism.y - (organism.radius / 2)) >= simSettings.GOAL_Y_POS && (organism.y - (organism.radius / 2)) <= (simSettings.GOAL_Y_POS + 20)) {
-        // check if within x-range
-        if ((organism.x - (organism.radius / 2)) >= simSettings.GOAL_X_POS && (organism.x - (organism.radius / 2)) <= (simSettings.GOAL_X_POS + 20)) {
-            // organism reached goal
-            organism.reached_goal = true;
-        }
-    }
-}
-
-function hasReachedGoalBounds(organism) {
-    // check if within y-range 
-    if ((organism.y - (organism.radius / 2)) >= simSettings.GOAL_Y_POS_BOUNDS && (organism.y - (organism.radius / 2)) <= (simSettings.GOAL_Y_POS_BOUNDS + 20)) {
-        // check if within x-range
-        if ((organism.x - (organism.radius / 2)) >= simSettings.GOAL_X_POS_BOUNDS && (organism.x - (organism.radius / 2)) <= (simSettings.GOAL_X_POS_BOUNDS + 20)) {
-            // organism reached goal
-            organism.reached_goal = true;
-        }
-    }
-}
+// ===== stopped at updateAndMove() functions =====
 
 async function runEvaluationAnimation(organisms, stats) {
 

@@ -676,7 +676,7 @@ function drawSuccessMessage(opacity, generation_count) {
 
     // backdrop
     ctx.fillStyle = `rgba(10, 10, 10, .75)`;
-    ctx.fillRect(225, 200, 540, 325);
+    ctx.fillRect(270, 240, 430, 300);
 
     ctx.font = '44px Cairo';
     ctx.fillStyle = `rgba(155, 245, 0, ${opacity})`;
