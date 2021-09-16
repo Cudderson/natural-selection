@@ -903,7 +903,7 @@ async function runEvaluationAnimation(organisms, stats) {
             Drawings.drawStaticEvaluationPhaseText(ctx);
         }
 
-        ctx2.clearRect(700, 510, 350, 120);
+        ctx2.clearRect(740, 510, 350, 120);
         Drawings.drawStatsStatic(ctx, stats);
 
         if (stats.generation_count === 0 && !simSettings.dialogue) {
@@ -920,7 +920,7 @@ async function runEvaluationAnimation(organisms, stats) {
             Drawings.drawStaticEvaluationPhaseText(ctx2);
         }
 
-        ctx.clearRect(700, 510, 350, 120);
+        ctx.clearRect(740, 510, 350, 120);
         Drawings.drawStatsStatic(ctx2, stats);
 
         var success_flag = await updateAndMoveOrganismsBounds(organisms);
@@ -1578,11 +1578,10 @@ async function runGeneration(new_generation) {
     // trigger extinction if not enough mothers and fathers to reproduce a new generation
     if (potential_mothers.length === 0 || potential_fathers.length === 0) {
 
-        await paintbrush.fadeIn(drawExtinctionMessage, .05);
+        await paintbrush.fadeIn(Drawings.drawExtinctionMessage, .025);
 
-        await sleep(2000);
         do {
-            let exit_key = await getUserDecision();
+            var exit_key = await getUserDecision();
             console.log(exit_key);
         }
         while (exit_key != "q");
