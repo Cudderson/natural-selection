@@ -460,6 +460,7 @@ function createNewBoundary() {
                     }
                 }
                 else {
+                    alert("Invalid:\nLine cannot touch boundary!");
                     BoundaryDrawings.drawBoundaryValidationScreen(new_boundary.top_boundary);
                     boundary_touched  = false;
                 }
