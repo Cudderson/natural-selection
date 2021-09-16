@@ -59,7 +59,6 @@ class Organism {
         this.distance_to_next_checkpoint; //for boundary sim type only
         this.fitness;
         this.reached_goal = false;
-        // for boundary animations
         this.is_alive = true;
     }
 
@@ -84,18 +83,15 @@ class Organism {
         }
     }
 
-    // remove personal ctx declarations from class
     move() {
-        ctx.fillStyle = 'rgba(148, 0, 211, 1)'; // darkviolet
+        ctx.fillStyle = 'rgba(148, 0, 211, 1)';
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2, false);
         ctx.fill();
     }
 
-    // ** maybe these calc functions shouldn't be class methods? **
-
     calcDistanceToGoal() {
-        // c**2 = a**2 + b**2
+        // c^2 = a^2 + b^2
         let horizontal_distance_squared = (Math.abs(this.x - simSettings.GOAL_X_POS)) ** 2;
         let vertical_distance_squared = (Math.abs(this.y - simSettings.GOAL_Y_POS)) ** 2;
 
@@ -111,7 +107,6 @@ class Organism {
         this.distance_to_goal = this.distance_to_next_checkpoint + remaining_distance;
     }
 
-    // should combine fitness functions when available
     calcFitness() {
         // height = distance between starting location(y) and goal.y
         let height = simSettings.INITIAL_Y - simSettings.GOAL_Y_POS;
@@ -121,7 +116,6 @@ class Organism {
     }
 
     calcFitnessBounds(scale) {
-        // ideally don't have to pass in scale here
         let normalized_distance_to_goal = this.distance_to_goal / scale;
         this.fitness = 1 - normalized_distance_to_goal;
     }
@@ -131,7 +125,7 @@ class Organism {
         if ((this.y - (this.radius / 2)) >= simSettings.GOAL_Y_POS && (this.y - (this.radius / 2)) <= (simSettings.GOAL_Y_POS + 20)) {
             // check if within x-range
             if ((this.x - (this.radius / 2)) >= simSettings.GOAL_X_POS && (this.x - (this.radius / 2)) <= (simSettings.GOAL_X_POS + 20)) {
-                // organism reached goal
+
                 this.reached_goal = true;
             }
         }
@@ -142,7 +136,7 @@ class Organism {
         if ((this.y - (this.radius / 2)) >= simSettings.GOAL_Y_POS_BOUNDS && (this.y - (this.radius / 2)) <= (simSettings.GOAL_Y_POS_BOUNDS + 20)) {
             // check if within x-range
             if ((this.x - (this.radius / 2)) >= simSettings.GOAL_X_POS_BOUNDS && (this.x - (this.radius / 2)) <= (simSettings.GOAL_X_POS_BOUNDS + 20)) {
-                // organism reached goal
+
                 this.reached_goal = true;
                 return true;
             }
@@ -151,14 +145,8 @@ class Organism {
     }
 }
 
-// rename to FadingTool ?
-// accepts drawing functions and uses opacity to create fade effects
 class Paintbrush {
-    constructor(canvas, ctx) {
-        // even these may not be needed
-        this.canvas = canvas;
-        this.ctx = ctx;
-        // subject or context for the paintbrush to draw (can basically be anything)
+    constructor() {
         this.subject = null; 
     }
 
@@ -167,11 +155,9 @@ class Paintbrush {
             let finished = false;
             let opacity = 0.00;
             let frame_id;
+
             function drawFrame() {
                 if (!finished) {
-                    // animate
-
-                    // think of better name than drawing_function
                     drawing_function(opacity, content);
                     
                     if (opacity >= 1.00) {
@@ -184,7 +170,6 @@ class Paintbrush {
                     frame_id = requestAnimationFrame(drawFrame);
                 }
                 else {
-                    // resolve
                     cancelAnimationFrame(frame_id);
                     resolve();
                 }
@@ -198,11 +183,10 @@ class Paintbrush {
             let finished = false;
             let opacity = 1.00;
             let frame_id;
+
             function drawFrame() {
                 if (!finished) {
-                    // animate
 
-                    // think of better name than drawing_function
                     drawing_function(opacity, content);
                     
                     if (opacity <= 0.00) {
@@ -211,10 +195,10 @@ class Paintbrush {
                     else {
                         opacity -= step;
                     }
+
                     frame_id = requestAnimationFrame(drawFrame);
                 }
                 else {
-                    // resolve
                     cancelAnimationFrame(frame_id);
                     resolve();
                 }
@@ -223,7 +207,6 @@ class Paintbrush {
         })
     }
 
-    // not adding 'content' here yet until necessary
     // accepts a drawing_function with 2 opacities (old color & new color)
     fadeToNewColor(drawing_function, step) {
         return new Promise(resolve => {
@@ -234,9 +217,7 @@ class Paintbrush {
 
             function drawFrame() {
                 if (!finished) {
-                    // animate
 
-                    // think of better name than drawing_function
                     drawing_function(opacity, old_opacity);
                     
                     if (opacity >= 1.00) {
@@ -250,7 +231,6 @@ class Paintbrush {
                     frame_id = requestAnimationFrame(drawFrame);
                 }
                 else {
-                    // resolve
                     cancelAnimationFrame(frame_id);
                     resolve();
                 }
@@ -748,7 +728,6 @@ function createOrganisms () {
     }
 
     // create equal number of males and females
-    // O(n * m), where m is gene_count, or O(n)
     for (let i = 0; i < simSettings.TOTAL_ORGANISMS; i++) {
         if (i % 2) {
             gender = 'male';
@@ -856,7 +835,6 @@ function updateAndMoveOrganismsBounds(organisms) {
                 frame_id = requestAnimationFrame(animateOrganisms);
             }
             else {
-                //resolve
                 cancelAnimationFrame(frame_id);
                 resolve(success_flag);
             }
@@ -872,7 +850,6 @@ function updateAndMoveOrganisms(organisms) {
         let success_flag = false;
         let frame_id;
 
-        // why is this async?
         function animateOrganisms() {
             if (!finished) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -901,7 +878,6 @@ function updateAndMoveOrganisms(organisms) {
                 frame_id = requestAnimationFrame(animateOrganisms);
             }
             else {
-                // resolve
                 cancelAnimationFrame(frame_id);
                 resolve(success_flag);
             }
@@ -910,11 +886,8 @@ function updateAndMoveOrganisms(organisms) {
     })
 }
 
-// ===== stopped at updateAndMove() functions =====
-
 async function runEvaluationAnimation(organisms, stats) {
 
-    // need to draw goal at location depending on sim type
     if (simSettings.sim_type === 'classic') {
         // draw goal on canvas2
         Drawings.drawGoal();
@@ -922,7 +895,6 @@ async function runEvaluationAnimation(organisms, stats) {
         var success_flag = await updateAndMoveOrganisms(organisms);
     }
     else if (simSettings.sim_type === 'boundary') {
-        // *** this is super messy ***
 
         if (simSettings.dialogue) {
             // draw eval text and stats on canvas1
@@ -963,7 +935,7 @@ function getShortestDistanceToGoal(organisms) {
     let shortest_distance = 10000;
     let closest_organism_index;
 
-    // though this loop identifies closest organism, it ALSO updates organism's distance_to_goal attribute
+    // though this loop identifies closest organism, it also updates organism's distance_to_goal attribute
     for (let i = 0; i < organisms.length; i++) {
         let distance_to_goal = organisms[i].calcDistanceToGoal();
         if (distance_to_goal < shortest_distance) {
@@ -980,10 +952,6 @@ function getShortestDistanceToGoal(organisms) {
 function getShortestDistanceToNextCheckpoint(next_checkpoint, organisms) {
     let shortest_distance_to_checkpoint = 10000;
     let closest_organism;
-
-    // BUG: when next_checkpoint === 'goal', we get coordinates error
-    // my fix:
-    // [] *** CHECK WHEN PROVEN WORKING ***
     let next_checkpoint_x;
     let next_checkpoint_y;
 
@@ -1005,15 +973,13 @@ function getShortestDistanceToNextCheckpoint(next_checkpoint, organisms) {
         let distance_to_checkpoint_squared = horizontal_distance_squared + vertical_distance_squared;
 
         organisms[i].distance_to_next_checkpoint = Math.sqrt(distance_to_checkpoint_squared);
-        // console.log("Distance to next-closest checkpoint for organism " + i + ":");
-        // console.log(organisms[i].distance_to_next_checkpoint);
 
         if (organisms[i].distance_to_next_checkpoint < shortest_distance_to_checkpoint) {
             shortest_distance_to_checkpoint = organisms[i].distance_to_next_checkpoint;
             closest_organism = organisms[i];
         }
     }
-    // we should have each organism's distance to the closest checkpoint not yet reached.
+
     return closest_organism;
 }
 
@@ -1031,7 +997,6 @@ function calcPopulationFitness (organisms) {
 
 function calcPopulationFitnessBounds(remaining_distance, organisms, scale) {
 
-    // calc/set distance_to_goal && fitness
     let total_fitness = 0.00;
 
     for (let i = 0; i < organisms.length; i++) {
@@ -1048,12 +1013,9 @@ function calcPopulationFitnessBounds(remaining_distance, organisms, scale) {
     // set average fitness
     let average_fitness = total_fitness / organisms.length;
 
-    console.log(average_fitness, total_fitness, organisms.length);
-
     return average_fitness;
 }
 
-// testing removing the awaits from here
 function evaluatePopulation(organisms) {
 
     let population_resolution = {
@@ -1083,7 +1045,6 @@ function beginSelectionProcess(organisms, average_fitness) {
     let potential_mothers = [];
     let potential_fathers = [];
 
-    // this algorithm is O(n * m), where n is the amount of organisms and m is the amount of times we add each organism to array
     for (let i = 0; i < organisms.length; i++) {
 
         // - give organisms with below-average fitness only 1 array spot
@@ -1106,8 +1067,6 @@ function beginSelectionProcess(organisms, average_fitness) {
                 }
             }
         }
-        // console.log(`Fitness for Organism ${i}: ${organisms[i].fitness}`);
-        // console.log(`Organism ${i} was added to array ${Math.ceil((organisms[i].fitness * selection_factor) ** 2)} times.`);
     }
 
     let potential_parents = {
@@ -1120,27 +1079,9 @@ function beginSelectionProcess(organisms, average_fitness) {
 
 function selectParentsForReproduction(potential_mothers, potential_fathers, next_gen_target_length) {
 
-    // this function creates parent couples === length of organisms / 2
-
-    // example
-    // var parents = [
-    //     [mother0, father0],
-    //     [mother1, father1],
-    //     ... 
-    //     [mother9, father9]
-    // ]
-
-    // console.log(`organisms.length: ${simSettings.organisms.length}`);
-    // console.log(`target length: ${next_gen_target_length}`);
-
     let parents = [];
-    // goal: pair together males and females 
-    // create parents == TOTAL_ORGANISMS / 2 (each couple reproduces roughly 2 offspring)
 
-    // classic target length = organisms.length
-    // boundary target length = organisms.length + num_of_deceased_organisms
-    // this way, our species will try to reproduce the same amount of organisms it started the generation with, rather than
-    // organisms.length, which would always decline as organisms die
+    // create parent couples (if each couple reproduces 2 offspring, population size remains constant)
     for (let i = 0; i < (next_gen_target_length / 2); i++) {
         let mother_index = Math.floor(Math.random() * potential_mothers.length);
         let father_index = Math.floor(Math.random() * potential_fathers.length);
@@ -1222,16 +1163,11 @@ async function runChosenParentsAnimations(parents, organisms) {
 }
 
 async function runSelectionAnimations(closest_organism, parents, organisms) {
-    console.log("Called runSelectionAnimations()");
-    // maybe model other phases after this one
-    await runClosestOrganismAnimations(closest_organism); // finished
+    await runClosestOrganismAnimations(closest_organism);
     await runChosenParentsAnimations(parents, organisms);
     
-    // make own function
     if (simSettings.sim_type === 'boundary') {
-
-        // fade out boundary
-        // we should draw a static selection phase on canvas1, and erase that area on canvas2
+        // we should draw static selection phase on canvas1, and erase that area on canvas2
         ctx2.clearRect(0, 0, 245, 150);
         Drawings.drawStaticSelectionPhaseText(ctx);
 
@@ -1253,7 +1189,6 @@ async function runSelectionAnimations(closest_organism, parents, organisms) {
 // ===== CROSSOVER & MUTATION =====
 // ================================
 
-// (Mutation handled on gene inheritance currently)
 function crossover(parents_to_crossover) {
 
     let mother = parents_to_crossover[0];
@@ -1267,18 +1202,15 @@ function crossover(parents_to_crossover) {
         let random_bool = Math.random();
 
         // apply mutation for variance
-        // set upper and lower bound for gene mutation using MUTATION_RATE / 2
-        // this way, mother and father genes retain an equal chance of being chosen
+        // set upper and lower bound for gene mutation using MUTATION_RATE / 2 (male and female genes have equal chance of mutation)
         if (random_bool < (simSettings.MUTATION_RATE / 2) || random_bool > 1 - (simSettings.MUTATION_RATE / 2)) {
             let mutated_gene = getRandomGene(simSettings.MIN_GENE, simSettings.MAX_GENE);
             crossover_genes.push(mutated_gene);
         }
-        // mother gene chosen
         else if (random_bool < 0.5) {
             let mother_gene = mother.genes[j];
             crossover_genes.push(mother_gene);
         }
-        // father gene chosen
         else {
             let father_gene = father.genes[j];
             crossover_genes.push(father_gene);
@@ -1308,14 +1240,11 @@ async function runMutationAnimations() {
 // ===== CREATE NEW GENERATION =====
 // =================================
 
-function determineOffspringCount() {
+function determineOffspringCount(possible_offspring_counts) {
 
     let offspring_count;
 
     if (simSettings.POP_GROWTH === 'fluctuate') {
-        // this shouldn't be declared every call.. (fix)
-        let possible_offspring_counts = [0, 0, 1, 1, 2, 2, 2, 3, 4, 5]; // sum = 20, 20/10 items = 2avg
-
         let offspring_count_index = Math.floor(Math.random() * possible_offspring_counts.length);
         offspring_count = possible_offspring_counts[offspring_count_index];
     }
@@ -1354,16 +1283,16 @@ function reproduce(crossover_genes) {
     let offspring = new Organism(offspring_gender, spawn_x, spawn_y);
     offspring.genes = crossover_genes;
 
-    // push offspring to new population
-    // simSettings.offspring_organisms.push(offspring);
     return offspring;
 }
 
 function reproduceNewGeneration(parents) {
+    let possible_offspring_counts = [0, 0, 1, 1, 2, 2, 2, 3, 4, 5]; // sum = 20, 20/10 items = 2 average
+
     let offspring_organisms = [];
 
     for (let i = 0; i < parents.length; i++) {
-        let offspring_count = determineOffspringCount();
+        let offspring_count = determineOffspringCount(possible_offspring_counts);
 
         for (let j = 0; j < offspring_count; j++) {
             let crossover_genes = crossover(parents[i]);
@@ -1375,14 +1304,7 @@ function reproduceNewGeneration(parents) {
     return offspring_organisms;
 }
 
-// ====================
-// ===== WIN/LOSE =====
-// ====================
-
-// * all win/lose drawings converted to module *
-// * keeping in case function is created to play those animations *
-
-// untested
+// UNTESTED (probably should move to bottom of file)
 async function handleSuccessfulSimDecision() {
     let key_pressed;
 
@@ -1392,15 +1314,15 @@ async function handleSuccessfulSimDecision() {
     }
     while (key_pressed != "Enter" && key_pressed != "q");
 
-    console.log("Key Accepted: " + key_pressed);
-
     await paintbrush.fadeOut(Drawings.drawSuccessMessage, .05);
 
     // this breaks:
     // drawings.js:353 Uncaught TypeError: Cannot read properties of null (reading 'length')
     // at drawOrganisms (drawings.js:353)
     // at drawFrame (simulator.js:160)
-    await paintbrush.fadeIn(Drawings.drawOrganisms, .9); // not tested yet (could try using rAF for one frame to ensure user sees?)
+    // [] check when works 
+    // (i forgot to add organisms as a parameter, try now)
+    await paintbrush.fadeIn(Drawings.drawOrganisms, .9, organisms);
 
     if (key_pressed === 'Enter') {
         console.log("Continuing Simulation.");
@@ -1432,13 +1354,12 @@ function createTitleScreenOrganisms() {
     let title_organisms = [];
 
     for (let i = 0; i < 100; i++) {
-        // we need a random x&y value to start the organism at 
+        // we need a random x&y value for organism spawn
         let random_x = Math.floor(Math.random() * canvas.width);
         let random_y = Math.floor(Math.random() * canvas.height);
 
         let new_organism = new Organism('female', random_x, random_y);
 
-        // ** NEED TO ALTER fadeInTitleAnimation() IF ANYTHING HERE CHANGES
         for (let j = 0; j < 250; j++) {
             let random_gene = getRandomGene(-5, 5);
             new_organism.genes.push(random_gene);
@@ -1454,7 +1375,7 @@ function fadeInTitleAnimation(title_organisms) {
     let opacity_tracker = 0.00;
     let finished = false;
     let cycles = 0;
-    let start_button_pressed = false; // flag to resolve animation
+    let start_button_pressed = false;
 
     let logo = document.getElementById("logo");
     let press_start_text = document.getElementById("press-start");
@@ -1481,9 +1402,7 @@ function fadeInTitleAnimation(title_organisms) {
         function animateTitle() {
             if (!finished) {
 
-                // respond to event listener flag
                 if (start_button_pressed) {
-                    // cancel and resolve
                     cancelAnimationFrame(frame_id);
                     return resolve("Select Sim Type");
                 }
@@ -1491,10 +1410,9 @@ function fadeInTitleAnimation(title_organisms) {
                 ctx.fillStyle = 'black';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-                // move organisms forever (works)
+                // move organisms forever
                 for (let i = 0; i < 100; i++) {
                     if (title_organisms[0].index < 250) {
-                        // update and move
                         if (title_organisms[i].index < 250) {
                             title_organisms[i].x += title_organisms[i].genes[title_organisms[i].index][0];
                             title_organisms[i].y += title_organisms[i].genes[title_organisms[i].index][1];
@@ -1504,7 +1422,6 @@ function fadeInTitleAnimation(title_organisms) {
                     }
                     else {
                         cycles++;
-                        console.log("Resetting Gene Index");
 
                         for (let j = 0; j < 100; j++) {
                             title_organisms[j].index = 0;
@@ -1516,18 +1433,19 @@ function fadeInTitleAnimation(title_organisms) {
                     }
                 }
 
-                // use globalAlpha, then reset
-                // could make this class Paintbrush in the future for this and goal class methods
+                // use globalAlpha for opacity, then reset
                 ctx.globalAlpha = opacity;
                 ctx.drawImage(logo, 105, 275);
 
                 ctx.globalAlpha = 0.8;
+
                 // blink start text 
                 if (opacity_tracker >= 0.12 && opacity_tracker <= 0.24) {
-                    // only draw image half of the time
+
                     ctx.drawImage(press_start_text, 300, 400, 400, 40);
                 }
                 else if (opacity_tracker > 0.24) {
+
                     // reset tracker
                     opacity_tracker = 0.00;
                 }
@@ -1540,13 +1458,10 @@ function fadeInTitleAnimation(title_organisms) {
                 // return to 1 for organisms
                 ctx.globalAlpha = 1;
 
-                // FPS is an example of a variable that doesn't need to be global ( in window )
-                sleep(750 / simSettings.FPS); // control drawing FPS for organisms
-                // var????? why
+                sleep(1000 / simSettings.FPS);
                 frame_id = requestAnimationFrame(animateTitle);
             }
             else {
-                // resolves every n cycles to prevent overflow
                 cancelAnimationFrame(frame_id);
                 resolve("Keep Playing");
             }
@@ -1580,7 +1495,6 @@ async function playTitleScreenAnimation() {
 // ===== MAIN =====
 // ================
 
-// not converted var >> let yet
 async function runGeneration(new_generation) {
 
     let organisms = new_generation.new_population;
@@ -1625,6 +1539,7 @@ async function runGeneration(new_generation) {
             await sleep(1500);
             await paintbrush.fadeIn(Drawings.drawSuccessMessage, .02, new_generation.generation_count);
 
+            // [] i'll need to pass organisms here or something, check in testing
             await handleSuccessfulSimDecision();            
         }
     }
@@ -1773,10 +1688,8 @@ async function runGeneration(new_generation) {
 
 async function runSimulation () {
 
-    // remove run-btn listener
+    // remove run-btn listener and hide
     document.getElementsByClassName("run-btn")[0].removeEventListener('click', runSimulation);
-
-    // hide start/settings buttons
     document.getElementsByClassName("run-btn")[0].style.display = 'none';
 
     // display stop simulation button & add its listener
@@ -1795,7 +1708,6 @@ async function runSimulation () {
     await runPreSimAnimations();
 
     let initial_population = createOrganisms();
-    console.log("Amount of organisms created = " + initial_population.length);
 
     // create initial generation and stats
     let new_generation = {};
@@ -1810,7 +1722,7 @@ async function runSimulation () {
 }
 
 function stopSimulation() {
-    // reloads the page
+    // reload page
     document.location.reload();
 }
 
@@ -1829,22 +1741,18 @@ function getPixel(canvas_data, index) {
 function getPixelXY(canvas_data, x, y) {
     let index = y * canvas_data.width + x;
 
-    // how it works?
-    // say we're at position (2, 2) on canvas, and canvas is 1000px wide
-    // index = (2 * 1000) + 2 = 2002
-    // reading left to right, pixel at (2, 2) is pixel #2002 ?
-
     return getPixel(canvas_data, index);
 }
 
 function sleep(milliseconds) {
-    console.log(`Sleeping for ${(milliseconds / 1000)} second(s).`);
     const date = Date.now();
     let currentDate = null;
+
     do {
         currentDate = Date.now();
     } 
     while (currentDate - date < milliseconds);
+
     return new Promise((resolve, reject) => {
         resolve();
     })
