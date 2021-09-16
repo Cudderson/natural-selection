@@ -514,11 +514,12 @@ function drawBothParentTypesNatural(opacity) {
 }
 
 // similar to redrawOrganisms(), but this function accepts an opacity value to allow fading
+// redrawOrganisms() may not be used, consider deprecating and keeping this only
 function drawOrganisms(opacity, organisms) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let i = 0; i < organisms.length; i++) {
-        ctx.fillStyle = `rgba(128, 0, 128, ${opacity})`;
+        ctx.fillStyle = `rgba(148, 0, 211, ${opacity});`;
         ctx.beginPath();
         ctx.arc(organisms[i].x, organisms[i].y, organisms[i].radius, 0, Math.PI*2, false);
         ctx.fill();
@@ -696,8 +697,8 @@ function drawSuccessMessage(opacity, generation_count) {
     ctx.fillRect(275, 295, 440, 3);
 }
 
+// NOT SURE IF THIS IS USED AT ALL?
 function redrawOrganisms(organisms) {
-    ctx.fillStyle = 'black';
     ctx.clearRect(235, 231, 550, 235);
 
     for (let i = 0; i < organisms.length; i++) {

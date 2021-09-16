@@ -1304,40 +1304,6 @@ function reproduceNewGeneration(parents) {
     return offspring_organisms;
 }
 
-// UNTESTED (probably should move to bottom of file)
-async function handleSuccessfulSimDecision() {
-    let key_pressed;
-
-    do {
-        key_pressed = await getUserDecision();
-        console.log(key_pressed);
-    }
-    while (key_pressed != "Enter" && key_pressed != "q");
-
-    await paintbrush.fadeOut(Drawings.drawSuccessMessage, .05);
-
-    // this breaks:
-    // drawings.js:353 Uncaught TypeError: Cannot read properties of null (reading 'length')
-    // at drawOrganisms (drawings.js:353)
-    // at drawFrame (simulator.js:160)
-    // [] check when works 
-    // (i forgot to add organisms as a parameter, try now)
-    await paintbrush.fadeIn(Drawings.drawOrganisms, .9, organisms);
-
-    if (key_pressed === 'Enter') {
-        console.log("Continuing Simulation.");
-        await sleep(500);
-    }
-    else if (key_pressed === 'q') {
-        console.log("Quitting Simulation.");
-
-        await paintbrush.fadeOut(Drawings.drawOrganisms, .05);
-
-        // possibly fade stats to black here too?
-        stopSimulation();
-    }
-}
-
 async function runNewGenAnimations(gen_summary_stats) {
     await paintbrush.fadeToNewColor(Drawings.drawCreateNewGenPhaseEntryText, .02);
     await paintbrush.fadeIn(Drawings.drawGenerationSummaryText, .025, gen_summary_stats);
@@ -1540,7 +1506,7 @@ async function runGeneration(new_generation) {
             await paintbrush.fadeIn(Drawings.drawSuccessMessage, .02, new_generation.generation_count);
 
             // [] i'll need to pass organisms here or something, check in testing
-            await handleSuccessfulSimDecision();            
+            await handleSuccessfulSimDecision(new_generation.generation_count, organisms);            
         }
     }
 
@@ -1766,6 +1732,32 @@ function getUserDecision() {
             resolve(key);
         }, {once: true});
     })
+}
+
+async function handleSuccessfulSimDecision(generation_count, organisms) {
+    let key_pressed;
+
+    do {
+        key_pressed = await getUserDecision();
+        console.log(key_pressed);
+    }
+    while (key_pressed != "Enter" && key_pressed != "q");
+
+    await paintbrush.fadeOut(Drawings.drawSuccessMessage, .05, generation_count);
+    
+    Drawings.drawOrganisms(1, organisms);
+
+    if (key_pressed === 'Enter') {
+        console.log("Continuing Simulation.");
+        await sleep(500);
+    }
+    else if (key_pressed === 'q') {
+        console.log("Quitting Simulation.");
+
+        await paintbrush.fadeOut(Drawings.drawOrganisms, .05, organisms);
+
+        stopSimulation();
+    }
 }
 
 function getRandomGene(min, max) {
