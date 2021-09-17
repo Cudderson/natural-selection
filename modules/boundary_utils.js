@@ -18,23 +18,19 @@ class Boundary {
 
         if (boundary_type === 'bottom') {
 
-            console.log("saving bottom-boundary");
             this.bottom_boundary.src = canvas.toDataURL("image/png");
         }
         else if (boundary_type === 'top') {
 
-            console.log("saving top boundary");
             this.top_boundary.src = canvas.toDataURL("image/png");
         }
         else if (boundary_type === 'full') {
 
-            console.log("saving full boundary");
             this.full_boundary.src = canvas.toDataURL("image/png");
         }
     }
 
     validateBottom(event) {
-        console.log("validating bottom boundary...");
 
         updateMousePosition(event);
 
@@ -42,17 +38,14 @@ class Boundary {
         if (simSettings.coordinates['x'] >= 940 && simSettings.coordinates['x'] <= 960 &&
             simSettings.coordinates['y'] >= 160 && simSettings.coordinates['y'] <= 180) {
 
-            console.log("valid boundary");
             return true;
         }
         else {
-            console.log("Invalid boundary.");
             return false;
         }   
     }
 
     validateTop(event) {
-        console.log("validating top-boundary...");
 
         updateMousePosition(event);
 
@@ -60,11 +53,9 @@ class Boundary {
         if (simSettings.coordinates['x'] >= 820 && simSettings.coordinates['x'] <= 840 &&
             simSettings.coordinates['y'] >= 40 && simSettings.coordinates['y'] <= 60) {
 
-            console.log("valid boundary");
             return true;
         }
         else {
-            console.log("Invalid boundary.");
             return false;
         }
     }
@@ -82,7 +73,6 @@ class Boundary {
     }
 
     determineLongestBoundary() {
-        // determine which boundary has more coordinates
         let longest_text;
         let longest_boundary;
         let target_length;
@@ -134,14 +124,13 @@ class Boundary {
             }
         }
 
-        console.log("Loop finished.");
-        console.log(`Longest boundary new size: ${longest_boundary_coordinates.length}`);
-        console.log(`Target Length (length of shortest boundary): ${target_length}`);
+        // console.log("Loop finished.");
+        // console.log(`Longest boundary new size: ${longest_boundary_coordinates.length}`);
+        // console.log(`Target Length (length of shortest boundary): ${target_length}`);
 
         // at this point, the longest_coordinate set is either the same size as the shortest, or slightly larger
         // trim off the extra if there is any
         if (longest_boundary_coordinates.length !== target_length) {
-            console.log("Trimming extra coordinates...");
             do {
                 // remove a random coordinate
                 let coordinate_to_remove = Math.floor(Math.random() * longest_boundary_coordinates.length);
@@ -150,16 +139,10 @@ class Boundary {
             while (longest_boundary_coordinates.length !== target_length);
         }
 
-        console.log("We should now have to coordinate sets of the same length");
-        console.log(`Longest Boundary Length: ${longest_boundary_coordinates.length}`);
-        console.log(`Shortest Boundary Length: ${target_length}`);
-
         return longest_boundary_coordinates;
     }
 
     prepareBoundaryForCheckpoints() {
-        console.log("Initial Boundary Lengths:");
-        console.log(`bottom: ${this.bottom_boundary_coordinates.length}, top: ${this.top_boundary_coordinates.length}`);
 
         // Identify longest boundary for trimming (target_length = length of shortest boundary)
         let longest_boundary_and_target = this.determineLongestBoundary();
@@ -195,7 +178,7 @@ class Boundary {
         // loop over all coordinates in both arrays
         for (let i = 0; i < this.top_boundary_coordinates.length; i++) {
             // draw a line from top[coordinate] to bottom[coordinate]
-            // let's say, for now, that we want just 10 lines drawn
+            // let's say that we want just 10 lines drawn
             // we could divide the total by 10, 243 / 10 = 24.3
             // if i % Math.ceil(24.3) === 0: draw line
             if (i % step === 0) {
@@ -220,9 +203,6 @@ class Boundary {
                 this.checkpoints.push({'coordinates': [mid_x, mid_y]});
             }
         }
-
-        // console.log("Line drawing complete");
-        // console.log(`Should be 10 lines: ${line_counter}`);
 
         // == Draw line connecting each checkpoint ==
         for (let i = 0; i < this.checkpoints.length - 1; i++) {
@@ -274,7 +254,6 @@ class Boundary {
 
             // determine shortest distance and store as size
             if (distance_to_previous_halfway_point < distance_to_own_halfway_point) {
-
                 // set minimum checkpoint size to 40
                 if (distance_to_previous_halfway_point < 40) {
                     this.checkpoints[i].size = 40;
@@ -284,7 +263,6 @@ class Boundary {
                 }
             }
             else {
-
                 // set minimum checkpoint size to 40
                 if (distance_to_own_halfway_point < 40) {
                     this.checkpoints[i].size = 40;
@@ -293,8 +271,6 @@ class Boundary {
                     this.checkpoints[i].size = Math.floor(distance_to_own_halfway_point);
                 }
             }
-
-            // checkpoint[0] doesn't check for previous halfway point, and checkpoint[length-1] doesn't check for own!
         }
 
         // give first and last checkpoints sizes
@@ -302,10 +278,10 @@ class Boundary {
         this.checkpoints[this.checkpoints.length - 1].size = 40;
 
         // to confirm, display sizes for each checkpoint
-        for (let i = 0; i < this.checkpoints.length; i++) {
-            console.log(`Size of checkpoint ${i}: ${this.checkpoints[i].size}`);
-            console.log(`coords of checkpoint: ${this.checkpoints[i].coordinates}`);
-        }
+        // for (let i = 0; i < this.checkpoints.length; i++) {
+        //     console.log(`Size of checkpoint ${i}: ${this.checkpoints[i].size}`);
+        //     console.log(`coords of checkpoint: ${this.checkpoints[i].coordinates}`);
+        // }
     }
 
     calcDistanceToGoalCheckpoints() {
@@ -335,7 +311,7 @@ class Boundary {
     
         let scale = 0.00;
     
-        // will store length of checkpoint to the next checkpoint
+        // store length of a checkpoint to the next checkpoint
         let checkpoint_to_checkpoint_lengths = [];
     
         for (let i = 1; i < this.checkpoints.length; i++) {
@@ -377,7 +353,7 @@ class Boundary {
     
         scale += distance_from_final_checkpoint_to_goal;
     
-        console.log(`final scale: ${scale}`);
+        // console.log(`final scale: ${scale}`);
     
         this.scale_statistics = {
             'scale': scale,
@@ -408,10 +384,10 @@ class Boundary {
         let reached_checkpoint = false;
     
         for (let k = this.checkpoints.length - 1; k >= 0; k--) {
-            console.log("k-loop iteration started");
+            // console.log("k-loop iteration started");
 
             if (reached_checkpoint) {
-                console.log("breaking out of k-loop, checkpoint was reached");
+                // console.log("breaking out of k-loop, checkpoint was reached");
                 break;
             }
 
@@ -422,13 +398,13 @@ class Boundary {
             let y_upper_bound = (this.checkpoints[k].coordinates[1]) + this.checkpoints[k].size;
 
             for (let j = 0; j < organisms.length; j++) {
-                console.log("j-loop iteration started");
+                // console.log("j-loop iteration started");
 
                 // check if organism within x && y bounds of checkpoint we're checking
                 if (organisms[j].x > x_lower_bound && organisms[j].x < x_upper_bound) {
                     if (organisms[j].y > y_lower_bound && organisms[j].y < y_upper_bound) {
     
-                        console.log("We have reached a checkpoint.");
+                        // console.log("We have reached a checkpoint.");
     
                         reached_checkpoint = true;
                         current_checkpoint = k;
@@ -448,8 +424,6 @@ class Boundary {
                             previous_checkpoint = 'spawn';
                             next_checkpoint = k + 1;
                         }
-    
-                        console.log("breaking");
                         break;
                     }
                 }

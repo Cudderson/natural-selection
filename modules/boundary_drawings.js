@@ -33,7 +33,7 @@ function drawBoundaryBoilerplate() {
     ctx.closePath();
 
     // placeholder goal
-    ctx.fillStyle = `rgba(155, 245, 0, 1)`;
+    ctx.fillStyle = `rgb(155, 245, 0)`;
     ctx.fillRect(925, 50, 20, 20);
 
     // draw instructions zones (no-draw zones)
@@ -241,7 +241,6 @@ function drawFinalBoundary(final_boundary) {
     drawHiddenBoundary();
 }
 
-// functions below are not exported, only called in this file
 function eraseIllegalDrawingZones() {
     ctx.fillStyle = 'black';
     ctx.fillRect(732, 442, 272, 200);
@@ -256,7 +255,6 @@ function drawHiddenBoundary() {
 }
 
 function drawCheckpoints() {
-    // === Draw Checkpoints ===
     for (let i = 0; i < simSettings.custom_boundary.checkpoints.length; i++) {
         ctx.beginPath();
         ctx.arc(
