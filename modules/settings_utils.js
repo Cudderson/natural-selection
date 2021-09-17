@@ -65,7 +65,6 @@ function validateTotalOrganismsSetting() {
 }
 
 function calculateGeneCount() {
-    // must be called after settings submitted
     let gene_count;
 
     if (simSettings.sim_type === 'classic') {
@@ -191,7 +190,7 @@ function validateSettingsForm() {
     if (all_settings_valid) {
         // turns off settings form, turns on canvas and run-btn
         applyValidSettings(settings_manager);
-        drawSimReadyScreen(); // drawing
+        drawSimReadyScreen();
     }
 
     // don't submit the form
@@ -200,7 +199,6 @@ function validateSettingsForm() {
 
 function applyValidSettings(settings_manager) {
 
-    // apply setting to global object
     simSettings.TOTAL_ORGANISMS = settings_manager.organisms_setting.value;
     simSettings.MIN_GENE = settings_manager.movement_setting.value * -1;
     simSettings.MAX_GENE = settings_manager.movement_setting.value;
@@ -228,7 +226,6 @@ function applyValidSettings(settings_manager) {
         simSettings.RESILIENCE = settings_manager.resilience_setting.value;
     }
 
-    // make html changes before function returns
     document.getElementsByClassName("canvas-container")[0].style.display = 'block';
     document.getElementsByClassName("settings-container")[0].style.display = 'none';
 

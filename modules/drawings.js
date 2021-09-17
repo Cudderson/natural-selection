@@ -1,6 +1,7 @@
 // === SIM TYPE SELECTION ===
+
 function highlightClassicSimType() {
-    console.log("left arrow pressed");
+    // console.log("left arrow pressed");
 
     // highlight classic btn, return boundary btn to normal
     let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
@@ -60,7 +61,7 @@ function highlightClassicSimType() {
 }
 
 function highlightBoundarySimType() {
-    console.log("right arrow pressed");
+    // console.log("right arrow pressed");
 
     // highlight boundary button, return classic button to normal
     let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
@@ -171,6 +172,7 @@ function drawInitialSimSelectionScreen() {
 }
 
 // === PRE SIM ===
+
 function drawSimReadyScreen() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -276,6 +278,7 @@ function drawGoal() {
 }
 
 // === STATS ===
+
 function drawStats(opacity, stats) {
     ctx2.clearRect(740, 510, 350, 120);
 
@@ -304,6 +307,7 @@ function drawStatsStatic(context, stats) {
 }
 
 // === PHASES ===
+
 function drawPhases(opacity) {
     ctx2.clearRect(0, 0, 245, 150);
 
@@ -369,7 +373,6 @@ function drawStaticEvaluationPhaseText(context) {
     context.fillText("Mutate", 10, 150);
 }
 
-// accepts a context/ctx to specify the canvas to draw on
 function drawStaticSelectionPhaseText(context) {
     context.clearRect(0, 0, 245, 150);
 
@@ -513,8 +516,6 @@ function drawBothParentTypesNatural(opacity) {
     }
 }
 
-// similar to redrawOrganisms(), but this function accepts an opacity value to allow fading
-// redrawOrganisms() may not be used, consider deprecating and keeping this only
 function drawOrganisms(opacity, organisms) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -672,6 +673,7 @@ function drawCreateNewGenPhaseExitText(opacity, old_opacity) {
 }
 
 // === WIN/LOSE ===
+
 function drawSuccessMessage(opacity, generation_count) {
     ctx.clearRect(270, 240, 430, 300);
 
@@ -695,15 +697,6 @@ function drawSuccessMessage(opacity, generation_count) {
     // line divider
     ctx.fillStyle = 'rgb(148, 0, 211)';
     ctx.fillRect(275, 295, 440, 3);
-}
-
-// NOT SURE IF THIS IS USED AT ALL?
-function redrawOrganisms(organisms) {
-    ctx.clearRect(235, 231, 550, 235);
-
-    for (let i = 0; i < organisms.length; i++) {
-        organisms[i].move();
-    }
 }
 
 function drawExtinctionMessage(opacity) {
@@ -737,27 +730,19 @@ function updateSuccessfulOrganism(organism) {
 }
 
 export {
-    drawSimulationSettings, drawSimulationIntro,
-    drawFakeGoal, drawSimulationExplanation,
-    drawExplanationAndGoal, drawStats,
-    drawEvaluationPhaseEntryText, drawEvaluationPhaseExitText,
-    drawSelectionPhaseEntryText, drawClosestOrganismText,
-    drawClosestOrganismHighlighted, drawClosestOrganismNatural,
-    drawMothersText, drawFathersText,
-    drawMothersHighlighted, drawMothersNatural,
-    drawFathersHighlighted, drawFathersNatural,
-    drawNotChosenText, drawAllSelectedOrganismsText,
-    drawBothParentTypesNatural, drawOrganisms,
-    drawSelectionPhaseExitText, drawCrossoverPhaseEntryText,
-    drawCrossoverDescriptionText, drawCrossoverPhaseExitText,
-    drawMutationPhaseEntryText, drawMutationDescriptionText,
-    drawMutationPhaseExitText, drawCreateNewGenPhaseEntryText,
-    drawGenerationSummaryText, drawCreateNewGenPhaseExitText,
-    drawSuccessMessage, drawExtinctionMessage,
-    redrawOrganisms, drawStaticEvaluationPhaseText,
-    updateSuccessfulOrganism, highlightClassicSimType,
-    highlightBoundarySimType, drawInitialSimSelectionScreen,
-    drawSimReadyScreen, drawPhases,
-    drawDeceasedOrganisms, drawStaticSelectionPhaseText,
-    drawStatsStatic, drawGoal,
+    drawSimulationSettings, drawSimulationIntro, drawFakeGoal,
+    drawSimulationExplanation, drawExplanationAndGoal, drawStats,
+    drawEvaluationPhaseEntryText, drawEvaluationPhaseExitText, drawSelectionPhaseEntryText,
+    drawClosestOrganismText,drawClosestOrganismHighlighted, drawClosestOrganismNatural,
+    drawMothersText, drawFathersText, drawMothersHighlighted,
+    drawMothersNatural, drawFathersHighlighted, drawFathersNatural,
+    drawNotChosenText, drawAllSelectedOrganismsText, drawBothParentTypesNatural,
+    drawOrganisms, drawSelectionPhaseExitText, drawCrossoverPhaseEntryText,
+    drawCrossoverDescriptionText, drawCrossoverPhaseExitText, drawMutationPhaseEntryText,
+    drawMutationDescriptionText, drawMutationPhaseExitText, drawCreateNewGenPhaseEntryText,
+    drawGenerationSummaryText, drawCreateNewGenPhaseExitText, drawSuccessMessage,
+    drawExtinctionMessage, drawStaticEvaluationPhaseText, updateSuccessfulOrganism,
+    highlightClassicSimType, highlightBoundarySimType, drawInitialSimSelectionScreen,
+    drawSimReadyScreen, drawPhases, drawDeceasedOrganisms,
+    drawStaticSelectionPhaseText, drawStatsStatic, drawGoal,
 }

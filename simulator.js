@@ -16,15 +16,16 @@ window.simSettings = {
     GOAL_X_POS_BOUNDS: 925,
     GOAL_Y_POS_BOUNDS: 50,
 
-    // population/species defaults (consider leaving blank until user chooses)
+    // organism settings
     TOTAL_ORGANISMS: 0,
     GENE_COUNT: 0,
     MUTATION_RATE: 0,
     MIN_GENE: 0,
     MAX_GENE: 0,
     RESILIENCE: 0,
-    POP_GROWTH: 'constant', // testing new setting (other value: 'fluctuate')
+    POP_GROWTH: 'constant', // (other value: 'fluctuate')
     
+    // sim settings
     dialogue: false,
 
     // frame rate
@@ -32,10 +33,10 @@ window.simSettings = {
 
     // sim type
     sim_type: null,
-};
 
-// boundary globals (maybe make window object?)
-simSettings.custom_boundary; // [] (one drawing: drawBoundary())
+    // populated with Boundary instance in boundary sim types
+    custom_boundary: null,
+};
 
 // attach canvas & drawing context to window
 window.canvas = document.getElementById("main-canvas");
@@ -43,9 +44,7 @@ window.ctx = canvas.getContext("2d");
 window.canvas2 = document.getElementById("background-canvas");
 window.ctx2 = canvas2.getContext("2d");
 
-// ===================
 // ===== CLASSES =====
-// ===================
 
 class Organism {
     constructor (gender, x, y) {
@@ -240,9 +239,7 @@ class Paintbrush {
     }
 }
 
-// ====================
 // ===== BOUNDARY =====
-// ====================
 
 function applyInitialBoundaryDrawingStyles() {
     // hide settings container and buttons
@@ -273,7 +270,7 @@ function applyInitialBoundaryDrawingStyles() {
 
 function createNewBoundary() {
 
-    // instantiate Boundary (test 'let' if can't get working)
+    // instantiate Boundary
     let new_boundary = new BoundaryUtils.Boundary();
 
     // drawing flags, and step tracker
@@ -477,7 +474,6 @@ function createNewBoundary() {
     let save_bounds_btn = document.getElementsByClassName("save-boundaries-btn")[0];
 
     save_bounds_btn.addEventListener("click", function() {
-        console.log("Saving Custom Boundaries");
 
         // draw Boundary as it will appear in simulation
         BoundaryDrawings.drawFinalBoundary(new_boundary.top_boundary);
@@ -488,7 +484,7 @@ function createNewBoundary() {
         // creates checkpoints, sets scale attribute
         new_boundary.prepareBoundaryForSimulation();
 
-        // add boundary to sim settings 
+        // populate simSettings.custom_boundary
         simSettings.custom_boundary = new_boundary;
 
         // turn off listeners
@@ -506,9 +502,7 @@ function createNewBoundary() {
     }, {once: true});
 }
 
-// ======================
 // ===== PRE-SIM =====
-// ======================
 
 function createPaintbrush() {
     window.paintbrush = new Paintbrush();
@@ -613,7 +607,6 @@ function turnOnSimTypeSelectionListeners() {
 
 function turnOffSimTypeSelectionEventListeners() {
     if (simSettings.sim_type != null) {
-        // turn off event listeners before displaying next canvas
         let sim_type_btn_classic = document.getElementsByClassName("sim-type-classic")[0];
         let sim_type_btn_boundary = document.getElementsByClassName("sim-type-boundary")[0];
     
@@ -675,7 +668,7 @@ function turnOnBoundaryIntroductionTwoListeners() {
 
         next_btn.style.display = 'none';
 
-        // go to next screen
+        // begin boundary creation
         createNewBoundary();
 
     }, {once: true});    
@@ -686,7 +679,7 @@ function turnOnBoundaryIntroductionTwoListeners() {
 
             next_btn.style.display = 'none';
 
-            // go to next screen, begin boundary creation
+            // begin boundary creation
             createNewBoundary();
         }
     })
@@ -703,7 +696,6 @@ async function applySimType() {
     document.getElementsByClassName("run-btn")[0].addEventListener("click", runSimulation, {once: true});
 
     if (simSettings.sim_type === 'classic') {
-        // configure simSettings
         SettingsUtils.configureSettings();
     }
     else if (simSettings.sim_type === 'boundary') {
@@ -748,9 +740,7 @@ function createOrganisms () {
     return initial_population;
 }
 
-// ======================
-// ===== EVALUATION =====
-// ======================
+// ===== EVALUATION PHASE =====
 
 function updateAndMoveOrganismsBounds(organisms) {
     return new Promise(resolve => {
@@ -811,8 +801,6 @@ function updateAndMoveOrganismsBounds(organisms) {
                             }
                         }
                         else {
-                            // update successful organism
-                            // set success flag to true 
                             Drawings.updateSuccessfulOrganism(organisms[i]);
                             success_flag = true;
                         }
@@ -875,7 +863,7 @@ function updateAndMoveOrganisms(organisms) {
                     finished = true;
                 }
 
-                sleep(1000 / simSettings.FPS); // control drawing FPS for organisms
+                sleep(1000 / simSettings.FPS);
                 frame_id = requestAnimationFrame(animateOrganisms);
             }
             else {
@@ -898,7 +886,6 @@ async function runEvaluationAnimation(organisms, stats) {
     else if (simSettings.sim_type === 'boundary') {
 
         if (simSettings.dialogue) {
-            // draw eval text and stats on canvas1
             ctx2.clearRect(0, 0, 245, 150);
             Drawings.drawStaticEvaluationPhaseText(ctx);
         }
@@ -915,7 +902,6 @@ async function runEvaluationAnimation(organisms, stats) {
             await paintbrush.fadeIn(BoundaryDrawings.drawBoundary, .015);
             ctx2.globalAlpha = 1;
 
-            // clear canvas1 and redraw eval text and stats on canvas2
             ctx.clearRect(0, 0, 245, 150);
             Drawings.drawStaticEvaluationPhaseText(ctx2);
         }
@@ -1027,9 +1013,7 @@ function evaluatePopulation(organisms) {
     return population_resolution;
 }
 
-// =====================
-// ===== SELECTION =====
-// =====================
+// ===== SELECTION PHASE =====
 
 function beginSelectionProcess(organisms, average_fitness) {
 
@@ -1101,16 +1085,13 @@ async function runClosestOrganismAnimations (closest_organism) {
 
     await paintbrush.fadeIn(Drawings.drawClosestOrganismText, .02);
 
-    // give paintbrush a subject to draw
     paintbrush.subject = closest_organism;
 
-    // highlight most-fit organism 
     await paintbrush.fadeIn(Drawings.drawClosestOrganismHighlighted, .03);
     await paintbrush.fadeIn(Drawings.drawClosestOrganismNatural, .03);
     await paintbrush.fadeIn(Drawings.drawClosestOrganismHighlighted, .03);
     await sleep(200);
 
-    // fade out text, return organism to natural color
     await paintbrush.fadeIn(Drawings.drawClosestOrganismNatural, .02);
     await paintbrush.fadeOut(Drawings.drawClosestOrganismText, .04);
 
@@ -1168,7 +1149,7 @@ async function runSelectionAnimations(closest_organism, parents, organisms) {
     await runChosenParentsAnimations(parents, organisms);
     
     if (simSettings.sim_type === 'boundary') {
-        // we should draw static selection phase on canvas1, and erase that area on canvas2
+        // draw static selection phase on canvas1, erase that area on canvas2
         ctx2.clearRect(0, 0, 245, 150);
         Drawings.drawStaticSelectionPhaseText(ctx);
 
@@ -1176,7 +1157,7 @@ async function runSelectionAnimations(closest_organism, parents, organisms) {
         await paintbrush.fadeOut(BoundaryDrawings.drawBoundary, .02);
         ctx2.globalAlpha = 1;
 
-        // next, we should erase the drawing on canvas1 and redraw on canvas2 (all working)
+        // erase the drawing on canvas1 and redraw on canvas2
         ctx.clearRect(0, 0, 245, 150);
         Drawings.drawStaticSelectionPhaseText(ctx2);
     }
@@ -1186,9 +1167,7 @@ async function runSelectionAnimations(closest_organism, parents, organisms) {
     })
 }
 
-// ================================
-// ===== CROSSOVER & MUTATION =====
-// ================================
+// ===== CROSSOVER & MUTATION PHASES =====
 
 function crossover(parents_to_crossover) {
 
@@ -1237,9 +1216,7 @@ async function runMutationAnimations() {
     await paintbrush.fadeToNewColor(Drawings.drawMutationPhaseExitText, .02);
 }
 
-// =================================
-// ===== CREATE NEW GENERATION =====
-// =================================
+// ===== CREATE NEW GENERATION PHASE =====
 
 function determineOffspringCount(possible_offspring_counts) {
 
@@ -1313,15 +1290,13 @@ async function runNewGenAnimations(gen_summary_stats) {
     await paintbrush.fadeToNewColor(Drawings.drawCreateNewGenPhaseExitText, .02);
 }
 
-// ========================
 // ===== TITLE SCREEN =====
-// ========================
 
 function createTitleScreenOrganisms() {
     let title_organisms = [];
 
     for (let i = 0; i < 100; i++) {
-        // we need a random x&y value for organism spawn
+        // random x&y value for organism spawn
         let random_x = Math.floor(Math.random() * canvas.width);
         let random_y = Math.floor(Math.random() * canvas.height);
 
@@ -1360,7 +1335,6 @@ function fadeInTitleAnimation(title_organisms) {
             console.log("Enter Pressed");
             start_button_pressed = true;
 
-            // remove eventListener after flag set
             document.removeEventListener('keydown', updateStartBtnFlagOnEnter);
         }
     });
@@ -1458,9 +1432,7 @@ async function playTitleScreenAnimation() {
     while (status === "Keep Playing");
 }
 
-// ================
 // ===== MAIN =====
-// ================
 
 async function runGeneration(new_generation) {
 
@@ -1491,7 +1463,6 @@ async function runGeneration(new_generation) {
     // Phase: Evaluate Individuals
 
     if (simulation_succeeded) {
-
         await runEvaluationAnimation(organisms, stats);
     }
     else {
@@ -1499,14 +1470,12 @@ async function runGeneration(new_generation) {
         let success_flag = await runEvaluationAnimation(organisms, stats);
 
         if (success_flag) {
-            // update flag
             simulation_succeeded = true;
 
             // give user time to see their win
             await sleep(1500);
             await paintbrush.fadeIn(Drawings.drawSuccessMessage, .02, new_generation.generation_count);
 
-            // [] i'll need to pass organisms here or something, check in testing
             await handleSuccessfulSimDecision(new_generation.generation_count, organisms);            
         }
     }
@@ -1517,15 +1486,15 @@ async function runGeneration(new_generation) {
         await paintbrush.fadeOut(Drawings.drawStats, .02, stats); // fade out stats before average fitness updated
     }
 
+    // for boundary sims
+    let deceased_organisms = [];
+
     // store length of organisms array before deceased organisms filtered out for reproduction (boundary sims)
     let next_gen_target_length = organisms.length;
 
+    // both sims
     let closest_organism;
-
     let average_fitness;
-
-    // for boundary sims
-    let deceased_organisms = [];
 
     if (simSettings.sim_type === 'classic') {
 
@@ -1560,7 +1529,6 @@ async function runGeneration(new_generation) {
         }
 
         // set each organism's distance_to_goal and fitness attributes
-        // update average_fitness
         average_fitness = calcPopulationFitnessBounds(remaining_distance, organisms, simSettings.custom_boundary.scale_statistics.scale);
     }
 
@@ -1694,11 +1662,8 @@ function stopSimulation() {
     document.location.reload();
 }
 
-// ============================
-// ===== EXTRAS / UNKNOWN =====
-// ============================
+// ===== MISC =====
 
-// getPixel() functions only used by createNewBoundary.draw() and UpdateAndMoveOrganismsBounds()
 function getPixel(canvas_data, index) {
     let i = index * 4;
     let data = canvas_data.data;
