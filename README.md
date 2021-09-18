@@ -10,7 +10,7 @@
 
 ---
 
-# Table of Contents
+# Table of Contents (finish/add markdown links at end)
 ## [1. About](#about)
 - ### [Project Overview](#overview)
 - ### [Natural Selection and Genetic Algorithms](#ga)
@@ -26,15 +26,14 @@
 
 <a name='overview'></a>
 
-## Project Overview
+## Project Overview (inspiration here?)
 
 - ### Natural Selection Simulator is a customizable implementation of a genetic algorithm based on natural selection. Users will configure their own species of organisms and watch them ...
+<br>
 
 <a name='ga'></a>
 
 ## Natural Selection and Genetic Algorithms
-
----
 
 <br>
 
@@ -44,7 +43,10 @@
 
 <br>
 
-### Hello world
+## * 5 phases refer to genetic algorithms, NOT natural selection. <<< make that clear
+### (describe how a genetic algorithm is just an optimization algorithm based on natural selection)
+### (maybe include definition of GA, as well as GA/SGA vs EA)
+### (describe 5 phases of gemetic algorithm) * Don't forget roulette wheel selection!
 
 ---
 
@@ -68,12 +70,37 @@
 
 <a name='walkthrough'></a>
 
-# 3. Walkthrough? (may need better name)
+# 3. Walkthrough? (may need better name; "Implementation?")
+
+## (Simulation types description)
+
+## The Algorithm
+
+- #### (describe how settings allow user to configure their own simulation) (maybe show at end to not overwhelm user)
+
+- #### (show code / images / gifs for all 5 phases)
+
+### Simulation Type: Classic
+
+- #### describe classic sim type
+
+### Simulation Type: Boundary
+
+- #### describe boundary sim type
 
 <a name='final-thoughts'></a>
 
 # 4. Final/Closing Thoughts
 
+- ### (describe how the algorithm is trivial compared to real natural selection)
+
+- ### What can we take away from this project?
+
+- ### etc.
+
 <a name='author'></a>
 
 # 5. Author
+
+- ### (talk about myself)
+- ### (email/contact)
