@@ -9,7 +9,7 @@
 </div>
 
 ---
-
+# *** Consider putting all readme screenshots/gifs in different repo to keep small size ***
 # Table of Contents (finish/add markdown links at end)
 ## [1. About](#about)
 - ### [Project Overview](#overview)
@@ -103,7 +103,7 @@
   - To evaluate our population, we apply each organism's genes to their current position until all genes have been evaluated for.
 
   - Next is possibly the most-crucial piece of any genetic algorithm: the **fitness function**.
-  - The goal of a fitness function is to determine how 'fit' an organism is, and assign her/him/it a fitness score. In this project, an organism's fitness reflects its ability to reach a target goal. The closer an organism is to the goal, the higher its fitness score.
+  - The goal of a fitness function is to determine how 'fit' an organism is, and assign her/him/it a fitness score. In this project, an organism's fitness reflects its ability to reach a target goal. The closer an organism is to reaching the goal, the higher its fitness score.
   - The fitness score of an organism determines its probability to be selected for reproduction.
 
 ### Selection
@@ -113,7 +113,7 @@
 
 ### Crossover
   - With our parent-organisms selected, we can begin the crossover phase.
-  - Genes of the parent-couples will be combined to create new offspring organisms!
+  - Genes of the selected parent-couples will be combined to create new offspring organisms!
   - [code snippet]
 
 ### Mutation
@@ -127,16 +127,36 @@
 <a name="simulation"></a>
 
 # 4 Simulation
-- ### (with everything explained, can now show the simulation in action)
-- ### sim types here? (settings should be near this)
+- ### Now that we understand the algorithm, let's see it in action.
+<br>
+
+## Simulation Types
+
+### This project offers two simulation types: Classic and Boundary
 
 #### Simulation Type: Classic
 
+- image
 - ##### describe classic sim type
 
 #### Simulation Type: Boundary
 
+- image
 - ##### describe boundary sim type
+
+#
+
+## Classic Simulation
+
+- #### (settings with screenshot)
+
+- #### (go through the 5 phases in classic simulations)
+
+## Boundary Simulation
+
+- #### (settings with screenshot)
+
+- #### (go through the 5 phases in boundary simluations)
 
 ---
 
