@@ -14,11 +14,14 @@
 ## [1. About](#about)
 - ### [Project Overview](#overview)
 - ### [Natural Selection and Genetic Algorithms](#ga)
-- ### [Built With](#built-with)
 ## [2. Usage](#usage)
-## [3. Walkthrough???](#walkthrough)
-## [4. Final Thoughts](#final-thoughts)
-## [5. Author](#author)
+## [3. Algorithm Implementation](#algo)
+## [4. Simulation](#simulation)
+## [5. Final Thoughts](#final-thoughts)
+## [6. Author](#author)
+
+<br>
+<br>
 
 <a name='about'></a>
 
@@ -29,6 +32,12 @@
 ## Project Overview (inspiration here?)
 
 - ### Natural Selection Simulator is a customizable implementation of a genetic algorithm based on natural selection. Users will configure their own species of organisms and watch them ...
+
+- ### Built With:
+  - Javascript
+  - HTML Canvas
+  - HTML/CSS
+
 <br>
 
 <a name='ga'></a>
@@ -43,54 +52,97 @@
 
 <br>
 
-## * 5 phases refer to genetic algorithms, NOT natural selection. <<< make that clear
-### (describe how a genetic algorithm is just an optimization algorithm based on natural selection)
+### In the context of computer science, genetic algorithms (GAs) are optimization algorithms based on the process of natural selection. (In this project's implementation, our algorithm will attempt to optimize a species of organisms' ability to reach a trivial target goal.) <<< Consider if this should wait until Algorithm section)
+
+#
+
+### Genetic Algorithms typically have five phases:
+
+- #### Creation of a New Generation
+- #### Evaluation / Fitness Function
+- #### Selection (don't forget roulette wheel!)
+- #### Crossover
+- #### Mutation
+
+#
+
+### These five phases are repeated until the algorithm no longer produces offspring that are significantly different from the previous generation. This is called [convergence](https://www.biologyonline.com/dictionary/convergence).
+
 ### (maybe include definition of GA, as well as GA/SGA vs EA)
-### (describe 5 phases of gemetic algorithm) * Don't forget roulette wheel selection!
 
 ---
-
-<a name='built-with'></a>
-
-## Built With / Technologies Used
-
-- ### Javascript
-- ### HTML Canvas
-- ### HTML/CSS
-
 <!-- finish up to here -->
 
 <a name='usage'></a>
 
-# 2. Usage
+# 2. Usage (Maybe this should be before anything? Kind of ruins the flow)
 
 ## [Installation Instructions (needs tag)]
 
 ## [web server explanation and instructions/recommendations]
 
-<a name='walkthrough'></a>
+<br>
 
-# 3. Walkthrough? (may need better name; "Implementation?")
+---
 
-## (Simulation types description)
+<a name='algo'></a>
 
-## The Algorithm
+# 3. Algorithm Implementation
 
-- #### (describe how settings allow user to configure their own simulation) (maybe show at end to not overwhelm user)
+## The Algorithm (include goal of this specific algorithm somewhere) (format text sizes at end)
 
-- #### (show code / images / gifs for all 5 phases)
+### Create A New Generation
+  - The first step is to supply our algorithm with an initial population (of organisms).
+  - [code snippet]
+  - We create a population of [x] organisms with random 'genes'.
+  - For this project, a 'gene' is a coordinate pair that represents the next movement an organism will make on a 2D plane. (ex. [3, -1])
+  - Note: All organisms will share the same starting location/spawn-point.
 
-### Simulation Type: Classic
+### Evaluation / Fitness Function
+  - [code snippet / updateAndMove() gif]
+  - To evaluate our population, we apply each organism's genes to their current position until all genes have been evaluated for.
 
-- #### describe classic sim type
+  - Next is possibly the most-crucial piece of any genetic algorithm: the **fitness function**.
+  - The goal of a fitness function is to determine how 'fit' an organism is, and assign her/him/it a fitness score. In this project, an organism's fitness reflects its ability to reach a target goal. The closer an organism is to the goal, the higher its fitness score.
+  - The fitness score of an organism determines its probability to be selected for reproduction.
 
-### Simulation Type: Boundary
+### Selection
+  - In the selection phase, we'll use the fitness scores of our population to select 'parent' organisms to reproduce the next-generation of organisms. 
+  - The premise here is that organisms with a high fitness score must have better genes than low fitness score organisms. Therefore, selecting the highest-fitness organisms to reproduce should yield a more-fit next-generation, compared to the current.
+  - [code snippet] / explanation (we create parent couples by...)
 
-- #### describe boundary sim type
+### Crossover
+  - With our parent-organisms selected, we can begin the crossover phase.
+  - Genes of the parent-couples will be combined to create new offspring organisms!
+  - [code snippet]
+
+### Mutation
+  - Mutation refers to the altering/mutation of an offspring organism's genes.
+  - "Mutation" sounds negative and alarming, but it's a necessary step in genetic algorithms.
+  - [code snippet]
+  - explanation
+
+---
+
+<a name="simulation"></a>
+
+# 4 Simulation
+- ### (with everything explained, can now show the simulation in action)
+- ### sim types here? (settings should be near this)
+
+#### Simulation Type: Classic
+
+- ##### describe classic sim type
+
+#### Simulation Type: Boundary
+
+- ##### describe boundary sim type
+
+---
 
 <a name='final-thoughts'></a>
 
-# 4. Final/Closing Thoughts
+# 5. Final/Closing Thoughts
 
 - ### (describe how the algorithm is trivial compared to real natural selection)
 
@@ -98,9 +150,14 @@
 
 - ### etc.
 
+<!-- credit: https://towardsdatascience.com/introduction-to-genetic-algorithms-including-example-code-e396e98d8bf3 -->
+<!-- credit: luke garrigan blog -->
+
+---
+
 <a name='author'></a>
 
-# 5. Author
+# 6. Author
 
 - ### (talk about myself)
 - ### (email/contact)
