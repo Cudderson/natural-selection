@@ -89,7 +89,9 @@
 
 # 3. Algorithm Implementation
 
-- ### ! *code snippets are stripped down to their essentials for readability*
+- ### ! *code snippets in this section are simplified to their essentials for readability*
+- (maybe mention that these snippets are meant to highlight the phases of the algorithm and not to show how the program works as a whole. To see the final product, see Simulation(linktoSimulation))
+- mention how the simulation settings allow you to configure your own simulation, but this example will focus on a certain set of settings
 
 #
 <br>
@@ -241,12 +243,11 @@
           selection_factor = 10;
       }
 
-      // fill arrays with candidates for reproduction
       let potential_mothers = [];
       let potential_fathers = [];
 
       for (let i = 0; i < organisms.length; i++) {
-
+      
           if (organisms[i].fitness < average_fitness) {
               if (organisms[i].gender === 'female') {
                   potential_mothers.push(organisms[i]);
@@ -292,7 +293,6 @@
 
       let parents = [];
 
-      // create parent couples
       for (let i = 0; i < (population_size / 2); i++) {
           let mother_index = Math.floor(Math.random() * potential_mothers.length);
           let father_index = Math.floor(Math.random() * potential_fathers.length);
@@ -312,21 +312,99 @@
 
 - Finally, we create parent couples by randomly pairing male and female organisms from `potential_parents`. My algorithm creates parent couples equal to half the population size. We'll see why in the crossover phase.
 - Note: `selection_factor` is an optimization I implemented to keep array sizes smaller as `average_fitness` increases, as well as strengthen selection-bias in early generations. However, it is not necessary for the overall-functioning of the algorithm.
+- consider mentioning roulette wheel selection???
+  - (put in correct place if used) This implementation allows for an organism to be selected for more than one parent couple, i.e., an organism can reproduce with multiple others. Theoretically, one single female could be selected for every single parent couple, and be the mother to each offspring organism in the next-generation.) 
 
 #
-
-# STOPPED HERE
 
 ### Crossover
   - With our parent-organisms selected, we can begin the crossover phase.
   - Genes of the selected parent-couples will be combined to create new offspring organisms!
-  - [code snippet]
+  - ```javascript
+    function crossover(parents_to_crossover) {
 
+        let mother = parents_to_crossover[0];
+        let father = parents_to_crossover[1];
+
+        let crossover_genes = [];
+
+        for (let j = 0; j < 300; j++) {
+        
+            // returns value between 0-1
+            let random_val = Math.random();
+
+            if (random_val < 0.5) {
+                let mother_gene = mother.genes[j];
+                crossover_genes.push(mother_gene);
+            }
+            else {
+                let father_gene = father.genes[j];
+                crossover_genes.push(father_gene);
+            }
+        }
+
+        return crossover_genes;
+    }
+    
+    
+    let offspring_organisms = [];
+
+    for (let i = 0; i < parents.length; i++) {
+        for (let j = 0; j < 2; j++) {
+            let crossover_genes = crossover(parents[i]);
+            
+            let offspring = new Organism();
+            offspring.genes = crossover_genes;
+            
+            offspring_organisms.push(offspring);
+        }
+    }
+    ```
+    
+   - We call `crossover()` twice for each of our selected parent couples to simulate each couple creating the `crossover_genes` for 2 offspring organisms. (In the selection phase, we created one parent couple for every two organisms in the population.)
+   - We create the `crossover_genes` for a new organism by randomly choosing either the mother or father gene at each index, until we have a full set of genes (300 in this example). The genes are assigned to new `Organism`s and stored in `offspring_organisms`. 
+       - *This crossover implementation will keep the population size constant from generation to generation. In Simulation Settings(linktosection), you can optionally choose that your population sizes fluctuate(linktofluctuate?) each generation.*
+
+#
+    
 ### Mutation
   - Mutation refers to the altering/mutation of an offspring organism's genes.
-  - "Mutation" sounds negative and alarming, but it's a necessary step in genetic algorithms.
-  - [code snippet]
-  - explanation
+  - The purpose of the mutation operator in a GA is to maintain genetic diversity. A mutation in an organism's genes could produce a new solution that didn't yet exist in the population! 
+  - Without mutation and the persistence of diversity, populations could prematurely converge, resulting in a suboptimal solution.
+  - ```javascript
+    function mutate(offspring_organisms) {
+        const MUTATION_RATE = 0.03;
+
+        for (let i = 0; i < offspring_organisms.length; i++) {
+            for (let j = 0; j < 300; j++) {
+            
+                // returns float between 0-1
+                let random_val = Math.random();
+
+                // apply mutation for variance
+                if (random_bool < MUTATION_RATE) {
+                    let mutated_gene = getRandomGene(-5, 5);
+                    offspring_organisms[i].genes[j] = mutated_gene; 
+                }
+            }
+        }
+    }
+    
+    offspring_organisms = mutate(offspring_organisms);
+    ```
+  - We can simulate gene mutation by comparing random numbers to our desired mutation rate. In this example, we mutate a gene if the random value is less than 0.03. This will mutate approximately 3% of all genes in the offspring population.
+    - the gene mutation rate of organisms is configurable in Simulation Settings (worth mentioning probably)
+  
+  - In the project files, the mutation phase is woven into crossover() for efficiency, but is separated in this example for readability and understanding  
+
+#
+
+### (word better) BOOM. We now have a new population of offspring organisms whose genes are derived from the most-fit male and female organisms from the previous generation. These organisms can now enter the Evaluation phase and continue the evolution of the species.
+
+(maybe show what happens when an organism succeeds (ehh, save for Simulation section))
+
+(feel free to say more here. Just stopping here for now)
+
 
 ---
 
