@@ -17,6 +17,7 @@
 ## [2. Usage](#usage)
 ## [3. Algorithm Implementation](#algo)
 ## [4. Simulation](#simulation)
+## (HTML Canvas/Animation section?)
 ## [5. Final Thoughts](#final-thoughts)
 ## [6. Author](#author)
 
@@ -408,6 +409,10 @@
 
 ---
 
+---
+
+---
+
 <a name="simulation"></a>
 
 # 4 Simulation
@@ -430,17 +435,100 @@
 
 #
 
-## Classic Simulation
+## Simulation Settings
 
-- #### (settings with screenshot)
+  - Natural Selection Simulator allows users to adjust settings in the algorithm and configure their own simulation(word better)
 
-- #### (go through the 5 phases in classic simulations)
+  - (image of classic settings screenshot)
 
-## Boundary Simulation
+  - (describe each setting available)
 
-- #### (settings with screenshot)
+  - (describe why resilience is grayed out, and that we'll see that in the boundary simulation type walkthrough
 
-- #### (go through the 5 phases in boundary simluations)
+#
+
+## Simulation Demo (Classic) (maybe name better)
+
+  - (show the settings used for this simulation)
+
+  - (show gen0 gif)
+
+  - (show gen 10 gif)
+
+  - (show successful gen gif)
+
+  - (Describe that not all simulations will finish this quickly, and that some may not even succeed at all)
+
+#
+
+## Simulation Demo (Boundary) (maybe name better/put Demo after boundary creation) 
+
+  - (show image of a boundary w/ caption)
+
+  - (show the settings used for this simulation)
+
+  - (introduce/describe resilience) (give resilience own link in table of contents)
+
+### Boundary Creation
+
+  - (don't need to show every step, just describe how it works and show what a valid boundary looks like when finished)
+
+#
+
+### Boundary Simulation Fitness Function(word better?)(give link in table of contents)
+
+  - (describe that boundary uses a different fitness function and why it has to (possible image?)
+
+  - (describe how this function will use checkpoints to determine an organism's fitness score, rather than just distance to goal)
+
+  - *code snippets in this section are simplified to their essentials for readability*
+
+#### Algorithm for Creating Boundary Checkpoints
+
+(i like the idea of using a numbered list here to show the checkpoint creation steps)
+
+##### When the user draws the walls to create their boundary, the mouse coordinates are stored. (mention when we get to it
+
+steps:
+1. Connect Boundary Coordinates
+  - (show image of the 100000 lines connected)
+  
+  - This is a bit overkill, though. Let's instead just create 10 connection lines
+   
+  - (show image of 10 lines connected (with center line drawn!))
+
+  - (optional explanation, maybe just explain what the code does)
+
+  - We also compute, store, and connect the center points of each line drawn. These points will represent the epicenter of our checkpoints.
+
+2. Determine Size of Checkpoints
+  - With the locations of our boundary's checkpoints known, we can determine the size at which they should be drawn.
+  
+  - (image of checkpoint circles drawn)
+
+  - (describe how checkpoint size is determined
+
+3. Calculate Checkpoint Data
+  - With our checkpoints created, we can calculate data that will help us with our fitness function.
+  - We first compute the distances from each checkpoint's epicenter to the next.
+  - Using this information, we can call the 'distance to the goal' the sum of distances between checkpoint epicenters (including the spawn point and goal location)
+  - Further, these checkpoint-to-checkpoint distances allow us to calculate the distance to the goal for *any* checkpoint, by summing the necessary distances.
+  - elaborate more
+
+#
+
+
+  - (show the settings used for this simulation)
+
+  - (show gen0 gif)
+
+  - (show gen 10 gif)
+
+  - (show successful gen gif)
+
+  - (Describe that not all simulations will finish this quickly, and that some may not even succeed at all)
+
+
 
 ---
 
