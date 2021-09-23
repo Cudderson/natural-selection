@@ -7,6 +7,11 @@
   <br>
   <img src='https://img.shields.io/badge/simulator-online-brightgreen'>
 </div>
+<!-- use this for settings description/keep just in case -->
+<!-- | Syntax      | Description |
+| ----------- | ----------- |
+| Header      | Title       |
+| Paragraph? More like a full-on essay!  | <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-classic-header-1.png" width="500" height="300">  | -->
 
 ---
 # *** Consider putting all readme screenshots/gifs in different repo to keep small size ***
@@ -415,7 +420,7 @@
 
 <a name="simulation"></a>
 
-# 4 Simulation
+# 4. Simulation
 - ### Now that we understand the algorithm, let's see it in action.
 <br>
 
@@ -423,39 +428,98 @@
 
 ### This project offers two simulation types: Classic and Boundary
 
-#### Simulation Type: Classic
+#
 
-- image
-- ##### describe classic sim type
+<div align="center">
+  <h3>Simulation Type: Classic</h3>
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-classic-header-1.png" width="500" height="300">
+  <h5>(screenshot from a Classic simulation)</h5>
+</div>
 
-#### Simulation Type: Boundary
+- ### In *Classic* simulations, users will configure their own species of organisms and watch them attempt to reach the goal over generations of natural selection.
 
-- image
-- ##### describe boundary sim type
+#
+
+### Simulation Type: Boundary
+
+- NO IMAGE YET (copy div from classic section)
+- ### In *Boundary* simulations, users will create their own path and watch their species of organisms attempt to reach the goal over generations of natural selection. Organism's will need to avoid the boundary to survive!
 
 #
 
 ## Simulation Settings
 
-  - Natural Selection Simulator allows users to adjust settings in the algorithm and configure their own simulation(word better)
+- ### Natural Selection Simulator allows users to adjust settings in the algorithm and configure their own simulation!
 
-  - (image of classic settings screenshot)
+<div align="center">
+  <h3>Settings</h3>
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-settings-classic.png" width="500" height="300">
+  <h5>(screenshot from Settings for Classic simulations)</h5>
+</div>
 
-  - (describe each setting available)
+<br>
 
-  - (describe why resilience is grayed out, and that we'll see that in the boundary simulation type walkthrough
+|  Setting      | Description |
+| ----------- | ----------- |
+| Initial Population Size | Amount of organisms to create for the first generation of the simulation |
+| Movement Speed  | Relative-maximum distance an organism can travel in one movement |
+| Mutation Rate | Target percentage of genes to be mutated in offspring organisms |
+| Resilience | For *Boundary* simulation type only |
+| Population Growth | 'Contant' vs 'Fluctuate' (toggle) |
+| Dialogue | When checked, simulation will run will run with additional GA phase highlighting, descriptions, and animations (toggle) |
+
+- (Population Growth) 'Constant': Parent organisms always reproduce offspring equal to the inital population size.
+- (Population Growth) 'Fluctuate': Population sizes may vary from generation to generation. When fluctuate is toggled, parent couples may reproduce anywhere from zero to five offspring.
+- Resilience will be explained in the *Boundary* section
+    
+#
+
+# DEMO SECTION? (apologize for gif quality)
+### - In this section, we'll walkthrough an examples of *Classic* and *Boundary* simulations. For readability, I'll be just focusing on the progression of the population/algorithm, specifically, the evaluation phase. (word better / I like the idea of a header for this section though)
+ 
+## Simulation Demo (Classic) (maybe name better)
+
+We create a *Classic* simulation with the following settings:
+  - ##### Initial Population: 100
+  - ##### Movement Speed: 4
+  - ##### Mutation Rate: 3.8%
+  - ##### Population Growth: Constant
+
+<br>
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-classic-gen0.gif" width="500" height="300">
+  <h5>Generation 0</h5>
+</div>
+    
+  - caption
 
 #
 
-## Simulation Demo (Classic) (maybe name better)
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-classic-mid-gen.gif" width="500" height="300">
+  <h5>Generation 5</h5>
+</div>
 
-  - (show the settings used for this simulation)
+  - caption
 
-  - (show gen0 gif)
+#
 
-  - (show gen 10 gif)
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-classic-gen10.gif" width="500" height="300">
+  <h5>Generation 10</h5>
+</div>
 
-  - (show successful gen gif)
+  - caption
+
+#
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-classic-gen-success.gif" width="500" height="300">
+  <h5>Generation 14</h5>
+</div>
+
+  - caption
 
   - (Describe that not all simulations will finish this quickly, and that some may not even succeed at all)
 
@@ -491,20 +555,38 @@
 
 steps:
 1. Connect Boundary Coordinates
-  - (show image of the 100000 lines connected)
+
+#
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-tutorial-2.png" width="500" height="300">
+  <h5>no caption here</h5>
+</div>
+
+  - caption
   
   - This is a bit overkill, though. Let's instead just create 10 connection lines
-   
-  - (show image of 10 lines connected (with center line drawn!))
+  
+#
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-tutorial-3.png" width="500" height="300">
+  <h5>no caption here</h5>
+</div>
 
   - (optional explanation, maybe just explain what the code does)
 
-  - We also compute, store, and connect the center points of each line drawn. These points will represent the epicenter of our checkpoints.
+  - We also compute, store, and connect the center points of each line drawn. These points will represent the epicenters of our checkpoints.
 
 2. Determine Size of Checkpoints
   - With the locations of our boundary's checkpoints known, we can determine the size at which they should be drawn.
   
-  - (image of checkpoint circles drawn)
+#
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-tutorial-4.png" width="500" height="300">
+  <h5>no caption here</h5>
+</div>
 
   - (describe how checkpoint size is determined
 
