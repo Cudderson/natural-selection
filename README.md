@@ -437,20 +437,102 @@
 </div>
 
 - ### In *Classic* simulations, users will configure their own species of organisms and watch them attempt to reach the goal over generations of natural selection.
+- elaborate
 
 #
 
-### Simulation Type: Boundary
+<div align="center">
+  <h3>Simulation Type: Boundary</h3>
+  <img src="" width="500" height="300">
+  <h5>(NO IMAGE YET)</h5>
+</div>
 
-- NO IMAGE YET (copy div from classic section)
 - ### In *Boundary* simulations, users will create their own path and watch their species of organisms attempt to reach the goal over generations of natural selection. Organism's will need to avoid the boundary to survive!
+- elaborate
 
 #
+
+### Boundary Simulation Fitness Function (give link in table of contents)
+
+  - In *Classic* simulations, we determine how *fit* an organism is by calculating its straight-line distance to the goal. The closer an organism is to the goal, the higher its fitness. However, this approach isn't sufficient for *Boundary* simulations, as most boundary paths are not straight-lines to the goal. Instead, it would be better to measure an organism's fitness based on its ability to progress through the boundary path, as the boundary path is the only way to reach the goal.
+
+  - To measure an organism's fitness in *Boundary* simulations, we'll create checkpoints along the boundary path, and assign fitness scores to organisms based on the checkpoints that they're able to reach. The more checkpoints an organism reaches, the higher its fitness.
+
+  - *code snippets in this section are simplified to their essentials for readability* (delete if there are no snippets)
+
+#
+
+### Boundary Creation
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-tutorial-1.png" width="500" height="300">
+  <h5>example of a user-drawn boundary</h5>
+</div>
+
+<br>
+
+  - Upon selecting *Boundary* as their simulation type, users will be prompted to create a boundary by drawing walls with their mouse/touchpad.
+
+  - For the simulation to work properly, we need to create checkpoints along the boundary path. These checkpoints will represent progress-markers for our population and allow us to assign a proper fitness score to each organism.
+
+#
+
+#### Algorithm for Creating Boundary Checkpoints
+
+- We'll use the boundary in the image above for this example
+
+steps:
+1. Connect Boundary Coordinates
+
+#
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-tutorial-2.png" width="500" height="300">
+  <h5>no caption here</h5>
+</div>
+
+  - As the user draws the top and bottom walls for their boundary, their mouse/cursor coordinates are stored. We can connect these coordinates with a line. These lines are the beginning of our checkpoints.
+  
+  - This is a bit overkill. Let's instead just create 10 connection lines. (It does look pretty cool, though)
+
+#
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-tutorial-3.png" width="500" height="300">
+  <h5>no caption here</h5>
+</div>
+
+  - This is better. We loop over the top/bottom boundary wall coordiantes and draw a line every *x* iterations until we have 10 lines.
+    - *x = coordinates.length / 10*
+
+  - We also compute, store, and connect the center points of each line drawn. These points will represent the epicenters of our checkpoints.
+
+2. Determine Size of Checkpoints
+  - With the locations of our boundary's checkpoints known, we can determine the size at which they should be drawn.
+  
+#
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-tutorial-4.png" width="500" height="300">
+  <h5>no caption here</h5>
+</div>
+
+  - (describe how checkpoint size is determined
+
+3. Calculate Checkpoint Data
+  - With our checkpoints created, we can calculate data that will help us with our fitness function.
+  - We first compute the distances from each checkpoint's epicenter to the next.
+  - Using this information, we can call the 'distance to the goal' the sum of distances between checkpoint epicenters (including the spawn point and goal location)
+  - Further, these checkpoint-to-checkpoint distances allow us to calculate the distance to the goal for *any* checkpoint, by summing the necessary distances.
+  - elaborate more
+
+<!-- done explaining boundary -->
 
 ## Simulation Settings
 
 - ### Natural Selection Simulator allows users to adjust settings in the algorithm and configure their own simulation!
 
+<!-- USE BOUNDARY SETTINGS PIC HERE (because boundary sim type will already be explained by this point) -->
 <div align="center">
   <h3>Settings</h3>
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-settings-classic.png" width="500" height="300">
@@ -533,72 +615,9 @@ We create a *Classic* simulation with the following settings:
 
   - (introduce/describe resilience) (give resilience own link in table of contents)
 
-### Boundary Creation
-
-  - (don't need to show every step, just describe how it works and show what a valid boundary looks like when finished)
+WAS HERE
 
 #
-
-### Boundary Simulation Fitness Function(word better?)(give link in table of contents)
-
-  - (describe that boundary uses a different fitness function and why it has to (possible image?)
-
-  - (describe how this function will use checkpoints to determine an organism's fitness score, rather than just distance to goal)
-
-  - *code snippets in this section are simplified to their essentials for readability*
-
-#### Algorithm for Creating Boundary Checkpoints
-
-(i like the idea of using a numbered list here to show the checkpoint creation steps)
-
-##### When the user draws the walls to create their boundary, the mouse coordinates are stored. (mention when we get to it
-
-steps:
-1. Connect Boundary Coordinates
-
-#
-
-<div align="center">
-  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-tutorial-2.png" width="500" height="300">
-  <h5>no caption here</h5>
-</div>
-
-  - caption
-  
-  - This is a bit overkill, though. Let's instead just create 10 connection lines
-  
-#
-
-<div align="center">
-  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-tutorial-3.png" width="500" height="300">
-  <h5>no caption here</h5>
-</div>
-
-  - (optional explanation, maybe just explain what the code does)
-
-  - We also compute, store, and connect the center points of each line drawn. These points will represent the epicenters of our checkpoints.
-
-2. Determine Size of Checkpoints
-  - With the locations of our boundary's checkpoints known, we can determine the size at which they should be drawn.
-  
-#
-
-<div align="center">
-  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-tutorial-4.png" width="500" height="300">
-  <h5>no caption here</h5>
-</div>
-
-  - (describe how checkpoint size is determined
-
-3. Calculate Checkpoint Data
-  - With our checkpoints created, we can calculate data that will help us with our fitness function.
-  - We first compute the distances from each checkpoint's epicenter to the next.
-  - Using this information, we can call the 'distance to the goal' the sum of distances between checkpoint epicenters (including the spawn point and goal location)
-  - Further, these checkpoint-to-checkpoint distances allow us to calculate the distance to the goal for *any* checkpoint, by summing the necessary distances.
-  - elaborate more
-
-#
-
 
   - (show the settings used for this simulation)
 
@@ -609,8 +628,6 @@ steps:
   - (show successful gen gif)
 
   - (Describe that not all simulations will finish this quickly, and that some may not even succeed at all)
-
-
 
 ---
 
