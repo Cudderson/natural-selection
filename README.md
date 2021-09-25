@@ -19,16 +19,61 @@
 # Table of Contents (finish at end when truly final)
 
 ## [1. Usage](#usage) 
-  - #### [Installation Instructions](#install)
-  - #### [Web Server](#server)
+  
+  - ### [Installation Instructions](#install)
+  - ### [HTTP/Web Server](#server)
+
+<br>
+
 ## [2. About](#about)
-  - #### [Project Overview](#overview)
-  - #### [Natural Selection and Genetic Algorithms](#ga)
+  
+  - ### [Project Overview](#overview)
+  - ### [Natural Selection and Genetic Algorithms](#ga)
+
+<br>
+
 ## [3. Algorithm Implementation](#algo)
+
+  - #### [Creation of New Generation](#newgen)
+  - #### [Evaluation](#eval)
+    - ##### [Fitness Function](#fit)
+  - #### [Selection](#select)
+  - #### [Crossover](#cross)
+  - #### [Mutation](#mutate)
+
+<br>
+
 ## [4. Simulation](#simulation)
-## (HTML Canvas/Animation section?)
+
+  - ### [Simulation Types](#types)
+    - ### [Classic](#class)
+    - ### [Boundary](#bound)
+      - #### [Boundary Fitness Function](#bfit)
+      - #### [Boundary Creation](#create)
+      - #### [Algorithm for Creating Boundary Checkpoints](#balgo)
+        - ##### [Connect Boundary Coordinates](#coords)
+        - ##### [Determine Size of Checkpoints](#size)
+        - ##### [Calculate Checkpoint Data](#data)
+        - ##### [Examples of Algorithmically-Created Checkpoints](#examp) 
+
+  - ### [Simulation Settings](#setting)
+
+  - ### [Simulation Demo](#demo)
+    - ### [Demo: Classic Simulation](#democ)
+    - ### [Demo: Boundary Simulation](#demob)
+
+<br>
+
 ## [5. Final Thoughts](#final-thoughts)
+
+  - ### [Comments](#comment)
+  - ### [Inspiration](#inspire)
+
+<br>
+
 ## [6. Author](#author)
+
+  - ### [Contact](#contac)
 
 <br>
 <br>
@@ -106,14 +151,18 @@
 
 <a name='overview'></a>
 
-## Project Overview (inspiration here?)
+## Project Overview
 
 - ### Natural Selection Simulator is a customizable implementation of a genetic algorithm based on natural selection. Users can configure their own species of organisms and watch them attempt to reach a target goal over generations of natural selection.
+
+<br>
 
 - ### Features:
   - A customizable genetic algorithm for unique simulations
   - A sibling animation that runs alongside the genetic algorithm for an entertaining user-experience
   - Two simulation types, one including a user-drawn path to the target goal!
+
+<br>
 
 - ### Built With:
   - Javascript
@@ -172,7 +221,9 @@
 
 #
 
-### Create A New Generation
+<a name='newgen'></a>
+
+### Create New Generation
   - #### The first step is to supply our algorithm with an initial population of organisms:
   - ```javascript
     class Organism {
@@ -223,6 +274,8 @@
 
 #
 
+<a name='eval'></a>
+
 ### Evaluation / Fitness Function
   - #### With the genes set for our organisms, we can begin the evaluation phase. The purpose of this phase is to obtain data about the organisms in the population to help us select the organisms that should reproduce the next-generation of offspring organisms.
   
@@ -263,6 +316,8 @@
   - The move() method draws an organism on the 2D plane using its `x` and `y` attributes as coordinates. We'll see the visual animation for a simulation in the Simulation Demo(link?) section 
  
 #
+
+<a name='fit'></a>
 
 ### Fitness Function
   - The goal of a fitness function is to determine how 'fit' an organism is, and assign her/him/it a fitness score. In this algorithm, an organism's fitness reflects its ability to reach a target goal. The closer an organism is to reaching the goal, the higher its fitness score.
@@ -326,6 +381,8 @@
   - Note: This is the fitness function used in *Classic* simulations. Later, we'll see that *Boundary* simulations use a different fitness function. 
 
 #
+
+<a name='select'></a>
 
 ### Selection
   - In the selection phase, we'll use the fitness scores of our population to select 'parent' organisms to reproduce the next-generation of organisms. 
@@ -425,6 +482,8 @@
 
 #
 
+<a name='cross'></a>
+
 ### Crossover
 
   - With our parent-organisms selected, we can begin the crossover phase.
@@ -479,6 +538,8 @@
    - *Note: This crossover implementation will keep the population size constant from generation to generation. In Simulation Settings(linktosection), you can optionally choose that your population sizes fluctuate(linktofluctuate?) each generation.*
 
 #
+
+<a name='mutate'></a>
     
 ### Mutation
   - Mutation refers to the alteration of an offspring organism's genes.
@@ -541,6 +602,8 @@
 
 <br>
 
+<a name='types'></a>
+
 ## Simulation Types
 
 ### This project offers two simulation types: Classic and Boundary
@@ -548,6 +611,8 @@
 #
 
 <br>
+
+<a name='class'></a>
 
 <div align="center">
   <h3>Simulation Type: Classic</h3>
@@ -561,6 +626,8 @@
 
 <br>
 
+<a name='bound'></a>
+
 <div align="center">
   <h3>Simulation Type: Boundary</h3>
   <img src="" width="500" height="300">
@@ -571,6 +638,8 @@
 
 #
 
+<a name='bfit'></a>
+
 ### Boundary Simulation Fitness Function (give link in table of contents)
 
   - In *Classic* simulations, we determine how *fit* an organism is by calculating its straight-line distance to the goal. The closer an organism is to the goal, the higher its fitness. However, this approach isn't sufficient for *Boundary* simulations, as most boundary paths are not straight-lines to the goal. Instead, it would be better to measure an organism's fitness based on its ability to progress through the boundary path, as the boundary path is the only way to reach the goal.
@@ -580,6 +649,8 @@
   - *code snippets in this section are simplified to their essentials for readability* (delete if there are no snippets)
 
 #
+
+<a name='create'></a>
 
 ### Boundary Creation
 
@@ -596,11 +667,15 @@
 
 #
 
+<a name='balgo'></a>
+
 ### Algorithm for Creating Boundary Checkpoints
 
 - #### We'll use the boundary in the image above for this example
 
 #
+
+<a name='coords'></a>
 
 ### 1. Connect Boundary Coordinates
 
@@ -629,6 +704,8 @@
 
 <br>
 
+<a name='size'></a>
+
 ### 2. Determine Size of Checkpoints
   - With the locations of our boundary's checkpoints known, we can determine the size at which they should be drawn.
   
@@ -644,6 +721,8 @@
 #
 
 <br>
+
+<a name='data'></a>
 
 ### 3. Calculate Checkpoint Data
 
@@ -665,6 +744,8 @@
 
 <br>
 
+<a name='examp'></a>
+
 ### Examples of Algorithmically-Created Checkpoints
 
   - #### Here are some examples of checkpoints created for other boundaries:
@@ -674,28 +755,24 @@
 
 <div align="center">
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-example-1.png" width="500" height="300">
-  <h5>no caption here</h5>
 </div>
 
 <br>
 
 <div align="center">
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-example-2.png" width="500" height="300">
-  <h5>no caption here</h5>
 </div>
 
 <br>
 
 <div align="center">
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-example-3.png" width="500" height="300">
-  <h5>no caption here</h5>
 </div>
 
 <br>
 
 <div align="center">
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-example-4.png" width="500" height="300">
-  <h5>no caption here</h5>
 </div>
 
 <br>
@@ -703,12 +780,12 @@
 
 ### This algorithm isn't perfect and doesn't always produce the best-checkpoints. However, it's consistent-enough to yield appropriate checkpoints for most user-drawn boundaries.
 
-<br>
-
 #
 
 <br>
 <br>
+
+<a name='setting'></a>
 
 # Simulation Settings
 - ### Natural Selection Simulator allows users to adjust settings in the algorithm and configure their own simulation!
@@ -716,7 +793,7 @@
 <div align="center">
   <h3>Settings</h3>
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-settings-boundary.png" width="500" height="300">
-  <h5>(screenshot from Settings for Classic simulations)</h5>
+  <h5>(screenshot from Settings for Boundary simulations)</h5>
 </div>
 
 <br>
@@ -732,11 +809,22 @@
 
 - (Population Growth) 'Constant': Parent organisms always reproduce offspring equal to the inital population size.
 - (Population Growth) 'Fluctuate': Population sizes may vary from generation to generation. When fluctuate is toggled, parent couples may reproduce anywhere from zero to five offspring.
+
+<br>
     
 #
 
-# DEMO SECTION? (apologize for gif quality)
-### - In this section, we'll walkthrough an examples of *Classic* and *Boundary* simulations. For readability, I'll be just focusing on the progression of the population/algorithm, specifically, the evaluation phase. (word better / I like the idea of a header for this section though)
+<br>
+
+<a name='demo'></a>
+
+# Simulation Demo
+### In this section, we'll walkthrough demonstrations of *Classic* and *Boundary* simulations. For readability, I'll be just focusing on the progression of the population/algorithm, specifically, the evaluation phase.
+### *(My apologies for the low GIF quality, simulations will run smoothly in practice)*
+
+<a name='democ'><a/>
+  
+<br>
  
 ## Simulation Demo (Classic) (maybe name better)
 
@@ -745,54 +833,84 @@ We create a *Classic* simulation with the following settings:
   - ##### Movement Speed: 4
   - ##### Mutation Rate: 3.8%
   - ##### Population Growth: Constant
+  - ##### Dialogue: Enabled
 
 <br>
+<br>  
 
 <div align="center">
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-classic-gen0.gif" width="500" height="300">
   <h5>Generation 0</h5>
 </div>
+  
+<br>
     
-  - caption
+  - The first generation is essentially a [random walk](https://en.wikipedia.org/wiki/Random_walk), as an organism's genes are ompletely random. Any progress here is due completely to chance.
+  
+<br>
 
 #
+  
+<br>  
 
 <div align="center">
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-classic-mid-gen.gif" width="500" height="300">
   <h5>Generation 5</h5>
 </div>
+  
+<br>  
 
-  - caption
+  - Only 5 generations in, and the population has already made considerable progress!
 
 #
+  
+<br>  
 
 <div align="center">
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-classic-gen10.gif" width="500" height="300">
   <h5>Generation 10</h5>
 </div>
+  
+<br>  
 
-  - caption
+  - By generation 10, we can say that the algorithm is definitely functioning properly, as some organisms nearly reached the goal!
 
 #
+  
+<br>
 
 <div align="center">
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-classic-gen-success.gif" width="500" height="300">
   <h5>Generation 14</h5>
 </div>
+  
+<br>
 
-  - caption
+  - Success! After only 14 generations, the genetic algorithm has optimized our species of organisms ability to reach the goal!
 
-  - (Describe that not all simulations will finish this quickly, and that some may not even succeed at all)
-
+    - *Note: Though this simulation succeeded in just 14 generations, it's worth mentioning that all simulations will be different, as different settings and randomness will result in different outcomes. Some may succeed sooner, some longer, and some may prematurely converge and never reach the goal.*
+  
+<br>  
+  
 #
+
+<br>  
+  
+<a name='demob'><a/>
 
 ## Simulation Demo (Boundary) (maybe name better/put Demo after boundary creation) 
 
-  - (show image of a boundary w/ caption)
+We create a *Boundary* simulation with the following settings:
+  - ##### Initial Population: 500
+  - ##### Movement Speed: 5
+  - ##### Mutation Rate: 2.75%
+  - ##### Resilience: 98%
+  - ##### Population Growth: Constant4
+  - ##### Dialogue: Disabled
 
-  - (show the settings used for this simulation)
-
-  - (introduce/describe resilience) (give resilience own link in table of contents)
+  - In *Boundary* simulations, you can configure the *resilience* of your organisms, which represents the chance that they'll survive if they collide with the boundary. In this simulation, organism's will have a resilience of 98%. 
+  
+<br>
 
 #
 
@@ -800,8 +918,10 @@ We create a *Classic* simulation with the following settings:
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-boundary-gen0.gif" width="500" height="300">
   <h5>Generation 0</h5>
 </div>
+  
+<br>  
 
-  - caption
+  - The first generation is essentially a [random walk](https://en.wikipedia.org/wiki/Random_walk), as an organism's genes are ompletely random. Any progress here is due completely to chance.
 
 #
 
@@ -809,8 +929,10 @@ We create a *Classic* simulation with the following settings:
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-boundary-gen10.gif" width="500" height="300">
   <h5>Generation 10</h5>
 </div>
+  
+<br>  
 
-  - caption
+  - Though there are clearly many wasted movements, the population has correctly decided which direction they'll take to the goal.
 
 #
 
@@ -818,8 +940,10 @@ We create a *Classic* simulation with the following settings:
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-boundary-gen25.gif" width="500" height="300">
   <h5>Generation 25</h5>
 </div>
+  
+<br>  
 
-  - caption
+  - By optimizing their movements/genes, organisms are able to traverse further down the boundary path with the same amount of genes.
 
 #
 
@@ -827,8 +951,10 @@ We create a *Classic* simulation with the following settings:
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-boundary-gen50.gif" width="500" height="300">
   <h5>Generation 50</h5>
 </div>
+  
+<br>  
 
-  - caption
+  - At generation 50, the algorithm is looking promising. Organisms continue to optimize their genes as the average fitness of the population continues to rise.
 
 #
 
@@ -836,6 +962,10 @@ We create a *Classic* simulation with the following settings:
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-boundary-gen71.png" width="500" height="300">
   <h5>Generation 71</h5>
 </div>
+  
+  - Success! The algorithm correctly optimized our population's ability to reach the goal after 71 generations.
+  
+<br>  
 
 #
 
@@ -843,38 +973,47 @@ We create a *Classic* simulation with the following settings:
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-boundary-gen-success.gif" width="500" height="300">
   <h5>Generation 73</h5>
 </div>
+  
+<br>  
 
-  - caption
+  - Allowing the simulation to continue will result in your population to be further optimized, and more organisms should begin to reach the goal.
+      - *Note: Though it took this simulation 71 generations to succeed, it's worth mentioning that all simulations will be different, as different settings, boundaries and randomness will result in different outcomes. Some may succeed sooner, some longer, and some may prematurely converge and never reach the goal.*
 
-#
-
-  - (Describe that not all simulations will finish this quickly, and that some may not even finish at all)
-
+<br>  
+  
   - Look at this simulation (below), for example. The algorithm prematurely converged around the 0.45 - 0.50 average fitness level. This could be due to settings that did not benefit the evolution of the population (mutation rate too high, etc.), inefficiency in the genetic algorithm, an error in the boundary checkpoint-creation algorithm (LINK), or random chance:
+  
+<br>  
 
 <div align="center">
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-boundary-gen250.gif" width="500" height="300">
   <h5>Generation 250</h5>
 </div>
+  
+<br>
 
   - Even after 250 generations of natural selection, organisms fail to evolve past an average fitness level of 0.50
+  
+<br>  
 
 ---
 
 <a name='final-thoughts'></a>
 
-# 5. Final/Closing Thoughts
+# 5. Final Thoughts
+  
+  <a name='comment'></a>  
+  
+  - ## Comments
+    - #### Looking at the bigger picture, this simple genetic algorithm is incredibly-abstract compared to real-life biology and the probably trillions of parameters that      influence natural selection in our world. However trivial it may seem, though, I still find it magical that we're able to esssentially *teach* some dots on a computer screen how to reach a target goal, starting with nothing but random genes.
 
-- ### (describe how the algorithm is trivial compared to real natural selection)
+<br>
+  
+<a name='inspire'><a>
 
-- ### (maybe include definition of GA, as well as GA/SGA vs EA (might do this at very end, either or))
-
-- ### What can we take away from this project?
-
-- ### etc.
-
-<!-- credit: https://towardsdatascience.com/introduction-to-genetic-algorithms-including-example-code-e396e98d8bf3 -->
-<!-- credit: luke garrigan blog -->
+- ### Inspiration (section)
+  - #### The idea and inspiration for this project initially originates from this awesome [blog post](https://dev.to/lukegarrigan/genetic-algorithms-in-javascript-mc3) from Luke Garrigan. In his post, he details the ideas of natural selection and creates a genetic algorithm that teaches cars to drive around a track! Check him out!
+  - #### Additionally, [this](https://towardsdatascience.com/introduction-to-genetic-algorithms-including-example-code-e396e98d8bf3) introduction to genetic algorithms from https://towardsdatascience.com was a big help for getting started, thanks!
 
 ---
 
@@ -882,5 +1021,13 @@ We create a *Classic* simulation with the following settings:
 
 # 6. Author
 
-- ### (talk about myself)
-- ### (email/contact)
+- ### Cody / Myself
+  
+- ### Thanks for taking the time to check out the project. 
+  
+- ### I'm a software developer from the US looking for a professional opportunity! If you'd like to contact me for hiring, questions, or anything related to this project, send me an email! (Link below)
+  
+<a name='contac'></a>  
+  
+## Contact
+  - ### Email: codered1227@gmail.com
