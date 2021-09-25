@@ -75,7 +75,7 @@
       
           - ```Starting up http-server, serving ./```
           
-      - followed by two URLs (*http://127.0.0.1:8080, for example*)
+      - followed by two local URLs (*http://127.0.0.1:8080, for example*)
       
       - Enter either URL into your web browser to launch the project
 
@@ -151,8 +151,6 @@
 
 ### These five phases are repeated until the algorithm no longer produces offspring that are significantly different from the previous generation. This is called [convergence](https://www.biologyonline.com/dictionary/convergence).
 
-### (maybe include definition of GA, as well as GA/SGA vs EA (might do this at very end, either or))
-
 <br>
 
 ---
@@ -177,19 +175,20 @@
 ### Create A New Generation
   - #### The first step is to supply our algorithm with an initial population of organisms:
   - ```javascript
-    function getRandomGene(min, max) {
-        let random_x = Math.floor(Math.random() * (max - min + 1) + min);
-        let random_y = Math.floor(Math.random() * (max - min + 1) + min);
-        let random_gene = [random_x, random_y];
-        
-        return random_gene;
-    }
-    
-    // class method of 'Organism'
-    setRandomGenes() {
-        for (let i = 0; i < 300; i++) {
-            let random_gene = getRandomGene(-5, 5);
-            this.genes.push(random_gene);
+    class Organism {
+        constructor (gender) {
+            this.gender = gender;
+            this.genes = [];
+            ...
+        }
+
+        setRandomGenes() {
+            for (let i = 0; i < 300; i++) {
+                // returns random coordinate pair from [-5, -5] to [5, 5]
+                let random_gene = getRandomGene(-5, 5);
+                
+                this.genes.push(random_gene);
+            }
         }
     }
     
@@ -197,7 +196,7 @@
         let gender;
         let initial_population = [];
         
-        // create equal number of males and females
+        // create an equal number of males and females
         for (let i = 0; i < 100; i++) {
             if (i % 2) {
                 gender = 'male';
@@ -217,23 +216,33 @@
     
     let initial_population = createOrganisms();
     ```
-  - We create a population of 100 organisms with 300 random 'genes'.
+  - We create an initial population of 100 male and female organisms with 300 random 'genes'.
   - For this project, a 'gene' is a coordinate pair that represents the next movement an organism will make on a 2D plane.
   - For example, the gene `[3, -1]` would represent an organism moving 3 units on the x-axis and -1 unit on the y-axis.
-  - Note: All organisms will share the same starting location/spawn-point.
+  - Note: All organisms share the same starting location/spawn-point.
 
 #
 
 ### Evaluation / Fitness Function
-  - #### To evaluate our population, we apply each organism's genes to their current position (`this.x`, `this.y`) until all genes have been accounted for:
+  - #### With the genes set for our organisms, we can begin the evaluation phase. The purpose of this phase is to obtain data about the organisms in the population to help us select the organisms that should reproduce the next-generation of offspring organisms.
+  
   -   ```javascript
-      // class method of 'Organism'
-      // organism.index starts at 0
-      update() {
-          if (this.index < 300) {
-              this.x += this.genes[this.index][0];
-              this.y += this.genes[this.index][1];
-              this.index++;
+      class Organism {
+          constructor (gender) {
+              this.gender = gender;
+              this.genes = [];
+              this.x = 0;
+              this.y = 0;
+              this.index = 0;
+              ...
+          }
+      
+          update() {
+              if (this.index < 300) {
+                  this.x += this.genes[this.index][0];
+                  this.y += this.genes[this.index][1];
+                  this.index++;
+              }
           }
       }
 
@@ -248,33 +257,48 @@
       
       updateAndMoveOrganisms(organisms);
       ```
-  - The move() method draws an organism on the 2D plane using its `x` and `y` attributes as coordinates. We will see the visual animation in-action in the Simulation(link?) section 
+      
+  - To begin evaluating our population, we apply each organism's genes to their current position (`this.x`, `this.y`) until all genes have been accounted for.
+   
+  - The move() method draws an organism on the 2D plane using its `x` and `y` attributes as coordinates. We'll see the visual animation for a simulation in the Simulation Demo(link?) section 
  
-  #
+#
 
 ### Fitness Function
-  - The goal of a fitness function is to determine how 'fit' an organism is, and assign her/him/it a fitness score. In this simulation, an organism's fitness reflects its ability to reach a target goal. The closer an organism is to reaching the goal, the higher its fitness score.
+  - The goal of a fitness function is to determine how 'fit' an organism is, and assign her/him/it a fitness score. In this algorithm, an organism's fitness reflects its ability to reach a target goal. The closer an organism is to reaching the goal, the higher its fitness score.
+  
   - The fitness score of an organism determines its probability to be selected for reproduction.
 
   - ```javascript
-    // class method of 'Organism'
-    calcDistanceToGoal() {
-        // c^2 = a^2 + b^2
-        let horizontal_distance_squared = (this.x - GOAL_X_POS) ** 2;
-        let vertical_distance_squared = (this.y - GOAL_Y_POS) ** 2;
-
-        let distance_to_goal_squared = vertical_distance_squared + horizontal_distance_squared;
-        let distance_to_goal = Math.sqrt(distance_to_goal_squared);
-
-        this.distance_to_goal = distance_to_goal;
-    }
+    class Organism {
+        constructor (gender, x, y) {
+            this.gender = gender;
+            this.genes = [];
+            this.x = x;
+            this.y = y;
+            this.index = 0;
+            this.distance_to_goal;
+            this.fitness;
+            ...
+        }
     
-    // class method of 'Organism'
-    calcFitness() {
-        let height = SPAWN_Y_POS - GOAL_Y_POS;
+        calcDistanceToGoal() {
+            // c^2 = a^2 + b^2
+            let horizontal_distance_squared = (this.x - GOAL_X_POS) ** 2;
+            let vertical_distance_squared = (this.y - GOAL_Y_POS) ** 2;
 
-        let normalized_distance_to_goal = this.distance_to_goal / height;
-        this.fitness = 1 - normalized_distance_to_goal;
+            let distance_to_goal_squared = vertical_distance_squared + horizontal_distance_squared;
+            let distance_to_goal = Math.sqrt(distance_to_goal_squared);
+
+            this.distance_to_goal = distance_to_goal;
+        }
+
+        calcFitness() {
+            let height = SPAWN_Y_POS - GOAL_Y_POS;
+
+            let normalized_distance_to_goal = this.distance_to_goal / height;
+            this.fitness = 1 - normalized_distance_to_goal;
+        }
     }
     
     function calcPopulationFitness (organisms) {
@@ -293,15 +317,19 @@
     let average_fitness = calcPopulationFitness(organisms);
     ```
 
-  - To calculate an organism's fitness, we first need to calculate its distance to the goal. Since we're on a 2D plane, all we need is the Pythagorean Theorem(spell check/link?)
+  - To calculate an organism's fitness, we first need to calculate its distance to the goal. Since we're on a 2D plane, all we'll need is the [Pythagorean theorem](https://en.wikipedia.org/wiki/Pythagorean_theorem)  *(a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup>)*
+  
   - Once an organism's distance to the goal is determined, we can assign it a fitness score. These scores are normalized by dividing an organism's distance to the goal by the total distance from spawn to goal (`height`), and subtracting the quotient from 1.
-  - We also calculate and store `average_fitness`, which is the average fitness score of the entire population. This will be useful in the selection phase of the algorithm.4
-  - Note: This is the fitness function used in 'Classic' simulation types. 'Boundary' simulations use a ```different fitness function(ADD LINK)```. 
+  
+  - We also calculate and store `average_fitness`, which is the average fitness score of the entire population. This will be useful in the selection phase of the algorithm.
+  
+  - Note: This is the fitness function used in *Classic* simulations. Later, we'll see that *Boundary* simulations use a different fitness function. 
 
 #
 
 ### Selection
   - In the selection phase, we'll use the fitness scores of our population to select 'parent' organisms to reproduce the next-generation of organisms. 
+  
   - The premise here is that organisms with a high fitness score must have better genes than low fitness score organisms. Therefore, selecting the highest-fitness organisms to reproduce should yield a more-fit next-generation, compared to the current.
 
 - ```javascript
@@ -353,10 +381,16 @@
   ```
 
 - We begin creating parent couples by first populating arrays `potential_mothers` and `potential_fathers` with female and male organisms from the population. The amount of times that an organism is added to an array is determined by their fitness score.
-- In my algorithm, organisms with a fitness score less than `average_fitness` will be added to `potential_mothers/fathers` just once. 
-- Alternatively, organisms with an above-average fitness score are added to the array an exponential number of times.
+
+- In my algorithm, organisms with an above-average fitness score are added to the array an exponential number of times based on their fitness.
+
+- Alternatively, organisms with a fitness score less than `average_fitness` will be added to `potential_mothers/fathers` just once. This way, we give low-fitness organisms a small-chance of reproducing as a way of introducing diversity.
+
+- *Note: `selection_factor` is an optimization I implemented to keep array sizes smaller as `average_fitness` increases, as well as strengthen selection-bias in early generations. However, it is not necessary for the overall-functioning of the algorithm.*
 
 #
+
+- Next, we'll create parent couples by randomly pairing male and female organisms from `potential_parents`.
 
 - ```javascript
   function selectParentsForReproduction(potential_parents, population_size) {
@@ -383,16 +417,20 @@
   let parents = selectParentsForReproduction(potential_parents, organisms.length);
   ```
 
-- Finally, we create parent couples by randomly pairing male and female organisms from `potential_parents`. My algorithm creates parent couples equal to half the population size. We'll see why in the crossover phase.
-- Note: `selection_factor` is an optimization I implemented to keep array sizes smaller as `average_fitness` increases, as well as strengthen selection-bias in early generations. However, it is not necessary for the overall-functioning of the algorithm.
-- consider mentioning roulette wheel selection???
-  - (put in correct place if used) This implementation allows for an organism to be selected for more than one parent couple, i.e., an organism can reproduce with multiple others. Theoretically, one single female could be selected for every single parent couple, and be the mother to each offspring organism in the next-generation.) 
+- For this algorithm, I chose to create a number parent couples equal to half the population size. We'll see why in the crossover phase.
+
+- This implementation allows for an organism to be selected for more than one parent couple, i.e., an organism can reproduce with multiple others. (Theoretically, one single female could be selected for every single parent couple, and be the mother to each offspring organism in the next-generation.) 
+
+- *Technical: This particular method of selection would be considered [fitness proportionate selection](https://en.wikipedia.org/wiki/Fitness_proportionate_selection), or 'roulette wheel selection', where all organisms are given a chance of being selected proportionate to their fitness score. It's not guaranteed that the highest-fitness organisms will be selected, nor that the lowest-fitness organisms won't be.*
 
 #
 
 ### Crossover
+
   - With our parent-organisms selected, we can begin the crossover phase.
+  
   - Genes of the selected parent-couples will be combined to create new offspring organisms!
+  
   - ```javascript
     function crossover(parents_to_crossover) {
 
@@ -434,16 +472,22 @@
     }
     ```
     
-   - We call `crossover()` twice for each of our selected parent couples to simulate each couple creating the `crossover_genes` for 2 offspring organisms. (In the selection phase, we created one parent couple for every two organisms in the population.)
-   - We create the `crossover_genes` for a new organism by randomly choosing either the mother or father gene at each index, until we have a full set of genes (300 in this example). The genes are assigned to new `Organism`s and stored in `offspring_organisms`. 
-       - *This crossover implementation will keep the population size constant from generation to generation. In Simulation Settings(linktosection), you can optionally choose that your population sizes fluctuate(linktofluctuate?) each generation.*
+   - We call `crossover()` twice for each of our selected parent couples to simulate each couple creating the `crossover_genes` for 2 offspring organisms. *(In the selection phase, we created one parent couple for every two organisms in the population.)*
+   
+   - We create the `crossover_genes` for a new organism by randomly choosing either the mother or father gene at each index, until we have a full set of genes *(300 in this example)*. The genes are assigned to new `Organism`s and stored in `offspring_organisms`. 
+   
+   - *Note: This crossover implementation will keep the population size constant from generation to generation. In Simulation Settings(linktosection), you can optionally choose that your population sizes fluctuate(linktofluctuate?) each generation.*
 
 #
     
 ### Mutation
-  - Mutation refers to the altering/mutation of an offspring organism's genes.
+  - Mutation refers to the alteration of an offspring organism's genes.
+  
+  
   - The purpose of the mutation operator in a GA is to maintain genetic diversity. A mutation in an organism's genes could produce a new solution that didn't yet exist in the population! 
+  
   - Without mutation and the persistence of diversity, populations could prematurely converge, resulting in a suboptimal solution.
+  
   - ```javascript
     function mutate(offspring_organisms) {
         const MUTATION_RATE = 0.03;
@@ -465,30 +509,36 @@
     
     offspring_organisms = mutate(offspring_organisms);
     ```
-  - We can simulate gene mutation by comparing random numbers to our desired mutation rate. In this example, we mutate a gene if the random value is less than 0.03. This will mutate approximately 3% of all genes in the offspring population.
-    - the gene mutation rate of organisms is configurable in Simulation Settings (worth mentioning probably)
   
-  - In the project files, the mutation phase is woven into crossover() for efficiency, but is separated in this example for readability and understanding  
+  - We can simulate gene mutation by comparing random numbers to our desired mutation rate. In this example, we mutate a gene if the random value is less than 0.03. This will mutate approximately 3% of all genes in the offspring population.
+    - the gene mutation rate of organisms is configurable in Simulation Settings(LINK) for your own simulations
+  
+  - *Note: In the project files, the mutation phase is woven into crossover() for efficiency, but is separated in this example for readability and understanding.* 
 
 #
 
-### (word better) BOOM. We now have a new population of offspring organisms whose genes are derived from the most-fit male and female organisms from the previous generation. These organisms can now enter the Evaluation phase and continue the evolution of the species.
+- #### At this point, we have a new population of offspring organisms whose genes are derived from the most-fit male and female organisms from the previous generation. These organisms can now enter the Evaluation phase and continue the evolution of the species.
 
-(maybe show what happens when an organism succeeds (ehh, save for Simulation section))
+<br>
 
-(feel free to say more here. Just stopping here for now)
+### This is the end of the first generation. In future generations, the same process of evaluating and assigning fitness scores to organisms, selecting parents to reproduce, and crossing-over and mutating parent genes for the next-generation will resume. These steps will be repeated until either an organism from the population reaches the goal, or the algorithm prematurely converges to a suboptimal solution *(simulation fails)*.
 
+<br>
+
+  - *Note: You can choose to continue running your simulations, even after your population succeed in reaching the goal, if you wish to see the algorithm optimize your population further*
+
+<br>
 
 ---
 
----
-
----
+<br>
 
 <a name="simulation"></a>
 
 # 4. Simulation
-- ### Now that we understand the algorithm, let's see it in action.
+- ### With our genetic algorithm in-place, we can now run our own simulations.
+- #### *Note: Simulations are made using Javascript to manipulate an HTML Canvas to create an animation that follows the algorithm.*
+
 <br>
 
 ## Simulation Types
@@ -497,6 +547,8 @@
 
 #
 
+<br>
+
 <div align="center">
   <h3>Simulation Type: Classic</h3>
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-classic-header-1.png" width="500" height="300">
@@ -504,9 +556,10 @@
 </div>
 
 - ### In *Classic* simulations, users will configure their own species of organisms and watch them attempt to reach the goal over generations of natural selection.
-- elaborate
 
 #
+
+<br>
 
 <div align="center">
   <h3>Simulation Type: Boundary</h3>
@@ -515,7 +568,6 @@
 </div>
 
 - ### In *Boundary* simulations, users will create their own path and watch their species of organisms attempt to reach the goal over generations of natural selection. Organism's will need to avoid the boundary to survive!
-- elaborate
 
 #
 
@@ -544,14 +596,15 @@
 
 #
 
-#### Algorithm for Creating Boundary Checkpoints
+### Algorithm for Creating Boundary Checkpoints
 
-- We'll use the boundary in the image above for this example
-
-steps:
-1. Connect Boundary Coordinates
+- #### We'll use the boundary in the image above for this example
 
 #
+
+### 1. Connect Boundary Coordinates
+
+<br>
 
 <div align="center">
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-tutorial-2.png" width="500" height="300">
@@ -562,7 +615,7 @@ steps:
   
   - This is a bit overkill. Let's instead just create 10 connection lines. (It does look pretty cool, though)
 
-#
+<br>
 
 <div align="center">
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-tutorial-3.png" width="500" height="300">
@@ -574,35 +627,95 @@ steps:
 
   - We also compute, store, and connect the center points of each line drawn. These points will represent the epicenters of our checkpoints.
 
-2. Determine Size of Checkpoints
+<br>
+
+### 2. Determine Size of Checkpoints
   - With the locations of our boundary's checkpoints known, we can determine the size at which they should be drawn.
   
-#
+<br>
 
 <div align="center">
   <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-tutorial-4.png" width="500" height="300">
   <h5>no caption here</h5>
 </div>
 
-  - (describe how checkpoint size is determined
+  - I won't show the process here, but the size of a checkpoint is determined using its distance to the checkpoints before and after it. Checkpoints are given a minimum size to ensure that they will be reachable by organisms in the population. 
 
-3. Calculate Checkpoint Data
-  - With our checkpoints created, we can calculate data that will help us with our fitness function.
-  - We first compute the distances from each checkpoint's epicenter to the next.
-  - Using this information, we can call the 'distance to the goal' the sum of distances between checkpoint epicenters (including the spawn point and goal location)
+#
+
+<br>
+
+### 3. Calculate Checkpoint Data
+
+  - With our checkpoints created, we can calculate data that will help us with our fitness function and selecting the most-fit organisms to reproduce.
+  
+  - In the last step, we computed the distances from each checkpoint's epicenter to the next.
+  
+  - Using this information, we can call the 'distance to the goal' the sum of distances between adjacent checkpoint epicenters *(including the spawn point and goal location distances to their nearest-checkpoint)*
+  
   - Further, these checkpoint-to-checkpoint distances allow us to calculate the distance to the goal for *any* checkpoint, by summing the necessary distances.
-  - elaborate more
+  
+  - Putting it all together, we can call an organism's 'distance to the goal' the distance from the organism to its nearest-checkpoint + the distance from that checkpoint to the goal, which is the sum of the distances connecting each subsequent checkpoint and the goal.
 
-<!-- done explaining boundary -->
+  - With a proper 'distance to the goal' calculation, we can determine an organism's fitness score the same way we do for *Classic* simulations. (See Algorithm implementation(LINK))
 
-## Simulation Settings
+<br>
 
+#
+
+<br>
+
+### Examples of Algorithmically-Created Checkpoints
+
+  - #### Here are some examples of checkpoints created for other boundaries:
+
+<br>
+<br>
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-example-1.png" width="500" height="300">
+  <h5>no caption here</h5>
+</div>
+
+<br>
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-example-2.png" width="500" height="300">
+  <h5>no caption here</h5>
+</div>
+
+<br>
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-example-3.png" width="500" height="300">
+  <h5>no caption here</h5>
+</div>
+
+<br>
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-checkpoint-example-4.png" width="500" height="300">
+  <h5>no caption here</h5>
+</div>
+
+<br>
+<br>
+
+### This algorithm isn't perfect and doesn't always produce the best-checkpoints. However, it's consistent-enough to yield appropriate checkpoints for most user-drawn boundaries.
+
+<br>
+
+#
+
+<br>
+<br>
+
+# Simulation Settings
 - ### Natural Selection Simulator allows users to adjust settings in the algorithm and configure their own simulation!
 
-<!-- USE BOUNDARY SETTINGS PIC HERE (because boundary sim type will already be explained by this point) -->
 <div align="center">
   <h3>Settings</h3>
-  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-settings-classic.png" width="500" height="300">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-settings-boundary.png" width="500" height="300">
   <h5>(screenshot from Settings for Classic simulations)</h5>
 </div>
 
@@ -613,13 +726,12 @@ steps:
 | Initial Population Size | Amount of organisms to create for the first generation of the simulation |
 | Movement Speed  | Relative-maximum distance an organism can travel in one movement |
 | Mutation Rate | Target percentage of genes to be mutated in offspring organisms |
-| Resilience | For *Boundary* simulation type only |
+| Resilience | Percent chance an organism will survive if it touches the boundary *(Boundary simulation type only)* |
 | Population Growth | 'Contant' vs 'Fluctuate' (toggle) |
 | Dialogue | When checked, simulation will run will run with additional GA phase highlighting, descriptions, and animations (toggle) |
 
 - (Population Growth) 'Constant': Parent organisms always reproduce offspring equal to the inital population size.
 - (Population Growth) 'Fluctuate': Population sizes may vary from generation to generation. When fluctuate is toggled, parent couples may reproduce anywhere from zero to five offspring.
-- Resilience will be explained in the *Boundary* section
     
 #
 
@@ -754,6 +866,8 @@ We create a *Classic* simulation with the following settings:
 # 5. Final/Closing Thoughts
 
 - ### (describe how the algorithm is trivial compared to real natural selection)
+
+- ### (maybe include definition of GA, as well as GA/SGA vs EA (might do this at very end, either or))
 
 - ### What can we take away from this project?
 
