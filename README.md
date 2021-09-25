@@ -5,7 +5,7 @@
   <img src="images/natural_selection_sim_logo.png">
   <br>
   <br>
-  <h3>some tagline</h3>
+  <h3>some tagline (still need extra checkpoint images embedded)</h3>
   <br>
   <br>
   <img src='https://img.shields.io/badge/simulator-online-brightgreen'>
@@ -16,7 +16,7 @@
 <br>
 <br>
 
-# Table of Contents (finish/add markdown links at end)
+# Table of Contents (finish at end when truly final)
 
 ## [1. Usage](#usage) 
   - #### [Installation Instructions](#install)
@@ -43,13 +43,60 @@
 
 ### Installation Instructions
  
-- blahh
+- (untested)
+- Open a terminal and navigate to the directory where you'll store this repository.
+- Run:
+
+      git clone https://github.com/Cudderson/natural-selection.git
+      
+<br>
 
 <a name='server'></a>
 
-### Web Server
+### HTTP/Web Server
 
-- blahh
+### Running this project locally requires a local HTTP/Web server. 
+
+### Any server should work, but here are a few tested options for Node and Python users:
+  - #### Node:
+      - #### The [http-server](https://www.npmjs.com/package/http-server) package makes it very easy to run a quick local server
+      
+      - The link provided details multiple installation options, but I'll provide a global installation:
+      
+          - (in terminal) ```npm install --global http-server```
+          
+          - *This will install http-server globally so that it may be run from the command line anywhere*
+          
+      - Once installed, navigate to the directory where you cloned this repository and run:
+      
+          - ```http-server```
+         
+      - You should see:
+      
+          - ```Starting up http-server, serving ./```
+          
+      - followed by two URLs (*http://127.0.0.1:8080, for example*)
+      
+      - Enter either URL into your web browser to launch the project
+
+<br>
+
+  - #### Python:
+      - ##### Python 3 comes with a simple HTTP server included in the standard library.
+      - ##### To use:
+        - Navigate to the root of the directory where you cloned this repository
+        
+        - Run either (depending on your python version):
+        
+          - ```python -m http.server 8000```
+          - ```python3 -m http.server 8000```
+        
+        - Server is now running on port 8000 (*You can choose a port other than 8000 if required*)
+        - Enter ```http://localhost:8000/``` into a web browser to launch the project
+
+<br>
+
+---
 
 <br>
 
@@ -61,7 +108,12 @@
 
 ## Project Overview (inspiration here?)
 
-- ### Natural Selection Simulator is a customizable implementation of a genetic algorithm based on natural selection. Users will configure their own species of organisms and watch them ...
+- ### Natural Selection Simulator is a customizable implementation of a genetic algorithm based on natural selection. Users can configure their own species of organisms and watch them attempt to reach a target goal over generations of natural selection.
+
+- ### Features:
+  - A customizable genetic algorithm for unique simulations
+  - A sibling animation that runs alongside the genetic algorithm for an entertaining user-experience
+  - Two simulation types, one including a user-drawn path to the target goal!
 
 - ### Built With:
   - Javascript
@@ -82,7 +134,8 @@
 
 <br>
 
-### In the context of computer science, genetic algorithms (GAs) are optimization algorithms based on the process of natural selection. (In this project's implementation, our algorithm will attempt to optimize a species of organisms' ability to reach a trivial target goal.) <<< Consider if this should wait until Algorithm section)
+### In the context of computer science, genetic algorithms (GAs) are optimization algorithms based on the process of natural selection. 
+  - #### *In this project's implementation, our algorithm will attempt to optimize a species of organisms' ability to reach a target goal*
 
 #
 
@@ -98,17 +151,20 @@
 
 ### These five phases are repeated until the algorithm no longer produces offspring that are significantly different from the previous generation. This is called [convergence](https://www.biologyonline.com/dictionary/convergence).
 
-### (maybe include definition of GA, as well as GA/SGA vs EA)
+### (maybe include definition of GA, as well as GA/SGA vs EA (might do this at very end, either or))
+
+<br>
 
 ---
+
+<br>
 
 <a name='algo'></a>
 
 # 3. Algorithm Implementation
-
+ 
+- ### In Simulation Settings(LINK), users are able to input their own settings and customize the algorithm. In this section, however, we'll use hard-coded settings for easier understanding.
 - ### ! *code snippets in this section are simplified to their essentials for readability*
-- (maybe mention that these snippets are meant to highlight the phases of the algorithm and not to show how the program works as a whole. To see the final product, see Simulation(linktoSimulation))
-- mention how the simulation settings allow you to configure your own simulation, but this example will focus on a certain set of settings
 
 #
 <br>
