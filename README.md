@@ -5,21 +5,25 @@
   <img src="images/natural_selection_sim_logo.png">
   <br>
   <br>
+  <h3>some tagline</h3>
+  <br>
+  <br>
   <img src='https://img.shields.io/badge/simulator-online-brightgreen'>
 </div>
-<!-- use this for settings description/keep just in case -->
-<!-- | Syntax      | Description |
-| ----------- | ----------- |
-| Header      | Title       |
-| Paragraph? More like a full-on essay!  | <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-classic-header-1.png" width="500" height="300">  | -->
 
 ---
-# *** Consider putting all readme screenshots/gifs in different repo to keep small size ***
+
+<br>
+<br>
+
 # Table of Contents (finish/add markdown links at end)
-## [1. About](#about)
-- ### [Project Overview](#overview)
-- ### [Natural Selection and Genetic Algorithms](#ga)
-## [2. Usage](#usage)
+
+## [1. Usage](#usage) 
+  - #### [Installation Instructions](#install)
+  - #### [Web Server](#server)
+## [2. About](#about)
+  - #### [Project Overview](#overview)
+  - #### [Natural Selection and Genetic Algorithms](#ga)
 ## [3. Algorithm Implementation](#algo)
 ## [4. Simulation](#simulation)
 ## (HTML Canvas/Animation section?)
@@ -29,9 +33,29 @@
 <br>
 <br>
 
+---
+
+<a name='usage'></a>
+
+## 1. Usage
+
+<a name='install'></a>
+
+### Installation Instructions
+ 
+- blahh
+
+<a name='server'></a>
+
+### Web Server
+
+- blahh
+
+<br>
+
 <a name='about'></a>
 
-# 1. About
+# 2. About
 
 <a name='overview'></a>
 
@@ -75,19 +99,6 @@
 ### These five phases are repeated until the algorithm no longer produces offspring that are significantly different from the previous generation. This is called [convergence](https://www.biologyonline.com/dictionary/convergence).
 
 ### (maybe include definition of GA, as well as GA/SGA vs EA)
-
----
-<!-- finish up to here -->
-
-<a name='usage'></a>
-
-# 2. Usage (Maybe this should be before anything? Kind of ruins the flow)
-
-## [Installation Instructions (needs tag)]
-
-## [web server explanation and instructions/recommendations]
-
-<br>
 
 ---
 
@@ -615,19 +626,70 @@ We create a *Classic* simulation with the following settings:
 
   - (introduce/describe resilience) (give resilience own link in table of contents)
 
-WAS HERE
+#
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-boundary-gen0.gif" width="500" height="300">
+  <h5>Generation 0</h5>
+</div>
+
+  - caption
 
 #
 
-  - (show the settings used for this simulation)
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-boundary-gen10.gif" width="500" height="300">
+  <h5>Generation 10</h5>
+</div>
 
-  - (show gen0 gif)
+  - caption
 
-  - (show gen 10 gif)
+#
 
-  - (show successful gen gif)
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-boundary-gen25.gif" width="500" height="300">
+  <h5>Generation 25</h5>
+</div>
 
-  - (Describe that not all simulations will finish this quickly, and that some may not even succeed at all)
+  - caption
+
+#
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-boundary-gen50.gif" width="500" height="300">
+  <h5>Generation 50</h5>
+</div>
+
+  - caption
+
+#
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-boundary-gen71.png" width="500" height="300">
+  <h5>Generation 71</h5>
+</div>
+
+#
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-boundary-gen-success.gif" width="500" height="300">
+  <h5>Generation 73</h5>
+</div>
+
+  - caption
+
+#
+
+  - (Describe that not all simulations will finish this quickly, and that some may not even finish at all)
+
+  - Look at this simulation (below), for example. The algorithm prematurely converged around the 0.45 - 0.50 average fitness level. This could be due to settings that did not benefit the evolution of the population (mutation rate too high, etc.), inefficiency in the genetic algorithm, an error in the boundary checkpoint-creation algorithm (LINK), or random chance:
+
+<div align="center">
+  <img src="https://github.com/Cudderson/nss-screenshots/blob/main/screenshots/nss-boundary-gen250.gif" width="500" height="300">
+  <h5>Generation 250</h5>
+</div>
+
+  - Even after 250 generations of natural selection, organisms fail to evolve past an average fitness level of 0.50
 
 ---
 
