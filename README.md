@@ -844,6 +844,7 @@
 # Simulation Demo
 ### In this section, we'll walkthrough demonstrations of *Classic* and *Boundary* simulations. For readability, I'll be just focusing on the progression of the population/algorithm, specifically, the evaluation phase.
 ### *(My apologies for the low GIF quality, simulations will run smoothly in practice)*
+#### *Additionally, here's a rough video demonstrating a *Boundary* simulation from creation to completion (~3 minutes)*: https://youtu.be/6w1lepPAuoM
 
 <br>
 
