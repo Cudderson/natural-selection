@@ -869,7 +869,7 @@
   
 <br>
     
-  - #### The first generation is essentially a [random walk](https://en.wikipedia.org/wiki/Random_walk), as an organism's genes are ompletely random. Any progress here is due completely to chance.
+  - #### The first generation is essentially a [random walk](https://en.wikipedia.org/wiki/Random_walk), as an organism's genes are completely random. Any progress here is due completely to chance.
   
 <br>
 
@@ -929,7 +929,7 @@
   - ##### Movement Speed: 5
   - ##### Mutation Rate: 2.75%
   - ##### Resilience: 98%
-  - ##### Population Growth: Constant4
+  - ##### Population Growth: Constant
   - ##### Dialogue: Disabled
 
   - #### In *Boundary* simulations, you can configure the *resilience* of your organisms, which represents the chance that they'll survive if they collide with the boundary. In this simulation, organism's will have a resilience of 98%. 
@@ -1044,7 +1044,7 @@
   <a name='comment'></a>  
   
   - ## Comments
-    - #### Looking at the bigger picture, this simple genetic algorithm is incredibly-abstract compared to real-life biology and the probably trillions of parameters that      influence natural selection in our world. However trivial it may seem, though, I still find it magical that we're able to esssentially *teach* some dots on a computer screen how to reach a target goal, starting with nothing but random genes.
+    - #### Looking at the bigger picture, this simple genetic algorithm is incredibly-abstract compared to real-life biology and the probably trillions of parameters that      influence natural selection in our world. However trivial it may seem, though, I still find it magical that we're able to essentially *teach* some dots on a screen how to reach a target goal, starting with nothing but random genes.
 
 <br>
   
@@ -1066,7 +1066,7 @@
 
 - ### Cody / Myself
   
-- ### Thanks for taking the time to check out the project! I had a ton of fun making it and learning about biology along the way.
+- ### Thanks for taking the time to check out the project! I had a ton of fun making it and learning a little biology along the way.
   
 - #### I'm a software developer from the US looking for a professional opportunity! If you'd like to contact me for hiring, questions, or anything related to this project, send me an email! (Link below)
   
