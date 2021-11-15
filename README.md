@@ -145,7 +145,7 @@
 
 ## Project Overview
 
-- ### Natural Selection Simulator is a customizable implementation of a genetic algorithm based on natural selection. Users can configure their own species of organisms and watch them attempt to reach a target goal over generations of adaptation/evolution.
+- ### Natural Selection Simulator is a customizable implementation of a genetic algorithm that runs in the browser. Users can configure their own species of organisms and watch them attempt to reach a target goal over generations of adaptation/evolution.
 
 <br>
 
@@ -188,7 +188,7 @@
 
 - #### Creation of a New Generation
 - #### Evaluation / Fitness Function
-- #### Selection (don't forget roulette wheel!)
+- #### Selection
 - #### Crossover
 - #### Mutation
 
