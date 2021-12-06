@@ -1044,15 +1044,15 @@
   <a name='comment'></a>  
   
   - ## Comments
-    - #### Looking at the bigger picture, this simple genetic algorithm is incredibly-abstract compared to real-life biology and the probably trillions of parameters that      influence natural selection in our world. However trivial it may seem, though, I still find it magical that we're able to essentially *teach* some dots on a screen how to reach a target goal, starting with nothing but random genes.
+    - #### Thinking about the bigger picture, this simple genetic algorithm is incredibly abstract compared to real-life biology and the probably billions of parameters that      influence natural selection in the world. However trivial it may seem, though, I still find it magical that we're able to essentially *teach* some dots on a screen how to find a target goal, starting with nothing but random genes.
 
 <br>
   
 <a name='inspire'><a>
 
 - ## Inspiration
-  - #### The idea and inspiration for this project initially originates from [this awesome blog post](https://dev.to/lukegarrigan/genetic-algorithms-in-javascript-mc3) from Luke Garrigan. In his post, he details the ideas of natural selection and creates a genetic algorithm that teaches cars to drive around a track! Check him out!
-  - #### Additionally, [this](https://towardsdatascience.com/introduction-to-genetic-algorithms-including-example-code-e396e98d8bf3) introduction to genetic algorithms from https://towardsdatascience.com was a big help for getting started, thanks!
+  - #### The idea and inspiration for this project originates from [this awesome blog post](https://dev.to/lukegarrigan/genetic-algorithms-in-javascript-mc3) from Luke Garrigan. In his post, he details the ideas of natural selection and creates a genetic algorithm that teaches cars to drive around a track! Check him out!
+  - #### Additionally, [this](https://towardsdatascience.com/introduction-to-genetic-algorithms-including-example-code-e396e98d8bf3) introduction to genetic algorithms from https://towardsdatascience.com was helpful for getting started.
   
 <br>
 
@@ -1068,7 +1068,7 @@
   
 - ### Thanks for taking the time to check out the project! I had a ton of fun making it and learning a little biology along the way.
   
-- #### I'm a software developer from the US looking for a professional opportunity! If you'd like to contact me for hiring, questions, or anything related to this project, send me an email! (Link below)
+- #### If you'd like to contact me for hiring, questions, or anything related to this project, send me an email! (Link below)
   
 <a name='contac'></a>  
   
